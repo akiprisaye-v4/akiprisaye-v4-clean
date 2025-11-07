@@ -45,22 +45,19 @@ aside.sidebar h2 {
 }
 
 nav.sidebar ul,
-aside.sidebar ul,
-aside.sidebar nav ul {
+aside.sidebar ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 nav.sidebar li,
-aside.sidebar li,
-aside.sidebar nav li {
+aside.sidebar li {
   margin: 1.2rem 0;
 }
 
 nav.sidebar a,
-aside.sidebar a,
-aside.sidebar nav a {
+aside.sidebar a {
   display: block;
   color: #a8ffb0;
   text-decoration: none;
@@ -71,8 +68,7 @@ aside.sidebar nav a {
 }
 
 nav.sidebar a:hover,
-aside.sidebar a:hover,
-aside.sidebar nav a:hover {
+aside.sidebar a:hover {
   background-color: rgba(0, 255, 200, 0.1);
   color: #00ffc8;
   transform: translateX(5px);
