@@ -4,6 +4,18 @@
  */
 
 /**
+ * Escape HTML to prevent XSS attacks
+ * @param {string} str - String to escape
+ * @returns {string} Escaped string
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/**
  * Fetch prices for a given EAN code
  * @param {string} ean - Product EAN code
  * @returns {Promise<Object>} Price data
@@ -54,9 +66,9 @@ function renderPricesTable(data) {
   if (data.product) {
     html += `
       <div class="product-info">
-        <h3>${data.product.name || 'Produit'}</h3>
-        ${data.product.brand ? `<p><strong>Marque:</strong> ${data.product.brand}</p>` : ''}
-        ${data.product.category ? `<p><strong>Catégorie:</strong> ${data.product.category}</p>` : ''}
+        <h3>${escapeHtml(data.product.name) || 'Produit'}</h3>
+        ${data.product.brand ? `<p><strong>Marque:</strong> ${escapeHtml(data.product.brand)}</p>` : ''}
+        ${data.product.category ? `<p><strong>Catégorie:</strong> ${escapeHtml(data.product.category)}</p>` : ''}
       </div>
     `;
   }
@@ -86,13 +98,13 @@ function renderPricesTable(data) {
     
     html += `
       <tr class="${rowClass}">
-        <td>${priceItem.storeName || priceItem.storeId || 'N/A'}</td>
-        <td>${priceItem.territory || 'N/A'}</td>
+        <td>${escapeHtml(priceItem.storeName || priceItem.storeId || 'N/A')}</td>
+        <td>${escapeHtml(priceItem.territory || 'N/A')}</td>
         <td class="price-cell">${priceItem.price?.toFixed(2) || 'N/A'} €</td>
-        <td>${priceItem.unit_price ? priceItem.unit_price.toFixed(2) + ' €/' + (priceItem.unit || 'kg') : 'N/A'}</td>
+        <td>${priceItem.unit_price ? priceItem.unit_price.toFixed(2) + ' €/' + escapeHtml(priceItem.unit || 'kg') : 'N/A'}</td>
         <td>
-          <span class="source-badge source-${priceItem.source}">
-            ${getSourceLabel(priceItem.source)}
+          <span class="source-badge source-${escapeHtml(priceItem.source)}">
+            ${escapeHtml(getSourceLabel(priceItem.source))}
           </span>
         </td>
         <td>${priceItem.ageHours || 0}h</td>
@@ -110,7 +122,7 @@ function renderPricesTable(data) {
     html += `
       <div class="best-price-summary">
         <p>🏆 <strong>Meilleur prix:</strong> ${data.best.price?.toFixed(2) || 'N/A'} € 
-        ${data.best.storeName ? `chez ${data.best.storeName}` : ''}</p>
+        ${data.best.storeName ? `chez ${escapeHtml(data.best.storeName)}` : ''}</p>
       </div>
     `;
   }
@@ -165,7 +177,7 @@ async function handleSearch(event) {
       resultsDiv.innerHTML = `
         <div class="error">
           <p>❌ Erreur lors de la récupération des prix</p>
-          <p class="hint">${error.message}</p>
+          <p class="hint">${escapeHtml(error.message)}</p>
         </div>
       `;
     }
