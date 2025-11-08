@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist",
+    "public": ".",
     "cleanUrls": true,
     "trailingSlash": false,
     "ignore": [
@@ -8,7 +8,12 @@
       "**/*.zip",
       "**/*.exe",
       "**/*.bat",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/src/**",
+      "**/functions/**",
+      "**/scripts/**",
+      "**/*.md"
     ],
     "headers": [
       {
@@ -62,12 +67,6 @@
             "value": "no-cache, no-store, must-revalidate"
           }
         ]
-      }
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
       }
     ]
   }
