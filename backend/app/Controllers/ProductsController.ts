@@ -23,28 +23,24 @@ class ProductsController {
 
       const territory = request.qs().territory || 'Guadeloupe';
 
-      try {
-        // Search Open Food Facts
-        const results = await fetch(
-          `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=15`
-        ).then((r) => r.json());
+      // Search Open Food Facts
+      const results = await fetch(
+        `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=15`
+      ).then((r) => r.json());
 
-        const items = (results.products || [])
-          .map((p: any) => ({
-            name: p.product_name || p.generic_name || 'Produit inconnu',
-            brand: p.brands || '—',
-            ean: p.code,
-            image: p.image_small_url || p.image_url || null,
-          }))
-          .filter((p: any) => p.ean)
-          .slice(0, 15);
+      const items = (results.products || [])
+        .map((p: any) => ({
+          name: p.product_name || p.generic_name || 'Produit inconnu',
+          brand: p.brands || '—',
+          ean: p.code,
+          image: p.image_small_url || p.image_url || null,
+        }))
+        .filter((p: any) => p.ean)
+        .slice(0, 15);
 
-        return response.ok(items);
-      } catch (err) {
-        console.error('Erreur API produits :', err);
-        return response.status(500).send({ error: 'Erreur lors de la recherche de produits' });
-      }
+      return response.ok(items);
     } catch (error) {
+      console.error('Erreur API produits :', error);
       return response.internalServerError({
         error: 'Error searching products',
         message: error.message

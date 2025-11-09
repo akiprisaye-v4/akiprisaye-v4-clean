@@ -6,16 +6,14 @@ export default function ProductSearch({ territory, onPickEAN }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [timer, setTimer] = useState(null);
 
   useEffect(() => {
     if (query.trim().length < 3) {
       setResults([]);
       return;
     }
-    if (timer) clearTimeout(timer);
 
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       setLoading(true);
       try {
         const res = await fetch(`/api/products/search?q=${encodeURIComponent(query)}&territory=${encodeURIComponent(territory || 'Guadeloupe')}`);
@@ -27,7 +25,8 @@ export default function ProductSearch({ territory, onPickEAN }) {
         setLoading(false);
       }
     }, DEBOUNCE);
-    setTimer(t);
+
+    return () => clearTimeout(timer);
   }, [query, territory]);
 
   return (
@@ -45,7 +44,11 @@ export default function ProductSearch({ territory, onPickEAN }) {
           {results.map((p) => (
             <li
               key={p.ean}
-              onClick={() => onPickEAN(p.ean)}
+              onClick={() => {
+                onPickEAN(p.ean);
+                setQuery('');
+                setResults([]);
+              }}
               className="flex items-center gap-3 p-3 hover:bg-white/5 cursor-pointer"
             >
               {p.image && (
