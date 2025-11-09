@@ -17,6 +17,7 @@
   
   <link rel="stylesheet" href="shared-nav.css"/>
   <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="cookie-consent.css"/>
 
   <style>
     body {
@@ -31,9 +32,16 @@
     }
     
     h1 {
-      color: #00ffc8;
+      color: #0f62fe;
       text-align: center;
       margin-bottom: 2rem;
+    }
+    
+    .intro-text {
+      text-align: center;
+      color: #b8b8b8;
+      margin-bottom: 2rem;
+      line-height: 1.6;
     }
     
     .modules-grid {
@@ -44,19 +52,57 @@
     }
     
     .module-card {
-      background: #1e2f2f;
+      background: rgba(26, 29, 46, 0.8);
+      backdrop-filter: blur(10px);
       border-radius: 12px;
       padding: 1.5rem;
       text-decoration: none;
       color: #ffffff;
       transition: all 0.3s ease;
-      border: 1px solid #333;
+      border: 1px solid #2a2d3e;
+      position: relative;
+      display: block;
     }
     
     .module-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 255, 200, 0.2);
-      border-color: #00ffc8;
+      box-shadow: 0 8px 20px rgba(15, 98, 254, 0.3);
+      border-color: #0f62fe;
+      background: rgba(26, 29, 46, 0.95);
+    }
+    
+    .module-card.coming-soon {
+      opacity: 0.7;
+    }
+    
+    .module-card.coming-soon:hover {
+      opacity: 0.85;
+    }
+    
+    .coming-soon-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .active-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
     }
     
     .module-icon {
@@ -68,7 +114,7 @@
     .module-title {
       font-size: 1.25rem;
       font-weight: bold;
-      color: #00ffc8;
+      color: #0f62fe;
       margin-bottom: 0.5rem;
     }
     
@@ -123,77 +169,94 @@
 
   <main>
     <h1>🧩 Tous les Modules</h1>
-    <p style="text-align: center; color: #b8b8b8; margin-bottom: 2rem;">
-      Découvrez tous les outils disponibles pour gérer votre budget
-    </p>
+    <div class="intro-text">
+      <p>Découvrez tous les outils disponibles pour gérer votre budget et lutter contre la vie chère en Outre-mer.</p>
+      <p><small>💡 Les modules marqués "Bientôt disponible" sont en cours de développement</small></p>
+    </div>
     
     <div class="modules-grid">
       <a href="/comparateur.html" class="module-card" aria-label="Comparateur de prix">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">🔍</span>
         <div class="module-title">Comparateur de Prix</div>
         <div class="module-desc">Comparez les prix par code EAN dans différents magasins</div>
       </a>
 
-      <a href="/scanner.html" class="module-card" aria-label="Scanner de code-barres">
+      <a href="/scanner.html" class="module-card coming-soon" aria-label="Scanner de code-barres">
+        <span class="coming-soon-badge">Bientôt</span>
         <span class="module-icon" aria-hidden="true">📷</span>
         <div class="module-title">Scanner</div>
-        <div class="module-desc">Scannez vos produits et tickets de caisse</div>
+        <div class="module-desc">Scannez vos produits avec la caméra (en développement)</div>
       </a>
 
-      <a href="/upload-ticket.html" class="module-card" aria-label="Upload de tickets">
+      <a href="/upload-ticket.html" class="module-card coming-soon" aria-label="Upload de tickets">
+        <span class="coming-soon-badge">Bientôt</span>
         <span class="module-icon" aria-hidden="true">🎫</span>
         <div class="module-title">Upload Tickets</div>
-        <div class="module-desc">Téléchargez et analysez vos tickets</div>
+        <div class="module-desc">Téléchargez et analysez vos tickets avec OCR (en développement)</div>
       </a>
 
       <a href="/carte.html" class="module-card" aria-label="Carte des prix">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">🗺️</span>
-        <div class="module-title">Carte</div>
-        <div class="module-desc">Visualisez les prix géolocalisés</div>
+        <div class="module-title">Carte Interactive</div>
+        <div class="module-desc">Visualisez les magasins et prix géolocalisés</div>
       </a>
 
       <a href="/historique.html" class="module-card" aria-label="Historique">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">📊</span>
         <div class="module-title">Historique</div>
         <div class="module-desc">Consultez l'historique de vos recherches</div>
       </a>
 
-      <a href="/ia-conseiller.html" class="module-card" aria-label="IA Conseiller">
+      <a href="/ia-conseiller.html" class="module-card coming-soon" aria-label="IA Conseiller">
+        <span class="coming-soon-badge">Bientôt</span>
         <span class="module-icon" aria-hidden="true">🤖</span>
-        <div class="module-title">IA Conseiller</div>
-        <div class="module-desc">Obtenez des conseils personnalisés</div>
+        <div class="module-title">IA Conseiller Budget</div>
+        <div class="module-desc">Obtenez des conseils personnalisés pour optimiser votre budget (à venir)</div>
       </a>
 
       <a href="/mon-compte.html" class="module-card" aria-label="Mon compte">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">👤</span>
         <div class="module-title">Mon Compte</div>
         <div class="module-desc">Gérez votre profil et vos préférences</div>
       </a>
 
       <a href="/faq.html" class="module-card" aria-label="FAQ">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">❓</span>
         <div class="module-title">FAQ</div>
-        <div class="module-desc">Questions fréquemment posées</div>
+        <div class="module-desc">Trouvez des réponses à vos questions</div>
       </a>
 
       <a href="/contact.html" class="module-card" aria-label="Contact">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">📧</span>
         <div class="module-title">Contact</div>
-        <div class="module-desc">Contactez-nous pour toute question</div>
+        <div class="module-desc">Contactez notre équipe</div>
       </a>
 
       <a href="/partenaires.html" class="module-card" aria-label="Partenaires">
+        <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">🤝</span>
         <div class="module-title">Partenaires</div>
-        <div class="module-desc">Découvrez nos partenaires</div>
+        <div class="module-desc">Découvrez nos partenaires et collaborations</div>
       </a>
     </div>
   </main>
 
-  <footer style="margin-top: 3rem; padding: 1.5rem; text-align: center; color: #ccc; border-top: 1px solid #333; background: #0e1a1a;">
-    <div>© 2025 <span style="color: #00ffc8; font-weight: bold;">A KI PRI SA YÉ</span> – Tous droits réservés</div>
+  <footer style="margin-top: 3rem; padding: 1.5rem; text-align: center; color: #b8b8b8; border-top: 1px solid #2a2d3e; background: #0f172a;">
+    <div>© 2025 <span style="color: #0f62fe; font-weight: bold;">A KI PRI SA YÉ</span> – Tous droits réservés</div>
+    <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+      <a href="/mentions.html" style="color: #0f62fe; text-decoration: none; margin: 0 0.5rem;">Mentions légales</a> • 
+      <a href="/faq.html" style="color: #0f62fe; text-decoration: none; margin: 0 0.5rem;">FAQ</a> • 
+      <a href="/contact.html" style="color: #0f62fe; text-decoration: none; margin: 0 0.5rem;">Contact</a>
+    </div>
   </footer>
   
   <script type="module" src="shared-nav.js"></script>
+  <script src="cookie-consent.js"></script>
 </body>
 </html>
