@@ -15,6 +15,7 @@
   <meta name="theme-color" content="#0f62fe"/>
   
   <link rel="stylesheet" href="shared-nav.css"/>
+  <link rel="stylesheet" href="cookie-consent.css"/>
   <style>
     body {
       margin: 0;
@@ -78,6 +79,34 @@
     .partner-desc {
       color: #b8b8b8;
       line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .partner-link {
+      display: inline-block;
+      color: #0f62fe;
+      text-decoration: none;
+      font-weight: 500;
+      margin-top: 0.5rem;
+      transition: all 0.3s;
+    }
+    
+    .partner-link:hover {
+      text-decoration: underline;
+    }
+    
+    .coming-soon-note {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid #f59e0b;
+      padding: 1rem 1.5rem;
+      margin-top: 3rem;
+      border-radius: 8px;
+      color: #b8b8b8;
+      line-height: 1.6;
+    }
+    
+    .coming-soon-note strong {
+      color: #f59e0b;
     }
   </style>
 </head>
@@ -137,28 +166,50 @@
         <div class="partner-icon">🏪</div>
         <div class="partner-name">Magasins partenaires</div>
         <div class="partner-desc">
-          Réseau de magasins qui partagent leurs prix en temps réel pour plus de transparence.
+          Réseau de magasins qui partagent leurs prix en temps réel pour plus de transparence. 
+          Nous sommes en cours de partenariat avec des enseignes locales des territoires d'Outre-mer.
         </div>
+        <p style="color: #b8b8b8; font-size: 0.9rem; font-style: italic;">
+          Partenariats en cours de finalisation
+        </p>
       </div>
       
       <div class="partner-card">
         <div class="partner-icon">🔗</div>
-        <div class="partner-name">API Open Food Facts</div>
+        <div class="partner-name">Open Food Facts</div>
         <div class="partner-desc">
-          Base de données collaborative de produits alimentaires du monde entier.
+          Base de données collaborative et ouverte de produits alimentaires du monde entier. 
+          Cette API nous permet d'enrichir les informations sur les produits.
         </div>
+        <a href="https://fr.openfoodfacts.org/" target="_blank" rel="noopener noreferrer" class="partner-link">
+          Visiter le site →
+        </a>
       </div>
       
       <div class="partner-card">
         <div class="partner-icon">🌐</div>
         <div class="partner-name">Associations locales</div>
         <div class="partner-desc">
-          Organisations engagées dans la lutte contre la vie chère en Outre-mer.
+          Organisations engagées dans la lutte contre la vie chère en Outre-mer. 
+          Leur expertise et engagement local enrichissent notre mission citoyenne.
         </div>
+        <p style="color: #b8b8b8; font-size: 0.9rem; font-style: italic;">
+          Collaborations en cours d'établissement
+        </p>
       </div>
+    </div>
+    
+    <div class="coming-soon-note">
+      <p><strong>📢 Vous êtes un magasin ou une association ?</strong></p>
+      <p>
+        Nous recherchons activement des partenaires engagés pour la transparence des prix. 
+        Contactez-nous via notre <a href="/contact.html" style="color: #0f62fe; text-decoration: underline;">formulaire de contact</a> 
+        pour discuter d'une collaboration.
+      </p>
     </div>
   </main>
   
   <script type="module" src="shared-nav.js"></script>
+  <script src="cookie-consent.js"></script>
 </body>
 </html>

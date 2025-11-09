@@ -64,6 +64,16 @@
   </header>
   <main>
     <h1>📷 Scanner un code-barres</h1>
+    
+    <!-- Development Notice -->
+    <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;">
+      <p style="color: #f59e0b; font-weight: 600; margin-bottom: 0.5rem;">⚠️ Fonctionnalité en développement</p>
+      <p style="color: #b8b8b8; font-size: 0.9rem; line-height: 1.6; margin: 0;">
+        Le scanner de codes-barres est actuellement en cours de développement. L'interface est présente mais 
+        la détection automatique n'est pas encore opérationnelle. Cette fonctionnalité sera activée prochainement.
+      </p>
+    </div>
+    
     <div class="scanner-box" aria-labelledby="scanner-heading">
       <div class="video-wrapper" aria-label="Aperçu caméra">
         <video id="scan-video" playsinline muted></video>
@@ -82,6 +92,7 @@
     </div>
   </main>
   <script type="module" src="shared-nav.js"></script>
+  <script src="cookie-consent.js"></script>
   <script type="module" src="scanner.js"></script>
 </body>
 </html>

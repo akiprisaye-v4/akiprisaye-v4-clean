@@ -223,9 +223,29 @@
 
   <main>
     <h1>📸 Upload de Ticket</h1>
-  
+
+    <!-- Development Notice -->
+    <div style="background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;">
+      <p style="color: #f59e0b; font-weight: 600; margin-bottom: 0.5rem;">⚠️ Fonctionnalité en développement</p>
+      <p style="color: #b8b8b8; font-size: 0.9rem; line-height: 1.6; margin: 0;">
+        L'analyse OCR (reconnaissance optique de caractères) des tickets est en cours de développement. 
+        Vous pouvez télécharger un ticket mais le traitement automatique n'est pas encore opérationnel. 
+        Cette fonctionnalité sera activée prochainement.
+      </p>
+    </div>
+
   <div class="upload-container">
     <p>Téléchargez une photo de votre ticket de caisse pour extraire automatiquement les prix.</p>
+    
+    <!-- Privacy Notice -->
+    <div style="background: rgba(15, 98, 254, 0.1); border-left: 3px solid #0f62fe; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 6px; font-size: 0.85rem;">
+      <p style="color: #b8b8b8; margin: 0; line-height: 1.5;">
+        🔒 <strong style="color: #0f62fe;">Protection des données :</strong> 
+        Les tickets téléchargés sont traités de manière sécurisée. Seules les informations de prix 
+        sont conservées pour enrichir notre base de données collaborative. Vos données personnelles 
+        ne sont jamais partagées.
+      </p>
+    </div>
     
     <form id="upload-form">
       <div class="file-input-wrapper">
@@ -459,5 +479,6 @@
   </main>
   
   <script type="module" src="shared-nav.js"></script>
+  <script src="cookie-consent.js"></script>
 </body>
 </html>

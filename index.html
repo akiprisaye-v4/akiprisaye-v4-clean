@@ -557,6 +557,13 @@
     .install-button:active {
       transform: translateY(0);
     }
+    
+    /* News cards hover effect */
+    .news-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(15, 98, 254, 0.2);
+      border-color: #0f62fe !important;
+    }
   </style>
 </head>
 <body>
@@ -680,6 +687,55 @@
       <button id="back-to-app-btn" class="secondary-btn">← Retour aux fonctionnalités</button>
     </div>
   </div>
+
+  <!-- Actualités Section -->
+  <section class="news" role="region" aria-labelledby="news-title" style="background: #0f172a; padding: 3rem 1rem; border-top: 1px solid #2a2d3e;">
+    <div class="container">
+      <h2 id="news-title" class="section-title">📰 Actualités</h2>
+      <div class="news-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+        
+        <div class="news-card" style="background: #1a1d2e; border-radius: 12px; padding: 1.5rem; border: 1px solid #2a2d3e; transition: all 0.3s;">
+          <div class="news-date" style="color: #0f62fe; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+            📅 Janvier 2025
+          </div>
+          <h3 style="color: #ffffff; font-size: 1.15rem; margin-bottom: 0.75rem; line-height: 1.4;">
+            Lancement de A KI PRI SA YÉ
+          </h3>
+          <p style="color: #b8b8b8; line-height: 1.6; font-size: 0.95rem;">
+            Notre plateforme citoyenne de transparence des prix est maintenant en ligne ! 
+            Comparateur actif et nouvelles fonctionnalités en développement.
+          </p>
+        </div>
+
+        <div class="news-card" style="background: #1a1d2e; border-radius: 12px; padding: 1.5rem; border: 1px solid #2a2d3e; transition: all 0.3s;">
+          <div class="news-date" style="color: #0f62fe; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+            🔜 À venir - T1 2026
+          </div>
+          <h3 style="color: #ffffff; font-size: 1.15rem; margin-bottom: 0.75rem; line-height: 1.4;">
+            Scanner et OCR de tickets
+          </h3>
+          <p style="color: #b8b8b8; line-height: 1.6; font-size: 0.95rem;">
+            Prochainement, scannez vos produits avec votre caméra et analysez vos tickets de caisse 
+            automatiquement grâce à l'OCR.
+          </p>
+        </div>
+
+        <div class="news-card" style="background: #1a1d2e; border-radius: 12px; padding: 1.5rem; border: 1px solid #2a2d3e; transition: all 0.3s;">
+          <div class="news-date" style="color: #0f62fe; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+            🤖 À venir - T2 2026
+          </div>
+          <h3 style="color: #ffffff; font-size: 1.15rem; margin-bottom: 0.75rem; line-height: 1.4;">
+            IA Conseiller Budget
+          </h3>
+          <p style="color: #b8b8b8; line-height: 1.6; font-size: 0.95rem;">
+            Un assistant intelligent pour optimiser votre budget et vous proposer des conseils 
+            personnalisés selon vos habitudes d'achat.
+          </p>
+        </div>
+        
+      </div>
+    </div>
+  </section>
 
   <section class="about" role="region" aria-labelledby="mission-title">
     <div class="about-content">
