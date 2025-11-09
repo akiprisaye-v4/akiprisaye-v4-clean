@@ -18,6 +18,13 @@ export default function routes(Route: Route) {
   });
 
   // ============================================
+  // PRODUCTS ROUTES
+  // ============================================
+  
+  // Search products by name/keyword
+  Route.get('/api/products/search', 'ProductsController.search');
+
+  // ============================================
   // PRICES ROUTES
   // ============================================
   
@@ -93,10 +100,12 @@ export function expressRoutes(app: any) {
   const PricesController = require('../app/Controllers/PricesController').default;
   const NewsController = require('../app/Controllers/NewsController').default;
   const ContactController = require('../app/Controllers/ContactController').default;
+  const ProductsController = require('../app/Controllers/ProductsController').default;
 
   const pricesCtrl = new PricesController();
   const newsCtrl = new NewsController();
   const contactCtrl = new ContactController();
+  const productsCtrl = new ProductsController();
 
   // Helper to wrap controller methods
   const wrap = (method: Function) => {
@@ -132,6 +141,9 @@ export function expressRoutes(app: any) {
       version: '1.1.0'
     });
   });
+
+  // Products routes
+  app.get('/api/products/search', wrap(productsCtrl.search.bind(productsCtrl)));
 
   // Prices routes
   app.get('/api/prices', wrap(pricesCtrl.index.bind(pricesCtrl)));
