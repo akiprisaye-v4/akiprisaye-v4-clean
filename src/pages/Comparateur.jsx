@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import TerritorySelector from '../components/TerritorySelector';
+import ProductSearch from '../components/ProductSearch';
 
 export default function Comparateur() {
   const [ean, setEan] = useState('');
@@ -7,6 +8,11 @@ export default function Comparateur() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const handlePickEAN = (code) => {
+    setEan(code);
+    setResults([]);
+  };
 
   const searchPrices = async (e) => {
     e.preventDefault();
@@ -112,6 +118,12 @@ export default function Comparateur() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6">
+        {/* Product Search */}
+        <div className="bg-[#1e1e1e] rounded-xl border border-gray-700 p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Rechercher un produit</h2>
+          <ProductSearch territory={territory} onPickEAN={handlePickEAN} />
+        </div>
+
         {/* Search Form */}
         <div className="bg-[#1e1e1e] rounded-xl border border-gray-700 p-6 mb-6">
           <form onSubmit={searchPrices} className="space-y-4">
