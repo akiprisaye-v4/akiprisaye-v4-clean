@@ -105,6 +105,32 @@
       text-transform: uppercase;
     }
     
+    .alpha-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .beta-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #ffffff;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
     .module-icon {
       font-size: 3rem;
       display: block;
@@ -156,7 +182,7 @@
           <div class="burger-line"></div>
           <div class="burger-line"></div>
         </button>
-        <a href="/" class="shared-logo" aria-label="A KI PRI SA YÉ - Accueil">A KI PRI SA YÉ</a>
+        <a href="/" class="shared-logo" aria-label="A KI PRI SA YÉ - Accueil"><img src="/logo-akpsy.svg" alt="A KI PRI SA YÉ" /></a>
       </div>
       <nav class="header-nav" role="navigation" aria-label="Navigation principale">
         <a href="/comparateur.html">Comparateur</a>
@@ -171,57 +197,57 @@
     <h1>🧩 Tous les Modules</h1>
     <div class="intro-text">
       <p>Découvrez tous les outils disponibles pour gérer votre budget et lutter contre la vie chère en Outre-mer.</p>
-      <p><small>💡 Les modules marqués "Bientôt disponible" sont en cours de développement</small></p>
+      <p><small>💡 Statuts : <strong style="color: #10b981;">Actif</strong> = fonctionnel | <strong style="color: #3b82f6;">Alpha</strong> = en test | <strong style="color: #8b5cf6;">Beta</strong> = fonctionnel, amélioration en cours | <strong style="color: #f59e0b;">En développement</strong> = à venir</small></p>
     </div>
     
     <div class="modules-grid">
       <a href="/comparateur.html" class="module-card" aria-label="Comparateur de prix">
-        <span class="active-badge">Actif</span>
+        <span class="alpha-badge">Alpha</span>
         <span class="module-icon" aria-hidden="true">🔍</span>
         <div class="module-title">Comparateur de Prix</div>
-        <div class="module-desc">Comparez les prix par code EAN dans différents magasins</div>
+        <div class="module-desc">Comparez les prix par code EAN dans différents magasins (recherche par nom en développement)</div>
       </a>
 
       <a href="/scanner.html" class="module-card coming-soon" aria-label="Scanner de code-barres">
-        <span class="coming-soon-badge">Bientôt</span>
+        <span class="coming-soon-badge">En développement</span>
         <span class="module-icon" aria-hidden="true">📷</span>
         <div class="module-title">Scanner</div>
-        <div class="module-desc">Scannez vos produits avec la caméra (en développement)</div>
+        <div class="module-desc">Scannez vos produits avec la caméra (interface prête, activation caméra à venir)</div>
       </a>
 
       <a href="/upload-ticket.html" class="module-card coming-soon" aria-label="Upload de tickets">
-        <span class="coming-soon-badge">Bientôt</span>
+        <span class="beta-badge">Beta</span>
         <span class="module-icon" aria-hidden="true">🎫</span>
         <div class="module-title">Upload Tickets</div>
-        <div class="module-desc">Téléchargez et analysez vos tickets avec OCR (en développement)</div>
+        <div class="module-desc">Téléchargez et analysez vos tickets avec OCR (fonctionnel, connexion backend à venir)</div>
       </a>
 
       <a href="/carte.html" class="module-card" aria-label="Carte des prix">
         <span class="active-badge">Actif</span>
         <span class="module-icon" aria-hidden="true">🗺️</span>
         <div class="module-title">Carte Interactive</div>
-        <div class="module-desc">Visualisez les magasins et prix géolocalisés</div>
+        <div class="module-desc">Visualisez les magasins et prix géolocalisés (thème sombre, filtres DOM-COM)</div>
       </a>
 
       <a href="/historique.html" class="module-card" aria-label="Historique">
-        <span class="active-badge">Actif</span>
+        <span class="alpha-badge">Alpha</span>
         <span class="module-icon" aria-hidden="true">📊</span>
         <div class="module-title">Historique</div>
-        <div class="module-desc">Consultez l'historique de vos recherches</div>
+        <div class="module-desc">Consultez l'historique de vos recherches (persistance en cours d'ajout)</div>
       </a>
 
       <a href="/ia-conseiller.html" class="module-card coming-soon" aria-label="IA Conseiller">
-        <span class="coming-soon-badge">Bientôt</span>
+        <span class="coming-soon-badge">T2 2026</span>
         <span class="module-icon" aria-hidden="true">🤖</span>
         <div class="module-title">IA Conseiller Budget</div>
-        <div class="module-desc">Obtenez des conseils personnalisés pour optimiser votre budget (à venir)</div>
+        <div class="module-desc">Obtenez des conseils personnalisés pour optimiser votre budget (interface interactive à venir)</div>
       </a>
 
       <a href="/mon-compte.html" class="module-card" aria-label="Mon compte">
-        <span class="active-badge">Actif</span>
+        <span class="alpha-badge">Alpha</span>
         <span class="module-icon" aria-hidden="true">👤</span>
         <div class="module-title">Mon Compte</div>
-        <div class="module-desc">Gérez votre profil et vos préférences</div>
+        <div class="module-desc">Gérez votre profil et vos préférences (authentification Firebase à venir)</div>
       </a>
 
       <a href="/faq.html" class="module-card" aria-label="FAQ">
@@ -278,6 +304,6 @@
   </footer>
   
   <script type="module" src="shared-nav.js"></script>
-  <script src="/cookie-consent.js" defer></script>
+  <script type="module" src="/cookie-consent.js"></script>
 </body>
 </html>
