@@ -135,7 +135,7 @@
           <div class="burger-line"></div>
           <div class="burger-line"></div>
         </button>
-        <a href="/" class="shared-logo" aria-label="A KI PRI SA YÉ - Accueil">A KI PRI SA YÉ</a>
+        <a href="/" class="shared-logo" aria-label="A KI PRI SA YÉ - Accueil"><img src="/logo-akpsy.svg" alt="A KI PRI SA YÉ" /></a>
       </div>
       <nav class="header-nav" role="navigation" aria-label="Navigation principale">
         <a href="/comparateur.html">Comparateur</a>
@@ -148,6 +148,16 @@
 
   <main>
     <h1>👤 Mon Compte</h1>
+    
+    <!-- Development Notice -->
+    <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 8px;">
+      <p style="color: #3b82f6; font-weight: 600; margin-bottom: 0.5rem;">ℹ️ Module en phase Alpha</p>
+      <p style="color: #b8b8b8; font-size: 0.9rem; line-height: 1.6; margin: 0;">
+        La page Mon Compte est fonctionnelle pour la saisie d'informations. L'authentification Firebase 
+        (connexion/inscription sécurisée) et la synchronisation des données sont en cours d'intégration. 
+        Pour le moment, les données ne sont pas sauvegardées.
+      </p>
+    </div>
     
     <div class="account-section">
       <h2>Informations personnelles</h2>
@@ -209,6 +219,6 @@
   </main>
   
   <script type="module" src="shared-nav.js"></script>
-  <script src="/cookie-consent.js" defer></script>
+  <script type="module" src="/cookie-consent.js"></script>
 </body>
 </html>
