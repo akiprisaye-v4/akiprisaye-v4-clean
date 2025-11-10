@@ -21,6 +21,7 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const Contact = lazy(() => import('./pages/Contact'));
 const IaConseiller = lazy(() => import('./pages/IaConseiller'));
 const TiPanie = lazy(() => import('./pages/TiPanie'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 // Loading component
 function LoadingFallback() {
@@ -65,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='contact' element={<Contact />} />
                   <Route path='ia-conseiller' element={<IaConseiller />} />
                   <Route path='ti-panie' element={<TiPanie />} />
+                  <Route path='admin/dashboard' element={<AdminDashboard />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
