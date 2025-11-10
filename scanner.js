@@ -8,6 +8,12 @@ const fileInput = document.getElementById('file-input');
 const statusEl = document.getElementById('status');
 const flashBtn = document.getElementById('btn-flash');
 
+// NOUVEAUX ÉLÉMENTS
+const ocrResultsSection = document.getElementById('ocr-results-section');
+const ocrResultsEl = document.getElementById('ocr-results');
+const saveToBudgetBtn = document.getElementById('save-to-budget-btn');
+
+
 let controls = null;
 let currentStream = null;
 let torchTrack = null;
@@ -128,6 +134,55 @@ async function decodeImageFile(file) {
   img.src = url;
 }
 
+// --- LOGIQUE D'INTÉGRATION DU BUDGET ---
+
+/**
+ * Sauvegarde une dépense dans le localStorage.
+ * @param {object} expense - L'objet de la dépense à sauvegarder.
+ */
+function saveExpense(expense) {
+  const allExpenses = JSON.parse(localStorage.getItem('budgetExpenses')) || [];
+  allExpenses.push(expense);
+  localStorage.setItem('budgetExpenses', JSON.stringify(allExpenses));
+}
+
+/**
+ * Se déclenche à la fin d'un scan OCR (simulé pour l'instant).
+ * Affiche les résultats et le bouton pour sauvegarder.
+ * @param {Array<object>} scannedItems - Liste des articles scannés.
+ */
+function onScanComplete(scannedItems) {
+  // Affiche les résultats dans la zone dédiée
+  ocrResultsEl.innerHTML = scannedItems.map(item => `
+    <div class="flex justify-between">
+      <span>${item.name}</span>
+      <strong>${item.price.toFixed(2)} €</strong>
+    </div>
+  `).join('');
+
+  // Affiche la section des résultats
+  ocrResultsSection.classList.remove('hidden');
+
+  // Ajoute un écouteur d'événement sur le bouton
+  saveToBudgetBtn.addEventListener('click', () => {
+    const newExpense = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      store: 'Magasin (Scan)',
+      items: scannedItems,
+      total: scannedItems.reduce((sum, item) => sum + item.price, 0)
+    };
+
+    saveExpense(newExpense);
+    
+    alert('Dépense enregistrée dans votre budget !');
+    ocrResultsSection.classList.add('hidden'); // On cache à nouveau après sauvegarde
+  }, { once: true }); // { once: true } pour que le listener soit retiré après le clic
+}
+
+
+// --- FIN DE LA LOGIQUE D'INTÉGRATION ---
+
 startBtn.addEventListener('click', () => startScanner());
 stopBtn.addEventListener('click', () => stopScanner());
 flashBtn.addEventListener('click', () => toggleTorch());
@@ -158,3 +213,13 @@ window.addEventListener('beforeunload', () => stopScanner(false));
     // Non supporté partout
   }
 })();
+
+// --- APPEL DE DÉMONSTRATION ---
+// Simule un scan réussi pour tester l'interface.
+// Vous devrez retirer ceci quand le vrai scan OCR sera branché.
+const demoScannedItems = [
+  { name: 'Pain de mie', price: 2.50 },
+  { name: 'Jus d'orange 1L', price: 3.15 },
+  { name: 'Yaourts x4', price: 1.99 }
+];
+onScanComplete(demoScannedItems);
