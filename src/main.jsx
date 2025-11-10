@@ -10,6 +10,7 @@ import Comparateur from './pages/Comparateur';
 import Carte from './pages/Carte';
 import Actualites from './pages/Actualites';
 import MentionsLegales from './pages/MentionsLegales';
+import MonCompte from './pages/MonCompte';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path='/carte' element={<Carte />} />
         <Route path='/actualites' element={<Actualites />} />
         <Route path='/mentions-legales' element={<MentionsLegales />} />
+        <Route path='/mon-compte' element={<MonCompte />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
