@@ -24,7 +24,8 @@ export async function onRequestGet(context) {
       });
     }
 
-    const territory = params.get('territory') || 'Guadeloupe';
+    // Territory parameter available for future filtering
+    const _territory = params.get('territory') || 'Guadeloupe';
 
     // Search Open Food Facts
     const offUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=15`;

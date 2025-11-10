@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 
 const DEBOUNCE = 250;
 const HISTORY_KEY = 'akiprisaye_search_history';
@@ -209,3 +210,8 @@ export default function ProductSearch({ territory, onPickEAN }) {
     </div>
   );
 }
+
+ProductSearch.propTypes = {
+  territory: PropTypes.string,
+  onPickEAN: PropTypes.func.isRequired,
+};
