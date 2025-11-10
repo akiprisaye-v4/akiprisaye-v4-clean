@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import NotFound from './pages/NotFound';
 
 // Lazy load other pages for better performance
@@ -18,6 +19,7 @@ const MentionsLegales = lazy(() => import('./pages/MentionsLegales'));
 const MonCompte = lazy(() => import('./pages/MonCompte'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Contact = lazy(() => import('./pages/Contact'));
+const IaConseiller = lazy(() => import('./pages/IaConseiller'));
 
 // Loading component
 function LoadingFallback() {
@@ -45,25 +47,28 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
       <ThemeProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path='/' element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path='chat' element={<ChatIALocal />} />
-                <Route path='scan' element={<ScanOCR />} />
-                <Route path='comparateur' element={<Comparateur />} />
-                <Route path='carte' element={<Carte />} />
-                <Route path='actualites' element={<Actualites />} />
-                <Route path='mentions-legales' element={<MentionsLegales />} />
-                <Route path='mon-compte' element={<MonCompte />} />
-                <Route path='pricing' element={<Pricing />} />
-                <Route path='contact' element={<Contact />} />
-                <Route path='*' element={<NotFound />} />
-              </Route>
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path='/' element={<Layout />}>
+                  <Route index element={<Home />} />
+                  <Route path='chat' element={<ChatIALocal />} />
+                  <Route path='scan' element={<ScanOCR />} />
+                  <Route path='comparateur' element={<Comparateur />} />
+                  <Route path='carte' element={<Carte />} />
+                  <Route path='actualites' element={<Actualites />} />
+                  <Route path='mentions-legales' element={<MentionsLegales />} />
+                  <Route path='mon-compte' element={<MonCompte />} />
+                  <Route path='pricing' element={<Pricing />} />
+                  <Route path='contact' element={<Contact />} />
+                  <Route path='ia-conseiller' element={<IaConseiller />} />
+                  <Route path='*' element={<NotFound />} />
+                </Route>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>
