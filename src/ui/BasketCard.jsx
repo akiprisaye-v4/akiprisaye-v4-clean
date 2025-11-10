@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { saveBasketToHistory } from '../services/tiPanieService';
+import PriceBadge from '../components/PriceBadge';
 
 export default function BasketCard({ basket }) {
   const navigate = useNavigate();
@@ -73,16 +74,14 @@ export default function BasketCard({ basket }) {
           <span>{basket.timeSlot}</span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-2xl font-bold text-blue-400">
-              {basket.price.toFixed(2)}€
-            </span>
-            <span className="text-slate-500 line-through ml-2 text-sm">
-              {basket.originalPrice.toFixed(2)}€
-            </span>
-          </div>
+        {/* Price with AI indicator */}
+        <div className="mb-3">
+          <PriceBadge
+            price={basket.price}
+            originalPrice={basket.originalPrice || basket.estimatedValue}
+            aiAdjustedAt={basket.aiAdjustedAt}
+            showSavings={true}
+          />
         </div>
 
         {/* Action Button */}
