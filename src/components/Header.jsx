@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -213,6 +214,9 @@ export default function Header() {
               >
                 Mon Compte
               </Link>
+              
+              {/* Theme Toggle */}
+              <ThemeToggle />
             </nav>
           </div>
         </div>
