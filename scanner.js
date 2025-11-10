@@ -219,7 +219,7 @@ window.addEventListener('beforeunload', () => stopScanner(false));
 // Vous devrez retirer ceci quand le vrai scan OCR sera branché.
 const demoScannedItems = [
   { name: 'Pain de mie', price: 2.50 },
-  { name: 'Jus d'orange 1L', price: 3.15 },
+  { name: "Jus d'orange 1L", price: 3.15 },
   { name: 'Yaourts x4', price: 1.99 }
 ];
 onScanComplete(demoScannedItems);
