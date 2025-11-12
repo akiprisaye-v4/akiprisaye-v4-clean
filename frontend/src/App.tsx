@@ -1,10 +1,13 @@
+import SplashScreen from "./components/SplashScreen";
 import NetworkStatusBadge from "./components/NetworkStatusBadge";
 
 function App() {
   return (
     <>
+      <SplashScreen />
       <NetworkStatusBadge />
-      {/* le reste de ton application */}
+
+      {/* Ici tu mets le reste de ton application */}
     </>
   );
 }
