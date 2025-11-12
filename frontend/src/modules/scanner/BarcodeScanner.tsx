@@ -1,3 +1,6 @@
+import { db } from "../../firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+
 async function fetchPriceByEAN(ean: string) {
   try {
     setLoading(true);
@@ -9,13 +12,23 @@ async function fetchPriceByEAN(ean: string) {
     product.ean = ean;
     product.date = new Date().toLocaleString();
 
-    // Sauvegarde locale dans l'historique
+    // 🔹 Sauvegarde locale dans l'historique
     const existing = JSON.parse(localStorage.getItem("scan_history") || "[]");
     localStorage.setItem("scan_history", JSON.stringify([product, ...existing].slice(0, 50)));
 
+    // 🔹 Sauvegarde Firestore (cloud)
+    await addDoc(collection(db, "scan_history"), {
+      ean: product.ean,
+      name: product.name,
+      price: product.price,
+      store: product.store,
+      date: serverTimestamp(),
+    });
+
     setProductInfo(product);
   } catch (err) {
-    setError("Erreur lors du chargement des données de prix");
+    console.error(err);
+    setError("Erreur lors du chargement ou de la sauvegarde des données");
   } finally {
     setLoading(false);
   }
