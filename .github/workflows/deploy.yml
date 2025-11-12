@@ -1,215 +1,201 @@
-name: Deploy to Cloudflare Pages
+name: 🚀 Deploy A KI PRI SA YÉ Web
 
 on:
   push:
     branches:
       - main
       - develop
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  PUBLIC_URL: 'https://akiprisaye-web.pages.dev'
+  NODE_VERSION: "20"
+  PUBLIC_URL: "https://akiprisaye-web.pages.dev"
 
 jobs:
-  # Job 1: Lint and Test
+  # ------------------------
+  # 1. Lint & Test
+  # ------------------------
   lint-and-test:
-    name: 🔍 Lint & Test
     runs-on: ubuntu-latest
-    
     permissions:
       contents: read
-    
     steps:
-      - name: 📥 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 📦 Setup Node.js ${{ env.NODE_VERSION }}
+
+      - name: 🛠 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: 📚 Install dependencies
+          cache: "npm"
+
+      - name: 📦 Install dependencies
         run: npm ci
-        
-      - name: 🔍 Run ESLint
+
+      - name: 🧪 Run ESLint
         run: npm run lint
         continue-on-error: true
-        
-      - name: ✅ Run tests
+
+      - name: 🧪 Run tests
         run: npm test
-        
-  # Job 2: Build
+
+  # ------------------------
+  # 2. Build Frontend
+  # ------------------------
   build:
-    name: 🏗️ Build
     runs-on: ubuntu-latest
     needs: lint-and-test
-    
     permissions:
       contents: read
-    
     steps:
-      - name: 📥 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 📦 Setup Node.js ${{ env.NODE_VERSION }}
+
+      - name: 🛠 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: 📚 Install dependencies
+          cache: "npm"
+
+      - name: 📦 Install dependencies
         run: npm ci
-        
-      - name: 🏗️ Build project
-        run: npm run build
+
+      - name: 🏗 Build project
+        run: npm run build --prefix frontend
         env:
           NODE_ENV: production
-          
-      - name: 📊 Check build output
+
+      - name: ✅ Check build output
         run: |
-          echo "Build completed successfully"
-          ls -lah dist/
-          du -sh dist/
-          
-      - name: 📦 Upload build artifacts
+          echo "✅ Build completed successfully"
+          ls -lah frontend/dist
+
+      - name: 📤 Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: frontend/dist
           retention-days: 7
-          
-  # Job 3: Lighthouse CI (Performance Audit)
+
+  # ------------------------
+  # 3. Lighthouse / Performance Audit
+  # ------------------------
   lighthouse:
-    name: 💡 Lighthouse Audit
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'pull_request'
-    
     permissions:
       contents: read
-    
     steps:
-      - name: 📥 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 📦 Setup Node.js ${{ env.NODE_VERSION }}
+
+      - name: 🛠 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: 📚 Install dependencies
+          cache: "npm"
+
+      - name: 📦 Install dependencies
         run: npm ci
-        
-      - name: 🏗️ Build project
-        run: npm run build
-        
-      - name: 💡 Run Lighthouse CI
+
+      - name: 🚦 Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v11
         with:
           urls: |
-            http://localhost:3000
+            http://localhost:3000/
             http://localhost:3000/comparateur.html
             http://localhost:3000/scanner.html
-          uploadArtifacts: true
           temporaryPublicStorage: true
-          
-  # Job 4: Deploy to Cloudflare Pages
+
+  # ------------------------
+  # 4. Deploy to Cloudflare Pages
+  # ------------------------
   deploy:
-    name: 🚀 Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    
     permissions:
       contents: read
       deployments: write
-      
     steps:
-      - name: 📥 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 📦 Download build artifacts
+
+      - name: 📥 Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist/
-          
-      - name: 🚀 Publish to Cloudflare Pages
+          path: frontend/dist
+
+      - name: 🌐 Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: akiprisaye-web
-          directory: dist
+          directory: frontend/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref_name }}
-          
-      - name: 🔄 Purge Cloudflare Cache
-        if: success()
+
+  # ------------------------
+  # 5. Purge Cloudflare Cache
+  # ------------------------
+  purge-cache:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: ♻️ Purge Cloudflare cache
         run: |
           curl -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            --data '{"purge_everything":true}'
-        continue-on-error: true
-        
-  # Job 5: Deploy Firebase Functions (if applicable)
-  deploy-functions:
-    name: 🔥 Deploy Firebase Functions
+          -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          --data '{"purge_everything":true}'
+
+  # ------------------------
+  # 6. Deploy Firebase Functions (optionnel)
+  # ------------------------
+  firebase-functions:
     runs-on: ubuntu-latest
-    needs: build
     if: github.ref == 'refs/heads/main'
-    
+    needs: deploy
     permissions:
       contents: read
-    
     steps:
-      - name: 📥 Checkout repository
+      - name: 🧾 Checkout repository
         uses: actions/checkout@v4
-        
-      - name: 📦 Setup Node.js ${{ env.NODE_VERSION }}
+
+      - name: 🛠 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: 📚 Install dependencies
+          cache: "npm"
+
+      - name: 📦 Install dependencies
         run: npm ci
-        
-      - name: 🔥 Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
+
+      - name: 🔥 Deploy Firebase Functions
+        uses: w9jds/firebase-action@v13
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          args: deploy --only functions
         env:
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
-          
-  # Job 6: Notify deployment status
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+  # ------------------------
+  # 7. Notify Deployment Status
+  # ------------------------
   notify:
-    name: 📢 Notify Status
     runs-on: ubuntu-latest
-    needs: [deploy, deploy-functions]
-    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-    
+    if: always()
+    needs: [deploy]
     permissions:
       contents: read
-    
     steps:
-      - name: 📢 Deployment Success
+      - name: 🟢 Deployment Success
         if: needs.deploy.result == 'success'
-        run: |
-          echo "✅ Deployment successful!"
-          echo "🌐 URL: ${{ env.PUBLIC_URL }}"
-          
-      - name: ❌ Deployment Failed
+        run: echo "✅ Déploiement réussi ! ${{ env.PUBLIC_URL }}"
+
+      - name: 🔴 Deployment Failed
         if: needs.deploy.result == 'failure'
-        run: |
-          echo "❌ Deployment failed!"
-          exit 1
+        run: echo "❌ Échec du déploiement."
