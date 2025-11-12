@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TerritorySelector from '../components/TerritorySelector';
 import ProductSearch from '../components/ProductSearch';
+import { findProductByEan, filterPricesByTerritory } from '../data/seedProducts';
 
 export default function Comparateur() {
   const [ean, setEan] = useState('');
@@ -45,7 +46,26 @@ export default function Comparateur() {
   };
 
   const getMockPrices = (ean, territory) => {
-    // Generate mock data based on EAN
+    // Try to find product in seed data first
+    const product = findProductByEan(ean);
+    
+    if (product) {
+      // Filter prices by territory
+      const filteredPrices = filterPricesByTerritory(product, territory);
+      
+      // Convert to component format
+      return filteredPrices.map((price, idx) => ({
+        id: idx + 1,
+        store: price.storeName,
+        price: price.price,
+        unit: price.currency === 'EUR' ? '€' : price.currency,
+        location: `${price.city}, ${price.territory}`,
+        lastUpdate: price.ts,
+        promotion: idx === 1, // Mark second store as promo for variety
+      }));
+    }
+    
+    // Fallback: Generate random mock data
     const basePrice = parseFloat((Math.random() * 10 + 2).toFixed(2));
     
     return [
