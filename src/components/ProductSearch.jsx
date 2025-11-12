@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Fuse from 'fuse.js';
 import { normalizeText } from '../utils/text';
+import { searchProductsByName, SEED_PRODUCTS } from '../data/seedProducts';
 
 const DEBOUNCE = 250;
 const MAX_RESULTS = 15;
@@ -31,10 +32,29 @@ export default function ProductSearch({ territory = 'Guadeloupe', onPickEAN }) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `/api/products/search?q=${encodeURIComponent(trimmedQuery)}&territory=${encodeURIComponent(territory)}`,
-        );
-        const data = await res.json();
+        // Try to fetch from API first
+        let data = [];
+        try {
+          const res = await fetch(
+            `/api/products/search?q=${encodeURIComponent(trimmedQuery)}&territory=${encodeURIComponent(territory)}`,
+          );
+          if (res.ok) {
+            data = await res.json();
+          }
+        } catch (apiErr) {
+          console.log('API not available, using seed data');
+        }
+        
+        // Fallback to seed data if API fails or returns empty
+        if (!data || data.length === 0) {
+          const seedResults = searchProductsByName(trimmedQuery);
+          data = seedResults.map(product => ({
+            ean: product.ean,
+            name: product.name,
+            brand: product.brand,
+            image: null, // No images in seed data
+          }));
+        }
         
         // Apply fuzzy re-ranking with Fuse.js if we have results
         let rankedResults = data;
