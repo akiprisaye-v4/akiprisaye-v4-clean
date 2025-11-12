@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import TerritorySelector from '../components/TerritorySelector';
 import ProductSearch from '../components/ProductSearch';
+import BarcodeScanner from '../components/BarcodeScanner';
+import { findProductByEan, filterPricesByTerritory } from '../data/seedProducts';
 
 export default function Comparateur() {
   const [ean, setEan] = useState('');
@@ -8,10 +10,24 @@ export default function Comparateur() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   const handlePickEAN = (code) => {
     setEan(code);
     setResults([]);
+  };
+
+  const handleScanResult = (code) => {
+    setEan(code);
+    setShowScanner(false);
+    setResults([]);
+    // Auto-trigger search after scan
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }, 100);
   };
 
   const searchPrices = async (e) => {
@@ -45,7 +61,26 @@ export default function Comparateur() {
   };
 
   const getMockPrices = (ean, territory) => {
-    // Generate mock data based on EAN
+    // Try to find product in seed data first
+    const product = findProductByEan(ean);
+    
+    if (product) {
+      // Filter prices by territory
+      const filteredPrices = filterPricesByTerritory(product, territory);
+      
+      // Convert to component format
+      return filteredPrices.map((price, idx) => ({
+        id: idx + 1,
+        store: price.storeName,
+        price: price.price,
+        unit: price.currency === 'EUR' ? '€' : price.currency,
+        location: `${price.city}, ${price.territory}`,
+        lastUpdate: price.ts,
+        promotion: idx === 1, // Mark second store as promo for variety
+      }));
+    }
+    
+    // Fallback: Generate random mock data
     const basePrice = parseFloat((Math.random() * 10 + 2).toFixed(2));
     
     return [
@@ -132,15 +167,25 @@ export default function Comparateur() {
                 <label htmlFor="ean" className="block text-sm font-medium mb-2">
                   Code EAN / Code-barres
                 </label>
-                <input
-                  id="ean"
-                  type="text"
-                  value={ean}
-                  onChange={(e) => setEan(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Ex: 3017620422003"
-                  className="w-full bg-[#252525] text-white border border-gray-700 px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
-                  maxLength="13"
-                />
+                <div className="flex gap-2">
+                  <input
+                    id="ean"
+                    type="text"
+                    value={ean}
+                    onChange={(e) => setEan(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Ex: 3017620422003"
+                    className="flex-1 bg-[#252525] text-white border border-gray-700 px-4 py-3 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                    maxLength="13"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowScanner(true)}
+                    className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors"
+                    title="Scanner un code-barres"
+                  >
+                    📷
+                  </button>
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Entrez le code à 8, 12 ou 13 chiffres
                 </p>
@@ -287,6 +332,14 @@ export default function Comparateur() {
       <footer className="bg-[#1e1e1e] border-t border-gray-700 mt-12 p-6 text-center text-gray-400">
         <p>© 2025 A KI PRI SA YÉ - Tous droits réservés</p>
       </footer>
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          onScan={handleScanResult}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 }
