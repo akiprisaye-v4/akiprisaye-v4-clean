@@ -1,58 +1,75 @@
 // scripts/magasins-firestore.js
-// Chargement des magasins depuis Firestore (collection "stores")
+// Charge les magasins depuis Firestore : collection "stores"
 
 import { getDB, loadFirestore } from "../firebase-config.js";
 
-let firestoreModulePromise = null;
+let firestoreModule = null;
 
-// Charge Firestore (lazy loading)
+// Charge Firestore une seule fois
 async function getFirestoreModule() {
-  if (!firestoreModulePromise) {
-    firestoreModulePromise = loadFirestore();
+  if (!firestoreModule) {
+    firestoreModule = await loadFirestore();
   }
-  return firestoreModulePromise;
+  return firestoreModule;
 }
 
 /**
- * 🔥 Fonction officielle utilisée par load-map.js
- * Récupère les magasins d'un territoire
+ * Récupère tous les magasins d’un territoire
+ * @param {string} territoryId - ex: "guadeloupe"
+ * @returns {Promise<Array>}
  */
 export async function getStoresByTerritory(territoryId) {
-  try {
-    const db = await getDB();
-    const firestore = await getFirestoreModule();
-    const { collection, getDocs, query, where } = firestore;
-
-    const colRef = collection(db, "stores");
-    const q = query(colRef, where("territory", "==", territoryId));
-
-    const snapshot = await getDocs(q);
-
-    const shops = [];
-
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-
-      shops.push({
-        id: doc.id,
-        name: data.name || data.Name || "Magasin",
-        address: data.address || "",
-        lat: data.lat,
-        lon: data.lon,
-        chain: data.chain || "",
-        territory: data.territory || territoryId,
-        openingHours: data.openingHours || "",
-        phone: data.phone || "",
-      });
-    });
-
-    console.log(
-      `Firestore → ${shops.length} magasin(s) trouvés pour ${territoryId}`
-    );
-
-    return shops;
-  } catch (e) {
-    console.error("Erreur Firestore:", e);
+  if (!territoryId) {
+    console.error("❌ Aucun territoire précisé !");
     return [];
   }
+
+  const db = await getDB();
+  const firestore = await getFirestoreModule();
+  const { collection, getDocs, query, where } = firestore;
+
+  // 🔥 Sélection collection
+  const colRef = collection(db, "stores");
+
+  // 🔥 Filtre : "territory" == "guadeloupe"
+  const q = query(colRef, where("territory", "==", territoryId));
+
+  let snapshot = null;
+
+  try {
+    snapshot = await getDocs(q);
+  } catch (err) {
+    console.error("❌ Erreur Firestore :", err);
+    return [];
+  }
+
+  // 🔥 Conversion en tableau lisible par la carte
+  const shops = [];
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+
+    shops.push({
+      id: doc.id,
+
+      // Noms différents possibles (compatibilité auto)
+      name: data.name || data.Name || "Magasin",
+      chain: data.chain || "",
+
+      address: data.address || "",
+      lat: Number(data.lat) || null,
+      lon: Number(data.lon) || null,
+
+      phone: data.phone || "",
+      openingHours: data.openingHours || "",
+
+      territory: data.territory || territoryId,
+    });
+  });
+
+  console.log(
+    `Firestore → ${shops.length} magasins trouvés pour ${territoryId}`
+  );
+
+  return shops;
 }
