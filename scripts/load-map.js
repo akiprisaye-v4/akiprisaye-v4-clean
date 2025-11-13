@@ -1,45 +1,20 @@
-/**
- * LOAD-MAP.JS
- * Chargement des magasins depuis Firestore + affichage sur Leaflet
- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
 
-import { getDB } from "./firebase-config.js";
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-export async function loadStoresForTerritory(territory, map) {
-    console.log("📍 Chargement magasins pour :", territory);
+export async function loadStoresForTerritory(territory) {
+  const storesRef = collection(db, "stores");
+  const q = query(storesRef, where("territory", "==", territory.toLowerCase()));
 
-    const db = await getDB();
+  const snapshot = await getDocs(q);
+  const stores = [];
 
-    const { collection, query, where, getDocs } = await import(
-        "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
-    );
+  snapshot.forEach(doc => {
+    stores.push({ id: doc.id, ...doc.data() });
+  });
 
-    const q = query(
-        collection(db, "stores"),
-        where("territory", "==", territory.toLowerCase())
-    );
-
-    const snapshot = await getDocs(q);
-
-    console.log(`📦 ${snapshot.size} magasins trouvés pour ${territory}`);
-
-    snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-
-        if (!data.lat || !data.lon) {
-            console.warn("⚠️ Magasin sans coordonnées :", data);
-            return;
-        }
-
-        L.marker([data.lat, data.lon])
-            .addTo(map)
-            .bindPopup(`
-                <b>${data.name}</b><br/>
-                ${data.address}<br/>
-                Chaîne : ${data.chain}<br/>
-                Tel : ${data.phone || "n/a"}
-            `);
-    });
-
-    console.log("✔️ Affichage terminé.");
+  return stores;
 }
