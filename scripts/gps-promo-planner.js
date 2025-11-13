@@ -1,166 +1,75 @@
 /**
- * SCRIPT 18 — GPS PROMO PLANNER
- * -------------------------------------------------------------
- * Analyse un trajet Google Maps et propose automatiquement
- * des arrêts EN PROMOTION sur ton chemin (IA + Firestore).
+ * gps-promo-planner.js
  *
- * Fonctionnalités :
- *  ✔ Récupère l'itinéraire Google Maps (Directions API)
- *  ✔ Analyse les points du trajet
- *  ✔ Trouve les magasins proches du trajet
- *  ✔ Vérifie les promotions Firestore
- *  ✔ Appelle l’IA locale pour recommander les arrêts
- *  ✔ Génère un itinéraire optimisé
+ * "Cerveau IA" pour proposer des arrêts promo intelligents
+ * en fonction du territoire + promotions actives dans Firestore.
+ *
+ * Utilisé par : carte-google.js
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { fetchActivePromotions } from "./promotions-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "akiprisaye-web.firebaseapp.com",
-  projectId: "akiprisaye-web"
-};
+/**
+ * Planifie un itinéraire optimisé avec arrêts promo.
+ *
+ * @param {string} startAddress
+ * @param {string} endAddress
+ * @param {Object} options
+ * @returns {Promise<{stops: Array, debug: Object}>}
+ */
+export async function planOptimizedRoute(startAddress, endAddress, options = {}) {
+  const territory = (options.territory || "guadeloupe").toLowerCase();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  // 1) Récupérer les promos actives pour le territoire
+  const promos = await fetchActivePromotions(territory);
 
-// -----------------------------------------------
-// GOOGLE MAPS DIRECTIONS API
-// -----------------------------------------------
-async function getRoute(start, end) {
-  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
-    start
-  )}&destination=${encodeURIComponent(end)}&mode=driving&key=YOUR_GOOGLE_MAPS_API_KEY`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-
-  if (!data.routes || !data.routes.length) {
-    throw new Error("Aucun itinéraire trouvé.");
-  }
-
-  return data.routes[0].overview_path || data.routes[0].legs[0].steps;
-}
-
-// -----------------------------------------------
-// DISTANCE ENTRE DEUX COORDONNÉES
-// -----------------------------------------------
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
-
-// -----------------------------------------------
-// TROUVER LES MAGASINS À MOINS DE 1 KM DU TRAJET
-// -----------------------------------------------
-async function getStoresNearRoute(routePoints) {
-  const storesSnap = await getDocs(collection(db, "stores"));
-
-  let nearbyStores = [];
-
-  storesSnap.forEach(doc => {
-    const store = doc.data();
-
-    for (const p of routePoints) {
-      const dist = haversine(store.lat, store.lon, p.lat, p.lng);
-
-      if (dist <= 1.0) {
-        nearbyStores.push(store);
-        break;
+  if (!promos.length) {
+    console.info("[GPS PROMO] Aucune promotion active trouvée pour", territory);
+    return {
+      stops: [],
+      debug: {
+        territory,
+        totalPromos: 0,
+        reason: "no-active-promos"
       }
-    }
-  });
-
-  return nearbyStores;
-}
-
-// -----------------------------------------------
-// TROUVER LES PROMOTIONS POUR CES MAGASINS
-// -----------------------------------------------
-async function getPromotionsForStores(storeNames) {
-  const qPromo = query(
-    collection(db, "promotions"),
-    where("store", "in", storeNames)
-  );
-
-  const snap = await getDocs(qPromo);
-  let promotions = [];
-
-  snap.forEach(doc => {
-    promotions.push(doc.data());
-  });
-
-  return promotions;
-}
-
-// -----------------------------------------------
-// IA LOCALE POUR CHOISIR LES MEILLEURS ARRÊTS
-// -----------------------------------------------
-async function askLocalAI(stores, promotions) {
-  const prompt = `
-Tu es une IA d'analyse d'économies.
-Voici la liste des magasins proches du trajet :
-${JSON.stringify(stores, null, 2)}
-
-Voici les promotions disponibles :
-${JSON.stringify(promotions, null, 2)}
-
-Réponds avec les arrêts optimaux (1 à 3 max), format JSON :
-[
-  {
-    "store": "nom du magasin",
-    "reason": "pourquoi ce choix",
-    "savings": "montant estimé",
-    "coords": { "lat": X, "lon": Y }
+    };
   }
-]
-  `;
 
-  const res = await fetch("/ai/analyse", {
-    method: "POST",
-    body: JSON.stringify({ prompt })
+  // 2) Heuristique simple : on trie par économie estimée > valeur promo
+  const sorted = [...promos].sort((a, b) => {
+    const aScore = (a.estimatedSaving || 0) + (a.discountValue || 0);
+    const bScore = (b.estimatedSaving || 0) + (b.discountValue || 0);
+    return bScore - aScore;
   });
 
-  const data = await res.json();
-  return data.result || [];
-}
+  // 3) On limite le nombre d'arrêts pour ne pas polluer la carte
+  const maxStops = options.maxStops || 5;
+  const top = sorted.slice(0, maxStops);
 
-// -----------------------------------------------
-// LANCEMENT GLOBAL
-// -----------------------------------------------
-export async function planOptimizedRoute(start, end) {
-  console.log("🚗 Récupération itinéraire…");
-  const routePoints = await getRoute(start, end);
+  // 4) Transformation en structure comprise par carte-google.js
+  const stops = top.map((promo) => ({
+    coords: { lat: promo.lat, lon: promo.lon },
+    store: promo.storeName,
+    reason: promo.title || "Promotion intéressante sur le trajet",
+    savings: promo.savingLabel || "Économie intéressante",
+    territory,
+    tags: promo.tags || []
+  }));
 
-  console.log("🛒 Recherche magasins proches du trajet…");
-  const nearbyStores = await getStoresNearRoute(routePoints);
-
-  console.log("🔥 Recherche promotions associées…");
-  const promotions = await getPromotionsForStores(
-    nearbyStores.map(s => s.name)
-  );
-
-  console.log("🤖 Analyse IA…");
-  const recommendations = await askLocalAI(nearbyStores, promotions);
-
-  console.log("🎉 Recommandations calculées :", recommendations);
+  console.info("[GPS PROMO] Itinéraire promo calculé :", {
+    territory,
+    totalPromos: promos.length,
+    usedStops: stops.length
+  });
 
   return {
-    route: routePoints,
-    stops: recommendations
+    stops,
+    debug: {
+      territory,
+      totalPromos: promos.length,
+      usedStops: stops.length,
+      sampleStart: startAddress,
+      sampleEnd: endAddress
+    }
   };
 }
