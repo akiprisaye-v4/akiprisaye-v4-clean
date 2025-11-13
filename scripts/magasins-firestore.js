@@ -5,7 +5,7 @@ import { getDB, loadFirestore } from "../firebase-config.js";
 
 let firestoreModulePromise = null;
 
-// Charge le module Firestore une seule fois (lazy)
+// Charge Firestore (lazy loading)
 async function getFirestoreModule() {
   if (!firestoreModulePromise) {
     firestoreModulePromise = loadFirestore();
@@ -14,42 +14,45 @@ async function getFirestoreModule() {
 }
 
 /**
- * Charge les magasins pour un territoire donné
- * @param {string} territory - ex: "Guadeloupe"
- * @returns {Promise<Array>}
+ * 🔥 Fonction officielle utilisée par load-map.js
+ * Récupère les magasins d'un territoire
  */
-export async function loadMagasins(territory) {
-  const db = await getDB();
-  const firestore = await getFirestoreModule();
-  const { collection, getDocs, query, where } = firestore;
+export async function getStoresByTerritory(territoryId) {
+  try {
+    const db = await getDB();
+    const firestore = await getFirestoreModule();
+    const { collection, getDocs, query, where } = firestore;
 
-  // On lit tous les docs de la collection "stores" filtrés par territory
-  const colRef = collection(db, "stores");
-  const q = query(colRef, where("territory", "==", territory));
+    const colRef = collection(db, "stores");
+    const q = query(colRef, where("territory", "==", territoryId));
 
-  const snapshot = await getDocs(q);
+    const snapshot = await getDocs(q);
 
-  const shops = [];
-  snapshot.forEach((doc) => {
-    const data = doc.data();
+    const shops = [];
 
-    shops.push({
-      id: doc.id,
-      name: data.Name || data.name || "Magasin",
-      address: data.address || "",
-      lat: data.lat,
-      lon: data.lon,
-      chain: data.chain || "",
-      territory: data.territory || territory,
-      openingHours: data.openingHours || "",
-      phone: data.phone || "",
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      shops.push({
+        id: doc.id,
+        name: data.name || data.Name || "Magasin",
+        address: data.address || "",
+        lat: data.lat,
+        lon: data.lon,
+        chain: data.chain || "",
+        territory: data.territory || territoryId,
+        openingHours: data.openingHours || "",
+        phone: data.phone || "",
+      });
     });
-  });
 
-  console.log(
-    `Firestore → ${shops.length} magasin(s) trouvés pour`,
-    territory
-  );
+    console.log(
+      `Firestore → ${shops.length} magasin(s) trouvés pour ${territoryId}`
+    );
 
-  return shops;
+    return shops;
+  } catch (e) {
+    console.error("Erreur Firestore:", e);
+    return [];
+  }
 }
