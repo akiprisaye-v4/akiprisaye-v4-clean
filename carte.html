@@ -1,135 +1,200 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A KI PRI SA YÉ – Carte interactive des magasins</title>
-  <!-- Feuille de styles de Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIu6VLd9gENbYQaS0pQsLnwLkLkS0Z8pcvY="
-    crossorigin=""
-  />
-  <!-- Style de la page -->
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #060814;
-      color: #f4f4f4;
-    }
-    header {
-      background-color: #0e64f5;
-      padding: 1rem;
-      color: white;
-      text-align: center;
-    }
-    #map-container {
-      padding: 1rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    #territorySelect {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-    }
-    #map {
-      width: 100%;
-      height: 500px;
-      border-radius: 12px;
-    }
-    .legend {
-      background-color: #161c2e;
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem auto;
-      max-width: 900px;
-      color: #f4f4f4;
-    }
-    .legend li {
-      list-style: none;
-      margin-bottom: 0.5rem;
-    }
-    .legend span {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Ki Pri Sa Yé – Carte Interactive</title>
+
+    <!-- Leaflet CSS -->
+    <link 
+        rel="stylesheet" 
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Styles -->
+    <style>
+        body {
+            margin: 0;
+            background: #0e0e0e;
+            font-family: system-ui, sans-serif;
+            color: white;
+        }
+
+        #page-header {
+            padding: 15px;
+            background: rgba(20, 20, 20, 0.9);
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        select {
+            padding: 12px;
+            width: 95%;
+            font-size: 1rem;
+            border-radius: 10px;
+            background: #222;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        #map {
+            height: calc(100vh - 100px);
+            width: 100%;
+        }
+
+        .promo-stop {
+            background: #1b1b1b;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid #333;
+        }
+
+        .promo-stop strong {
+            color: #4cd9ff;
+        }
+
+        a.gps-link {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 7px 12px;
+            background: #007bff;
+            border-radius: 7px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        .marker-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
 </head>
+
 <body>
-  <header>
-    <h1>Carte interactive des magasins</h1>
-  </header>
 
-  <div id="map-container">
-    <select id="territorySelect"></select>
+    <header id="page-header">
+        <select id="territory-select">
+            <option value="">— Choisir un territoire —</option>
+        </select>
+    </header>
+
     <div id="map"></div>
-  </div>
 
-  <div class="legend">
-    <h2>Légende</h2>
-    <ul>
-      <li>
-        <span style="background-color: #1e88e5;"></span> Magasins partenaires
-      </li>
-    </ul>
-  </div>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Bibliothèque Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuK2/Z9VM+kNiyxNV1lvTLZBo="
-    crossorigin=""
-  ></script>
+    <!-- TERRITORIES -->
+    <script type="module">
+        import { TERRITORIES } from "./scripts/territories.js";
+        import { loadStoresForTerritory } from "./scripts/load-map.js";
 
-  <!-- Script principal en module -->
-  <script type="module">
-    import { TERRITORIES } from "./scripts/territories.js";
-    import { initMap } from "./scripts/map-init.js";
-    import { loadStoresForTerritory } from "./scripts/load-map.js";
+        // Insert territories
+        const select = document.getElementById("territory-select");
+        TERRITORIES.forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t.id;
+            opt.textContent = t.name;
+            select.appendChild(opt);
+        });
 
-    // Récupérer la liste déroulante
-    const selectEl = document.getElementById("territorySelect");
+        // Init map
+        const map = L.map("map").setView([16.25, -61.55], 10);
 
-    // Remplir la liste avec les territoires définis dans territories.js
-    for (const [key, value] of Object.entries(TERRITORIES)) {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = value.label;
-      selectEl.appendChild(option);
-    }
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution: "&copy; OpenStreetMap"
+            }
+        ).addTo(map);
 
-    let mapInstance = null;
+        let markers = [];
 
-    // Lorsque l'utilisateur change de territoire
-    selectEl.addEventListener("change", async (e) => {
-      const selectedKey = e.target.value;
-      const territory = TERRITORIES[selectedKey];
-      if (!territory) return;
+        function clearMarkers() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+        }
 
-      // Initialisation ou changement de vue de la carte
-      if (!mapInstance) {
-        mapInstance = initMap(territory);
-      } else {
-        mapInstance.setView([territory.lat, territory.lon], territory.zoom);
-      }
+        // GPS launcher (Waze / Google Maps / Apple Plans)
+        function generateGPSLink(lat, lon) {
+            return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+        }
 
-      // Charger les magasins pour le territoire sélectionné
-      await loadStoresForTerritory(mapInstance, selectedKey);
-    });
+        // PROMO SYSTEM (simple placeholder)
+        function getPromoStops() {
+            return [
+                {
+                    title: "Promo essence – Station Total",
+                    offer: "-0.15€/L seulement aujourd’hui",
+                    saving: "Économie estimée : 3€"
+                },
+                {
+                    title: "Promo alimentaire – Ecomax",
+                    offer: "Bouteille d'eau 1L : 0.19€",
+                    saving: "Économie estimée : 5€"
+                }
+            ];
+        }
 
-    // Sélectionner par défaut le premier territoire et initialiser la carte
-    const defaultKey = Object.keys(TERRITORIES)[0];
-    selectEl.value = defaultKey;
-    mapInstance = initMap(TERRITORIES[defaultKey]);
-    loadStoresForTerritory(mapInstance, defaultKey);
-  </script>
+        // When selecting a territory
+        select.addEventListener("change", async () => {
+            const territory = select.value;
+
+            if (!territory) return;
+
+            clearMarkers();
+
+            const stores = await loadStoresForTerritory(territory);
+
+            if (stores.length === 0) {
+                alert("Aucun magasin trouvé pour ce territoire.");
+                return;
+            }
+
+            // Focus map on first store
+            map.setView([stores[0].lat, stores[0].lon], 12);
+
+            stores.forEach(store => {
+                const marker = L.marker([store.lat, store.lon]).addTo(map);
+
+                const gpsUrl = generateGPSLink(store.lat, store.lon);
+
+                // Promo stops
+                const promos = getPromoStops()
+                    .map(p => `
+                        <div class="promo-stop">
+                            <strong>${p.title}</strong><br>
+                            ${p.offer}<br>
+                            <em>${p.saving}</em>
+                        </div>
+                    `)
+                    .join("");
+
+                marker.bindPopup(`
+                    <div class="marker-title">${store.name}</div>
+                    <div>${store.address}</div>
+
+                    <a 
+                        href="${gpsUrl}" 
+                        target="_blank"
+                        class="gps-link"
+                    >
+                        🚗 Ouvrir GPS
+                    </a>
+
+                    <h4>🛒 Bons plans sur le trajet</h4>
+                    ${promos}
+                `);
+
+                markers.push(marker);
+            });
+        });
+
+    </script>
+
 </body>
 </html>
