@@ -3,116 +3,107 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte interactive des magasins - A KI PRI SA YÉ</title>
+    <title>Carte interactive – A KI PRI SA YÉ</title>
 
-    <!-- Style global -->
-    <link rel="stylesheet" href="/dist/assets/main.css" onerror="this.href='/dist/assets/main-BXLYN4L9.css'">
-
-    <script type="module">
-        // Fonction pour récupérer automatiquement le bon JS généré par Vite
-        async function loadCarteScript() {
-            try {
-                // On récupère la liste des fichiers dans /dist/assets/
-                const res = await fetch("/dist/assets/");
-                const html = await res.text();
-
-                // On recherche un fichier du type carte-xxxx.js
-                const match = html.match(/carte-[a-zA-Z0-9]+\.js/g);
-
-                if (!match) {
-                    console.error("❌ Fichier carte-*.js introuvable.");
-                    return;
-                }
-
-                const scriptName = match[0];
-                console.log("📌 Chargement du script :", scriptName);
-
-                // Import dynamique du bon fichier
-                await import(`/dist/assets/${scriptName}`);
-
-            } catch (e) {
-                console.error("Erreur lors du chargement dynamique :", e);
-            }
-        }
-
-        loadCarteScript();
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     </script>
 
     <style>
         body {
-            background: #0d0f16;
             margin: 0;
-            padding: 0;
+            background: #0d0f16;
+            color: #fff;
             font-family: system-ui, sans-serif;
-            color: #ffffff;
         }
+
         .container {
             max-width: 1200px;
             margin: auto;
             padding: 20px;
         }
-        .panel {
-            background: rgba(255,255,255,0.04);
-            padding: 18px;
-            border-radius: 10px;
-            margin-bottom: 25px;
+
+        h1 {
+            text-align: center;
+            font-size: 30px;
+            color: #4d9cff;
+            margin-bottom: 20px;
         }
-        .map-zone {
-            width: 100%;
-            height: 70vh;
-            background: #0a0c12;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
+
         select {
             width: 100%;
-            background: #1a1d29;
-            border: 1px solid #2c3142;
-            color: white;
             padding: 12px;
             border-radius: 8px;
+            background: #1a1d29;
+            color: white;
+            border: 1px solid #2c3142;
             font-size: 16px;
+            margin-bottom: 20px;
         }
-        .title {
-            font-size: 32px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 30px;
-            color: #4d9cff;
+
+        #map {
+            width: 100%;
+            height: 70vh;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.15);
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+<div class="container">
+    <h1>🗺️ Carte interactive des magasins</h1>
 
-        <h1 class="title">🗺️ Carte interactive des magasins</h1>
+    <select id="territory">
+        <option value="guadeloupe">🇬🇵 Guadeloupe</option>
+        <option value="martinique">🇲🇶 Martinique</option>
+        <option value="guyane">🇬🇫 Guyane</option>
+        <option value="reunion">🇷🇪 La Réunion</option>
+        <option value="mayotte">🇾🇹 Mayotte</option>
+        <option value="saint-martin">🇫🇷 Saint-Martin</option>
+        <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
+        <option value="saint-pierre">🇫🇷 Saint-Pierre-et-Miquelon</option>
+        <option value="futuna">🇼🇫 Wallis-et-Futuna</option>
+        <option value="polynesie">🇵🇫 Polynésie française</option>
+        <option value="caledonie">🇳🇨 Nouvelle-Calédonie</option>
+    </select>
 
-        <div class="panel">
-            <select id="territoire-select">
-                <option value="guadeloupe">🇬🇵 Guadeloupe</option>
-                <option value="martinique">🇲🇶 Martinique</option>
-                <option value="guyane">🇬🇫 Guyane</option>
-                <option value="reunion">🇷🇪 La Réunion</option>
-                <option value="mayotte">🇾🇹 Mayotte</option>
-                <option value="saint-martin">🇫🇷 Saint-Martin</option>
-                <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
-                <option value="saint-pierre-miquelon">🇫🇷 Saint-Pierre-et-Miquelon</option>
-                <option value="wallis-futuna">🇼🇫 Wallis-et-Futuna</option>
-                <option value="polynesie">🇵🇫 Polynésie française</option>
-                <option value="nouvelle-caledonie">🇳🇨 Nouvelle-Calédonie</option>
-            </select>
-        </div>
+    <div id="map"></div>
+</div>
 
-        <div class="map-zone" id="map"></div>
+<script>
+    const territories = {
+        guadeloupe:  { lat: 16.265, lon: -61.55, zoom: 10 },
+        martinique:  { lat: 14.63, lon: -61.02, zoom: 10 },
+        guyane:      { lat: 4.93,  lon: -52.33, zoom: 8 },
+        reunion:     { lat: -21.115, lon: 55.536, zoom: 10 },
+        mayotte:     { lat: -12.823, lon: 45.166, zoom: 11 },
+        "saint-martin": { lat: 18.07, lon: -63.05, zoom: 12 },
+        "saint-barthelemy": { lat: 17.9, lon: -62.85, zoom: 12 },
+        "saint-pierre": { lat: 46.78, lon: -56.18, zoom: 11 },
+        futuna: { lat: -14.3, lon: -178.1, zoom: 10 },
+        polynesie: { lat: -17.679, lon: -149.406, zoom: 8 },
+        caledonie: { lat: -22.2758, lon: 166.458, zoom: 9 }
+    };
 
-        <div class="panel">
-            <h2 style="color:#4d9cff">📍 Légende</h2>
-            <p>🔵 Magasins partenaires</p>
-            <p>💡 Cliquez sur un marqueur pour voir les informations du magasin</p>
-        </div>
+    const map = L.map('map').setView([16.265, -61.55], 10);
 
-    </div>
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap",
+    }).addTo(map);
+
+    document.getElementById("territory").addEventListener("change", (e) => {
+        const t = territories[e.target.value];
+        map.setView([t.lat, t.lon], t.zoom);
+    });
+</script>
+
 </body>
 </html>
