@@ -35,3 +35,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }, 800);
     });
+
+    /* ------------------------------
+       3. Filtrer les produits
+       ------------------------------ */
+    function filterProducts(term) {
+        if (!term) return PRODUCTS;
+
+        return PRODUCTS.filter(p =>
+            p.name.toLowerCase().includes(term) ||
+            p.brand.toLowerCase().includes(term)
+        );
+    }
+
+    /* ------------------------------
+       4. Afficher les résultats
+       ------------------------------ */
+    function displayResults(list) {
+        resultsList.innerHTML = "";
+
+        if (list.length === 0) {
+            resultsList.innerHTML = `
+                <div class="no-results">
+                    Aucun produit trouvé…
+                </div>
+            `;
+            return;
+        }
+
+        list.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "product-card";
+
+            card.innerHTML = `
+                <h3>${item.name}</h3>
+                <p class="brand">${item.brand}</p>
+
+                <div class="price-block">
+                    <span class="price">${item.price.toFixed(2)} €</span>
+                    <span class="store">${item.store}</span>
+                    <span class="territory">${item.territory}</span>
+                </div>
+            `;
+
+            resultsList.appendChild(card);
+        });
+    }
+
+    /* ------------------------------
+       5. Initialisation
+       ------------------------------ */
+    displayResults(PRODUCTS);
+});
