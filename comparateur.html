@@ -1,43 +1,37 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Comparateur intelligent des prix Outre-mer – Trouvez les produits les moins chers en temps réel.">
-    <title>Comparateur – A KI PRI SA YÉ</title>
+/* ================================
+   COMPARATEUR – LOGIQUE PRINCIPALE
+   ================================ */
 
-    <link rel="stylesheet" href="styles/style.css">
-</head>
+document.addEventListener("DOMContentLoaded", () => {
 
-<body>
+    const searchInput = document.getElementById("searchInput");
+    const refreshBtn  = document.getElementById("refreshBtn");
+    const resultsList = document.getElementById("resultsList");
 
-    <!-- HEADER GLOBAL -->
-    <header id="app-header"></header>
+    // ▼ Données simulées (reliées à comparateur-data.js)
+    let PRODUCTS = window.PRODUCTS || [];
 
-    <section class="page-title">
-        <h1>📊 Comparateur des prix</h1>
-        <p class="subtitle">Comparez les prix des produits en Outre-mer en un seul clic</p>
-    </section>
+    /* ------------------------------
+       1. Recherche en temps réel
+       ------------------------------ */
+    searchInput.addEventListener("input", (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        displayResults(filterProducts(term));
+    });
 
-    <!-- Barre de recherche -->
-    <section class="search-section">
-        <input id="searchInput" type="text" placeholder="Rechercher un produit… (ex : lait, riz, beurre)">
-        <button id="refreshBtn" class="refresh-btn">🔄 Actualiser les prix</button>
-    </section>
+    /* ------------------------------
+       2. Bouton "Actualiser les prix"
+       ------------------------------ */
+    refreshBtn.addEventListener("click", () => {
+        refreshBtn.classList.add("loading");
+        refreshBtn.disabled = true;
 
-    <!-- Liste des résultats -->
-    <section class="results-section">
-        <div id="resultsList" class="results-list"></div>
-    </section>
+        // Ici, plus tard → future synchro Firestore / API
+        setTimeout(() => {
+            refreshBtn.classList.remove("loading");
+            refreshBtn.disabled = false;
 
-    <!-- FOOTER GLOBAL -->
-    <footer id="app-footer"></footer>
+            displayResults(filterProducts(searchInput.value.toLowerCase()));
 
-    <!-- SCRIPTS -->
-    <script src="scripts/comparateur-data.js"></script>
-    <script src="scripts/comparateur.js"></script>
-    <script src="components/header.js"></script>
-    <script src="components/footer.js"></script>
-
-</body>
-</html>
+        }, 800);
+    });
