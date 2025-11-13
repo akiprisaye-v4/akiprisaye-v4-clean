@@ -1,51 +1,122 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte - A KI PRI SA YÉ</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte des magasins - A KI PRI SA YÉ</title>
 
-    <!-- Leaflet CSS -->
-    <link 
-        rel="stylesheet" 
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #0f0f0f;
-            color: white;
-            font-family: system-ui, sans-serif;
-        }
-        #map {
-            width: 100vw;
-            height: 100vh;
-        }
-    </style>
+  <style>
+    body {
+      background: #0d0d16;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      height: 60vh;
+      margin: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .box {
+      background: #151521;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: #1f1f2e;
+      color: #fff;
+      border: 1px solid #333;
+      font-size: 16px;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div id="map"></div>
+  <div class="box">
+    <select id="territorySelector">
+      <option value="guadeloupe">🇬🇵 Guadeloupe</option>
+      <option value="martinique">🇲🇶 Martinique</option>
+      <option value="guyane">🇬🇫 Guyane</option>
+      <option value="reunion">🇷🇪 Réunion</option>
+      <option value="mayotte">🇾🇹 Mayotte</option>
+    </select>
+  </div>
 
-    <!-- Leaflet JS -->
-    <script 
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-    </script>
+  <div id="map"></div>
 
-    <!-- FIREBASE CONFIG -->
-    <script type="module" src="./firebase-config.js"></script>
+  <script type="module">
+    import { getDB, loadFirestore } from "./firebase-config.js";
 
-    <!-- CHARGEMENT DES MAGASINS DE FIRESTORE -->
-    <script type="module" src="./scripts/magasins-firestore.js"></script>
+    // Initialiser la carte
+    const map = L.map("map").setView([16.265, -61.551], 11);
 
-    <!-- SYSTÈME DE CARTE -->
-    <script type="module" src="./scripts/load-map.js"></script>
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+    }).addTo(map);
 
-    <!-- IMPORT AUTOMATIQUE DES MAGASINS GUADELOUPE -->
-    <script type="module" src="./scripts/auto-import-stores.js"></script>
+    let markersLayer = L.layerGroup().addTo(map);
+
+    /* ------------------------------------------------------------------
+     * Charger les magasins de Firestore
+     * ------------------------------------------------------------------ */
+    async function loadStores(territory) {
+      const db = await getDB();
+      const { collection, query, where, getDocs } = await loadFirestore();
+
+      markersLayer.clearLayers();
+
+      const q = query(
+        collection(db, "stores"),
+        where("territory", "==", territory)
+      );
+
+      const snap = await getDocs(q);
+
+      snap.forEach((doc) => {
+        const s = doc.data();
+        if (!s.lat || !s.lon) return;
+
+        L.marker([s.lat, s.lon])
+          .addTo(markersLayer)
+          .bindPopup(`
+            <b>${s.name}</b><br>
+            ${s.address}<br>
+            <b>Tél :</b> ${s.phone || "Non indiqué"}
+          `);
+      });
+    }
+
+    /* ------------------------------------------------------------------
+     * Sélection de territoire
+     * ------------------------------------------------------------------ */
+    const territorySelector = document.getElementById("territorySelector");
+
+    territorySelector.addEventListener("change", async () => {
+      const terr = territorySelector.value;
+      await loadStores(terr);
+
+      if (terr === "guadeloupe") map.setView([16.265, -61.551], 11);
+    });
+
+    // Charger par défaut
+    loadStores("guadeloupe");
+  </script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 </body>
 </html>
