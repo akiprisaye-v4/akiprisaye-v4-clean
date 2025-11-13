@@ -3,107 +3,600 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte interactive – A KI PRI SA YÉ</title>
+    <title>A KI PRI SA YÉ – Carte interactive</title>
 
-    <!-- Leaflet -->
+    <!-- Leaflet core -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIu6VLd9gENbYQaS0pQsLnwLkLkS0Z8pcvY="
+        crossorigin=""
     />
     <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin="">
     </script>
 
     <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            background: #0d0f16;
-            color: #fff;
-            font-family: system-ui, sans-serif;
+            background: #05060b;
+            color: #f5f5f5;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, sans-serif;
         }
 
-        .container {
+        .page {
             max-width: 1200px;
-            margin: auto;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 16px;
         }
 
-        h1 {
+        header {
             text-align: center;
-            font-size: 30px;
-            color: #4d9cff;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin: 0 0 4px;
+            color: #4da3ff;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 13px;
+            color: #a3acc4;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        select,
+        button {
+            font-size: 14px;
         }
 
         select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            background: #1a1d29;
-            color: white;
-            border: 1px solid #2c3142;
-            font-size: 16px;
-            margin-bottom: 20px;
+            flex: 1;
+            min-width: 180px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #262b3b;
+            background: #101320;
+            color: #f5f5f5;
+        }
+
+        button {
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid #2b3344;
+            background: #161b2a;
+            color: #e5ecff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #20263a;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .filter-chip {
+            padding: 6px 11px;
+            border-radius: 999px;
+            border: 1px solid #262b3b;
+            background: #111522;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip input {
+            accent-color: #4da3ff;
+        }
+
+        .filter-chip span.color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
+        .filters-group-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7c86a3;
+            margin-bottom: 2px;
         }
 
         #map {
             width: 100%;
             height: 70vh;
-            border-radius: 12px;
+            min-height: 360px;
+            border-radius: 14px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+        }
+
+        .legend {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #a3acc4;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 11px;
+            height: 11px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
+        .leaflet-popup-content {
+            font-size: 13px;
+        }
+
+        .popup-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .popup-meta {
+            font-size: 12px;
+            color: #6f7a96;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 20px;
+            }
+            #map {
+                height: 65vh;
+            }
         }
     </style>
 </head>
 
 <body>
-<div class="container">
-    <h1>🗺️ Carte interactive des magasins</h1>
+<div class="page">
+    <header>
+        <h1>A KI PRI SA YÉ – Carte interactive</h1>
+        <p>Magasins, stations, pharmacies et points clés dans les DOM-TOM</p>
+    </header>
 
-    <select id="territory">
-        <option value="guadeloupe">🇬🇵 Guadeloupe</option>
-        <option value="martinique">🇲🇶 Martinique</option>
-        <option value="guyane">🇬🇫 Guyane</option>
-        <option value="reunion">🇷🇪 La Réunion</option>
-        <option value="mayotte">🇾🇹 Mayotte</option>
-        <option value="saint-martin">🇫🇷 Saint-Martin</option>
-        <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
-        <option value="saint-pierre">🇫🇷 Saint-Pierre-et-Miquelon</option>
-        <option value="futuna">🇼🇫 Wallis-et-Futuna</option>
-        <option value="polynesie">🇵🇫 Polynésie française</option>
-        <option value="caledonie">🇳🇨 Nouvelle-Calédonie</option>
-    </select>
+    <section class="controls">
+        <!-- Ligne 1 : Territoire + géolocalisation -->
+        <div class="controls-row">
+            <select id="territory-select">
+                <option value="guadeloupe">🇬🇵 Guadeloupe</option>
+                <option value="martinique">🇲🇶 Martinique</option>
+                <option value="guyane">🇬🇫 Guyane</option>
+                <option value="reunion">🇷🇪 La Réunion</option>
+                <option value="mayotte">🇾🇹 Mayotte</option>
+                <option value="saint-martin">🇫🇷 Saint-Martin</option>
+                <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
+                <option value="saint-pierre">🇫🇷 Saint-Pierre-et-Miquelon</option>
+                <option value="futuna">🇼🇫 Wallis-et-Futuna</option>
+                <option value="polynesie">🇵🇫 Polynésie française</option>
+                <option value="caledonie">🇳🇨 Nouvelle-Calédonie</option>
+            </select>
+
+            <button id="locate-me">
+                <span>📍</span><span>Me localiser</span>
+            </button>
+        </div>
+
+        <!-- Ligne 2 : Filtres -->
+        <div>
+            <div class="filters-group-title">Filtres</div>
+            <div class="controls-row">
+                <label class="filter-chip">
+                    <input type="checkbox" name="type-filter" value="supermarche" checked />
+                    <span class="color-dot" style="background:#4caf50;"></span>
+                    Supermarchés
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" name="type-filter" value="station" checked />
+                    <span class="color-dot" style="background:#ff9800;"></span>
+                    Stations-service
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" name="type-filter" value="pharmacie" checked />
+                    <span class="color-dot" style="background:#e91e63;"></span>
+                    Pharmacies
+                </label>
+                <label class="filter-chip">
+                    <input type="checkbox" name="type-filter" value="autre" checked />
+                    <span class="color-dot" style="background:#03a9f4;"></span>
+                    Autres
+                </label>
+                <button id="filters-all">Tout</button>
+            </div>
+        </div>
+    </section>
 
     <div id="map"></div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <span class="legend-color" style="background:#4caf50;"></span>
+            <span>Supermarché</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background:#ff9800;"></span>
+            <span>Station-service</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background:#e91e63;"></span>
+            <span>Pharmacie</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color" style="background:#03a9f4;"></span>
+            <span>Autre / Point clé</span>
+        </div>
+    </div>
 </div>
 
 <script>
-    const territories = {
-        guadeloupe:  { lat: 16.265, lon: -61.55, zoom: 10 },
-        martinique:  { lat: 14.63, lon: -61.02, zoom: 10 },
-        guyane:      { lat: 4.93,  lon: -52.33, zoom: 8 },
-        reunion:     { lat: -21.115, lon: 55.536, zoom: 10 },
-        mayotte:     { lat: -12.823, lon: 45.166, zoom: 11 },
+    // --- Coordonnées des territoires ---
+    const TERRITORIES = {
+        guadeloupe: { lat: 16.265, lon: -61.55, zoom: 10 },
+        martinique: { lat: 14.63, lon: -61.02, zoom: 10 },
+        guyane: { lat: 4.93, lon: -52.33, zoom: 8 },
+        reunion: { lat: -21.115, lon: 55.536, zoom: 11 },
+        mayotte: { lat: -12.823, lon: 45.166, zoom: 11 },
         "saint-martin": { lat: 18.07, lon: -63.05, zoom: 12 },
         "saint-barthelemy": { lat: 17.9, lon: -62.85, zoom: 12 },
         "saint-pierre": { lat: 46.78, lon: -56.18, zoom: 11 },
-        futuna: { lat: -14.3, lon: -178.1, zoom: 10 },
+        futuna: { lat: -14.3, lon: -178.1, zoom: 11 },
         polynesie: { lat: -17.679, lon: -149.406, zoom: 8 },
         caledonie: { lat: -22.2758, lon: 166.458, zoom: 9 }
     };
 
-    const map = L.map('map').setView([16.265, -61.55], 10);
+    // --- Données de magasins (exemples réalistes mais simplifiés) ---
+    // type: supermarche | station | pharmacie | autre
+    const STORES = [
+        // Guadeloupe
+        {
+            territory: "guadeloupe",
+            type: "supermarche",
+            name: "Carrefour Milenis",
+            city: "Les Abymes",
+            lat: 16.273,
+            lon: -61.515,
+            address: "Centre commercial Milenis",
+            opening: "Lun-Sam 8h-20h"
+        },
+        {
+            territory: "guadeloupe",
+            type: "station",
+            name: "Total Baie-Mahault",
+            city: "Baie-Mahault",
+            lat: 16.265,
+            lon: -61.583,
+            address: "Zone industrielle de Jarry",
+            opening: "24h/24"
+        },
+        {
+            territory: "guadeloupe",
+            type: "pharmacie",
+            name: "Pharmacie de Bas-du-Fort",
+            city: "Le Gosier",
+            lat: 16.224,
+            lon: -61.504,
+            opening: "Lun-Sam 8h-19h"
+        },
+
+        // Martinique
+        {
+            territory: "martinique",
+            type: "supermarche",
+            name: "Hyper U La Galleria",
+            city: "Le Lamentin",
+            lat: 14.616,
+            lon: -61.03,
+            opening: "Lun-Sam 8h-20h"
+        },
+        {
+            territory: "martinique",
+            type: "station",
+            name: "Station-service Fort-de-France",
+            city: "Fort-de-France",
+            lat: 14.610,
+            lon: -61.074,
+        },
+        {
+            territory: "martinique",
+            type: "pharmacie",
+            name: "Pharmacie du Centre",
+            city: "Fort-de-France",
+            lat: 14.604,
+            lon: -61.076,
+        },
+
+        // Guyane
+        {
+            territory: "guyane",
+            type: "supermarche",
+            name: "Super U Cayenne",
+            city: "Cayenne",
+            lat: 4.939,
+            lon: -52.322
+        },
+        {
+            territory: "guyane",
+            type: "station",
+            name: "Station Kourou",
+            city: "Kourou",
+            lat: 5.157,
+            lon: -52.647
+        },
+
+        // Réunion
+        {
+            territory: "reunion",
+            type: "supermarche",
+            name: "Leclerc Saint-Denis",
+            city: "Saint-Denis",
+            lat: -20.88,
+            lon: 55.45
+        },
+        {
+            territory: "reunion",
+            type: "station",
+            name: "Station-service Saint-Pierre",
+            city: "Saint-Pierre",
+            lat: -21.34,
+            lon: 55.48
+        },
+        {
+            territory: "reunion",
+            type: "pharmacie",
+            name: "Pharmacie du Front de Mer",
+            city: "Saint-Denis",
+            lat: -20.88,
+            lon: 55.45
+        },
+
+        // Mayotte
+        {
+            territory: "mayotte",
+            type: "supermarche",
+            name: "Supermarché Mamoudzou",
+            city: "Mamoudzou",
+            lat: -12.78,
+            lon: 45.23
+        },
+
+        // Saint-Martin
+        {
+            territory: "saint-martin",
+            type: "autre",
+            name: "Marché local de Marigot",
+            city: "Marigot",
+            lat: 18.07,
+            lon: -63.08
+        },
+
+        // Polynésie
+        {
+            territory: "polynesie",
+            type: "supermarche",
+            name: "Carrefour Punaauia",
+            city: "Punaauia (Tahiti)",
+            lat: -17.62,
+            lon: -149.57
+        },
+
+        // Nouvelle-Calédonie
+        {
+            territory: "caledonie",
+            type: "supermarche",
+            name: "Super U Dumbéa",
+            city: "Dumbéa",
+            lat: -22.2758,
+            lon: 166.458
+        }
+    ];
+
+    // --- Map initialisation ---
+    const defaultTerritoryKey = "guadeloupe";
+    const defaultTerritory = TERRITORIES[defaultTerritoryKey];
+
+    const map = L.map("map", {
+        zoomControl: true,
+        scrollWheelZoom: true
+    }).setView([defaultTerritory.lat, defaultTerritory.lon], defaultTerritory.zoom);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "© OpenStreetMap",
     }).addTo(map);
 
-    document.getElementById("territory").addEventListener("change", (e) => {
-        const t = territories[e.target.value];
-        map.setView([t.lat, t.lon], t.zoom);
-    });
-</script>
+    // Groupe pour les marqueurs de magasins
+    const markersLayer = L.layerGroup().addTo(map);
+    let myLocationMarker = null;
 
+    // Couleur par type
+    const TYPE_COLORS = {
+        supermarche: "#4caf50",
+        station: "#ff9800",
+        pharmacie: "#e91e63",
+        autre: "#03a9f4",
+    };
+
+    function createStoreMarker(store) {
+        const color = TYPE_COLORS[store.type] || "#03a9f4";
+
+        const marker = L.circleMarker([store.lat, store.lon], {
+            radius: 8,
+            fillColor: color,
+            color: "#000",
+            weight: 1,
+            opacity: 0.9,
+            fillOpacity: 0.9,
+        });
+
+        const typeLabelMap = {
+            supermarche: "Supermarché",
+            station: "Station-service",
+            pharmacie: "Pharmacie",
+            autre: "Point clé",
+        };
+
+        const popupHtml = `
+            <div class="popup">
+                <div class="popup-name">${store.name}</div>
+                <div class="popup-meta">
+                    ${typeLabelMap[store.type] || "Point"} – ${store.city || ""}
+                </div>
+                ${
+                    store.address
+                        ? `<div class="popup-meta">Adresse : ${store.address}</div>`
+                        : ""
+                }
+                ${
+                    store.opening
+                        ? `<div class="popup-meta">Horaires : ${store.opening}</div>`
+                        : ""
+                }
+            </div>
+        `;
+
+        marker.bindPopup(popupHtml);
+        return marker;
+    }
+
+    function getActiveTypes() {
+        const checkboxes = document.querySelectorAll('input[name="type-filter"]');
+        const active = [];
+        checkboxes.forEach((cb) => {
+            if (cb.checked) active.push(cb.value);
+        });
+        return active;
+    }
+
+    function refreshMarkers() {
+        const territoryKey = document.getElementById("territory-select").value;
+        const activeTypes = getActiveTypes();
+
+        markersLayer.clearLayers();
+
+        const filtered = STORES.filter(
+            (store) =>
+                store.territory === territoryKey &&
+                activeTypes.includes(store.type)
+        );
+
+        filtered.forEach((store) => {
+            const marker = createStoreMarker(store);
+            marker.addTo(markersLayer);
+        });
+    }
+
+    // --- Gestion du territoire ---
+    document
+        .getElementById("territory-select")
+        .addEventListener("change", (event) => {
+            const key = event.target.value;
+            const t = TERRITORIES[key];
+            if (t) {
+                map.setView([t.lat, t.lon], t.zoom);
+            }
+            refreshMarkers();
+        });
+
+    // --- Gestion des filtres ---
+    document
+        .querySelectorAll('input[name="type-filter"]')
+        .forEach((cb) => cb.addEventListener("change", refreshMarkers));
+
+    document.getElementById("filters-all").addEventListener("click", () => {
+        document
+            .querySelectorAll('input[name="type-filter"]')
+            .forEach((cb) => (cb.checked = true));
+        refreshMarkers();
+    });
+
+    // --- Géolocalisation ---
+    document.getElementById("locate-me").addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            alert("La géolocalisation n'est pas supportée sur cet appareil.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+
+                if (myLocationMarker) {
+                    myLocationMarker.setLatLng([latitude, longitude]);
+                } else {
+                    myLocationMarker = L.circleMarker([latitude, longitude], {
+                        radius: 7,
+                        fillColor: "#ffff00",
+                        color: "#000",
+                        weight: 1,
+                        opacity: 0.9,
+                        fillOpacity: 0.9,
+                    }).addTo(map);
+                    myLocationMarker.bindPopup("Vous êtes ici (approximation GPS)").openPopup();
+                }
+
+                map.setView([latitude, longitude], 13);
+            },
+            (err) => {
+                console.error("Erreur géolocalisation:", err);
+                alert("Impossible de récupérer votre position.");
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 8000,
+                maximumAge: 0,
+            }
+        );
+    });
+
+    // Initial render
+    refreshMarkers();
+</script>
 </body>
 </html>
