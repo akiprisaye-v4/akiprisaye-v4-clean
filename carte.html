@@ -1,54 +1,71 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Carte interactive des magasins Outre-mer – Guadeloupe, Martinique, Guyane, Réunion, Mayotte, Nouvelle-Calédonie.">
-    <title>Carte interactive – A KI PRI SA YÉ</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Ki Pri Sa Yé – Carte Google Maps</title>
 
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles.css" />
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: #0b0f19;
+            color: white;
+            font-family: Inter, sans-serif;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        #search-panel {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.55);
+            padding: 12px;
+            border-radius: 14px;
+            backdrop-filter: blur(10px);
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 8px;
+            border: none;
+        }
+        button {
+            background: #1e90ff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- HEADER GLOBAL -->
-    <header id="app-header"></header>
+    <!-- PANNEAU DE RECHERCHE -->
+    <div id="search-panel">
+        <input id="start" placeholder="Point de départ…" />
+        <input id="end" placeholder="Destination…" />
 
-    <section class="page-title">
-        <h1>🗺️ Carte interactive des magasins</h1>
+        <button onclick="computeRoute()">Calculer l'itinéraire</button>
+    </div>
 
-        <div class="territory-selector">
-            <select id="territoryFilter">
-                <option value="all">Tous les territoires</option>
-                <option value="guadeloupe">Guadeloupe</option>
-                <option value="martinique">Martinique</option>
-                <option value="guyane">Guyane</option>
-                <option value="reunion">La Réunion</option>
-                <option value="mayotte">Mayotte</option>
-                <option value="nouvelle-caledonie">Nouvelle-Calédonie</option>
-            </select>
-        </div>
-    </section>
+    <!-- MAP -->
+    <div id="map"></div>
 
-    <!-- MAP ZONE -->
-    <section class="map-container">
-        <div id="map" class="map"></div>
-        <div id="map-loader" class="loader">Chargement de la carte…</div>
-    </section>
+    <!-- SCRIPTS -->
+    <script type="module" src="./scripts/carte-google.js"></script>
 
-    <!-- FOOTER GLOBAL -->
-    <footer id="app-footer"></footer>
-
-    <!-- Scripts -->
-    <script src="scripts/territories.js"></script>
-    <script src="scripts/magasins-firestore.js"></script>
-    <script src="scripts/load-map.js"></script>
-    <script src="components/header.js"></script>
-    <script src="components/footer.js"></script>
+    <!-- GOOGLE MAPS -->
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry">
+    </script>
 
 </body>
 </html>
