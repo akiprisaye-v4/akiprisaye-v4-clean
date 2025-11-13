@@ -3,83 +3,62 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A Ki Pri Sa Yé — Carte Interactive</title>
+    <title>Carte des magasins - A KI PRI SA YÉ</title>
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+    <!-- Style simple pour éviter les bugs -->
     <style>
-        body {
-            margin: 0;
-            background: #0e0e0e;
-            color: white;
-            font-family: system-ui, sans-serif;
-        }
-        #page-header {
-            padding: 15px;
-            background: rgba(20,20,20,0.9);
-            border-bottom: 1px solid #333;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-        select {
-            width: 95%;
+        body { margin: 0; padding: 0; background: #0d0d0d; color: white; font-family: sans-serif; }
+        #territorySelect {
+            width: 90%;
+            margin: 15px auto;
             padding: 12px;
-            background: #222;
-            border: 1px solid #555;
-            border-radius: 10px;
+            font-size: 18px;
+            border-radius: 12px;
+            background: #1a1a1a;
             color: white;
-            font-size: 1rem;
+            border: 2px solid #333;
+            display: block;
         }
         #map {
             width: 100%;
-            height: calc(100vh - 100px);
+            height: 80vh;
+            border-radius: 12px;
+            margin: auto;
         }
     </style>
-</head>
 
+    <!-- Google Maps (clé API) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=ALzaSyAs0uisnGSK7OIrFqQPFYF6E-ctNOPY0Sw&libraries=places"></script>
+
+</head>
 <body>
 
-    <header id="page-header">
-        <select id="territory-select">
-            <option value="">— Choisir un territoire —</option>
-        </select>
-    </header>
+    <h2 style="text-align:center; margin-top:20px; font-size:28px;">
+        🌍 Carte interactive des magasins
+    </h2>
 
+    <!-- Selecteur des territoires -->
+    <select id="territorySelect">
+        <option value="all">Tous les territoires</option>
+        <option value="guadeloupe">🇬🇵 Guadeloupe</option>
+        <option value="martinique">🇲🇶 Martinique</option>
+        <option value="guyane">🇬🇫 Guyane</option>
+        <option value="reunion">🇷🇪 La Réunion</option>
+        <option value="mayotte">🇾🇹 Mayotte</option>
+        <option value="saint-martin">🇫🇷 Saint-Martin</option>
+        <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
+        <option value="saint-pierre-et-miquelon">🇵🇲 Saint-Pierre-et-Miquelon</option>
+        <option value="wallis-et-futuna">🇼🇫 Wallis-et-Futuna</option>
+        <option value="nouvelle-caledonie">🇳🇨 Nouvelle-Calédonie</option>
+        <option value="polynesie-francaise">🇵🇫 Polynésie française</option>
+        <option value="terres-australes">🇹🇫 Terres australes</option>
+    </select>
+
+    <!-- Carte -->
     <div id="map"></div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- Modules -->
-    <script type="module">
-
-        import { TERRITORIES } from "./scripts/territories.js";
-        import { loadTerritory, initMap } from "./scripts/load-map.js";
-
-        // Insert territories in the select dropdown
-        const select = document.getElementById("territory-select");
-
-        TERRITORIES.forEach(t => {
-            const opt = document.createElement("option");
-            opt.value = t.id;
-            opt.textContent = `${t.flag} ${t.name}`;
-            select.appendChild(opt);
-        });
-
-        // Initialize map once
-        initMap();
-
-        // When selecting a territory
-        select.addEventListener("change", () => {
-            const id = select.value;
-            if (!id) return;
-            loadTerritory(id);
-        });
-
-    </script>
+    <!-- Scripts -->
+    <script type="module" src="/scripts/load-map.js"></script>
 
 </body>
 </html>
