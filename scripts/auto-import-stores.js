@@ -68,6 +68,7 @@ async function geocode(address) {
     const res = await fetch(url, {
       headers: {
         "Accept-Language": "fr",
+        // Fournir un User-Agent conforme à la politique Nominatim
         "User-Agent": "akiprisaye-web/1.0 (+https://github.com/teetee971/akiprisaye-web)"
       }
     });
@@ -95,14 +96,14 @@ async function autoImport() {
   );
 
   for (let store of storesList) {
-    // --- Géocodage (correction : geocode)
+    // --- Géocodage (correction : appel à geocode)
     const { lat, lon } = await geocode(store.address);
 
     if (lat === null || lon === null) {
       console.warn(`Géocodage non trouvé pour: ${store.address}`);
     }
 
-    // --- Création d'un document automatique
+    // --- Création d’un document automatique
     const ref = doc(collection(db, "stores"));
 
     await setDoc(ref, {
@@ -113,6 +114,7 @@ async function autoImport() {
       lat,
       lon,
       openingHours: "08:00 - 20:00",
+      // Normaliser le code de territoire en minuscules pour correspondre au front
       territory: "guadeloupe"
     });
 
