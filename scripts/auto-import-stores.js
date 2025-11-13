@@ -1,72 +1,150 @@
 /**
- * AUTO-IMPORT STORES GUADELOUPE
+ * MEGA AUTO-IMPORT DOM-TOM
  * Importation automatique dans Firestore (collection: stores)
- * Compatible Cloudflare Pages / Browser / Lazy Loading Firebase
+ * Territoires : Guadeloupe, Martinique, Guyane, Réunion, Mayotte, Saint-Martin, Saint-Barth
+ * Compatible Cloudflare Pages + Firebase lazy-loading
  */
 
 import { getDB } from "../firebase-config.js";
 
-/** LISTE DES MAGASINS DE GUADELOUPE */
-const storesList = [
+/* ---------------------------------------------------------
+   LISTE OFFICIELLE DES MAGASINS PAR TERRITOIRE
+--------------------------------------------------------- */
+const storesDOMTOM = [
+  /* ------------------ GUADELOUPE ------------------- */
   {
+    territory: "guadeloupe",
     name: "Super U Bas-du-Fort",
     address: "Bas-du-Fort, Le Gosier, Guadeloupe",
     chain: "Super U",
     phone: "0590 99 99 99"
   },
   {
+    territory: "guadeloupe",
     name: "Carrefour Destrellan",
     address: "Destrellan, Baie-Mahault, Guadeloupe",
     chain: "Carrefour",
     phone: "0590 26 92 92"
   },
   {
-    name: "Carrefour Market Saint-François",
-    address: "Saint-François, Guadeloupe",
-    chain: "Carrefour Market",
-    phone: ""
-  },
-  {
-    name: "Ecomax Bergevin",
-    address: "Bergevin, Pointe-à-Pitre, Guadeloupe",
-    chain: "Ecomax",
-    phone: ""
-  },
-  {
-    name: "Ecomax Lauricisque",
-    address: "Lauricisque, Pointe-à-Pitre, Guadeloupe",
-    chain: "Ecomax",
-    phone: ""
-  },
-  {
-    name: "Leader Price Besson",
-    address: "Besson, Le Gosier, Guadeloupe",
-    chain: "Leader Price",
-    phone: ""
-  },
-  {
-    name: "Leader Price Mornalot",
-    address: "Mornalot, Sainte-Anne, Guadeloupe",
-    chain: "Leader Price",
-    phone: ""
-  },
-  {
+    territory: "guadeloupe",
     name: "Géant Casino Dothémare",
     address: "Dothémare, Les Abymes, Guadeloupe",
     chain: "Géant Casino",
     phone: ""
+  },
+
+  /* ------------------ MARTINIQUE ------------------- */
+  {
+    territory: "martinique",
+    name: "Hyper U La Galléria",
+    address: "Centre Commercial La Galléria, Le Lamentin, Martinique",
+    chain: "Hyper U",
+    phone: ""
+  },
+  {
+    territory: "martinique",
+    name: "Carrefour Cluny",
+    address: "Centre Commercial Cluny, Fort-de-France, Martinique",
+    chain: "Carrefour",
+    phone: ""
+  },
+  {
+    territory: "martinique",
+    name: "Leader Price Dillon",
+    address: "Dillon, Fort-de-France, Martinique",
+    chain: "Leader Price",
+    phone: ""
+  },
+
+  /* ------------------ GUYANE ----------------------- */
+  {
+    territory: "guyane",
+    name: "Super U Montjoly",
+    address: "Route de Montjoly, Remire-Montjoly, Guyane",
+    chain: "Super U",
+    phone: ""
+  },
+  {
+    territory: "guyane",
+    name: "Carrefour Market Cayenne",
+    address: "Cayenne, Guyane",
+    chain: "Carrefour Market",
+    phone: ""
+  },
+
+  /* ------------------ RÉUNION ---------------------- */
+  {
+    territory: "reunion",
+    name: "E.Leclerc Saint-Denis",
+    address: "Saint-Denis, La Réunion",
+    chain: "E.Leclerc",
+    phone: ""
+  },
+  {
+    territory: "reunion",
+    name: "Carrefour Saint-Pierre",
+    address: "Saint-Pierre, La Réunion",
+    chain: "Carrefour",
+    phone: ""
+  },
+  {
+    territory: "reunion",
+    name: "Leader Price Saint-André",
+    address: "Saint-André, La Réunion",
+    chain: "Leader Price",
+    phone: ""
+  },
+
+  /* ------------------ MAYOTTE ---------------------- */
+  {
+    territory: "mayotte",
+    name: "Super U Dembéni",
+    address: "Dembéni, Mayotte",
+    chain: "Super U",
+    phone: ""
+  },
+  {
+    territory: "mayotte",
+    name: "Carrefour Mamoudzou",
+    address: "Mamoudzou, Mayotte",
+    chain: "Carrefour",
+    phone: ""
+  },
+
+  /* ------------------ SAINT-MARTIN ---------------------- */
+  {
+    territory: "saint-martin",
+    name: "Super U Howell Center",
+    address: "Howell Center, Marigot, Saint-Martin",
+    chain: "Super U",
+    phone: ""
+  },
+
+  /* ------------------ SAINT-BARTH ---------------------- */
+  {
+    territory: "saint-barth",
+    name: "Marché U Saint-Barth",
+    address: "Saint-Jean, Saint-Barthélemy",
+    chain: "U",
+    phone: ""
   }
 ];
 
-/** GEO-CODAGE — API Nominatim (OpenStreetMap) */
+/* ---------------------------------------------------------
+   GÉOCODAGE OPENSTREETMAP (NOMINATIM)
+--------------------------------------------------------- */
 async function geocode(address) {
-  console.log("Géocodage :", address);
-
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+    address
+  )}&limit=1`;
 
   try {
     const res = await fetch(url, {
-      headers: { "Accept-Language": "fr" }
+      headers: {
+        "Accept-Language": "fr",
+        "User-Agent": "akiprisaye-web/1.0 (+https://akiprisaye-web.pages.dev)"
+      }
     });
 
     const data = await res.json();
@@ -77,25 +155,25 @@ async function geocode(address) {
       lon: parseFloat(data[0].lon)
     };
   } catch (e) {
-    console.error("Erreur géocode:", e);
+    console.error("Erreur géocodage :", e);
     return { lat: null, lon: null };
   }
 }
 
-/** IMPORT AUTOMATIQUE DANS FIRESTORE */
+/* ---------------------------------------------------------
+   IMPORT FIRESTORE
+--------------------------------------------------------- */
 async function autoImport() {
-  console.log("🚀 Importation automatique dans Firestore…");
+  console.log("🚀 Import automatique DOM-TOM → Firestore…");
 
   const db = await getDB();
   const { collection, doc, setDoc } = await import(
     "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
   );
 
-  for (let store of storesList) {
-    // --- Géocodage
-    const { lat, lon } = await gecode(store.address);
+  for (const store of storesDOMTOM) {
+    const { lat, lon } = await geocode(store.address);
 
-    // --- Création d’un document automatique
     const ref = doc(collection(db, "stores"));
 
     await setDoc(ref, {
@@ -106,17 +184,15 @@ async function autoImport() {
       lat,
       lon,
       openingHours: "08:00 - 20:00",
-      territory: "Guadeloupe"
+      territory: store.territory
     });
 
-    console.log("✅ Ajouté :", store.name);
+    console.log(`✅ ${store.territory.toUpperCase()} → ${store.name}`);
 
-    // 🔥 Pause anti-ban (1 seconde)
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000)); // Anti-ban
   }
 
-  console.log("🎉 IMPORT TERMINÉ !");
+  console.log("🎉 IMPORT COMPLET DOM-TOM TERMINÉ !");
 }
 
-// Lancer automatiquement
 autoImport();
