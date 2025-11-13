@@ -3,62 +3,160 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte des magasins - A KI PRI SA YÉ</title>
+    <title>Carte des magasins – A KI PRI SA YÉ</title>
 
-    <!-- Style simple pour éviter les bugs -->
+    <!-- STYLE GLOBAL -->
     <style>
-        body { margin: 0; padding: 0; background: #0d0d0d; color: white; font-family: sans-serif; }
-        #territorySelect {
+        body {
+            margin: 0;
+            background: #0d0d0d;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .page-title {
+            text-align: center;
+            padding: 20px 10px;
+            color: #3f7fff;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .selector-container {
+            padding: 10px;
+            text-align: center;
+        }
+        select {
             width: 90%;
-            margin: 15px auto;
+            max-width: 500px;
             padding: 12px;
             font-size: 18px;
-            border-radius: 12px;
-            background: #1a1a1a;
+            background: #111;
             color: white;
-            border: 2px solid #333;
-            display: block;
+            border: 2px solid #3f7fff;
+            border-radius: 12px;
         }
         #map {
             width: 100%;
-            height: 80vh;
-            border-radius: 12px;
-            margin: auto;
+            height: calc(100vh - 160px);
+            border-radius: 0;
         }
     </style>
 
-    <!-- Google Maps (clé API) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=ALzaSyAs0uisnGSK7OIrFqQPFYF6E-ctNOPY0Sw&libraries=places"></script>
+    <!-- GOOGLE MAPS API -->
+    <script async
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAs0uisnGSK7OIrFqQPFYF6E-ctNOPY0Sw">
+    </script>
+
+    <!-- SCRIPTS DU PROJET -->
+    <script type="module">
+        import { TERRITORIES } from "./scripts/territories.js";
+        import { getStoresByTerritory } from "./scripts/magasins-firestore.js";
+
+        let map = null;
+        let markers = [];
+
+        // -----------------------------
+        // Création de la carte Google
+        // -----------------------------
+        function initMap(lat = 14.6, lon = -53.0, zoom = 3) {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat, lng: lon },
+                zoom,
+                mapTypeId: "roadmap",
+                disableDefaultUI: false
+            });
+        }
+
+        // -----------------------------
+        // Charger un territoire + magasins
+        // -----------------------------
+        async function loadTerritory(territoryId) {
+            const t = TERRITORIES.find(x => x.id === territoryId);
+            if (!t) return;
+
+            initMap(t.center.lat, t.center.lon, t.zoom);
+
+            // Nettoyage des anciens marqueurs
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+
+            // Charger Firestore
+            const shops = await getStoresByTerritory(territoryId);
+
+            shops.forEach(shop => {
+                if (!shop.lat || !shop.lon) return;
+
+                const marker = new google.maps.Marker({
+                    position: { lat: shop.lat, lng: shop.lon },
+                    map: map,
+                    title: shop.name
+                });
+
+                const popup = `
+                    <div style="font-size:15px; color:black;">
+                        <strong>${shop.name}</strong><br>
+                        ${shop.address}<br>
+                        <em>${shop.chain || ""}</em><br><br>
+
+                        <button onclick="openGPS(${shop.lat}, ${shop.lon})"
+                            style="background:#1e90ff;color:white;padding:6px 10px;border:none;border-radius:6px;">
+                            📍 Ouvrir dans GPS
+                        </button>
+                        <br><br>
+                        <button onclick="suggestPromotions('${territoryId}')"
+                            style="background:#ff5722;color:white;padding:6px 10px;border:none;border-radius:6px;">
+                            🔥 Promotions sur le trajet
+                        </button>
+                    </div>
+                `;
+
+                const infowindow = new google.maps.InfoWindow({
+                    content: popup
+                });
+
+                marker.addListener("click", () => infowindow.open(map, marker));
+                markers.push(marker);
+            });
+        }
+
+        // GPS externe (Google Maps App ou navigateur)
+        window.openGPS = function(lat, lon) {
+            window.open(`https://maps.google.com/?q=${lat},${lon}`, "_blank");
+        };
+
+        // IA – suggestions promotions
+        window.suggestPromotions = function(territoryId) {
+            alert("🧠 Analyse IA du trajet en cours… Promotions bientôt intégrées.");
+        };
+
+        // Au chargement
+        window.onload = () => {
+            initMap(); // vue globale
+
+            const select = document.getElementById("territorySelect");
+            select.innerHTML = TERRITORIES.map(t =>
+                `<option value="${t.id}">${t.flag} ${t.name}</option>`
+            ).join("");
+
+            select.addEventListener("change", () => {
+                if (select.value !== "all") loadTerritory(select.value);
+                else initMap(); // vue globale
+            });
+        };
+    </script>
 
 </head>
+
 <body>
 
-    <h2 style="text-align:center; margin-top:20px; font-size:28px;">
-        🌍 Carte interactive des magasins
-    </h2>
+    <div class="page-title">🗺️ Carte interactive des magasins</div>
 
-    <!-- Selecteur des territoires -->
-    <select id="territorySelect">
-        <option value="all">Tous les territoires</option>
-        <option value="guadeloupe">🇬🇵 Guadeloupe</option>
-        <option value="martinique">🇲🇶 Martinique</option>
-        <option value="guyane">🇬🇫 Guyane</option>
-        <option value="reunion">🇷🇪 La Réunion</option>
-        <option value="mayotte">🇾🇹 Mayotte</option>
-        <option value="saint-martin">🇫🇷 Saint-Martin</option>
-        <option value="saint-barthelemy">🇫🇷 Saint-Barthélemy</option>
-        <option value="saint-pierre-et-miquelon">🇵🇲 Saint-Pierre-et-Miquelon</option>
-        <option value="wallis-et-futuna">🇼🇫 Wallis-et-Futuna</option>
-        <option value="nouvelle-caledonie">🇳🇨 Nouvelle-Calédonie</option>
-        <option value="polynesie-francaise">🇵🇫 Polynésie française</option>
-        <option value="terres-australes">🇹🇫 Terres australes</option>
-    </select>
+    <div class="selector-container">
+        <select id="territorySelect">
+            <option>Chargement…</option>
+        </select>
+    </div>
 
-    <!-- Carte -->
     <div id="map"></div>
-
-    <!-- Scripts -->
-    <script type="module" src="/scripts/load-map.js"></script>
 
 </body>
 </html>
