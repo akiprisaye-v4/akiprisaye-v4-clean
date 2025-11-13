@@ -1,56 +1,53 @@
-// =============================================
-// A KI PRI SA YÉ — Module Carte Interactive
-// Compatible avec import { loadMap } from "./scripts/load-map.js";
-// =============================================
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte – A KI PRI SA YÉ</title>
 
-// Chargement Firestore (magasins)
-import { loadMagasins } from "./magasins-firestore.js";
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            background: #111;
+            color: white;
+            font-family: sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .store-popup {
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .store-popup b {
+            font-size: 18px;
+            color: #00e676;
+        }
+    </style>
+</head>
 
-// Fonction appelée par carte.html
-export async function loadMap(selectedTerritory = "guadeloupe") {
+<body>
 
-    // ---- Coordonnées DOM-TOM ----
-    const territories = {
-        guadeloupe: { lat: 16.265, lon: -61.55, zoom: 10 },
-        martinique: { lat: 14.610, lon: -61.07, zoom: 10 },
-        guyane: { lat: 4.938, lon: -52.33, zoom: 8 },
-        reunion: { lat: -21.115, lon: 55.536, zoom: 10 },
-        mayotte: { lat: -12.823, lon: 45.166, zoom: 11 },
-        spm: { lat: 46.781, lon: -56.196, zoom: 12 }
-    };
+<div id="map"></div>
 
-    const t = territories[selectedTerritory];
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    // ---- Initialisation Leaflet ----
-    const map = L.map("map").setView([t.lat, t.lon], t.zoom);
+<!-- Firebase Config -->
+<script type="module" src="./scripts/firebase-config.js"></script>
 
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution: "© OpenStreetMap • © CARTO"
-    }).addTo(map);
+<!-- Charger les magasins -->
+<script type="module" src="./scripts/magasins-firestore.js"></script>
 
-    // ---- Chargement des magasins Firestore ----
-    let shops = [];
-    try {
-        shops = await loadMagasins(selectedTerritory);
-    } catch (e) {
-        console.error("Erreur Firestore →", e);
-    }
+<!-- Import automatique des magasins -->
+<script type="module" src="./scripts/auto-import-stores.js"></script>
 
-    // ---- Ajout des marqueurs sur la carte ----
-    shops.forEach(shop => {
+<!-- Charger la carte -->
+<script type="module" src="./scripts/load-map.js"></script>
 
-        const marker = L.marker([shop.lat, shop.lon]).addTo(map);
-
-        const popup = `
-            <b>${shop.name}</b><br>
-            📍 ${shop.address}<br>
-            🕒 ${shop.openingHours}<br>
-            ☎️ ${shop.phone}<br>
-            🏪 ${shop.chain}
-        `;
-
-        marker.bindPopup(popup);
-    });
-
-    console.log("Carte chargée avec", shops.length, "magasins.");
-}
+</body>
+</html>
