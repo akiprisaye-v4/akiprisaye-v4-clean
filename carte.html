@@ -1,70 +1,72 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carte des magasins - A KI PRI SA YÉ</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte interactive des magasins</title>
 
-    <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <!-- FEUILLES DE STYLE -->
+    <link rel="stylesheet" href="assets/shared-nav.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
+    <!-- FIX LEAFLET – IMPORTANT -->
     <style>
-        body {
-            background: #0d0f16;
-            color: white;
-            margin: 0;
-            font-family: Arial;
+        #map {
+            height: 480px !important;
+            min-height: 480px !important;
+            width: 100%;
+            background: #0d0d0d;
+            border-radius: 12px;
+            margin-top: 10px;
         }
 
-        #map {
-            width: 100%;
-            height: 70vh;
-            background: #111;
-            border-radius: 14px;
-            margin-top: 20px;
+        @media (max-width: 600px) {
+            #map {
+                height: 420px !important;
+                min-height: 420px !important;
+            }
+        }
+
+        body {
+            background: #0b0b0b;
+            color: #fff;
+            font-family: system-ui, sans-serif;
         }
 
         .container {
-            padding: 20px;
-        }
-
-        select {
-            width: 100%;
-            padding: 14px;
-            background: #121626;
-            color: white;
-            border-radius: 10px;
-            border: 1px solid #333;
-            font-size: 18px;
+            padding: 15px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1 style="text-align:center;">magasins</h1>
 
-        <select id="territorySelector">
+    <!-- NAVIGATION -->
+    <script type="module" src="assets/shared-nav.js"></script>
+
+    <div class="container">
+        <h1 style="font-size: 28px; text-align: center; margin-bottom: 20px;">
+            🗺️ Carte interactive des magasins
+        </h1>
+
+        <!-- SELECT DES TERRITOIRES -->
+        <select id="territory-select"
+                style="width:100%; padding:14px; border-radius:10px; background:#111; color:white; font-size:18px;">
             <option value="guadeloupe">🇬🇵 Guadeloupe</option>
+            <option value="martinique">🇲🇶 Martinique</option>
+            <option value="guyane">🇬🇫 Guyane</option>
+            <option value="reunion">🇷🇪 La Réunion</option>
+            <option value="mayotte">🇾🇹 Mayotte</option>
         </select>
 
+        <!-- CARTE -->
         <div id="map"></div>
-
-        <h3 style="margin-top:25px;">📍 Légende</h3>
-        <ul>
-            <li>🔵 Magasins partenaires</li>
-        </ul>
     </div>
 
-    <!-- Leaflet JS -->
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-    </script>
+    <!-- LEAFLET JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- Scripts -->
+    <!-- MODULES FIRESTORE + TERRITOIRES + MAP -->
     <script type="module">
         import { TERRITORIES } from "./scripts/territories.js";
         import { initMap } from "./scripts/map-init.js";
@@ -72,23 +74,27 @@
 
         console.log("Carte — démarrage…");
 
-        // Initialisation de la carte
         const map = initMap();
+        window.map = map; // utile pour invalidateSize
 
-        const selector = document.getElementById("territorySelector");
+        const select = document.getElementById("territory-select");
 
-        async function refreshStores() {
-            const territory = selector.value;
-            console.log("Territoire sélectionné :", territory);
+        async function updateMap() {
+            const t = select.value;
+            console.log("Chargement territoire :", t);
 
-            await loadStoresForTerritory(map, territory);
+            const coords = TERRITORIES[t];
+            map.setView([coords.lat, coords.lon], coords.zoom);
+
+            await loadStoresForTerritory(t, map);
+
+            // FIX affichage : recalc Leaflet
+            setTimeout(() => map.invalidateSize(), 350);
         }
 
-        // Changement de territoire
-        selector.addEventListener("change", refreshStores);
+        select.addEventListener("change", updateMap);
 
-        // Chargement initial
-        refreshStores();
+        updateMap(); // affichage initial
     </script>
 
 </body>
