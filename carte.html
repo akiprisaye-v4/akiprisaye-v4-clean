@@ -1,106 +1,56 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A KI PRI SA YÉ — Carte interactive</title>
+// =============================================
+// A KI PRI SA YÉ — Module Carte Interactive
+// Compatible avec import { loadMap } from "./scripts/load-map.js";
+// =============================================
 
-    <!-- Leaflet core -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIu6VLd9gENbYQaS0pQsLnwLkLkS0Z8pcvY="
-        crossorigin=""
-    />
+// Chargement Firestore (magasins)
+import { loadMagasins } from "./magasins-firestore.js";
 
-    <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1vTlZBo="
-        crossorigin=""
-    ></script>
+// Fonction appelée par carte.html
+export async function loadMap(selectedTerritory = "guadeloupe") {
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #0f172a;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
+    // ---- Coordonnées DOM-TOM ----
+    const territories = {
+        guadeloupe: { lat: 16.265, lon: -61.55, zoom: 10 },
+        martinique: { lat: 14.610, lon: -61.07, zoom: 10 },
+        guyane: { lat: 4.938, lon: -52.33, zoom: 8 },
+        reunion: { lat: -21.115, lon: 55.536, zoom: 10 },
+        mayotte: { lat: -12.823, lon: 45.166, zoom: 11 },
+        spm: { lat: 46.781, lon: -56.196, zoom: 12 }
+    };
 
-        #map {
-            height: 70vh;
-            width: 100%;
-            margin-top: 10px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
+    const t = territories[selectedTerritory];
 
-        .legend {
-            background: #1e293b;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 10px;
-            font-size: 16px;
-            border: 1px solid #334155;
-        }
+    // ---- Initialisation Leaflet ----
+    const map = L.map("map").setView([t.lat, t.lon], t.zoom);
 
-        .legend-title {
-            font-weight: bold;
-            color: #3b82f6;
-            margin-bottom: 6px;
-        }
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: "© OpenStreetMap • © CARTO"
+    }).addTo(map);
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-top: 6px;
-        }
+    // ---- Chargement des magasins Firestore ----
+    let shops = [];
+    try {
+        shops = await loadMagasins(selectedTerritory);
+    } catch (e) {
+        console.error("Erreur Firestore →", e);
+    }
 
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #3b82f6;
-            display: inline-block;
-            margin-right: 8px;
-        }
+    // ---- Ajout des marqueurs sur la carte ----
+    shops.forEach(shop => {
 
-        .header {
-            background: #1d4ed8;
-            padding: 15px;
-            font-size: 22px;
-            font-weight: bold;
-            color: white;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-    </style>
-</head>
+        const marker = L.marker([shop.lat, shop.lon]).addTo(map);
 
-<body>
+        const popup = `
+            <b>${shop.name}</b><br>
+            📍 ${shop.address}<br>
+            🕒 ${shop.openingHours}<br>
+            ☎️ ${shop.phone}<br>
+            🏪 ${shop.chain}
+        `;
 
-    <div class="header">A KI PRI SA YÉ</div>
+        marker.bindPopup(popup);
+    });
 
-    <div id="map"></div>
-
-    <div class="legend">
-        <div class="legend-title">📍 Légende</div>
-
-        <div class="legend-item">
-            <span class="legend-color"></span> Magasins partenaires
-        </div>
-
-        <div class="legend-item">
-            💡 Cliquez sur un marqueur pour voir les informations du magasin
-        </div>
-    </div>
-
-    <!-- Initialisation -->
-    <script type="module">
-        import { loadMap } from "./scripts/load-map.js";
-        loadMap();
-    </script>
-
-</body>
-</html>
+    console.log("Carte chargée avec", shops.length, "magasins.");
+}
