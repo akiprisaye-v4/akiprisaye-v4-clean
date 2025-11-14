@@ -1,24 +1,25 @@
 import fs from "fs";
 
-console.log("🧪 Vérification JSON stores…");
+console.log("🔎 Vérification stores.json…");
 
-const filePath = new URL("./stores.json", import.meta.url);  
-const raw = fs.readFileSync(filePath, "utf8");
+const raw = fs.readFileSync("./stores.json", "utf8");
 const stores = JSON.parse(raw);
 
-let missing = 0;
+let errors = 0;
+let seenNames = new Set();
 
-stores.forEach(s => {
-  if (!s.lat || !s.lng) {
-    console.log(`❌ Manque coordonnées : ${s.name}`);
-    missing++;
+stores.forEach((s, i) => {
+  if (seenNames.has(s.name)) {
+    console.log(`❌ Doublon détecté: ${s.name}`);
+    errors++;
+  }
+  seenNames.add(s.name);
+
+  if (!s.name || !s.city || !s.territory) {
+    console.log(`❌ Données manquantes (index ${i}):`, s);
+    errors++;
   }
 });
 
-if (missing === 0) {
-  console.log("✅ Toutes les coordonnées sont présentes !");
-} else {
-  console.log(`⚠️ ${missing} magasin(s) avec coordonnées manquantes.`);
-}
-
-console.log("✔ Test terminé");
+console.log(errors === 0 ? "✔ OK : Aucun problème détecté." : `❌ ${errors} erreurs trouvées.`);
+process.exit(errors > 0 ? 1 : 0);
