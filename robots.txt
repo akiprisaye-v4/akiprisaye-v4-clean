@@ -1,10 +1,1 @@
-# A KI PRI SA YÉ - robots.txt
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://akiprisaye.web.app/sitemap.xml
-
-# Disallow specific paths if needed
-# Disallow: /admin/
-# Disallow: /private/
+Sitemap: https://akiprisaye-web.pages.dev/sitemap.xml
