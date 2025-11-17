@@ -4,7 +4,7 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import path from 'path';
 
 export default defineConfig({
-  base: './',
+  base: '/', // Use root base path for SPA routing
   plugins: [
     react(),
     viteStaticCopy({
@@ -59,48 +59,8 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      input: {
-        main: './index.html',
-        comparateur: './comparateur.html',
-        scanner: './scanner.html',
-        uploadTicket: './upload-ticket.html',
-        modules: './modules.html',
-        carte: './carte.html',
-        historique: './historique.html',
-        iaConseiller: './ia-conseiller.html',
-        monCompte: './mon-compte.html',
-        faq: './faq.html',
-        contact: './contact.html',
-        mentions: './mentions.html',
-        partenaires: './partenaires.html',
-      },
-      output: {
-        manualChunks(id) {
-          // Separate large vendor libraries into their own chunks
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor-react';
-            }
-            if (id.includes('firebase')) {
-              return 'vendor-firebase';
-            }
-            if (id.includes('tesseract')) {
-              return 'vendor-ocr';
-            }
-            if (id.includes('leaflet')) {
-              return 'vendor-maps';
-            }
-            if (id.includes('recharts')) {
-              return 'vendor-charts';
-            }
-            if (id.includes('fuse.js')) {
-              return 'vendor-search';
-            }
-            // All other node_modules
-            return 'vendor';
-          }
-        },
-      },
+      // No longer an MPA, so we don't need multiple inputs.
+      // Vite will use index.html at the root by default.
     },
     chunkSizeWarningLimit: 1000,
   },
