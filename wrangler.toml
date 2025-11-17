@@ -1,9 +1,11 @@
-name = "akiprisaye-web"
+﻿name = "akiprisaye-web"
 compatibility_date = "2025-11-17"
 
-# This is the configuration for Cloudflare Pages
-[pages]
-# The command to build your project
-build_command = "npm run build"
-# The directory where the built assets are located
-build_output_dir = "dist"
+[build]
+command = "npm install && npm run build"
+
+[build.environment]
+NODE_VERSION = "18"
+NPM_VERSION = "latest"
+
+pages_build_output_dir = "dist"
