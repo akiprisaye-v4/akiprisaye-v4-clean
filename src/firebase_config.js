@@ -2,12 +2,12 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBfQGoLoqFqNFMy2uv2JvIPepLtLeBSYU", // CLEF INVALIDE - À CORRIGER
+  apiKey: "AIzaSyBfQGLocAqVPNyk2w2Jyi0Pbej-Lz8tSYU",
   authDomain: "a-ki-pri-sa-ye.firebaseapp.com",
   projectId: "a-ki-pri-sa-ye",
-  storageBucket: "a-ki-pri-sa-ye.appspot.com",
-  messagingSenderId: "187270278809",
-  appId: "1:187270278809:android:ad2191f46c07530e5e5e68"
+  storageBucket: "a-ki-pri-sa-ye.firebasestorage.app",
+  messagingSenderId: "187272078809",
+  appId: "1:187272078809:android:a2841196fcd9735306e5c8"
 };
 
 // Désactiver Firebase temporairement pour que le site fonctionne
