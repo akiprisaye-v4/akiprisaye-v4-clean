@@ -40,4 +40,5 @@ jobs:
       # Purge du cache inutile (pas de domaine personnalisé)
       - name: Skip cache purge
         if: success()
-        run: echo "Purge skipped: Cloudflare Pages without custom domain does not support API cache purge."
+        run: |
+          echo "Purge skipped: Cloudflare Pages without custom domain does not support API cache purge."
