@@ -1,1 +1,1 @@
-ULTRA pack placeholder
+Sentinel FULL PACK ready.
