@@ -8,7 +8,14 @@
     "referenceScore": 100,
     "methodologyVersion": "1.0.0",
     "methodologyLocked": true,
-    "methodologyDocument": "METHODOLOGIE_IEVR_v1.0.md"
+    "methodologyDocument": "METHODOLOGIE_IEVR_v1.0.md",
+    "dataStatus": "DEMONSTRATION",
+    "warning": "⚠️ DONNÉES DE DÉMONSTRATION - NE PAS UTILISER EN PRODUCTION",
+    "requiredSources": [
+      "INSEE - Indice des prix à la consommation",
+      "OPMR - Observatoires des prix DOM-TOM",
+      "DGCCRF - Rapports vie chère"
+    ]
   },
   "categories": {
     "alimentation": {

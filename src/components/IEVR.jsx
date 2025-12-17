@@ -25,6 +25,7 @@ import {
   validateIEVRData,
   getTerritoryStatus
 } from '../utils/ievrCalculations.js';
+import { DataSourceWarning } from './DataSourceWarning.jsx';
 
 export function IEVR({ selectedTerritory = null }) {
   const [territory, setTerritory] = useState(selectedTerritory || 'GP');
@@ -99,6 +100,14 @@ export function IEVR({ selectedTerritory = null }) {
 
   return (
     <div className="space-y-6">
+      {/* Critical Data Warning */}
+      {data.metadata.dataStatus !== 'OFFICIEL' && (
+        <DataSourceWarning 
+          dataStatus={data.metadata.dataStatus}
+          requiredSources={data.metadata.requiredSources}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between mb-2">
