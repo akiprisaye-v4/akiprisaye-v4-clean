@@ -35,6 +35,7 @@ const BudgetVital = lazy(() => import('./pages/BudgetVital'));
 const FauxBonsPlan = lazy(() => import('./pages/FauxBonsPlan'));
 const BudgetReelMensuel = lazy(() => import('./pages/BudgetReelMensuel'));
 const ComparateurFormats = lazy(() => import('./pages/ComparateurFormats'));
+const ListeCourses = lazy(() => import('./pages/ListeCourses'));
 
 // Loading component
 function LoadingFallback() {
@@ -93,6 +94,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='faux-bons-plans' element={<FauxBonsPlan />} />
                   <Route path='budget-reel-mensuel' element={<BudgetReelMensuel />} />
                   <Route path='comparateur-formats' element={<ComparateurFormats />} />
+                  <Route path='liste-courses' element={<ListeCourses />} />
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
