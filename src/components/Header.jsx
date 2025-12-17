@@ -47,18 +47,18 @@ export default function Header() {
 
       {/* Mobile Drawer Menu */}
       <nav
-        className={`fixed top-0 left-0 h-full w-80 bg-slate-900 z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`fixed top-0 left-0 h-full w-80 glass-strong z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Navigation mobile"
       >
-        <div className="flex items-center justify-between p-4 bg-blue-700" style={{ paddingTop: 'max(1rem, var(--safe-top))' }}>
+        <div className="flex items-center justify-between p-4 border-b border-[color:var(--glass-border)]" style={{ paddingTop: 'max(1rem, var(--safe-top))' }}>
           <div className="flex items-center gap-3">
             <img src="/logo-akpsy.svg" alt="A KI PRI SA YÉ" className="h-8" />
           </div>
           <button
             onClick={closeMobileMenu}
-            className="text-white text-3xl leading-none hover:text-gray-300"
+            className="text-white text-3xl leading-none hover:text-[color:var(--text-muted)]"
             aria-label="Fermer le menu"
           >
             &times;
@@ -167,7 +167,7 @@ export default function Header() {
 
       {/* Header */}
       <header
-        className="sticky top-0 z-30 bg-blue-700 backdrop-blur-sm border-b border-blue-600/50 max-w-[100vw]"
+        className="sticky top-0 z-30 glass-strong border-b border-[color:var(--glass-border)] max-w-[100vw]"
         style={{ paddingTop: 'max(0.75rem, var(--safe-top))' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -177,7 +177,7 @@ export default function Header() {
               {/* Mobile menu button */}
               <button
                 onClick={toggleMobileMenu}
-                className="lg:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-blue-600/50 transition-colors"
+                className="lg:hidden flex flex-col justify-center items-center w-10 h-10 rounded hover:bg-[color:var(--glass-bg)] transition-colors"
                 aria-label="Menu"
                 aria-expanded={mobileMenuOpen}
               >
@@ -200,48 +200,48 @@ export default function Header() {
             <nav className="hidden lg:flex items-center gap-6" aria-label="Navigation principale">
               <Link
                 to="/comparateur"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/comparateur') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/comparateur') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Comparateur
               </Link>
               <Link
                 to="/scan"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/scan') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/scan') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Scanner
               </Link>
               <Link
                 to="/carte"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/carte') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/carte') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Carte
               </Link>
               <Link
                 to="/alertes"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/alertes') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/alertes') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Alertes
               </Link>
               <Link
                 to="/actualites"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/actualites') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/actualites') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Actualités
               </Link>
               <Link
                 to="/mon-compte"
-                className={`text-white/90 hover:text-white hover:bg-blue-600/30 px-3 py-2 rounded-lg transition-all ${
-                  isActiveRoute('/mon-compte') ? 'bg-blue-600/40 text-white font-semibold' : ''
+                className={`text-white/90 hover:text-white hover:bg-[color:var(--glass-bg)] px-3 py-2 rounded-lg transition-all ${
+                  isActiveRoute('/mon-compte') ? 'bg-[color:var(--glass-bg)] text-white font-semibold' : ''
                 }`}
               >
                 Mon Compte

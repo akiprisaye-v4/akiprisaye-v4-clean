@@ -5,175 +5,202 @@ import Footer from '../components/Footer';
 import ScrollToTop from '../components/ScrollToTop';
 import PWAInstallToast from '../components/PWAInstallToast';
 import StructuredData from '../components/StructuredData';
+import BackgroundMapBlur from '../components/BackgroundMapBlur';
 
 export default function Home() {
   const [lang, setLang] = useState('fr');
 
   const content = {
     fr: {
-      title: 'Gérez votre budget facilement',
-      subtitle: 'Comparez les prix et luttez contre la vie chère en Outre-mer',
-      chat: 'Chat IA Local',
-      chatDesc: 'Posez vos questions en créole, français ou espagnol',
-      ocr: 'Scanner un ticket (OCR)',
-      ocrDesc: 'Reconnaissance automatique des prix sur ticket',
-      budget: 'Comparateur de prix',
-      budgetDesc: 'Comparez les prix locaux en un clic',
-      carte: 'Carte interactive',
-      carteDesc: 'Localisez les magasins et comparez les prix géographiquement',
+      title: 'Comparer. Comprendre. Dépenser moins.',
+      subtitle: 'Données réelles. Prix locaux. Décisions éclairées.',
+      cta1: 'Créer une liste de courses',
+      cta2: 'Comparer autour de moi',
+      feature1Title: 'Comparateur de prix',
+      feature1Desc: 'Données officielles et prix locaux vérifiés',
+      feature2Title: 'Scanner de ticket',
+      feature2Desc: 'Reconnaissance automatique pour suivre vos dépenses',
+      feature3Title: 'Carte interactive',
+      feature3Desc: 'Magasins proches avec distances réelles',
+      feature4Title: 'Alertes citoyennes',
+      feature4Desc: 'Variations de prix et disponibilité des produits',
+      mission: 'Mission',
+      missionText: 'Plateforme citoyenne dédiée à la transparence des prix en Outre-mer',
+      missionDesc: 'Aucun prix inventé. Aucune promesse marketing. Uniquement des données réelles pour vous aider à mieux gérer votre budget.',
     },
     gp: {
-      title: 'Jéré bidjé-w fasil',
-      subtitle: 'Konparé pri-yo é palé kont lavi chè an péyi nou',
-      chat: 'Chat IA Lokal',
-      chatDesc: 'Pozé kèsyon-w an kréyol, fransé oben èspanyol',
-      ocr: 'Skannyé on tiké (OCR)',
-      ocrDesc: 'Rékonesans otomatik pri asi tiké',
-      budget: 'Konparatè pri',
-      budgetDesc: 'Konparé pri lokal-la an on klik',
-      carte: 'Kat entyéraktif',
-      carteDesc: 'Chwazi magazen-yo é konparé pri jeyografikman',
+      title: 'Konparé. Konprann. Dépansé mwens.',
+      subtitle: 'Doné réyèl. Pri lokal. Désizyòn éklaré.',
+      cta1: 'Kréyé on lis kous',
+      cta2: 'Konparé otou mwen',
+      feature1Title: 'Konparatè pri',
+      feature1Desc: 'Doné ofisyèl é pri lokal vérifié',
+      feature2Title: 'Skannè tiké',
+      feature2Desc: 'Rékonesans otomatik pou swiv dépans-w',
+      feature3Title: 'Kat entèraktif',
+      feature3Desc: 'Magazen pwoch ek distans réyèl',
+      feature4Title: 'Alèt sitwayèn',
+      feature4Desc: 'Varyasyòn pri é disponibilité pwodui',
+      mission: 'Misyòn',
+      missionText: 'Platfòm sitwayèn pou transparans pri an Lòtremè',
+      missionDesc: 'Pyès pri envanté. Pyès pwomès maketing. Sèlman doné réyèl pou éd-w jéré bidjé-w.',
     },
     es: {
-      title: 'Gestione su presupuesto fácilmente',
-      subtitle: 'Compare precios y luche contra el alto costo de vida en Ultramar',
-      chat: 'Chat IA Local',
-      chatDesc: 'Haga preguntas en criollo, francés o español',
-      ocr: 'Escanear un ticket (OCR)',
-      ocrDesc: 'Reconocimiento automático de precios en tickets',
-      budget: 'Comparador de precios',
-      budgetDesc: 'Compare precios locales con un clic',
-      carte: 'Mapa interactivo',
-      carteDesc: 'Localice tiendas y compare precios geográficamente',
+      title: 'Comparar. Comprender. Gastar menos.',
+      subtitle: 'Datos reales. Precios locales. Decisiones informadas.',
+      cta1: 'Crear una lista de compras',
+      cta2: 'Comparar cerca de mí',
+      feature1Title: 'Comparador de precios',
+      feature1Desc: 'Datos oficiales y precios locales verificados',
+      feature2Title: 'Escáner de ticket',
+      feature2Desc: 'Reconocimiento automático para rastrear sus gastos',
+      feature3Title: 'Mapa interactivo',
+      feature3Desc: 'Tiendas cercanas con distancias reales',
+      feature4Title: 'Alertas ciudadanas',
+      feature4Desc: 'Variaciones de precios y disponibilidad de productos',
+      mission: 'Misión',
+      missionText: 'Plataforma ciudadana dedicada a la transparencia de precios en Ultramar',
+      missionDesc: 'Sin precios inventados. Sin promesas de marketing. Solo datos reales para ayudarle a gestionar mejor su presupuesto.',
     },
   };
 
   const t = content[lang];
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 max-w-[100vw] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen max-w-[100vw] overflow-x-hidden">
       {/* SEO Structured Data */}
       <StructuredData />
+      
+      {/* Chic Background - Blurred map at 20% opacity */}
+      <BackgroundMapBlur />
       
       {/* Skip to main content link for screen readers */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 bg-[color:var(--accent-primary)] text-white rounded-lg shadow-lg"
       >
         Aller au contenu principal
       </a>
       
-      <Header />
+      <div className="relative-z-10">
+        <Header />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-slate-900 via-blue-900/20 to-slate-900 border-b border-blue-700/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-center">
-          <div className="flex justify-end mb-4">
-            <select
-              className="bg-slate-800 text-white border border-slate-700 px-3 py-2 rounded-lg text-sm hover:bg-slate-700 transition-colors"
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              aria-label="Sélectionner la langue"
-            >
-              <option value="fr">🇫🇷 Français</option>
-              <option value="gp">🇬🇵 Kréyol</option>
-              <option value="es">🇪🇸 Español</option>
-            </select>
+        {/* Hero Section - Minimal & Institutional */}
+        <section className="border-b border-[color:var(--glass-border)]">
+          <div className="container-civic py-16 sm:py-24 text-center">
+            <div className="flex justify-end mb-6">
+              <select
+                className="glass px-3 py-2 text-sm"
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                aria-label="Sélectionner la langue"
+              >
+                <option value="fr">Français</option>
+                <option value="gp">Kréyol</option>
+                <option value="es">Español</option>
+              </select>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-[color:var(--text-main)] mb-6 leading-tight">
+              {t.title}
+            </h1>
+            <p className="text-xl sm:text-2xl text-[color:var(--text-muted)] mb-12 max-w-3xl mx-auto">
+              {t.subtitle}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                to="/liste-courses"
+                className="btn-civic-primary"
+              >
+                {t.cta1}
+              </Link>
+              <Link
+                to="/carte"
+                className="btn-civic"
+              >
+                {t.cta2}
+              </Link>
+            </div>
           </div>
+        </section>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-            {t.title}
-          </h1>
-          <p className="text-xl sm:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto">
-            {t.subtitle}
-          </p>
+        {/* Features Section - Clean Cards */}
+        <main id="main-content" className="flex-grow py-16 px-4 sm:px-6 lg:px-8">
+          <div className="container-civic">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <Link
+                to="/comparateur"
+                className="glass p-6 hover:border-[color:var(--accent-primary)]"
+              >
+                <h3 className="text-xl font-semibold text-[color:var(--text-main)] mb-2">{t.feature1Title}</h3>
+                <p className="text-sm text-[color:var(--text-muted)]">{t.feature1Desc}</p>
+              </Link>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/comparateur"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all shadow-lg hover:shadow-blue-600/50 hover:-translate-y-0.5 motion-reduce:transform-none"
-            >
-              🔍 Découvrir l'application
-            </Link>
+              <Link
+                to="/scan"
+                className="glass p-6 hover:border-[color:var(--accent-primary)]"
+              >
+                <h3 className="text-xl font-semibold text-[color:var(--text-main)] mb-2">{t.feature2Title}</h3>
+                <p className="text-sm text-[color:var(--text-muted)]">{t.feature2Desc}</p>
+              </Link>
+
+              <Link
+                to="/carte"
+                className="glass p-6 hover:border-[color:var(--accent-primary)]"
+              >
+                <h3 className="text-xl font-semibold text-[color:var(--text-main)] mb-2">{t.feature3Title}</h3>
+                <p className="text-sm text-[color:var(--text-muted)]">{t.feature3Desc}</p>
+              </Link>
+
+              <Link
+                to="/alertes"
+                className="glass p-6 hover:border-[color:var(--accent-primary)]"
+              >
+                <h3 className="text-xl font-semibold text-[color:var(--text-main)] mb-2">{t.feature4Title}</h3>
+                <p className="text-sm text-[color:var(--text-muted)]">{t.feature4Desc}</p>
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </main>
 
-      {/* Features Section */}
-      <main id="main-content" className="flex-grow py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-10">
-            🎯 Fonctionnalités
-          </h2>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Link
-              to="/comparateur"
-              className="group bg-slate-900 hover:bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 motion-reduce:transform-none hover:scale-105 motion-reduce:hover:scale-100"
-            >
-              <div className="text-4xl mb-4 transition-transform group-hover:scale-110 motion-reduce:transform-none">🔍</div>
-              <h3 className="text-xl font-semibold text-white mb-2">{t.budget}</h3>
-              <p className="text-sm text-slate-400">{t.budgetDesc}</p>
-            </Link>
-
-            <Link
-              to="/scan"
-              className="group bg-slate-900 hover:bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 motion-reduce:transform-none hover:scale-105 motion-reduce:hover:scale-100"
-            >
-              <div className="text-4xl mb-4 transition-transform group-hover:scale-110 motion-reduce:transform-none">📷</div>
-              <h3 className="text-xl font-semibold text-white mb-2">{t.ocr}</h3>
-              <p className="text-sm text-slate-400">{t.ocrDesc}</p>
-            </Link>
-
-            <Link
-              to="/carte"
-              className="group bg-slate-900 hover:bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 motion-reduce:transform-none hover:scale-105 motion-reduce:hover:scale-100"
-            >
-              <div className="text-4xl mb-4 transition-transform group-hover:scale-110 motion-reduce:transform-none">🗺️</div>
-              <h3 className="text-xl font-semibold text-white mb-2">{t.carte}</h3>
-              <p className="text-sm text-slate-400">{t.carteDesc}</p>
-            </Link>
-
-            <Link
-              to="/alertes"
-              className="group bg-slate-900 hover:bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500 transition-all hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 motion-reduce:transform-none hover:scale-105 motion-reduce:hover:scale-100"
-            >
-              <div className="text-4xl mb-4 transition-transform group-hover:scale-110 motion-reduce:transform-none">🔔</div>
-              <h3 className="text-xl font-semibold text-white mb-2">Alertes</h3>
-              <p className="text-sm text-slate-400">Prix anormaux, pénuries et variations</p>
-            </Link>
+        {/* Mission Section - Institutional */}
+        <section className="border-t border-[color:var(--glass-border)] py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-semibold text-[color:var(--text-main)] mb-6">{t.mission}</h2>
+            <p className="text-lg text-[color:var(--text-main)] mb-4">
+              {t.missionText}
+            </p>
+            <p className="text-[color:var(--text-muted)] mb-8">
+              {t.missionDesc}
+            </p>
+            
+            {/* Data Source Panel - Trust & Transparency */}
+            <div className="panel-source max-w-2xl mx-auto mb-8">
+              <strong>Sources officielles :</strong> OPMR (Observatoire des Prix et des Marges), 
+              INSEE, DGCCRF, relevés terrain partenaires. 
+              Données indicatives uniquement.
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-4 mt-8">
+              <Link
+                to="/a-propos"
+                className="btn-civic"
+              >
+                En savoir plus
+              </Link>
+              <Link
+                to="/methodologie"
+                className="btn-civic"
+              >
+                Notre méthodologie
+              </Link>
+            </div>
           </div>
-        </div>
-      </main>
+        </section>
 
-      {/* Mission Section */}
-      <section className="bg-slate-900 border-t border-slate-800 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">🎗️ Notre Mission</h2>
-          <p className="text-lg text-slate-300 mb-4">
-            <strong className="text-blue-400">A KI PRI SA YÉ</strong> est une plateforme citoyenne dédiée à la transparence des prix en Outre-mer.
-          </p>
-          <p className="text-slate-400 mb-6">
-            Comparez facilement les prix, consultez les alertes et gérez votre budget plus efficacement.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <Link
-              to="/a-propos"
-              className="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-6 py-3 rounded-lg transition-all"
-            >
-              En savoir plus
-            </Link>
-            <Link
-              to="/methodologie"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all"
-            >
-              Notre méthodologie
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
+        <Footer />
+      </div>
       
       {/* PWA Install Toast */}
       <PWAInstallToast />

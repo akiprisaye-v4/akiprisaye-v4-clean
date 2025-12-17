@@ -6,35 +6,79 @@ export default {
     './src/**/*.{js,jsx,ts,tsx,vue}',
     './ui_components/**/*.{js,jsx}',
   ],
-  darkMode: 'class', // Enable dark mode with class strategy
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Brand colors for A KI PRI SA YÉ
-        primary: {
-          DEFAULT: '#0f62fe',
-          50: '#e6f0ff',
-          100: '#b3d4ff',
-          200: '#80b8ff',
-          300: '#4d9cff',
-          400: '#1a80ff',
-          500: '#0f62fe',
-          600: '#0c4ecb',
-          700: '#093a98',
-          800: '#062665',
-          900: '#031332',
+        // Civic Glass Design System
+        background: 'rgb(var(--bg-main) / <alpha-value>)',
+        foreground: 'rgb(var(--text-main) / <alpha-value>)',
+        
+        glass: {
+          DEFAULT: 'rgba(var(--bg-glass), var(--glass-opacity))',
+          hover: 'rgba(var(--bg-glass), var(--glass-opacity-hover))',
+          strong: 'rgba(var(--bg-glass), var(--glass-opacity-strong))',
+          border: 'rgba(var(--border-glass), var(--border-opacity))',
+          'border-hover': 'rgba(var(--border-glass), var(--border-opacity-hover))',
         },
+
+        muted: 'rgb(var(--text-muted) / <alpha-value>)',
+        subtle: 'rgb(var(--text-subtle) / <alpha-value>)',
+        
+        accent: {
+          DEFAULT: 'rgb(var(--accent-primary) / <alpha-value>)',
+          primary: 'rgb(var(--accent-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--accent-secondary) / <alpha-value>)',
+        },
+
+        info: 'rgb(var(--info) / <alpha-value>)',
+        warning: 'rgb(var(--warning) / <alpha-value>)',
+        success: 'rgb(var(--success) / <alpha-value>)',
+        error: 'rgb(var(--error) / <alpha-value>)',
+
+        // Legacy civic colors (kept for compatibility)
+        civic: {
+          background: '#0B1220',
+          glass: 'rgba(255, 255, 255, 0.08)',
+          'glass-hover': 'rgba(255, 255, 255, 0.12)',
+          primary: '#4AA3FF',
+          'primary-dark': '#3B8FE6',
+          'primary-light': '#5CB3FF',
+          secondary: '#6EE7B7',
+          'secondary-dark': '#5DD4A4',
+          'secondary-light': '#7FFACA',
+          text: '#E5E7EB',
+          'text-secondary': '#9CA3AF',
+          'text-muted': '#6B7280',
+        },
+
+        // Legacy brand colors for A KI PRI SA YÉ (kept for compatibility)
+        primary: {
+          DEFAULT: '#4AA3FF',
+          50: '#e6f4ff',
+          100: '#b3ddff',
+          200: '#80c6ff',
+          300: '#4dafff',
+          400: '#1a98ff',
+          500: '#4AA3FF',
+          600: '#3B8FE6',
+          700: '#2C7BCC',
+          800: '#1D67B3',
+          900: '#0E5399',
+        },
+        
         dark: {
-          DEFAULT: '#0b0d17',
-          50: '#1a1d2e',
-          100: '#141729',
-          200: '#0f1120',
-          300: '#0b0d17',
-          400: '#08090f',
-          500: '#050507',
-          600: '#020203',
+          DEFAULT: '#0B1220',
+          50: '#1a2332',
+          100: '#141b28',
+          200: '#0f141e',
+          300: '#0B1220',
+          400: '#080d16',
+          500: '#05080c',
+          600: '#020304',
           700: '#000000',
         },
+        
         // DOM-COM territory colors
         territory: {
           guadeloupe: '#0066cc',
@@ -51,17 +95,22 @@ export default {
           taaf: '#3366cc',
         },
       },
+      
       fontFamily: {
-        sans: [
-          'Inter',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'sans-serif',
-        ],
-        mono: ['Fira Code', 'Consolas', 'Monaco', 'monospace'],
+        sans: ['Inter', 'IBM Plex Sans', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'monospace'],
+      },
+      
+      backdropBlur: {
+        civic: '14px',
+        glass: 'var(--blur-civic)',
+        strong: 'var(--blur-strong)',
+      },
+      
+      borderRadius: {
+        xl: 'var(--radius)',
+        '2xl': 'calc(var(--radius) + 4px)',
+        civic: 'var(--radius)',
       },
       spacing: {
         '18': '4.5rem',
