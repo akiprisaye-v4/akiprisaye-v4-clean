@@ -1,6 +1,6 @@
 import { GlassCard } from "../components/ui/glass-card";
 
-export function Home() {
+export default function Home() {
   return (
     <div className="space-y-6">
       <GlassCard>

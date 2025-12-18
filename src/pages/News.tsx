@@ -1,7 +1,7 @@
 import { GlassCard } from "../components/ui/glass-card";
 import { SourceFooter } from "../components/ui/SourceFooter";
 
-export function News() {
+export default function News() {
   return (
     <GlassCard>
       <h2 className="text-lg font-semibold">

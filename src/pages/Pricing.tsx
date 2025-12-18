@@ -1,6 +1,6 @@
 import { GlassCard } from "../components/ui/glass-card";
 
-export function Pricing() {
+export default function Pricing() {
   return (
     <div className="grid gap-4">
       <GlassCard>

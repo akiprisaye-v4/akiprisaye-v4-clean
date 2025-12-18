@@ -7,7 +7,7 @@ interface Result {
   distanceKm: number;
 }
 
-export function Compare() {
+export default function Compare() {
   const [results, setResults] = useState<Result[]>([]);
 
   useEffect(() => {
