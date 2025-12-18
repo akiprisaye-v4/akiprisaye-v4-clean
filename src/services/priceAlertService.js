@@ -16,17 +16,16 @@
  */
 
 import { db } from '../firebase_config';
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  query, 
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  query,
   where,
   orderBy,
-  limit,
-  Timestamp 
+  Timestamp,
 } from 'firebase/firestore';
 
 // Default alert preferences
@@ -46,7 +45,7 @@ export const DEFAULT_ALERT_PREFERENCES = {
  */
 function calculateSeverity(percentageChange) {
   const absChange = Math.abs(percentageChange);
-  
+
   if (absChange >= 10) {
     return 'high';
   } else if (absChange >= 5) {
@@ -63,7 +62,7 @@ function determineConfidence(source, verified = false) {
   if (verified) {
     return 'high';
   }
-  
+
   switch (source) {
     case 'official_site':
     case 'observateur':
@@ -86,15 +85,15 @@ export function detectPriceDrop(previousPrice, currentPrice, preferences) {
   if (!preferences.priceDropEnabled) {
     return null;
   }
-  
+
   // Only trigger if current price is actually lower
   if (currentPrice >= previousPrice) {
     return null;
   }
-  
+
   const absoluteChange = currentPrice - previousPrice;
   const percentageChange = ((absoluteChange / previousPrice) * 100);
-  
+
   return {
     triggered: true,
     absoluteChange,
@@ -112,19 +111,19 @@ export function detectPriceIncrease(previousPrice, currentPrice, preferences) {
   if (!preferences.priceIncreaseEnabled) {
     return null;
   }
-  
+
   // Only trigger if current price is actually higher
   if (currentPrice <= previousPrice) {
     return null;
   }
-  
+
   const absoluteChange = currentPrice - previousPrice;
   const percentageChange = ((absoluteChange / previousPrice) * 100);
-  
+
   // Check if thresholds are exceeded
   const exceedsPercentageThreshold = percentageChange > preferences.increasePercentageThreshold;
   const exceedsAbsoluteThreshold = absoluteChange > preferences.increaseAbsoluteThreshold;
-  
+
   if (exceedsPercentageThreshold || exceedsAbsoluteThreshold) {
     return {
       triggered: true,
@@ -133,7 +132,7 @@ export function detectPriceIncrease(previousPrice, currentPrice, preferences) {
       severity: calculateSeverity(percentageChange),
     };
   }
-  
+
   return null;
 }
 
@@ -143,41 +142,41 @@ export function detectPriceIncrease(previousPrice, currentPrice, preferences) {
  * Critical: Requires TWO verifiable data points
  */
 export function detectShrinkflation(
-  previousPrice, 
-  currentPrice, 
-  previousQuantity, 
-  currentQuantity, 
-  preferences
+  previousPrice,
+  currentPrice,
+  previousQuantity,
+  currentQuantity,
+  preferences,
 ) {
   if (!preferences.shrinkflationEnabled) {
     return null;
   }
-  
+
   // Require both quantity values
   if (!previousQuantity || !currentQuantity) {
     return null;
   }
-  
+
   // Detect quantity reduction
   if (currentQuantity >= previousQuantity) {
     return null;
   }
-  
+
   const quantityReduction = previousQuantity - currentQuantity;
   const quantityReductionPercentage = ((quantityReduction / previousQuantity) * 100);
-  
+
   // Calculate price per unit
   const pricePerUnitBefore = previousPrice / previousQuantity;
   const pricePerUnitAfter = currentPrice / currentQuantity;
-  
+
   // Calculate effective price increase per unit
   const effectivePriceIncrease = ((pricePerUnitAfter - pricePerUnitBefore) / pricePerUnitBefore) * 100;
-  
+
   // Only trigger if there's an effective price increase per unit
   if (effectivePriceIncrease <= 0) {
     return null;
   }
-  
+
   return {
     triggered: true,
     shrinkflationDetails: {
@@ -230,9 +229,9 @@ export async function getUserAlerts(userId, filters = {}) {
   try {
     const alertsRef = collection(db, 'priceAlerts');
     let q = query(
-      alertsRef, 
+      alertsRef,
       where('userId', '==', userId),
-      orderBy('triggeredAt', 'desc')
+      orderBy('triggeredAt', 'desc'),
     );
     
     // Apply filters
@@ -335,7 +334,7 @@ export async function getTrackedProducts(userId) {
     const q = query(
       trackedRef,
       where('userId', '==', userId),
-      where('alertsEnabled', '==', true)
+      where('alertsEnabled', '==', true),
     );
     
     const snapshot = await getDocs(q);
@@ -453,11 +452,11 @@ export async function processPriceUpdate(userId, productId, newPriceData) {
     
     // Check for shrinkflation
     const shrinkflationAlert = detectShrinkflation(
-      previousPrice, 
-      currentPrice, 
-      previousQuantity, 
-      currentQuantity, 
-      preferences
+      previousPrice,
+      currentPrice,
+      previousQuantity,
+      currentQuantity,
+      preferences,
     );
     if (shrinkflationAlert && shrinkflationAlert.triggered) {
       const alertData = {
