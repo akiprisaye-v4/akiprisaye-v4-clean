@@ -43,6 +43,24 @@ npm run build
 
 ## ✨ Nouvelles Fonctionnalités (v1.1.0)
 
+### 🧴 Module d'Évaluation Cosmétique
+
+**Nouveau!** Analyse transparente des produits cosmétiques basée uniquement sur des sources officielles :
+
+- **Sources officielles uniquement** : CosIng (EU), ANSES, ECHA, Règlement CE 1223/2009
+- **Analyse INCI** : Identification automatique des ingrédients
+- **Score transparent** : Méthodologie de calcul documentée et objective
+- **Niveaux de risque documentés** : Basés sur les réglementations européennes
+- **Références officielles** : Liens directs vers les sources pour chaque ingrédient
+- **Aucune affirmation médicale** : Respect strict des réglementations
+- **Aucune donnée fictive** : 100% de données publiques vérifiables
+
+📘 Voir [COSMETIQUE_EVALUATION_MODULE.md](./COSMETIQUE_EVALUATION_MODULE.md) pour la documentation complète.
+
+**Accès** : `/evaluation-cosmetique`
+
+**Tests** : 35 tests unitaires ✅
+
 ### 🏢 Registre des Entreprises (Company Registry)
 
 Module centralisé de gestion des données d'entreprises avec qualité institutionnelle :
