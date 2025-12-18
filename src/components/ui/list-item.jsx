@@ -1,4 +1,4 @@
-import { cn } from "../../lib/utils.ts";
+import { cn } from "../../lib/utils";
 
 /**
  * ListItem - Civic Glass list component
