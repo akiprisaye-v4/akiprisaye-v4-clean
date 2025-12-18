@@ -1,6 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './styles/globals.css';
+import './styles/civic-glass.css';
 import './styles/glass.css';
 import Home from './pages/Home';
 import Layout from './components/Layout';
