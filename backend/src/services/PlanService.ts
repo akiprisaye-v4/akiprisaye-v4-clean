@@ -172,10 +172,50 @@ export const getFeatureDescription = (feature: Feature): string => {
   return descriptions[feature];
 };
 
+/**
+ * Check if a plan is valid
+ */
+export const isValidPlan = (plan: string): plan is Plan => {
+  return ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'].includes(plan);
+};
+
+/**
+ * Get all features for a plan
+ */
+export const getFeatures = (plan: Plan): Feature[] => {
+  const features: Feature[] = [];
+  
+  for (const [feature, plans] of Object.entries(FEATURES)) {
+    if (plans.includes(plan)) {
+      features.push(feature as Feature);
+    }
+  }
+  
+  return features;
+};
+
+/**
+ * Get access denied message
+ */
+export const getAccessDeniedMessage = (feature: Feature, currentPlan: Plan): string => {
+  const requiredPlans = FEATURES[feature];
+  
+  if (!requiredPlans || requiredPlans.length === 0) {
+    return 'Cette fonctionnalité n\'est pas disponible';
+  }
+  
+  const lowestPlan = requiredPlans[0];
+  
+  return `Cette fonctionnalité nécessite au minimum le plan ${lowestPlan}. Vous êtes actuellement sur le plan ${currentPlan}.`;
+};
+
 export default {
   canUse,
   getTerritoryPrice,
   getFeatureDescription,
+  isValidPlan,
+  getFeatures,
+  getAccessDeniedMessage,
   PLAN_PRICES,
   FEATURES,
 };
