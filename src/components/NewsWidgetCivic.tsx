@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { CivicNewsItem } from '../types/news';
 import CivicBadge from './ui/CivicBadge';
 import SourceFooter from './ui/SourceFooter';
@@ -14,11 +14,7 @@ export default function NewsWidgetCivic({ limit = 3, showFullButton = true, terr
   const [news, setNews] = useState<CivicNewsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchNews();
-  }, [limit, territory]);
-
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     try {
       setLoading(true);
       // Try to fetch from API, fallback to mock data
@@ -48,7 +44,11 @@ export default function NewsWidgetCivic({ limit = 3, showFullButton = true, terr
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, territory]);
+
+  useEffect(() => {
+    fetchNews();
+  }, [fetchNews]);
 
   const getMockNews = (): CivicNewsItem[] => [
     {

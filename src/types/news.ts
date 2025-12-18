@@ -41,20 +41,23 @@ export const AUTHORIZED_SOURCES = [
  * Fixed: Use proper URL parsing to prevent false positives
  * e.g., "fake-insee.fr.malicious.com" should be rejected
  */
-export function isAuthorizedSource(url: string): boolean {
-  let hostname: string;
-
+function extractHostname(url: string): string | null {
   try {
     // Try parsing as a full URL first
-    hostname = new URL(url).hostname;
+    return new URL(url).hostname;
   } catch {
     try {
       // Fallback: allow hostnames without protocol (e.g. "insee.fr")
-      hostname = new URL(`https://${url}`).hostname;
+      return new URL(`https://${url}`).hostname;
     } catch {
-      return false;
+      return null;
     }
   }
+}
+
+export function isAuthorizedSource(url: string): boolean {
+  const hostname = extractHostname(url);
+  if (!hostname) return false;
 
   return AUTHORIZED_SOURCES.some((source) => {
     return hostname === source || hostname.endsWith(`.${source}`);

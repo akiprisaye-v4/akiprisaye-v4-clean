@@ -50,7 +50,7 @@ export default function AIPricePrediction({
   return (
     <div className={`bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5 ${className || ''}`}>
       <div className="flex items-start gap-3 mb-4">
-        {icon && icon}
+        {icon}
         <div className="flex-1">
           <h3 className="text-sm font-medium text-gray-200 mb-1">
             Projection de prix : {productName}
