@@ -1,227 +1,344 @@
 // src/pages/Pricing.tsx
-import React, { useState, useEffect } from "react";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { getUserPlan, setUserPlan } from "@/lib/firestore/plan";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { GlassContainer } from '@/components/ui/GlassContainer';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { CivicButton } from '@/components/ui/CivicButton';
+import { DataBadge } from '@/components/ui/DataBadge';
+import { LimitNote } from '@/components/ui/LimitNote';
+import { UltraSimpleToggle } from '@/components/ui/UltraSimpleToggle';
+
+const plans = [
+  {
+    id: 'FREE',
+    title: 'Citoyen – Gratuit',
+    price: '0 €',
+    priceMonthly: 0,
+    priceYearly: 0,
+    description: 'Accès essentiel pour tous',
+    features: [
+      'Liste de courses générique',
+      'Carte des magasins',
+      'Distances simples',
+      'Sources publiques visibles',
+      'Mode hors ligne basique',
+    ],
+    limits: [
+      '1 territoire',
+      'Historique 30 jours',
+      'Pas d\'export',
+    ],
+  },
+  {
+    id: 'CITIZEN_PREMIUM',
+    title: 'Citoyen Premium',
+    price: '3,99 € / mois',
+    priceMonthly: 3.99,
+    priceYearly: 39,
+    description: 'Pour optimiser ses dépenses quotidiennes',
+    popular: true,
+    features: [
+      'Tout Gratuit +',
+      'Optimisation multi-trajets',
+      'Profils de foyers (INSEE)',
+      'Export PDF',
+      'Historique illimité',
+      'Mode hors ligne renforcé',
+    ],
+    limits: [
+      '3 territoires maximum',
+      'Pas d\'API',
+    ],
+  },
+  {
+    id: 'PRO',
+    title: 'Professionnel',
+    price: '19 € / mois',
+    priceMonthly: 19,
+    priceYearly: 190,
+    description: 'Veille économique locale',
+    features: [
+      'Tout Premium +',
+      'Multi-territoires',
+      'Tendances (hausse / baisse)',
+      'Export CSV',
+      'Support prioritaire',
+    ],
+    limits: [
+      'API lecture seule',
+      'Historique 2 ans',
+    ],
+    domDiscount: true,
+  },
+  {
+    id: 'BUSINESS',
+    title: 'Business',
+    price: '99 € / mois',
+    priceMonthly: 99,
+    priceYearly: 990,
+    description: 'Analyse territoriale structurée',
+    features: [
+      'Tout Pro +',
+      'Tableaux de bord',
+      'Rapports automatisés',
+      'Accès API lecture (agrégée)',
+      'Comptes multiples',
+    ],
+    limits: [
+      'Historique 5 ans',
+      'Pas de données concurrentielles',
+    ],
+    domDiscount: true,
+  },
+  {
+    id: 'ENTERPRISE',
+    title: 'Enterprise',
+    price: 'Sur devis',
+    priceRange: '2 500 € - 25 000 € / an',
+    description: 'Analyse macro-territoriale',
+    features: [
+      'Tout Business +',
+      'Multi-DOM / COM',
+      'Historique complet',
+      'Analyses prédictives',
+      'Accompagnement dédié',
+      'API étendue',
+    ],
+    limits: [
+      'Secteur privé uniquement',
+      'Pas de données sensibles',
+    ],
+  },
+  {
+    id: 'INSTITUTION',
+    title: 'Institution',
+    price: 'Licence publique',
+    priceRange: '500 € - 50 000 € / an',
+    description: 'Outil public numérique',
+    features: [
+      'Tout Enterprise +',
+      'Rapports publics institutionnels',
+      'Transparence totale',
+      'Audit complet',
+      'Support institutionnel',
+      'Traçabilité complète',
+    ],
+    limits: [
+      'Données 100% publiques',
+      'Collectivités et organismes publics',
+    ],
+  },
+];
 
 export default function Pricing() {
-  const [user, setUser] = useState<User | null>(null);
-  const [currentPlan, setCurrentPlan] = useState<string>("freemium");
-  const [loading, setLoading] = useState(true);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [isDOMTerritory, setIsDOMTerritory] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const plan = await getUserPlan(currentUser.uid);
-        setCurrentPlan(plan);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const handleChoosePlan = async (plan: "freemium" | "premium" | "pro") => {
-    if (!user) {
-      alert("Veuillez d'abord vous connecter.");
-      window.location.href = "/mon-compte";
-      return;
-    }
+  const getDisplayPrice = (plan: typeof plans[0]) => {
+    if (plan.id === 'FREE') return '0 €';
+    if (plan.id === 'ENTERPRISE' || plan.id === 'INSTITUTION') return plan.priceRange;
     
-    try {
-      await setUserPlan(user.uid, plan);
-      setCurrentPlan(plan);
-      alert(`Plan ${plan.toUpperCase()} activé ✅`);
-    } catch (err) {
-      alert("Erreur lors du changement de plan : " + err);
-    }
+    const isYearly = billingCycle === 'yearly';
+    const basePrice = isYearly ? plan.priceYearly : plan.priceMonthly;
+    const price = isDOMTerritory && plan.domDiscount ? basePrice * 0.7 : basePrice;
+    
+    return `${price.toFixed(2)} € / ${isYearly ? 'an' : 'mois'}`;
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-white text-xl">Chargement...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-4">
-      <div className="max-w-6xl mx-auto py-12">
+    <div className="min-h-screen bg-slate-950 p-4 md:p-8">
+      <GlassContainer className="max-w-7xl mx-auto p-8">
+        {/* Hero */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Choisissez votre plan
+            Un outil citoyen. Des usages professionnels.
           </h1>
-          <p className="text-xl text-gray-300">
-            Sélectionnez le plan qui correspond le mieux à vos besoins
+
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+            Les données sont publiques. Vous payez pour l'analyse, la clarté
+            et le gain de temps.
           </p>
-          {user && (
-            <p className="mt-4 text-blue-400">
-              Plan actuel: <span className="font-bold uppercase">{currentPlan}</span>
-            </p>
-          )}
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <span className={billingCycle === 'monthly' ? 'text-white' : 'text-gray-400'}>
+              Mensuel
+            </span>
+            <UltraSimpleToggle
+              checked={billingCycle === 'yearly'}
+              onChange={(checked) => setBillingCycle(checked ? 'yearly' : 'monthly')}
+            />
+            <span className={billingCycle === 'yearly' ? 'text-white' : 'text-gray-400'}>
+              Annuel
+              <span className="ml-2 text-green-400 text-sm">(~17% d'économie)</span>
+            </span>
+          </div>
+
+          {/* DOM Toggle */}
+          <div className="flex items-center justify-center mb-8">
+            <UltraSimpleToggle
+              checked={isDOMTerritory}
+              onChange={setIsDOMTerritory}
+              label="Territoire DOM-ROM-COM (-30% sur Pro/Business)"
+            />
+          </div>
+
+          <p className="text-sm text-gray-400 mb-4">
+            Vous pouvez annuler à tout moment. •{' '}
+            <Link to="/methodologie" className="text-blue-400 hover:underline">
+              Comparer les plans en détail
+            </Link>
+          </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3 mb-8">
-          {/* Freemium Plan */}
-          <div className={`bg-slate-800 rounded-2xl p-8 border-2 ${
-            currentPlan === "freemium" ? "border-blue-500 shadow-xl shadow-blue-500/20" : "border-slate-700"
-          } transition-all hover:scale-105`}>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">Freemium</h2>
-              <div className="text-4xl font-bold text-blue-400 mb-2">Gratuit</div>
-              <p className="text-gray-400">Pour commencer</p>
-            </div>
-
-            <ul className="space-y-4 mb-8 text-gray-300">
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Comparaison de prix entre enseignes</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Scanner de produits</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Historique limité (30 jours)</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Carte des enseignes</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-gray-500 mr-2">✗</span>
-                <span className="text-gray-500">Alertes de prix</span>
-              </li>
-            </ul>
-
-            <Button
-              onClick={() => handleChoosePlan("freemium")}
-              disabled={currentPlan === "freemium"}
-              className={`w-full ${
-                currentPlan === "freemium"
-                  ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } text-white py-3`}
+        {/* Pricing Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+          {plans.map((plan) => (
+            <GlassCard
+              key={plan.id}
+              className={`flex flex-col ${
+                plan.popular
+                  ? 'border-2 border-blue-500 shadow-xl shadow-blue-500/20'
+                  : ''
+              }`}
             >
-              {currentPlan === "freemium" ? "Plan actuel" : "Choisir Freemium"}
-            </Button>
-          </div>
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 rounded-full text-sm font-bold">
+                  POPULAIRE
+                </div>
+              )}
 
-          {/* Premium Plan */}
-          <div className={`bg-slate-800 rounded-2xl p-8 border-2 ${
-            currentPlan === "premium" ? "border-blue-500 shadow-xl shadow-blue-500/20" : "border-blue-500"
-          } relative transition-all hover:scale-105`}>
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-bold">
-              POPULAIRE
-            </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-white mb-2">{plan.title}</h2>
+                <p className="text-3xl font-bold text-blue-400 mb-2">
+                  {getDisplayPrice(plan)}
+                </p>
+                <p className="text-sm text-gray-400 mb-6">{plan.description}</p>
 
-            <div className="text-center mb-6 mt-2">
-              <h2 className="text-2xl font-bold text-white mb-2">Premium</h2>
-              <div className="text-4xl font-bold text-blue-400 mb-2">9.99€</div>
-              <p className="text-gray-400">Par mois</p>
-            </div>
+                {/* Features */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-300 mb-3">Inclus :</h3>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="text-sm text-gray-300">
+                        • {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            <ul className="space-y-4 mb-8 text-gray-300">
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Toutes les fonctionnalités Freemium</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Historique illimité</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Alertes de prix personnalisées</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Analyses et statistiques avancées</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Synchronisation multi-appareils</span>
-              </li>
-            </ul>
+                {/* Limits */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-gray-300 mb-3">Limites :</h3>
+                  <ul className="space-y-2">
+                    {plan.limits.map((limit, idx) => (
+                      <li key={idx} className="text-sm text-gray-400">
+                        • {limit}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            <Button
-              onClick={() => handleChoosePlan("premium")}
-              disabled={currentPlan === "premium"}
-              className={`w-full ${
-                currentPlan === "premium"
-                  ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } text-white py-3`}
-            >
-              {currentPlan === "premium" ? "Plan actuel" : "Passer à Premium"}
-            </Button>
-          </div>
+                {/* Data Badge */}
+                <div className="mb-6">
+                  <DataBadge source="INSEE · OPMR · data.gouv.fr" />
+                </div>
 
-          {/* Pro Plan */}
-          <div className={`bg-slate-800 rounded-2xl p-8 border-2 ${
-            currentPlan === "pro" ? "border-blue-500 shadow-xl shadow-blue-500/20" : "border-slate-700"
-          } transition-all hover:scale-105`}>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">Pro</h2>
-              <div className="text-4xl font-bold text-blue-400 mb-2">29.99€</div>
-              <p className="text-gray-400">Par mois</p>
-            </div>
+                <LimitNote>
+                  Les données restent publiques et non modifiées.
+                </LimitNote>
+              </div>
 
-            <ul className="space-y-4 mb-8 text-gray-300">
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Toutes les fonctionnalités Premium</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Accès API pour intégrations</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Support prioritaire 24/7</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Exports de données illimités</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-green-400 mr-2">✓</span>
-                <span>Tableaux de bord personnalisés</span>
-              </li>
-            </ul>
-
-            <Button
-              onClick={() => handleChoosePlan("pro")}
-              disabled={currentPlan === "pro"}
-              className={`w-full ${
-                currentPlan === "pro"
-                  ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } text-white py-3`}
-            >
-              {currentPlan === "pro" ? "Plan actuel" : "Passer à Pro"}
-            </Button>
-          </div>
+              {/* CTA */}
+              <div className="mt-6">
+                <CivicButton
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => {
+                    if (plan.id === 'FREE') {
+                      window.location.href = '/';
+                    } else if (plan.id === 'ENTERPRISE') {
+                      window.location.href = '/contact?subject=devis-enterprise';
+                    } else {
+                      window.location.href = `/subscribe?plan=${plan.id}&cycle=${billingCycle}&dom=${isDOMTerritory}`;
+                    }
+                  }}
+                >
+                  {plan.id === 'ENTERPRISE'
+                    ? 'Nous contacter'
+                    : plan.id === 'FREE'
+                    ? 'Commencer gratuitement'
+                    : 'Choisir ce plan'}
+                </CivicButton>
+              </div>
+            </GlassCard>
+          ))}
         </div>
 
-        {!user && (
-          <div className="text-center">
-            <p className="text-gray-400 mb-4">
-              Vous devez être connecté pour changer de plan
+        {/* Transparency Section */}
+        <GlassCard className="mb-12 bg-blue-900/10 border-blue-500/30">
+          <h2 className="text-2xl font-bold text-white mb-4">Transparence totale</h2>
+          <div className="space-y-3 text-gray-300">
+            <p>
+              <strong>Vous ne payez pas la donnée</strong>, vous payez le service :
             </p>
-            <Button
-              onClick={() => window.location.href = "/mon-compte"}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
-            >
-              Se connecter
-            </Button>
+            <ul className="list-disc list-inside space-y-2 ml-4">
+              <li>Agrégation et mise à jour des sources publiques</li>
+              <li>Calculs d'optimisation de trajets</li>
+              <li>Infrastructure et hébergement sécurisé</li>
+              <li>Support technique et maintenance</li>
+            </ul>
+            <p className="text-sm text-gray-400 mt-4">
+              Aucune marque. Aucun sponsor. Aucune donnée vendue. Résiliation en 1 clic.
+            </p>
           </div>
-        )}
-      </div>
+        </GlassCard>
+
+        {/* FAQ */}
+        <div>
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">FAQ</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <GlassCard>
+              <h3 className="font-bold text-lg text-white mb-2">
+                Pourquoi payer si les données sont publiques ?
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Les données brutes sont gratuites, mais leur agrégation, leur mise en forme
+                accessible et leur maintenance ont un coût réel.
+              </p>
+            </GlassCard>
+
+            <GlassCard>
+              <h3 className="font-bold text-lg text-white mb-2">
+                Les citoyens sont-ils exclus ?
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Non. L'essentiel reste gratuit : liste de courses, carte des magasins,
+                géolocalisation et scanner basique.
+              </p>
+            </GlassCard>
+
+            <GlassCard>
+              <h3 className="font-bold text-lg text-white mb-2">
+                Comment annuler mon abonnement ?
+              </h3>
+              <p className="text-gray-300 text-sm">
+                En 1 clic depuis votre compte. Aucune justification requise. Aucune relance.
+              </p>
+            </GlassCard>
+
+            <GlassCard>
+              <h3 className="font-bold text-lg text-white mb-2">
+                Mes données personnelles sont-elles stockées ?
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Non. Tout est en local (localStorage/IndexedDB). Seuls email et plan
+                sont enregistrés pour la facturation.
+              </p>
+            </GlassCard>
+          </div>
+        </div>
+      </GlassContainer>
     </div>
   );
 }

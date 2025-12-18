@@ -23,6 +23,9 @@ const Methodologie = lazy(() => import('./pages/Methodologie'));
 const MentionsLegales = lazy(() => import('./pages/MentionsLegales'));
 const MonCompte = lazy(() => import('./pages/MonCompte'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const Subscribe = lazy(() => import('./pages/Subscribe'));
+const LicenceInstitution = lazy(() => import('./pages/LicenceInstitution'));
+const ContactCollectivites = lazy(() => import('./pages/ContactCollectivites'));
 const Contact = lazy(() => import('./pages/Contact'));
 const IaConseiller = lazy(() => import('./pages/IaConseiller'));
 const TiPanie = lazy(() => import('./pages/TiPanie'));
@@ -55,7 +58,7 @@ function LoadingFallback() {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/sw.js')
+      .register('/service-worker.js')
       .then(() => {
         if (import.meta.env.DEV) {
           console.log('Service Worker enregistré');
@@ -90,6 +93,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='mentions-legales' element={<MentionsLegales />} />
                   <Route path='mon-compte' element={<MonCompte />} />
                   <Route path='pricing' element={<Pricing />} />
+                  <Route path='subscribe' element={<Subscribe />} />
+                  <Route path='licence-institution' element={<LicenceInstitution />} />
+                  <Route path='contact-collectivites' element={<ContactCollectivites />} />
                   <Route path='contact' element={<Contact />} />
                   <Route path='ia-conseiller' element={<IaConseiller />} />
                   <Route path='ti-panie' element={<TiPanie />} />

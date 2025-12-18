@@ -1,18 +1,18 @@
 import { useState } from 'react';
 
 const territories = [
-  { code: 'GP', name: 'Guadeloupe', flag: '🇬🇵' },
-  { code: 'MQ', name: 'Martinique', flag: '🇲🇶' },
-  { code: 'GF', name: 'Guyane', flag: '🇬🇫' },
-  { code: 'RE', name: 'La Réunion', flag: '🇷🇪' },
-  { code: 'YT', name: 'Mayotte', flag: '🇾🇹' },
-  { code: 'PM', name: 'Saint-Pierre-et-Miquelon', flag: '🇵🇲' },
-  { code: 'BL', name: 'Saint-Barthélemy', flag: '🇧🇱' },
-  { code: 'MF', name: 'Saint-Martin', flag: '🇲🇫' },
-  { code: 'WF', name: 'Wallis-et-Futuna', flag: '🇼🇫' },
-  { code: 'PF', name: 'Polynésie française', flag: '🇵🇫' },
-  { code: 'NC', name: 'Nouvelle-Calédonie', flag: '🇳🇨' },
-  { code: 'TF', name: 'Terres australes et antarctiques françaises', flag: '🇹🇫' }
+  { code: 'GP', name: 'Guadeloupe', type: 'DROM' },
+  { code: 'MQ', name: 'Martinique', type: 'DROM' },
+  { code: 'GF', name: 'Guyane', type: 'DROM' },
+  { code: 'RE', name: 'La Réunion', type: 'DROM' },
+  { code: 'YT', name: 'Mayotte', type: 'DROM' },
+  { code: 'PM', name: 'Saint-Pierre-et-Miquelon', type: 'COM' },
+  { code: 'BL', name: 'Saint-Barthélemy', type: 'COM' },
+  { code: 'MF', name: 'Saint-Martin', type: 'COM' },
+  { code: 'WF', name: 'Wallis-et-Futuna', type: 'COM' },
+  { code: 'PF', name: 'Polynésie française', type: 'COM' },
+  { code: 'NC', name: 'Nouvelle-Calédonie', type: 'COM' },
+  { code: 'TF', name: 'Terres australes françaises', type: 'COM' }
 ];
 
 export default function TerritorySelector({ value, onChange, className = '' }) {
@@ -30,13 +30,16 @@ export default function TerritorySelector({ value, onChange, className = '' }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-[#1e1e1e] text-white border border-gray-700 px-4 py-3 rounded-lg flex items-center justify-between hover:bg-[#2a2a2a] transition-colors"
+        className="w-full bg-white/[0.08] backdrop-blur-[14px] text-white border border-white/[0.22] px-4 py-3 rounded-lg flex items-center justify-between hover:bg-white/[0.12] hover:border-blue-500/40 transition-all"
         aria-label="Sélectionner un territoire"
         aria-expanded={isOpen}
       >
-        <span className="flex items-center gap-2">
-          <span className="text-2xl">{selectedTerritory.flag}</span>
+        <span className="flex items-center gap-3">
+          <span className="px-2 py-0.5 text-xs font-mono bg-blue-600/20 border border-blue-500/40 rounded text-blue-300">
+            {selectedTerritory.code}
+          </span>
           <span>{selectedTerritory.name}</span>
+          <span className="text-xs text-gray-400">({selectedTerritory.type})</span>
         </span>
         <svg
           className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -55,18 +58,21 @@ export default function TerritorySelector({ value, onChange, className = '' }) {
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute z-20 w-full mt-2 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl max-h-80 overflow-y-auto">
+          <div className="absolute z-20 w-full mt-2 bg-slate-900/95 backdrop-blur-[14px] border border-white/[0.22] rounded-lg shadow-xl max-h-80 overflow-y-auto">
             {territories.map((territory) => (
               <button
                 key={territory.code}
                 type="button"
                 onClick={() => handleSelect(territory)}
-                className={`w-full px-4 py-3 text-left hover:bg-[#2a2a2a] transition-colors flex items-center gap-3 ${
-                  territory.code === value ? 'bg-[#2a2a2a]' : ''
+                className={`w-full px-4 py-3 text-left hover:bg-white/[0.08] transition-colors flex items-center gap-3 ${
+                  territory.code === value ? 'bg-white/[0.12] border-l-2 border-blue-500' : ''
                 }`}
               >
-                <span className="text-2xl">{territory.flag}</span>
-                <span className="text-white">{territory.name}</span>
+                <span className="px-2 py-0.5 text-xs font-mono bg-blue-600/20 border border-blue-500/40 rounded text-blue-300 flex-shrink-0">
+                  {territory.code}
+                </span>
+                <span className="text-white flex-1">{territory.name}</span>
+                <span className="text-xs text-gray-400">({territory.type})</span>
               </button>
             ))}
           </div>
