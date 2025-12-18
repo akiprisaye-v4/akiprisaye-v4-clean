@@ -1,6 +1,8 @@
 /**
  * SEED_STORES - Données des magasins pour tous les territoires DROM-COM
  * Base de données centralisée des magasins partenaires et référencés
+ * 
+ * Updated to include company references for Company Registry integration
  */
 
 export const SEED_STORES = [
@@ -9,6 +11,8 @@ export const SEED_STORES = [
     id: 'superu_petit_canal',
     name: 'Super U Petit-Canal',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Guadeloupe',
     city: 'Le Gosier',
     address: 'Petit-Canal',
@@ -25,6 +29,8 @@ export const SEED_STORES = [
     id: 'carrefour_baie_mahault',
     name: 'Carrefour Baie-Mahault',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Guadeloupe',
     city: 'Baie-Mahault',
     address: 'Centre Commercial Destrelande',
@@ -41,6 +47,8 @@ export const SEED_STORES = [
     id: 'leader_price_pointe_pitre',
     name: 'Leader Price Pointe-à-Pitre',
     chain: 'Leader Price',
+    companyId: 'company-leader-price', // Link to Company Registry
+    companyId: 'company-leader-price', // Link to Company Registry
     territory: 'Guadeloupe',
     city: 'Pointe-à-Pitre',
     address: 'Centre-ville',
@@ -57,6 +65,7 @@ export const SEED_STORES = [
     id: 'leclerc_abymes',
     name: 'E.Leclerc Les Abymes',
     chain: 'E.Leclerc',
+    companyId: 'company-leclerc', // Link to Company Registry
     territory: 'Guadeloupe',
     city: 'Les Abymes',
     address: 'Zone Commerciale de Jarry',
@@ -73,6 +82,7 @@ export const SEED_STORES = [
     id: 'intermarche_gosier',
     name: 'Intermarché Le Gosier',
     chain: 'Intermarché',
+    companyId: 'company-intermarche', // Link to Company Registry
     territory: 'Guadeloupe',
     city: 'Le Gosier',
     address: 'Centre Commercial',
@@ -91,6 +101,7 @@ export const SEED_STORES = [
     id: 'super_score_fort_de_france',
     name: 'Super Score Fort-de-France',
     chain: 'Super Score',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Martinique',
     city: 'Fort-de-France',
     address: 'Centre-ville',
@@ -107,6 +118,7 @@ export const SEED_STORES = [
     id: 'carrefour_dillon',
     name: 'Carrefour Dillon',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Martinique',
     city: 'Fort-de-France',
     address: 'Quartier Dillon',
@@ -123,6 +135,7 @@ export const SEED_STORES = [
     id: 'hyper_u_lamentin',
     name: 'Hyper U Le Lamentin',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Martinique',
     city: 'Le Lamentin',
     address: 'Zone Industrielle',
@@ -157,6 +170,7 @@ export const SEED_STORES = [
     id: 'hyper_u_cayenne',
     name: 'Hyper U Cayenne',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Guyane',
     city: 'Cayenne',
     address: 'Avenue Léopold Héder',
@@ -173,6 +187,7 @@ export const SEED_STORES = [
     id: 'carrefour_cayenne',
     name: 'Carrefour Cayenne',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Guyane',
     city: 'Cayenne',
     address: 'Centre Commercial',
@@ -189,6 +204,7 @@ export const SEED_STORES = [
     id: 'leader_price_kourou',
     name: 'Leader Price Kourou',
     chain: 'Leader Price',
+    companyId: 'company-leader-price', // Link to Company Registry
     territory: 'Guyane',
     city: 'Kourou',
     address: 'Centre-ville',
@@ -207,6 +223,7 @@ export const SEED_STORES = [
     id: 'hyper_u_saint_denis',
     name: 'Hyper U Saint-Denis',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'La Réunion',
     city: 'Saint-Denis',
     address: 'Centre Commercial Chaudron',
@@ -223,6 +240,7 @@ export const SEED_STORES = [
     id: 'carrefour_saint_pierre',
     name: 'Carrefour Saint-Pierre',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'La Réunion',
     city: 'Saint-Pierre',
     address: 'Zone Commerciale',
@@ -255,6 +273,7 @@ export const SEED_STORES = [
     id: 'super_u_saint_andre',
     name: 'Super U Saint-André',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'La Réunion',
     city: 'Saint-André',
     address: 'Centre Commercial',
@@ -273,6 +292,7 @@ export const SEED_STORES = [
     id: 'carrefour_mamoudzou',
     name: 'Carrefour Mamoudzou',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Mayotte',
     city: 'Mamoudzou',
     address: 'Centre Commercial',
@@ -289,6 +309,7 @@ export const SEED_STORES = [
     id: 'leader_price_mamoudzou',
     name: 'Leader Price Mamoudzou',
     chain: 'Leader Price',
+    companyId: 'company-leader-price', // Link to Company Registry
     territory: 'Mayotte',
     city: 'Mamoudzou',
     address: 'Centre-ville',
@@ -307,6 +328,7 @@ export const SEED_STORES = [
     id: 'super_u_saint_pierre',
     name: 'Super U Saint-Pierre',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Saint-Pierre-et-Miquelon',
     city: 'Saint-Pierre',
     address: 'Rue du Général de Gaulle',
@@ -343,6 +365,7 @@ export const SEED_STORES = [
     id: 'super_u_marigot',
     name: 'Super U Marigot',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Saint-Martin',
     city: 'Marigot',
     address: 'Centre Commercial',
@@ -359,6 +382,7 @@ export const SEED_STORES = [
     id: 'carrefour_sandy_ground',
     name: 'Carrefour Sandy Ground',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Saint-Martin',
     city: 'Sandy Ground',
     address: 'Route de Sandy Ground',
@@ -377,6 +401,7 @@ export const SEED_STORES = [
     id: 'super_u_mata_utu',
     name: 'Super U Mata-Utu',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Wallis-et-Futuna',
     city: 'Mata-Utu',
     address: 'Centre-ville',
@@ -395,6 +420,7 @@ export const SEED_STORES = [
     id: 'carrefour_papeete',
     name: 'Carrefour Papeete',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Polynésie française',
     city: 'Papeete',
     address: 'Centre Commercial Moana Nui',
@@ -411,6 +437,7 @@ export const SEED_STORES = [
     id: 'super_u_punaauia',
     name: 'Super U Punaauia',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Polynésie française',
     city: 'Punaauia',
     address: 'Centre Commercial',
@@ -429,6 +456,7 @@ export const SEED_STORES = [
     id: 'carrefour_noumea',
     name: 'Carrefour Nouméa',
     chain: 'Carrefour',
+    companyId: 'company-carrefour-france', // Link to Company Registry
     territory: 'Nouvelle-Calédonie',
     city: 'Nouméa',
     address: 'Centre Commercial Kenu In',
@@ -445,6 +473,7 @@ export const SEED_STORES = [
     id: 'super_u_dumbea',
     name: 'Super U Dumbéa',
     chain: 'Système U',
+    companyId: 'company-systeme-u', // Link to Company Registry
     territory: 'Nouvelle-Calédonie',
     city: 'Dumbéa',
     address: 'Zone Commerciale',
