@@ -21,7 +21,7 @@ Repository administrators can create these labels via:
 
 ### Using GitHub CLI:
 ```bash
-gh label create "command:queue-for-merging" --description "Add to queue this PR for merging" --color "0E8A16"
+gh label create "command:queue-for-merging" --description "Add this PR to queue for merging" --color "0E8A16"
 gh label create "bot:merging" --description "This PR is currently being merged" --color "FFA500"
 gh label create "bot:queued" --description "This PR is queued for merging" --color "FBCA04"
 ```
