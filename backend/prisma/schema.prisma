@@ -10,6 +10,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Utilisateur de l'application (administrateurs, gestionnaires)
+/// RGPD: Minimisation des données - uniquement les informations essentielles
+/// 
+/// Références légales:
+/// - Règlement (UE) 2016/679 (RGPD) - Art. 5, 25, 32
+model User {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Email (utilisé pour l'authentification)
+  /// RGPD: Donnée personnelle - consentement requis
+  email     String   @unique @db.VarChar(255)
+  
+  /// Hash du mot de passe (bcrypt)
+  /// RGPD: Art. 32 - Sécurité du traitement
+  /// Jamais stocké en clair
+  passwordHash String @map("password_hash") @db.VarChar(255)
+  
+  /// Nom complet de l'utilisateur
+  /// RGPD: Donnée personnelle
+  name      String   @db.VarChar(255)
+  
+  /// Rôle de l'utilisateur (pour permissions futures)
+  role      UserRole @default(USER)
+  
+  /// Compte actif ou désactivé
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  /// Date de dernière connexion
+  /// RGPD: Traçabilité des accès
+  lastLogin DateTime? @map("last_login")
+  
+  /// Date de création du compte
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Refresh tokens actifs (pour révocation)
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([isActive])
+  @@map("users")
+}
+
+/// Refresh tokens pour authentification JWT
+/// Stockage pour permettre révocation
+/// RGPD: Minimisation - uniquement hash et expiration
+model RefreshToken {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Hash du refresh token (SHA-256)
+  /// Jamais stocké en clair
+  tokenHash String   @unique @map("token_hash") @db.VarChar(64)
+  
+  /// Utilisateur propriétaire
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  /// Date d'expiration
+  expiresAt DateTime @map("expires_at")
+  
+  /// Révoqué manuellement (logout, changement mot de passe, etc.)
+  isRevoked Boolean  @default(false) @map("is_revoked")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+/// Rôles utilisateur (pour permissions futures - Sprint 3)
+enum UserRole {
+  /// Utilisateur standard
+  USER
+  
+  /// Administrateur
+  ADMIN
+  
+  /// Super administrateur
+  SUPER_ADMIN
+}
+
 /// Entité légale représentant une entreprise ou établissement
 /// Conforme au système d'identification français SIREN/SIRET
 /// 
