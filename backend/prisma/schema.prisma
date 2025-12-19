@@ -1693,3 +1693,330 @@ enum ReportStatus {
   PUBLISHED  // Publié officiellement (immutable)
   ARCHIVED   // Archivé (historique)
 }
+
+// ============================================================
+// SPRINT 14: IA EXPLICATIVE MULTI-SOURCES CERTIFIÉE
+// ============================================================
+
+/// Cadre de recherche IA scientifique
+/// Documentation niveau publication scientifique
+/// Reproductibilité et auditabilité garanties
+/// 
+/// Références légales:
+/// - Transparence algorithmique (Conseil d'État)
+/// - IA responsable (RGPD Art. 22)
+/// - Compatible recherche publique
+model AIResearchFramework {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom du framework/modèle
+  name String @unique @db.VarChar(255)
+  
+  /// Objectif scientifique clair
+  /// Ex: "Expliquer variations prix alimentaires DOM"
+  objective String @db.Text
+  
+  /// Sources de données utilisées (JSON array)
+  /// [{name, type, coverage, period}]
+  dataSources String @map("data_sources") @db.Text
+  
+  /// Méthodes statistiques/ML utilisées
+  /// Description niveau publication
+  methods String @db.Text
+  
+  /// Hypothèses du modèle
+  /// Explicitation claire
+  assumptions String @db.Text
+  
+  /// Biais connus et documentés
+  /// Transparence obligatoire
+  knownBiases String @map("known_biases") @db.Text
+  
+  /// Limitations méthodologiques
+  /// Cas où le modèle n'est pas applicable
+  limitations String @db.Text
+  
+  /// Version du framework (semver)
+  version String @db.VarChar(50)
+  
+  /// Créé le
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Validé par (expert scientifique)
+  /// Null si pas encore validé
+  validatedBy String? @map("validated_by") @db.VarChar(255)
+  
+  /// Date de validation
+  validatedAt DateTime? @map("validated_at")
+  
+  /// Commentaires validation
+  validationComments String? @map("validation_comments") @db.Text
+  
+  /// Relations
+  explanations ExplanationResult[]
+  computations ComputationTrace[]
+  reviews      HumanReview[]
+  
+  @@index([name])
+  @@index([version])
+  @@index([validatedBy])
+  @@map("ai_research_frameworks")
+}
+
+/// Registre des sources de données
+/// Traçabilité complète des inputs IA
+/// 
+/// Chaque source doit être:
+/// - Officiellement autorisée (lecture seule)
+/// - Licence compatible
+/// - Fiabilité documentée
+model DataSourceRegistry {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom de la source
+  /// Ex: "A KI PRI SA YÉ - Prix historiques"
+  name String @db.VarChar(500)
+  
+  /// Type de source
+  type DataSourceType
+  
+  /// Licence d'utilisation
+  /// Ex: "Licence Ouverte v2.0"
+  licence String @db.VarChar(255)
+  
+  /// Fréquence de mise à jour
+  updateFrequency UpdateFrequency @map("update_frequency")
+  
+  /// Score de fiabilité (0-100)
+  /// Basé sur: complétude, cohérence, vérifications
+  reliabilityScore Int @map("reliability_score") @db.SmallInt
+  
+  /// Périmètre couvert (JSON)
+  /// {territories, categories, period}
+  coverage String @db.Text
+  
+  /// URL source officielle
+  sourceUrl String? @map("source_url") @db.VarChar(1000)
+  
+  /// Description
+  description String? @db.Text
+  
+  /// Date d'ajout au registre
+  registeredAt DateTime @default(now()) @map("registered_at")
+  
+  /// Dernière vérification fiabilité
+  lastVerified DateTime? @map("last_verified")
+  
+  /// Statut (actif/deprecated)
+  isActive Boolean @default(true) @map("is_active")
+  
+  /// Relations
+  explanations ExplanationResult[]
+  
+  @@index([type])
+  @@index([reliabilityScore])
+  @@index([isActive])
+  @@map("data_source_registry")
+}
+
+/// Résultat d'explication IA
+/// Explication = décomposition facteurs passés
+/// NON prédictif, NON prescriptif
+/// 
+/// Références légales:
+/// - Pas de conseil économique
+/// - Pas de décision automatisée
+/// - Transparence méthodologique totale
+model ExplanationResult {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Framework IA utilisé
+  frameworkId String @map("framework_id")
+  framework   AIResearchFramework @relation(fields: [frameworkId], references: [id], onDelete: Restrict)
+  
+  /// Indicateur analysé (optionnel)
+  indicatorId String? @map("indicator_id")
+  indicator   StructuralIndicator? @relation(fields: [indicatorId], references: [id], onDelete: SetNull)
+  
+  /// Facteurs identifiés (JSON array)
+  /// [{name, contribution, confidence, sources}]
+  /// Ex: [{"name": "Distance géo", "contribution": 0.42, ...}]
+  factors String @db.Text
+  
+  /// Poids de chaque facteur (JSON)
+  /// Somme = 1.0 (100%)
+  weights String @db.Text
+  
+  /// Intervalle de confiance (JSON)
+  /// {lower: 0.85, upper: 0.95}
+  confidenceInterval String @map("confidence_interval") @db.Text
+  
+  /// Méthode d'explication utilisée
+  methodUsed ExplanationMethod @map("method_used")
+  
+  /// Sources de données utilisées (relation)
+  sourceIds String @map("source_ids") @db.Text // JSON array d'IDs
+  sources   DataSourceRegistry[]
+  
+  /// Explication textuelle générée
+  /// Langage accessible
+  textExplanation String? @map("text_explanation") @db.Text
+  
+  /// Date de génération
+  generatedAt DateTime @default(now()) @map("generated_at")
+  
+  /// Hash computation associé (reproductibilité)
+  computationTraceId String? @map("computation_trace_id")
+  computationTrace   ComputationTrace? @relation(fields: [computationTraceId], references: [id], onDelete: SetNull)
+  
+  /// Revue humaine associée
+  humanReviewId String? @map("human_review_id")
+  humanReview   HumanReview? @relation(fields: [humanReviewId], references: [id], onDelete: SetNull)
+  
+  /// Statut publication
+  isPublished Boolean @default(false) @map("is_published")
+  publishedAt DateTime? @map("published_at")
+  
+  @@index([frameworkId])
+  @@index([indicatorId])
+  @@index([methodUsed])
+  @@index([isPublished])
+  @@index([generatedAt])
+  @@map("explanation_results")
+}
+
+/// Trace de calcul pour reproductibilité
+/// Garantit auditabilité scientifique
+/// 
+/// Permet de re-exécuter exactement le même calcul
+/// avec les mêmes résultats (déterminisme)
+model ComputationTrace {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Framework IA utilisé
+  frameworkId String @map("framework_id")
+  framework   AIResearchFramework @relation(fields: [frameworkId], references: [id], onDelete: Restrict)
+  
+  /// Hash des inputs (SHA-256)
+  /// Données entrée + paramètres
+  inputsHash String @map("inputs_hash") @db.VarChar(64)
+  
+  /// Inputs détaillés (JSON)
+  /// Pour reproductibilité exacte
+  inputsDetail String @map("inputs_detail") @db.Text
+  
+  /// Version algorithme utilisée
+  algorithmVersion String @map("algorithm_version") @db.VarChar(50)
+  
+  /// Hash du résultat (SHA-256)
+  /// Permet vérification intégrité
+  outputHash String @map("output_hash") @db.VarChar(64)
+  
+  /// Résultat détaillé (JSON)
+  outputDetail String @map("output_detail") @db.Text
+  
+  /// Temps d'exécution (ms)
+  executionTime Int @map("execution_time")
+  
+  /// Date/heure exécution (UTC)
+  executedAt DateTime @default(now()) @map("executed_at")
+  
+  /// Environnement exécution (JSON)
+  /// {os, node_version, dependencies}
+  environment String? @db.Text
+  
+  /// Reproductible (déterministe)
+  isReproducible Boolean @default(true) @map("is_reproducible")
+  
+  /// Relations
+  explanations ExplanationResult[]
+  
+  @@index([frameworkId])
+  @@index([inputsHash])
+  @@index([executedAt])
+  @@map("computation_traces")
+}
+
+/// Revue humaine des résultats IA
+/// Validation obligatoire avant publication
+/// 
+/// Workflow:
+/// 1. IA génère explication
+/// 2. Expert humain revoit
+/// 3. Décision: APPROVED / REJECTED / NEEDS_REVISION
+/// 4. Si APPROVED → Publication
+model HumanReview {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Framework IA revu
+  frameworkId String? @map("framework_id")
+  framework   AIResearchFramework? @relation(fields: [frameworkId], references: [id], onDelete: SetNull)
+  
+  /// Explication revue (optionnel)
+  explanationId String? @map("explanation_id")
+  explanation   ExplanationResult? @relation(fields: [explanationId], references: [id], onDelete: SetNull)
+  
+  /// Nom/ID du reviewer
+  /// Expert scientifique qualifié
+  reviewer String @db.VarChar(255)
+  
+  /// Qualifications reviewer
+  /// Ex: "Dr. en Économie, 15 ans exp. analyse prix"
+  reviewerCredentials String? @map("reviewer_credentials") @db.Text
+  
+  /// Date de la revue
+  reviewedAt DateTime @default(now()) @map("reviewed_at")
+  
+  /// Décision
+  decision ReviewDecision
+  
+  /// Commentaires détaillés
+  /// Justification de la décision
+  comments String @db.Text
+  
+  /// Modifications suggérées (si NEEDS_REVISION)
+  suggestedChanges String? @map("suggested_changes") @db.Text
+  
+  /// Score qualité (0-10)
+  /// Évaluation globale par reviewer
+  qualityScore Int? @map("quality_score") @db.SmallInt
+  
+  /// Critères évaluation (JSON)
+  /// {accuracy, clarity, completeness, methodology}
+  evaluationCriteria String? @map("evaluation_criteria") @db.Text
+  
+  @@index([frameworkId])
+  @@index([explanationId])
+  @@index([reviewer])
+  @@index([decision])
+  @@index([reviewedAt])
+  @@map("human_reviews")
+}
+
+// ============================================================
+// ENUMS SPRINT 14
+// ============================================================
+
+/// Méthode d'explication IA
+enum ExplanationMethod {
+  DECOMPOSITION_FACTORS  // Décomposition en facteurs contributifs
+  CORRELATION_ANALYSIS   // Analyse de corrélation documentée
+  CONTRIBUTION_WEIGHTS   // Contribution pondérée par facteur
+  TEMPORAL_COMPARISON    // Comparaison temporelle contrôlée
+  TERRITORIAL_EFFECTS    // Effets territoriaux persistants
+  REGRESSION_BASED       // Basée sur régression linéaire/non-linéaire
+  ENSEMBLE_METHODS       // Combinaison plusieurs méthodes
+}
+
+/// Décision revue humaine
+enum ReviewDecision {
+  APPROVED         // Approuvé pour publication
+  REJECTED         // Rejeté (méthodologie incorrecte)
+  NEEDS_REVISION   // Nécessite modifications
+  PENDING          // En attente de revue
+}
