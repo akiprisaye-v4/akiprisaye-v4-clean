@@ -22,6 +22,7 @@ import authRoutes from './api/routes/auth.routes.js';
 import legalEntityRoutes from './api/routes/legalEntity.routes.js';
 import auditRoutes from './audit/audit.routes.js';
 import adminRoutes from './admin/admin.routes.js';
+import opendataRoutes from './api/routes/opendata.routes.js';
 
 // Import middlewares
 import { apiLimiter } from './api/middlewares/rateLimit.middleware.js';
@@ -116,7 +117,7 @@ app.get('/health', async (_req: Request, res: Response) => {
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     name: 'A KI PRI SA YÉ - Backend API',
-    version: '3.0.0',
+    version: '4.0.0', // Sprint 6: Open Data API
     description: 'Backend institutionnel pour la gestion des entreprises',
     environment: nodeEnv,
     endpoints: {
@@ -127,10 +128,12 @@ app.get('/', (_req: Request, res: Response) => {
       legalEntities: '/api/legal-entities',
       audit: '/api/audit',
       admin: '/api/admin',
+      opendata: '/api/opendata/v1', // Sprint 6
     },
     legal: {
       rgpd: 'Conforme RGPD (EU) 2016/679',
       siren_siret: 'Décret n°82-130 du 9 février 1982',
+      opendata_licence: 'Licence Ouverte / Open Licence v2.0',
       data_protection:
         process.env.DATA_PROTECTION_OFFICER_EMAIL || 'dpo@akiprisaye.app',
     },
@@ -160,6 +163,10 @@ app.use('/api/audit', auditRoutes);
 
 // Routes admin (protégées par JWT + SUPER_ADMIN ou permissions spécifiques)
 app.use('/api/admin', adminRoutes);
+
+// Routes Open Data (publiques - pas d'authentification)
+// Sprint 6: API Open Data avec Licence Ouverte v2.0
+app.use('/api/opendata', opendataRoutes);
 
 // ========================================
 // Gestion des erreurs
