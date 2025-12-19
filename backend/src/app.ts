@@ -20,6 +20,8 @@ import { PrismaClient } from '@prisma/client';
 // Import routes
 import authRoutes from './api/routes/auth.routes.js';
 import legalEntityRoutes from './api/routes/legalEntity.routes.js';
+import auditRoutes from './audit/audit.routes.js';
+import adminRoutes from './admin/admin.routes.js';
 
 // Import middlewares
 import { apiLimiter } from './api/middlewares/rateLimit.middleware.js';
@@ -114,7 +116,7 @@ app.get('/health', async (_req: Request, res: Response) => {
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     name: 'A KI PRI SA YÉ - Backend API',
-    version: '2.0.0',
+    version: '3.0.0',
     description: 'Backend institutionnel pour la gestion des entreprises',
     environment: nodeEnv,
     endpoints: {
@@ -123,11 +125,14 @@ app.get('/', (_req: Request, res: Response) => {
       docs: '/api/docs',
       auth: '/api/auth',
       legalEntities: '/api/legal-entities',
+      audit: '/api/audit',
+      admin: '/api/admin',
     },
     legal: {
       rgpd: 'Conforme RGPD (EU) 2016/679',
       siren_siret: 'Décret n°82-130 du 9 février 1982',
-      data_protection: process.env.DATA_PROTECTION_OFFICER_EMAIL || 'dpo@akiprisaye.app',
+      data_protection:
+        process.env.DATA_PROTECTION_OFFICER_EMAIL || 'dpo@akiprisaye.app',
     },
   });
 });
@@ -150,6 +155,11 @@ app.use('/api/auth', authRoutes);
 // Routes des entités juridiques (protégées par JWT)
 app.use('/api/legal-entities', legalEntityRoutes);
 
+// Routes audit (protégées par JWT + permission AUDIT_READ)
+app.use('/api/audit', auditRoutes);
+
+// Routes admin (protégées par JWT + SUPER_ADMIN ou permissions spécifiques)
+app.use('/api/admin', adminRoutes);
 
 // ========================================
 // Gestion des erreurs
