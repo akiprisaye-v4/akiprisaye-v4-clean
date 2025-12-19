@@ -788,3 +788,207 @@ model Quote {
   @@index([quoteRequestId])
   @@map("quotes")
 }
+
+// ============================================================================
+// SPRINT 8: CERTIFICATION, COMPLIANCE & DATA INTEGRITY
+// ============================================================================
+
+/// Certification officielle de la plateforme
+/// Label "A KI PRI SA YÉ - Données Économiques Vérifiées"
+/// 
+/// Références légales:
+/// - Loi pour une République numérique (2016) - Transparence algorithmes
+/// - RGPD Art. 30 - Registre des activités de traitement
+enum CertificationScope {
+  PLATFORM      // Certification plateforme entière
+  API           // Certification API spécifique
+  DASHBOARD     // Certification dashboard institutionnel
+  ALGORITHM     // Certification algorithme spécifique
+  DATA_SOURCE   // Certification source de données
+}
+
+enum CertificationStatus {
+  ACTIVE      // Certification valide
+  SUSPENDED   // Certification suspendue
+  REVOKED     // Certification révoquée
+  EXPIRED     // Certification expirée
+}
+
+model Certification {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Périmètre de la certification
+  scope CertificationScope
+  
+  /// Version de la certification (ex: "1.0.0")
+  version String @db.VarChar(20)
+  
+  /// Émis par (organisation/autorité)
+  issuedBy String @db.VarChar(255)
+  
+  /// Date d'émission
+  issuedAt DateTime @default(now()) @map("issued_at")
+  
+  /// Valide jusqu'à
+  validUntil DateTime @map("valid_until")
+  
+  /// Statut de la certification
+  status CertificationStatus @default(ACTIVE)
+  
+  /// Hash SHA-256 des critères de certification
+  /// Garantit l'intégrité et la traçabilité
+  criteriaHash String @map("criteria_hash") @db.VarChar(64)
+  
+  /// Référence audit externe (optionnel)
+  auditReference String? @map("audit_reference") @db.VarChar(100)
+  
+  /// Métadonnées JSON (critères détaillés, etc.)
+  metadata String? @db.Text
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@index([scope])
+  @@index([status])
+  @@index([validUntil])
+  @@map("certifications")
+}
+
+/// Registre des algorithmes (transparence algorithmique)
+/// Conformité Loi pour une République numérique - Art. L111-7-2
+/// 
+/// Pas de boîte noire - tous les algorithmes documentés
+enum AlgorithmModelType {
+  STATISTICAL       // Modèles statistiques (moyenne, régression, etc.)
+  MACHINE_LEARNING  // ML (réseaux neurones, etc.)
+  RULE_BASED        // Règles déterministes
+  HYBRID            // Combinaison
+}
+
+model AlgorithmRegistry {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom de l'algorithme (ex: "price_prediction_v1")
+  name String @unique @db.VarChar(100)
+  
+  /// Objectif de l'algorithme
+  purpose String @db.VarChar(500)
+  
+  /// Description détaillée
+  description String @db.Text
+  
+  /// Inputs (JSON array de noms de champs)
+  inputs String @db.Text
+  
+  /// Outputs (JSON array de noms de champs)
+  outputs String @db.Text
+  
+  /// Type de modèle
+  modelType AlgorithmModelType @map("model_type")
+  
+  /// Version de l'algorithme
+  version String @db.VarChar(20)
+  
+  /// Méthode de calcul de confiance (expliquée en français)
+  confidenceMethod String @map("confidence_method") @db.Text
+  
+  /// Date de dernière revue
+  lastReviewedAt DateTime @map("last_reviewed_at")
+  
+  /// Publiquement visible (transparence)
+  isPublic Boolean @default(true) @map("is_public")
+  
+  /// Métadonnées JSON (formules mathématiques, etc.)
+  metadata String? @db.Text
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@index([name])
+  @@index([modelType])
+  @@index([isPublic])
+  @@map("algorithm_registry")
+}
+
+/// Journal d'intégrité des données
+/// Hash cryptographique quotidien pour détecter toute altération
+/// 
+/// Références légales:
+/// - RGPD Art. 32 - Sécurité du traitement
+/// - Code de commerce - Conservation documents comptables
+model DataIntegrityLog {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom de la table surveillée
+  tableName String @map("table_name") @db.VarChar(100)
+  
+  /// Nombre d'enregistrements au moment du snapshot
+  recordCount Int @map("record_count")
+  
+  /// Hash SHA-256 des données (triées, normalisées)
+  dataHash String @map("data_hash") @db.VarChar(64)
+  
+  /// Date du snapshot
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([tableName])
+  @@index([createdAt])
+  @@map("data_integrity_logs")
+}
+
+/// Documents de conformité (auto-générés)
+/// COMPLIANCE_REPORT, DATA_GOVERNANCE, ALGORITHMIC_TRANSPARENCY, RGPD_RECORDS
+enum ComplianceDocumentType {
+  COMPLIANCE_REPORT         // Rapport conformité général
+  DATA_GOVERNANCE           // Gouvernance des données
+  ALGORITHMIC_TRANSPARENCY  // Transparence algorithmes
+  RGPD_RECORDS             // Registre RGPD Art. 30
+  SECURITY_POLICY          // Politique sécurité
+  DATA_RETENTION           // Politique conservation
+}
+
+model ComplianceDocument {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Type de document
+  type ComplianceDocumentType
+  
+  /// Version du document (ex: "1.0.0")
+  version String @db.VarChar(20)
+  
+  /// Contenu du document (Markdown)
+  content String @db.Text
+  
+  /// Hash SHA-256 du contenu (intégrité)
+  contentHash String @map("content_hash") @db.VarChar(64)
+  
+  /// Auteur/Générateur
+  author String @db.VarChar(255)
+  
+  /// Révisé par (optionnel)
+  reviewedBy String? @map("reviewed_by") @db.VarChar(255)
+  
+  /// Valide jusqu'à
+  validUntil DateTime? @map("valid_until")
+  
+  /// Métadonnées JSON
+  metadata String? @db.Text
+  
+  /// Date de génération
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([type])
+  @@index([version])
+  @@index([createdAt])
+  @@map("compliance_documents")
+}
