@@ -28,6 +28,9 @@ import {
   notFoundMiddleware,
 } from './api/middlewares/error.middleware.js';
 
+// Import Swagger
+import { setupSwagger } from './api/docs/swagger.js';
+
 // Charger les variables d'environnement
 dotenv.config();
 
@@ -132,6 +135,11 @@ app.get('/', (_req: Request, res: Response) => {
 // ========================================
 // Routes API
 // ========================================
+
+// Documentation Swagger (avant rate limiting pour accès libre)
+if (process.env.ENABLE_SWAGGER !== 'false') {
+  setupSwagger(app);
+}
 
 // Rate limiting sur toutes les routes API
 app.use('/api', apiLimiter);
