@@ -53,6 +53,9 @@ model User {
   
   /// Logs d'audit créés par cet utilisateur
   auditLogs AuditLog[]
+  
+  /// Profil chat (optionnel - créé si user participe aux discussions)
+  chatProfile ChatUserProfile?
 
   @@index([email])
   @@index([isActive])
@@ -2019,4 +2022,465 @@ enum ReviewDecision {
   REJECTED         // Rejeté (méthodologie incorrecte)
   NEEDS_REVISION   // Nécessite modifications
   PENDING          // En attente de revue
+}
+
+// ============================================================
+// CITIZEN CHAT BACKEND (Backend-only, no frontend)
+// ============================================================
+// Private citizen discussion groups for cost of living topics
+// - JWT authentication required
+// - Verified users only
+// - AI-assisted moderation (non-blocking, passive)
+// - RGPD compliant (data minimization, audit trail)
+// - Territory-based groups (DOM, COM, ROM, RUP)
+// 
+// Frontend implementation planned separately
+// WebSocket client implementation planned separately
+// ============================================================
+
+/// Verified user profile for chat system
+/// Extended profile for chat participation
+/// 
+/// RGPD: Art. 5 (data minimization), Art. 6 (lawful basis)
+/// Only verified users can participate in discussions
+model ChatUserProfile {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Lien vers User principal (JWT auth)
+  /// CASCADE: suppression profil si user supprimé
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  /// Pseudonyme public affiché dans les groupes
+  /// RGPD: Pseudonymisation (Art. 4.5)
+  displayName String @map("display_name") @db.VarChar(100)
+  
+  /// URL avatar (photo de profil - facultative)
+  /// Stockage S3-compatible recommandé
+  /// RGPD: Consentement explicite requis pour photo
+  avatarUrl String? @map("avatar_url") @db.VarChar(500)
+  
+  /// Code territoire (COG INSEE)
+  /// Ex: "971" (Guadeloupe), "972" (Martinique), "973" (Guyane)
+  /// Permet groupes territoriaux et affichage drapeau
+  territoryCode String @map("territory_code") @db.VarChar(10)
+  
+  /// Région/ville (optionnel, pour contexte)
+  /// Ex: "Pointe-à-Pitre", "Fort-de-France"
+  location String? @db.VarChar(100)
+  
+  /// Statut utilisateur chat
+  /// VERIFIED: Peut participer
+  /// MUTED: Temporairement silencieux (sanction modération)
+  /// SUSPENDED: Suspendu définitivement
+  status ChatUserStatus @default(VERIFIED)
+  
+  /// Date fin mute (si MUTED)
+  /// NULL si statut != MUTED
+  mutedUntil DateTime? @map("muted_until")
+  
+  /// Biographie courte (optionnelle)
+  /// Max 500 chars, modérable
+  bio String? @db.VarChar(500)
+  
+  /// Préférences notifications (JSON)
+  /// {mention: true, newMessage: false, dailyDigest: true}
+  notificationPreferences String? @map("notification_preferences") @db.Text
+  
+  /// Date création profil
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Messages envoyés
+  messages ChatMessage[]
+  
+  /// Appartenance groupes
+  memberships ChatGroupMembership[]
+  
+  /// Actions de modération reçues
+  moderationActions ChatModerationAction[]
+  
+  @@index([userId])
+  @@index([territoryCode])
+  @@index([status])
+  @@index([displayName])
+  @@map("chat_user_profiles")
+}
+
+/// Discussion group (groupe de parole)
+/// Groupes privés organisés par territoire ou thématique
+/// 
+/// Types:
+/// - Territoriaux: Par DOM/COM/ROM (code INSEE)
+/// - Thématiques: Alimentation, carburant, logement
+/// - Situations: Familles, étudiants, retraités
+model ChatGroup {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom du groupe
+  /// Ex: "Vie chère Guadeloupe", "Carburant Martinique"
+  name String @db.VarChar(150)
+  
+  /// Description groupe
+  description String @db.Text
+  
+  /// Type de groupe
+  groupType ChatGroupType @map("group_type")
+  
+  /// Code territoire associé (si type TERRITORIAL)
+  /// Code INSEE: "971", "972", "973", etc.
+  /// NULL si type THEMATIC ou SITUATION
+  territoryCode String? @map("territory_code") @db.VarChar(10)
+  
+  /// Thématique (si type THEMATIC)
+  /// Ex: FOOD, FUEL, HOUSING
+  theme ChatTheme?
+  
+  /// Icône groupe (emoji ou URL)
+  /// Ex: "🛒" pour alimentation, "⛽" pour carburant
+  icon String? @db.VarChar(100)
+  
+  /// Métadonnées groupe (JSON)
+  /// {flagCode: "GP", color: "#003580", rules: [...]}
+  metadata String? @db.Text
+  
+  /// Règles du groupe
+  /// Texte affiché aux nouveaux membres
+  rules String @db.Text
+  
+  /// Groupe actif ou archivé
+  isActive Boolean @default(true) @map("is_active")
+  
+  /// Nombre maximum de membres (optionnel)
+  /// NULL = illimité
+  maxMembers Int? @map("max_members") @db.Integer
+  
+  /// Date création groupe
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date dernière activité (dernier message)
+  lastActivityAt DateTime? @map("last_activity_at")
+  
+  /// Messages du groupe
+  messages ChatMessage[]
+  
+  /// Membres du groupe
+  memberships ChatGroupMembership[]
+  
+  @@index([groupType])
+  @@index([territoryCode])
+  @@index([theme])
+  @@index([isActive])
+  @@index([lastActivityAt])
+  @@map("chat_groups")
+}
+
+/// Membership in discussion group
+/// Association user ↔ group avec métadonnées
+model ChatGroupMembership {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Profil utilisateur
+  userProfileId String @map("user_profile_id")
+  userProfile   ChatUserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  
+  /// Groupe
+  groupId String @map("group_id")
+  group   ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  /// Rôle dans le groupe
+  /// MEMBER: Membre standard
+  /// MODERATOR: Modérateur groupe (peut signaler)
+  /// ADMIN: Administrateur groupe (peut gérer membres)
+  role ChatGroupRole @default(MEMBER)
+  
+  /// Date adhésion
+  joinedAt DateTime @default(now()) @map("joined_at")
+  
+  /// Date dernière lecture (pour notifications)
+  /// Permet calcul messages non lus
+  lastReadAt DateTime? @map("last_read_at")
+  
+  /// Notifications activées pour ce groupe
+  notificationsEnabled Boolean @default(true) @map("notifications_enabled")
+  
+  @@unique([userProfileId, groupId])
+  @@index([userProfileId])
+  @@index([groupId])
+  @@index([role])
+  @@map("chat_group_memberships")
+}
+
+/// Chat message
+/// Messages échangés dans groupes de discussion
+/// 
+/// RGPD: Art. 30 (registre), Art. 17 (droit à l'effacement)
+/// Modération: IA passive + signalement humain
+model ChatMessage {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Auteur du message
+  authorId String @map("author_id")
+  author   ChatUserProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  /// Groupe de discussion
+  groupId String @map("group_id")
+  group   ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  /// Contenu texte du message
+  /// Max 2000 caractères recommandé
+  content String @db.Text
+  
+  /// Type de message
+  messageType ChatMessageType @default(TEXT) @map("message_type")
+  
+  /// URL pièce jointe (optionnel)
+  /// Photo, document (pas implémenté initialement)
+  /// Stockage S3-compatible recommandé
+  attachmentUrl String? @map("attachment_url") @db.VarChar(500)
+  
+  /// Métadonnées pièce jointe (JSON)
+  /// {fileName: "...", mimeType: "...", size: 123456}
+  attachmentMetadata String? @map("attachment_metadata") @db.Text
+  
+  /// Message en réponse à (threading)
+  /// NULL si message racine
+  replyToId String? @map("reply_to_id")
+  replyTo   ChatMessage? @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  
+  /// Réponses à ce message
+  replies ChatMessage[] @relation("MessageReplies")
+  
+  /// Statut modération IA
+  moderationStatus ChatModerationStatus @default(PENDING) @map("moderation_status")
+  
+  /// Score toxicité IA (0.0 - 1.0)
+  /// Détection automatique propos haineux/agressifs
+  /// NULL si pas encore analysé
+  toxicityScore Float? @map("toxicity_score") @db.Real
+  
+  /// Flags modération IA (JSON array)
+  /// ["profanity", "aggression", "spam"]
+  /// NULL si aucun flag
+  moderationFlags String? @map("moderation_flags") @db.Text
+  
+  /// Message édité
+  isEdited Boolean @default(false) @map("is_edited")
+  
+  /// Date dernière édition
+  editedAt DateTime? @map("edited_at")
+  
+  /// Message supprimé par auteur
+  /// Soft delete: conservé pour audit mais masqué
+  isDeleted Boolean @default(false) @map("is_deleted")
+  
+  /// Date suppression
+  deletedAt DateTime? @map("deleted_at")
+  
+  /// Date création (horodatage)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Actions modération sur ce message
+  moderationActions ChatModerationAction[]
+  
+  @@index([authorId])
+  @@index([groupId])
+  @@index([replyToId])
+  @@index([moderationStatus])
+  @@index([isDeleted])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+/// Moderation action log
+/// Journal actions modération (IA + humaine)
+/// 
+/// RGPD: Art. 30 (registre activités de traitement)
+/// Traçabilité complète pour transparence et contestation
+model ChatModerationAction {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Message concerné
+  messageId String @map("message_id")
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  
+  /// Utilisateur ciblé (auteur message ou profil)
+  targetUserId String @map("target_user_id")
+  targetUser   ChatUserProfile @relation(fields: [targetUserId], references: [id], onDelete: Cascade)
+  
+  /// Type d'action modération
+  actionType ChatModerationType @map("action_type")
+  
+  /// Source action
+  /// AI: Détection automatique IA
+  /// USER_REPORT: Signalement utilisateur
+  /// MODERATOR: Action modérateur humain
+  /// ADMIN: Action administrateur
+  source ChatModerationSource
+  
+  /// ID modérateur humain (si source = MODERATOR/ADMIN)
+  /// Lien vers User.id (compte admin)
+  moderatorId String? @map("moderator_id")
+  
+  /// Raison détaillée
+  /// Justification action pour transparence
+  reason String @db.Text
+  
+  /// Durée sanction (minutes)
+  /// Pour MUTE: durée mute
+  /// NULL pour autres actions
+  durationMinutes Int? @map("duration_minutes") @db.Integer
+  
+  /// Action révoquée/annulée
+  isRevoked Boolean @default(false) @map("is_revoked")
+  
+  /// Date révocation
+  revokedAt DateTime? @map("revoked_at")
+  
+  /// Raison révocation
+  revocationReason String? @map("revocation_reason") @db.Text
+  
+  /// Date action
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([messageId])
+  @@index([targetUserId])
+  @@index([actionType])
+  @@index([source])
+  @@index([moderatorId])
+  @@index([createdAt])
+  @@map("chat_moderation_actions")
+}
+
+/// AI moderation model metadata
+/// Métadonnées modèle IA modération
+/// Traçabilité versions modèle pour reproductibilité
+model ChatModerationModel {
+  /// Identifiant unique
+  id String @id @default(uuid())
+  
+  /// Nom modèle
+  /// Ex: "toxicity-detector-v1", "hate-speech-classifier-v2"
+  name String @db.VarChar(100)
+  
+  /// Version modèle
+  /// Semantic versioning: "1.0.0", "2.1.3"
+  version String @db.VarChar(20)
+  
+  /// Type modèle
+  modelType ChatModerationModelType @map("model_type")
+  
+  /// Provider/source
+  /// Ex: "OpenAI Moderation API", "Hugging Face transformers", "Internal ML"
+  provider String @db.VarChar(100)
+  
+  /// Configuration modèle (JSON)
+  /// {thresholds: {toxicity: 0.7, spam: 0.8}, languages: ["fr"]}
+  config String? @db.Text
+  
+  /// Statistiques performance (JSON)
+  /// {accuracy: 0.92, precision: 0.89, recall: 0.85, f1: 0.87}
+  performanceMetrics String? @map("performance_metrics") @db.Text
+  
+  /// Modèle actif (utilisé en production)
+  isActive Boolean @default(false) @map("is_active")
+  
+  /// Date déploiement
+  deployedAt DateTime? @map("deployed_at")
+  
+  /// Date création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([name])
+  @@index([version])
+  @@index([isActive])
+  @@map("chat_moderation_models")
+}
+
+// ============================================================
+// CHAT ENUMS
+// ============================================================
+
+/// Statut utilisateur chat
+enum ChatUserStatus {
+  VERIFIED   // Vérifié, peut participer
+  MUTED      // Temporairement silencieux (sanction)
+  SUSPENDED  // Suspendu définitivement
+}
+
+/// Type de groupe discussion
+enum ChatGroupType {
+  TERRITORIAL  // Par territoire (DOM/COM/ROM)
+  THEMATIC     // Par thématique (alimentation, carburant, etc.)
+  SITUATION    // Par situation (familles, étudiants, retraités)
+}
+
+/// Thématique discussion
+enum ChatTheme {
+  FOOD         // Alimentation
+  FUEL         // Carburant
+  HOUSING      // Logement
+  TRANSPORT    // Transport
+  HEALTH       // Santé
+  EDUCATION    // Éducation
+  UTILITIES    // Services publics (eau, électricité)
+  GENERAL      // Général vie chère
+}
+
+/// Rôle dans groupe
+enum ChatGroupRole {
+  MEMBER      // Membre standard
+  MODERATOR   // Modérateur groupe
+  ADMIN       // Administrateur groupe
+}
+
+/// Type de message
+enum ChatMessageType {
+  TEXT        // Texte uniquement
+  IMAGE       // Message avec image
+  DOCUMENT    // Message avec document
+  SYSTEM      // Message système (join/leave/etc.)
+}
+
+/// Statut modération message
+enum ChatModerationStatus {
+  PENDING      // En attente analyse IA
+  APPROVED     // Approuvé (pas de problème détecté)
+  FLAGGED      // Signalé (détection automatique)
+  UNDER_REVIEW // En revue humaine
+  REMOVED      // Supprimé par modération
+}
+
+/// Type action modération
+enum ChatModerationType {
+  WARNING      // Avertissement
+  MUTE         // Mute temporaire
+  KICK         // Expulsion groupe
+  BAN          // Bannissement plateforme
+  MESSAGE_HIDE // Masquage message
+  MESSAGE_DELETE // Suppression message
+}
+
+/// Source action modération
+enum ChatModerationSource {
+  AI            // Détection automatique IA
+  USER_REPORT   // Signalement utilisateur
+  MODERATOR     // Action modérateur groupe
+  ADMIN         // Action administrateur plateforme
+}
+
+/// Type modèle modération IA
+enum ChatModerationModelType {
+  TOXICITY_DETECTION   // Détection toxicité
+  HATE_SPEECH         // Détection discours haineux
+  SPAM_DETECTION      // Détection spam
+  PROFANITY_FILTER    // Filtre grossièretés
+  SENTIMENT_ANALYSIS  // Analyse sentiment
 }
