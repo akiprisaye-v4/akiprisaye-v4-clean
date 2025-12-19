@@ -15,8 +15,8 @@ import {
 describe('Zod Schema Validation', () => {
   describe('sirenSchema', () => {
     test('devrait accepter un SIREN valide', () => {
-      expect(() => sirenSchema.parse('732829320')).not.toThrow();
-      expect(() => sirenSchema.parse('542065479')).not.toThrow();
+      expect(() => sirenSchema.parse('123456782')).not.toThrow();
+      expect(() => sirenSchema.parse('987654324')).not.toThrow();
     });
 
     test('devrait rejeter un SIREN invalide', () => {
@@ -26,15 +26,15 @@ describe('Zod Schema Validation', () => {
     });
 
     test('devrait nettoyer les espaces', () => {
-      const result = sirenSchema.parse('  732829320  ');
-      expect(result).toBe('732829320');
+      const result = sirenSchema.parse('  123456782  ');
+      expect(result).toBe('123456782');
     });
   });
 
   describe('siretSchema', () => {
     test('devrait accepter un SIRET valide', () => {
-      expect(() => siretSchema.parse('73282932000074')).not.toThrow();
-      expect(() => siretSchema.parse('54206547900022')).not.toThrow();
+      expect(() => siretSchema.parse('12345678200002')).not.toThrow();
+      expect(() => siretSchema.parse('98765432400019')).not.toThrow();
     });
 
     test('devrait rejeter un SIRET invalide', () => {
@@ -44,8 +44,8 @@ describe('Zod Schema Validation', () => {
     });
 
     test('devrait nettoyer les espaces', () => {
-      const result = siretSchema.parse('  73282932000074  ');
-      expect(result).toBe('73282932000074');
+      const result = siretSchema.parse('  12345678200002  ');
+      expect(result).toBe('12345678200002');
     });
   });
 
@@ -64,8 +64,8 @@ describe('Zod Schema Validation', () => {
 
   describe('createLegalEntitySchema', () => {
     const validData = {
-      siren: '732829320',
-      siret: '73282932000074',
+      siren: '123456782',
+      siret: '12345678200002',
       name: 'Facebook France',
       status: 'ACTIVE' as const,
     };
@@ -77,8 +77,8 @@ describe('Zod Schema Validation', () => {
 
     test('devrait accepter des données sans statut (défaut ACTIVE)', () => {
       const data = {
-        siren: '732829320',
-        siret: '73282932000074',
+        siren: '123456782',
+        siret: '12345678200002',
         name: 'Facebook France',
       };
       const result = createLegalEntitySchema.parse(data);
@@ -97,8 +97,8 @@ describe('Zod Schema Validation', () => {
 
     test('devrait rejeter si SIREN et SIRET incohérents', () => {
       const data = {
-        siren: '732829320',
-        siret: '54206547900022', // SIRET de Google, pas Facebook
+        siren: '123456782',
+        siret: '98765432400019', // SIRET de différente entreprise
         name: 'Test',
         status: 'ACTIVE' as const,
       };
@@ -133,25 +133,25 @@ describe('Zod Schema Validation', () => {
     });
 
     test('devrait valider SIREN si présent', () => {
-      expect(() => updateLegalEntitySchema.parse({ siren: '732829320' })).not.toThrow();
+      expect(() => updateLegalEntitySchema.parse({ siren: '123456782' })).not.toThrow();
       expect(() => updateLegalEntitySchema.parse({ siren: '123456789' })).toThrow();
     });
 
     test('devrait valider SIRET si présent', () => {
-      expect(() => updateLegalEntitySchema.parse({ siret: '73282932000074' })).not.toThrow();
+      expect(() => updateLegalEntitySchema.parse({ siret: '12345678200002' })).not.toThrow();
       expect(() => updateLegalEntitySchema.parse({ siret: '12345678901234' })).toThrow();
     });
 
     test('devrait vérifier la cohérence SIREN/SIRET si les deux sont présents', () => {
       const validData = {
-        siren: '732829320',
-        siret: '73282932000074',
+        siren: '123456782',
+        siret: '12345678200002',
       };
       expect(() => updateLegalEntitySchema.parse(validData)).not.toThrow();
 
       const invalidData = {
-        siren: '732829320',
-        siret: '54206547900022',
+        siren: '123456782',
+        siret: '98765432400019',
       };
       expect(() => updateLegalEntitySchema.parse(invalidData)).toThrow();
     });
@@ -217,8 +217,8 @@ describe('Zod Schema Validation', () => {
     test('devrait fournir un message d\'erreur pour incohérence SIREN/SIRET', () => {
       try {
         createLegalEntitySchema.parse({
-          siren: '732829320',
-          siret: '54206547900022',
+          siren: '123456782',
+          siret: '98765432400019',
           name: 'Test',
           status: 'ACTIVE',
         });

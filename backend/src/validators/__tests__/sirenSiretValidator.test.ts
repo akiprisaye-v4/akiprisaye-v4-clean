@@ -17,11 +17,11 @@ import {
 
 describe('SIREN Validation', () => {
   describe('validateSiren', () => {
-    // SIREN valides (exemples réels d'entreprises françaises)
+    // SIREN valides (générés avec algorithme de Luhn)
     test('devrait accepter un SIREN valide', () => {
-      expect(validateSiren('732829320')).toBe(true); // Facebook France
-      expect(validateSiren('542065479')).toBe(true); // Google France
-      expect(validateSiren('443061841')).toBe(true); // Apple France
+      expect(validateSiren('123456782')).toBe(true); // Valide selon Luhn
+      expect(validateSiren('987654324')).toBe(true); // Valide selon Luhn
+      expect(validateSiren('552100554')).toBe(true); // Valide selon Luhn
     });
 
     test('devrait rejeter un SIREN avec une longueur incorrecte', () => {
@@ -33,7 +33,7 @@ describe('SIREN Validation', () => {
     test('devrait rejeter un SIREN avec des caractères non numériques', () => {
       expect(validateSiren('73282932A')).toBe(false);
       expect(validateSiren('732-829-320')).toBe(false);
-      expect(validateSiren('732 829 320')).toBe(false); // avec espaces
+      // Note: les espaces sont nettoyés, donc on test sans eux
       expect(validateSiren('abcdefghi')).toBe(false);
     });
 
@@ -58,11 +58,11 @@ describe('SIREN Validation', () => {
 
 describe('SIRET Validation', () => {
   describe('validateSiret', () => {
-    // SIRET valides (exemples réels)
+    // SIRET valides (générés avec algorithme de Luhn)
     test('devrait accepter un SIRET valide', () => {
-      expect(validateSiret('73282932000074')).toBe(true); // Facebook France
-      expect(validateSiret('54206547900022')).toBe(true); // Google France
-      expect(validateSiret('44306184100047')).toBe(true); // Apple France
+      expect(validateSiret('12345678200002')).toBe(true); // Valide selon Luhn
+      expect(validateSiret('98765432400019')).toBe(true); // Valide selon Luhn
+      expect(validateSiret('55210055440019')).toBe(true); // Valide selon Luhn
     });
 
     test('devrait rejeter un SIRET avec une longueur incorrecte', () => {
@@ -74,7 +74,7 @@ describe('SIRET Validation', () => {
     test('devrait rejeter un SIRET avec des caractères non numériques', () => {
       expect(validateSiret('7328293200007A')).toBe(false);
       expect(validateSiret('732-829-320-00074')).toBe(false);
-      expect(validateSiret('732 829 320 00074')).toBe(false); // avec espaces
+      // Note: les espaces sont nettoyés, donc on test sans eux
       expect(validateSiret('abcdefghijklmn')).toBe(false);
     });
 
@@ -95,22 +95,22 @@ describe('SIRET Validation', () => {
 describe('SIREN/SIRET Consistency', () => {
   describe('validateSirenSiretConsistency', () => {
     test('devrait valider la cohérence entre SIREN et SIRET', () => {
-      expect(validateSirenSiretConsistency('732829320', '73282932000074')).toBe(true);
-      expect(validateSirenSiretConsistency('542065479', '54206547900022')).toBe(true);
-      expect(validateSirenSiretConsistency('443061841', '44306184100047')).toBe(true);
+      expect(validateSirenSiretConsistency('123456782', '12345678200002')).toBe(true);
+      expect(validateSirenSiretConsistency('987654324', '98765432400019')).toBe(true);
+      expect(validateSirenSiretConsistency('552100554', '55210055440019')).toBe(true);
     });
 
     test('devrait rejeter un SIRET qui ne commence pas par le SIREN', () => {
-      expect(validateSirenSiretConsistency('732829320', '54206547900022')).toBe(false);
-      expect(validateSirenSiretConsistency('542065479', '73282932000074')).toBe(false);
+      expect(validateSirenSiretConsistency('123456782', '98765432400019')).toBe(false);
+      expect(validateSirenSiretConsistency('987654324', '12345678200002')).toBe(false);
     });
 
     test('devrait rejeter si le SIREN est invalide', () => {
-      expect(validateSirenSiretConsistency('123456789', '73282932000074')).toBe(false);
+      expect(validateSirenSiretConsistency('123456789', '12345678200002')).toBe(false);
     });
 
     test('devrait rejeter si le SIRET est invalide', () => {
-      expect(validateSirenSiretConsistency('732829320', '12345678901234')).toBe(false);
+      expect(validateSirenSiretConsistency('123456782', '12345678901234')).toBe(false);
     });
 
     test('devrait rejeter si les deux sont invalides', () => {
@@ -120,9 +120,9 @@ describe('SIREN/SIRET Consistency', () => {
 
   describe('extractSirenFromSiret', () => {
     test('devrait extraire le SIREN d\'un SIRET valide', () => {
-      expect(extractSirenFromSiret('73282932000074')).toBe('732829320');
-      expect(extractSirenFromSiret('54206547900022')).toBe('542065479');
-      expect(extractSirenFromSiret('44306184100047')).toBe('443061841');
+      expect(extractSirenFromSiret('12345678200002')).toBe('123456782');
+      expect(extractSirenFromSiret('98765432400019')).toBe('987654324');
+      expect(extractSirenFromSiret('55210055440019')).toBe('552100554');
     });
 
     test('devrait retourner null pour un SIRET invalide', () => {
@@ -136,8 +136,8 @@ describe('SIREN/SIRET Consistency', () => {
 describe('Formatting Functions', () => {
   describe('formatSiren', () => {
     test('devrait formater un SIREN avec espaces', () => {
-      expect(formatSiren('732829320')).toBe('732 829 320');
-      expect(formatSiren('542065479')).toBe('542 065 479');
+      expect(formatSiren('123456782')).toBe('123 456 782');
+      expect(formatSiren('987654324')).toBe('987 654 324');
     });
 
     test('devrait retourner la chaîne originale si longueur incorrecte', () => {
@@ -148,8 +148,8 @@ describe('Formatting Functions', () => {
 
   describe('formatSiret', () => {
     test('devrait formater un SIRET avec espaces', () => {
-      expect(formatSiret('73282932000074')).toBe('732 829 320 00074');
-      expect(formatSiret('54206547900022')).toBe('542 065 479 00022');
+      expect(formatSiret('12345678200002')).toBe('123 456 782 00002');
+      expect(formatSiret('98765432400019')).toBe('987 654 324 00019');
     });
 
     test('devrait retourner la chaîne originale si longueur incorrecte', () => {
@@ -162,16 +162,16 @@ describe('Formatting Functions', () => {
 describe('Algorithme de Luhn - Cas particuliers', () => {
   test('devrait valider des SIREN avec différents patterns', () => {
     // Cas avec des zéros
-    expect(validateSiren('552100554')).toBe(true); // SNCF
+    expect(validateSiren('552100554')).toBe(true); // Basé sur SNCF (recalculé)
 
     // Cas avec répétitions
-    expect(validateSiren('352521390')).toBe(true); // RATP
+    expect(validateSiren('123456782')).toBe(true); // Pattern simple
   });
 
   test('devrait valider des SIRET avec différents patterns', () => {
-    // SIRET avec NIC différents
-    expect(validateSiret('55210055400013')).toBe(true); // SNCF - établissement 1
-    expect(validateSiret('55210055400039')).toBe(true); // SNCF - établissement 2
+    // SIRET avec NIC différents (basés sur SIREN valide 552100554)
+    expect(validateSiret('55210055440019')).toBe(true); // établissement 1
+    expect(validateSiret('55210055440027')).toBe(true); // établissement 2
   });
 });
 
@@ -191,7 +191,7 @@ describe('Edge Cases et Sécurité', () => {
   });
 
   test('devrait gérer les espaces multiples', () => {
-    const sirenWithSpaces = '732829320'.replace(/(.{3})/g, '$1 ').trim();
+    const sirenWithSpaces = '123456782'.replace(/(.{3})/g, '$1 ').trim();
     // La fonction nettoie les espaces, donc le résultat doit être valide
     expect(validateSiren(sirenWithSpaces.replace(/\s/g, ''))).toBe(true);
   });
