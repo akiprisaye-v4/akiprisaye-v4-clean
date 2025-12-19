@@ -27,6 +27,46 @@ export enum Permission {
   ADMIN_MANAGE_USERS = 'ADMIN_MANAGE_USERS',
   ADMIN_MANAGE_ROLES = 'ADMIN_MANAGE_ROLES',
   ADMIN_VIEW_STATS = 'ADMIN_VIEW_STATS',
+
+  // Marketplace - Sprint 4
+  // Brands (Enseignes)
+  BRAND_CREATE = 'BRAND_CREATE',
+  BRAND_READ = 'BRAND_READ',
+  BRAND_UPDATE = 'BRAND_UPDATE',
+  BRAND_APPROVE = 'BRAND_APPROVE', // INSTITUTION/SUPER_ADMIN uniquement
+  BRAND_SUSPEND = 'BRAND_SUSPEND', // INSTITUTION/SUPER_ADMIN uniquement
+
+  // Stores (Magasins)
+  STORE_CREATE = 'STORE_CREATE',
+  STORE_READ = 'STORE_READ',
+  STORE_UPDATE = 'STORE_UPDATE',
+  STORE_DELETE = 'STORE_DELETE',
+
+  // Products (Produits)
+  PRODUCT_CREATE = 'PRODUCT_CREATE',
+  PRODUCT_READ = 'PRODUCT_READ',
+  PRODUCT_UPDATE = 'PRODUCT_UPDATE',
+  PRODUCT_DELETE = 'PRODUCT_DELETE',
+
+  // Prices (Prix)
+  PRICE_CREATE = 'PRICE_CREATE',
+  PRICE_READ = 'PRICE_READ',
+  PRICE_UPDATE = 'PRICE_UPDATE',
+
+  // Predictions (Prédictions IA)
+  PREDICTION_VIEW = 'PREDICTION_VIEW',
+  PREDICTION_GENERATE = 'PREDICTION_GENERATE', // INSTITUTION/SUPER_ADMIN
+
+  // Subscriptions (Abonnements)
+  SUBSCRIPTION_CREATE = 'SUBSCRIPTION_CREATE',
+  SUBSCRIPTION_READ = 'SUBSCRIPTION_READ',
+  SUBSCRIPTION_MANAGE = 'SUBSCRIPTION_MANAGE',
+
+  // Quotes (Devis)
+  QUOTE_REQUEST = 'QUOTE_REQUEST',
+  QUOTE_VIEW = 'QUOTE_VIEW',
+  QUOTE_GENERATE = 'QUOTE_GENERATE', // INSTITUTION/SUPER_ADMIN
+  QUOTE_APPROVE = 'QUOTE_APPROVE', // INSTITUTION/SUPER_ADMIN
 }
 
 /**
@@ -43,35 +83,54 @@ export type UserRole =
  * Mapping des rôles vers leurs permissions
  *
  * RÈGLES:
- * - USER: Lecture seule des entités
- * - ANALYSTE: Lecture + audit + statistiques
- * - ENSEIGNE: Gestion entités (CRUD complet)
- * - INSTITUTION: Gestion multi-enseignes + audit étendu
+ * - USER: Lecture seule des entités + marketplace
+ * - ANALYSTE: Lecture + audit + statistiques + prédictions
+ * - ENSEIGNE: Gestion entités + brands + produits/prix
+ * - INSTITUTION: Gestion multi-enseignes + validation + prédictions IA
  * - SUPER_ADMIN: Tous les pouvoirs (administration complète)
  */
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   /**
    * USER - Utilisateur standard
-   * - Consultation des entités juridiques uniquement
+   * - Consultation des entités juridiques
+   * - Consultation marketplace (brands, stores, products, prices)
+   * - Vue des prédictions
    */
-  USER: [Permission.LEGAL_ENTITY_READ],
+  USER: [
+    Permission.LEGAL_ENTITY_READ,
+    Permission.BRAND_READ,
+    Permission.STORE_READ,
+    Permission.PRODUCT_READ,
+    Permission.PRICE_READ,
+    Permission.PREDICTION_VIEW,
+  ],
 
   /**
    * ANALYSTE - Analyste de données
-   * - Lecture des entités
+   * - Lecture complète
    * - Consultation des logs d'audit
    * - Accès aux statistiques
+   * - Vue des prédictions
    */
   ANALYSTE: [
     Permission.LEGAL_ENTITY_READ,
     Permission.AUDIT_READ,
     Permission.ADMIN_VIEW_STATS,
+    Permission.BRAND_READ,
+    Permission.STORE_READ,
+    Permission.PRODUCT_READ,
+    Permission.PRICE_READ,
+    Permission.PREDICTION_VIEW,
+    Permission.SUBSCRIPTION_READ,
   ],
 
   /**
    * ENSEIGNE - Gestionnaire d'enseigne
    * - CRUD complet sur les entités juridiques
-   * - Lecture des audits concernant ses actions
+   * - Création et gestion de sa propre enseigne (brand)
+   * - Gestion stores, produits, prix
+   * - Gestion abonnements
+   * - Demande devis
    */
   ENSEIGNE: [
     Permission.LEGAL_ENTITY_CREATE,
@@ -79,13 +138,35 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.LEGAL_ENTITY_UPDATE,
     Permission.LEGAL_ENTITY_DELETE,
     Permission.AUDIT_READ,
+    Permission.BRAND_CREATE,
+    Permission.BRAND_READ,
+    Permission.BRAND_UPDATE,
+    Permission.STORE_CREATE,
+    Permission.STORE_READ,
+    Permission.STORE_UPDATE,
+    Permission.STORE_DELETE,
+    Permission.PRODUCT_CREATE,
+    Permission.PRODUCT_READ,
+    Permission.PRODUCT_UPDATE,
+    Permission.PRODUCT_DELETE,
+    Permission.PRICE_CREATE,
+    Permission.PRICE_READ,
+    Permission.PRICE_UPDATE,
+    Permission.PREDICTION_VIEW,
+    Permission.SUBSCRIPTION_CREATE,
+    Permission.SUBSCRIPTION_READ,
+    Permission.SUBSCRIPTION_MANAGE,
+    Permission.QUOTE_REQUEST,
+    Permission.QUOTE_VIEW,
   ],
 
   /**
    * INSTITUTION - Gestionnaire institutionnel
    * - Toutes les permissions ENSEIGNE
-   * - Gestion multi-enseignes
-   * - Audit complet
+   * - Validation des enseignes (BRAND_APPROVE)
+   * - Suspension des enseignes
+   * - Génération prédictions IA
+   * - Génération devis
    * - Statistiques avancées
    */
   INSTITUTION: [
@@ -95,6 +176,31 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.LEGAL_ENTITY_DELETE,
     Permission.AUDIT_READ,
     Permission.ADMIN_VIEW_STATS,
+    Permission.BRAND_CREATE,
+    Permission.BRAND_READ,
+    Permission.BRAND_UPDATE,
+    Permission.BRAND_APPROVE,
+    Permission.BRAND_SUSPEND,
+    Permission.STORE_CREATE,
+    Permission.STORE_READ,
+    Permission.STORE_UPDATE,
+    Permission.STORE_DELETE,
+    Permission.PRODUCT_CREATE,
+    Permission.PRODUCT_READ,
+    Permission.PRODUCT_UPDATE,
+    Permission.PRODUCT_DELETE,
+    Permission.PRICE_CREATE,
+    Permission.PRICE_READ,
+    Permission.PRICE_UPDATE,
+    Permission.PREDICTION_VIEW,
+    Permission.PREDICTION_GENERATE,
+    Permission.SUBSCRIPTION_CREATE,
+    Permission.SUBSCRIPTION_READ,
+    Permission.SUBSCRIPTION_MANAGE,
+    Permission.QUOTE_REQUEST,
+    Permission.QUOTE_VIEW,
+    Permission.QUOTE_GENERATE,
+    Permission.QUOTE_APPROVE,
   ],
 
   /**
@@ -113,6 +219,31 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.ADMIN_MANAGE_USERS,
     Permission.ADMIN_MANAGE_ROLES,
     Permission.ADMIN_VIEW_STATS,
+    Permission.BRAND_CREATE,
+    Permission.BRAND_READ,
+    Permission.BRAND_UPDATE,
+    Permission.BRAND_APPROVE,
+    Permission.BRAND_SUSPEND,
+    Permission.STORE_CREATE,
+    Permission.STORE_READ,
+    Permission.STORE_UPDATE,
+    Permission.STORE_DELETE,
+    Permission.PRODUCT_CREATE,
+    Permission.PRODUCT_READ,
+    Permission.PRODUCT_UPDATE,
+    Permission.PRODUCT_DELETE,
+    Permission.PRICE_CREATE,
+    Permission.PRICE_READ,
+    Permission.PRICE_UPDATE,
+    Permission.PREDICTION_VIEW,
+    Permission.PREDICTION_GENERATE,
+    Permission.SUBSCRIPTION_CREATE,
+    Permission.SUBSCRIPTION_READ,
+    Permission.SUBSCRIPTION_MANAGE,
+    Permission.QUOTE_REQUEST,
+    Permission.QUOTE_VIEW,
+    Permission.QUOTE_GENERATE,
+    Permission.QUOTE_APPROVE,
   ],
 };
 

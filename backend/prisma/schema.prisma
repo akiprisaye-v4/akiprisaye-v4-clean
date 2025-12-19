@@ -154,6 +154,9 @@ model LegalEntity {
   /// Date de dernière mise à jour
   /// RGPD: Exactitude et mise à jour des données (Art. 5.1.d)
   updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Enseignes liées à cette entité légale (Sprint 4)
+  brands    Brand[]
 
   @@index([siren])
   @@index([siret])
@@ -244,4 +247,544 @@ enum AuditResult {
   
   /// Accès refusé (permissions insuffisantes)
   DENIED
+}
+
+/// ==========================================
+/// SPRINT 4: MARKETPLACE ECOSYSTEM
+/// ==========================================
+
+/// Enseigne commerciale (Brand)
+/// Représente une marque ou chaîne de magasins inscrite sur la plateforme
+/// Lien obligatoire avec une LegalEntity validée
+/// 
+/// Règles métier:
+/// - Une enseigne doit être liée à une entité légale valide (SIREN/SIRET)
+/// - Validation requise par INSTITUTION ou SUPER_ADMIN
+/// - Abonnement obligatoire pour publier produits/prix
+model Brand {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Nom commercial de l'enseigne
+  name      String   @db.VarChar(255)
+  
+  /// Entité légale associée (SIREN/SIRET validé)
+  /// Référence obligatoire pour conformité juridique
+  legalEntityId String  @map("legal_entity_id")
+  legalEntity   LegalEntity @relation(fields: [legalEntityId], references: [id], onDelete: Restrict)
+  
+  /// Statut de l'enseigne
+  /// PENDING: En attente de validation
+  /// ACTIVE: Validée et opérationnelle
+  /// SUSPENDED: Suspendue (non-paiement, violation CGU, etc.)
+  status    BrandStatus @default(PENDING)
+  
+  /// Plan d'abonnement actif
+  subscriptionPlan SubscriptionPlan @default(BASIC) @map("subscription_plan")
+  
+  /// Logo URL (optionnel)
+  logoUrl   String?  @map("logo_url") @db.VarChar(500)
+  
+  /// Description de l'enseigne
+  description String? @db.Text
+  
+  /// Site web de l'enseigne
+  website   String?  @db.VarChar(500)
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Magasins de l'enseigne
+  stores    Store[]
+  
+  /// Produits de l'enseigne
+  products  Product[]
+  
+  /// Abonnements
+  subscriptions Subscription[]
+
+  @@index([legalEntityId])
+  @@index([status])
+  @@index([subscriptionPlan])
+  @@map("brands")
+}
+
+/// Statut d'une enseigne
+enum BrandStatus {
+  /// En attente de validation institutionnelle
+  PENDING
+  
+  /// Validée et active
+  ACTIVE
+  
+  /// Suspendue (violation, non-paiement, etc.)
+  SUSPENDED
+}
+
+/// Magasin / Point de vente
+/// Représente un point de vente physique d'une enseigne
+/// Utilisé pour la géolocalisation et comparaison locale des prix
+model Store {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Enseigne propriétaire
+  brandId   String   @map("brand_id")
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  
+  /// Nom du magasin (ex: "Carrefour City Paris 15")
+  name      String   @db.VarChar(255)
+  
+  /// Adresse complète
+  address   String   @db.VarChar(500)
+  
+  /// Code postal
+  postalCode String  @map("postal_code") @db.VarChar(10)
+  
+  /// Ville
+  city      String   @db.VarChar(255)
+  
+  /// Territoire (pour comparaisons et statistiques)
+  /// DOM/COM/France hexagonale
+  territory Territory
+  
+  /// Latitude (pour géolocalisation)
+  latitude  Float?   @db.DoublePrecision
+  
+  /// Longitude (pour géolocalisation)
+  longitude Float?   @db.DoublePrecision
+  
+  /// Magasin actif ou fermé
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Prix associés au magasin
+  prices    Price[]
+
+  @@index([brandId])
+  @@index([territory])
+  @@index([city])
+  @@index([isActive])
+  @@map("stores")
+}
+
+/// Territoire géographique
+/// Pour segmentation et comparaisons de prix
+enum Territory {
+  /// France hexagonale (métropole)
+  FRANCE_HEXAGONALE
+  
+  /// Départements d'Outre-Mer
+  DOM
+  
+  /// Collectivités d'Outre-Mer
+  COM
+}
+
+/// Produit
+/// Représente un produit vendu par une enseigne
+/// Peut avoir plusieurs prix (un par magasin)
+model Product {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Enseigne propriétaire
+  /// Un produit ne peut être créé que par une enseigne validée
+  brandId   String   @map("brand_id")
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  
+  /// Nom du produit
+  name      String   @db.VarChar(255)
+  
+  /// Catégorie produit
+  category  String   @db.VarChar(100)
+  
+  /// Code-barres EAN/GTIN (si disponible)
+  /// Permet l'identification unique inter-enseignes
+  barcode   String?  @db.VarChar(50)
+  
+  /// Description du produit
+  description String? @db.Text
+  
+  /// Image URL (optionnel)
+  imageUrl  String?  @map("image_url") @db.VarChar(500)
+  
+  /// Produit actif ou retiré du catalogue
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Prix du produit (historique et actuels)
+  prices    Price[]
+  
+  /// Prédictions de prix
+  predictions PricePrediction[]
+
+  @@index([brandId])
+  @@index([category])
+  @@index([barcode])
+  @@index([isActive])
+  @@map("products")
+}
+
+/// Prix d'un produit dans un magasin
+/// Historique complet - aucune suppression autorisée
+/// 
+/// Règles strictes:
+/// - Chaque modification de prix crée une nouvelle entrée
+/// - Historique conservé indéfiniment pour traçabilité
+/// - Détection automatique d'anomalies (variations > seuil)
+/// - Audit obligatoire de toute modification
+model Price {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Produit concerné
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  
+  /// Magasin concerné
+  storeId   String   @map("store_id")
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  
+  /// Prix (en centimes d'euro pour éviter problèmes de précision)
+  /// Ex: 1599 = 15,99€
+  price     Int
+  
+  /// Devise (ISO 4217)
+  currency  String   @default("EUR") @db.VarChar(3)
+  
+  /// Source de la donnée prix
+  /// MANUAL: Saisie manuelle par l'enseigne
+  /// API: Import via API
+  /// INSTITUTION: Relevé institutionnel (vérification)
+  source    PriceSource @default(MANUAL)
+  
+  /// Date d'effet du prix
+  /// Permet de planifier des changements de prix futurs
+  effectiveDate DateTime @map("effective_date")
+  
+  /// Date de création de l'enregistrement
+  /// RGPD: Traçabilité complète
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([storeId])
+  @@index([effectiveDate])
+  @@index([createdAt])
+  @@map("prices")
+}
+
+/// Source d'un prix
+enum PriceSource {
+  /// Saisie manuelle par l'enseigne
+  MANUAL
+  
+  /// Import automatique via API
+  API
+  
+  /// Relevé institutionnel (contrôle, vérification)
+  INSTITUTION
+}
+
+/// Prédiction de prix par IA
+/// RÈGLES JURIDIQUES STRICTES:
+/// - ❌ PAS de promesse de prix futur
+/// - ❌ PAS de conseil financier
+/// - ✅ Indication probabiliste uniquement
+/// - ✅ Mention obligatoire "aide à la décision"
+/// - ✅ Historique conservé pour auditabilité
+/// 
+/// Conformité:
+/// - Code de la consommation (pratiques commerciales trompeuses)
+/// - Règlement (UE) 2016/679 (RGPD) - Art. 22 (décision automatisée)
+model PricePrediction {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Produit concerné
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  /// Territoire concerné
+  territory Territory
+  
+  /// Prix actuel moyen (référence)
+  currentPrice Int    @map("current_price")
+  
+  /// Prix prédit (en centimes)
+  predictedPrice Int  @map("predicted_price")
+  
+  /// Score de confiance (0.0 à 1.0)
+  /// Indique la fiabilité de la prédiction
+  confidenceScore Float @map("confidence_score") @db.DoublePrecision
+  
+  /// Version du modèle IA utilisé
+  /// Permet traçabilité et reproductibilité
+  modelVersion String @map("model_version") @db.VarChar(50)
+  
+  /// Horizon de prédiction (en jours)
+  /// Ex: 7 = prédiction à 7 jours
+  horizonDays Int    @map("horizon_days")
+  
+  /// Date de création de la prédiction
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([territory])
+  @@index([createdAt])
+  @@map("price_predictions")
+}
+
+/// Abonnement d'une enseigne
+/// Gère la monétisation B2B de la plateforme
+/// 
+/// Règles métier:
+/// - Abonnement obligatoire pour publier produits/prix
+/// - Facturation automatique selon billingCycle
+/// - Suspension automatique en cas de non-paiement
+model Subscription {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Enseigne abonnée
+  brandId   String   @map("brand_id")
+  brand     Brand    @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  
+  /// Plan d'abonnement
+  /// BASIC: Fonctionnalités limitées
+  /// PRO: Fonctionnalités étendues + API
+  /// INSTITUTION: Accès complet + support premium
+  plan      SubscriptionPlan
+  
+  /// Prix de l'abonnement (en centimes/mois)
+  price     Int
+  
+  /// Cycle de facturation
+  /// MONTHLY, QUARTERLY, YEARLY
+  billingCycle String @map("billing_cycle") @db.VarChar(20)
+  
+  /// Statut de l'abonnement
+  status    SubscriptionStatus @default(ACTIVE)
+  
+  /// Date de début
+  startedAt DateTime @map("started_at")
+  
+  /// Date de fin (null = abonnement actif indéfiniment)
+  endsAt    DateTime? @map("ends_at")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Factures associées
+  invoices  Invoice[]
+
+  @@index([brandId])
+  @@index([plan])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+/// Plan d'abonnement
+enum SubscriptionPlan {
+  /// Plan basique (limité)
+  BASIC
+  
+  /// Plan professionnel (étendu)
+  PRO
+  
+  /// Plan institutionnel (complet)
+  INSTITUTION
+}
+
+/// Statut d'abonnement
+enum SubscriptionStatus {
+  /// Actif
+  ACTIVE
+  
+  /// Annulé (par l'utilisateur)
+  CANCELLED
+  
+  /// Suspendu (non-paiement, etc.)
+  SUSPENDED
+  
+  /// Expiré
+  EXPIRED
+}
+
+/// Facture
+/// Générée automatiquement selon le cycle de facturation
+/// Traçabilité complète des paiements
+model Invoice {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Abonnement concerné
+  subscriptionId String @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  
+  /// Montant (en centimes)
+  amount    Int
+  
+  /// Devise
+  currency  String   @default("EUR") @db.VarChar(3)
+  
+  /// Statut de la facture
+  status    InvoiceStatus @default(PENDING)
+  
+  /// Numéro de facture (unique, généré automatiquement)
+  invoiceNumber String @unique @map("invoice_number") @db.VarChar(50)
+  
+  /// Date d'émission
+  issuedAt  DateTime @map("issued_at")
+  
+  /// Date d'échéance
+  dueAt     DateTime @map("due_at")
+  
+  /// Date de paiement (null si non payée)
+  paidAt    DateTime? @map("paid_at")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([issuedAt])
+  @@map("invoices")
+}
+
+/// Statut de facture
+enum InvoiceStatus {
+  /// En attente de paiement
+  PENDING
+  
+  /// Payée
+  PAID
+  
+  /// Annulée
+  CANCELLED
+  
+  /// En retard
+  OVERDUE
+}
+
+/// Demande de devis
+/// Pour entreprises PRO et institutions
+/// Permet demandes personnalisées
+model QuoteRequest {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Type de demandeur
+  requesterType RequesterType @map("requester_type")
+  
+  /// Email du demandeur
+  email     String   @db.VarChar(255)
+  
+  /// Nom de l'entreprise/institution
+  companyName String @map("company_name") @db.VarChar(255)
+  
+  /// Besoins détaillés
+  needs     String   @db.Text
+  
+  /// Volume estimé (nombre de produits, magasins, etc.)
+  estimatedVolume String? @map("estimated_volume") @db.VarChar(255)
+  
+  /// Territoire(s) concerné(s)
+  territory Territory?
+  
+  /// Statut de la demande
+  status    QuoteStatus @default(PENDING)
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  /// Date de dernière mise à jour
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  /// Devis généré (si disponible)
+  quote     Quote?
+
+  @@index([status])
+  @@index([requesterType])
+  @@map("quote_requests")
+}
+
+/// Type de demandeur de devis
+enum RequesterType {
+  /// Entreprise professionnelle
+  PRO
+  
+  /// Institution publique
+  INSTITUTION
+}
+
+/// Statut de demande de devis
+enum QuoteStatus {
+  /// En attente de traitement
+  PENDING
+  
+  /// Devis envoyé
+  SENT
+  
+  /// Devis accepté
+  ACCEPTED
+  
+  /// Devis rejeté
+  REJECTED
+}
+
+/// Devis généré
+/// Réponse à une QuoteRequest
+/// Génération par règles IA déterministes (pas d'hallucination)
+model Quote {
+  /// Identifiant unique
+  id        String   @id @default(uuid())
+  
+  /// Demande de devis associée
+  quoteRequestId String @unique @map("quote_request_id")
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Restrict)
+  
+  /// Montant proposé (en centimes)
+  amount    Int
+  
+  /// Devise
+  currency  String   @default("EUR") @db.VarChar(3)
+  
+  /// Détails du devis (JSON)
+  /// Inclut: breakdown, options, conditions
+  details   String   @db.Text
+  
+  /// Généré par IA ou manuellement
+  generatedByAI Boolean @default(true) @map("generated_by_ai")
+  
+  /// Version du modèle IA (si applicable)
+  modelVersion String? @map("model_version") @db.VarChar(50)
+  
+  /// Date de validité du devis
+  validUntil DateTime @map("valid_until")
+  
+  /// Date d'acceptation (null si non accepté)
+  acceptedAt DateTime? @map("accepted_at")
+  
+  /// Date de création
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([quoteRequestId])
+  @@map("quotes")
 }
