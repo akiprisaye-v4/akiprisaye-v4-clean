@@ -9,7 +9,7 @@
 - **DOM** (Guadeloupe, Martinique, Guyane, La Réunion, Mayotte)
 - **ROM / COM** (Saint-Martin, Saint-Barthélemy, Polynésie française, Nouvelle-Calédonie, Wallis-et-Futuna, Saint-Pierre-et-Miquelon, Terres australes, etc.)
 
-Le projet repose exclusivement sur des données réelles, vérifiables et sourcées, avec une architecture moderne, scalable et sécurisée.
+Le projet repose exclusivement sur des données réelles, vérifiables et sourcées, avec une architecture moderne, évolutive et sécurisée.
 
 ---
 
