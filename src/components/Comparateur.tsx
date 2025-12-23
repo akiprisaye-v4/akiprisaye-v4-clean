@@ -16,6 +16,8 @@ type Price = {
   date: Timestamp;
 };
 
+feat(Comparateur): connect to Firestore products/prices and display results
+
 type Product = {
   id: string;
   name: string;
