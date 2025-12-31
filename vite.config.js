@@ -1,53 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { fileURLToPath, URL } from 'node:url';
+
+// ESM-safe __dirname / __filename (Termux + Node + Vite)
+// (vite.config.js est exécuté par Node en ESM, pas dans le navigateur)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
-  
-  // Configuration des alias de chemin
+
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  
-  // Configuration des assets
-  assetsInclude: ['**/*.webp', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg'],
-  
-  // Configuration du serveur de développement
-  server: {
-    port: 5173,
-    host: true,
-    fs: {
-      strict: false,
-    },
-  },
-  
-  // Configuration du build
-  build: {
-    outDir: 'dist',
-    // Use a lowercase assets directory to avoid case-sensitivity issues between 'Assets' and 'assets'
-    assetsDir: 'assets',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        // Place images under assets/images and other assets under assets/
-        assetFileNames: (assetInfo) => {
-          if (/\.(webp|png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
-            return 'assets/images/[name].[hash][extname]';
-          }
-          return 'assets/[name].[hash][extname]';
-        },
-      },
-    },
-  },
-  
-  // Configuration des chemins publics
-  publicDir: 'public',
-  
-  // Optimisation des dépendances
-  optimizeDeps: {
-    include: ['react', 'react-dom'],
-  },
+
+  // Optionnel: si tu utilises Cloudflare Pages avec SPA routes
+  // (sinon, laisse tel quel)
+  // base: '/',
 });
