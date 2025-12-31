@@ -1,25 +1,55 @@
-/**
- * Router configuration for simplified automatic pages
- * 
- * This router demonstrates the intended routing structure for the simplified pages.
- * Currently, the app uses the routing defined in main.jsx for compatibility with
- * the existing layout and navigation structure.
- * 
- * To use this router, replace the routing in main.jsx with:
- * import { RouterProvider } from "react-router-dom";
- * import { router } from "./router";
- * 
- * Then render: <RouterProvider router={router} />
- */
 import { createBrowserRouter } from "react-router-dom";
+
 import Home from "./pages/Home";
-import Compare from "./pages/Compare";
-import News from "./pages/News";
-import Pricing from "./pages/Pricing";
+import Comparateur from "./pages/Comparateur";
+import Carte from "./pages/Carte";
+import ScanOCR from "./pages/ScanOCR";
+import ListeCourses from "./pages/ListeCourses";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/comparer", element: <Compare /> },
-  { path: "/actualites", element: <News /> },
-  { path: "/tarifs", element: <Pricing /> }
+  {
+    path: "/",
+    element: (
+      <>
+        {/* 🔴 MARQUEUR VISUEL DE TEST */}
+        <div
+          style={{
+            background: "red",
+            color: "white",
+            padding: "12px",
+            fontWeight: "bold",
+            textAlign: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 99999,
+          }}
+        >
+          ROUTER ACTIF – HOME CONNECTÉ – 31/12/2025
+        </div>
+
+        <div style={{ paddingTop: "60px" }}>
+          <Home />
+        </div>
+      </>
+    ),
+  },
+
+  {
+    path: "/comparateur",
+    element: <Comparateur />,
+  },
+  {
+    path: "/carte",
+    element: <Carte />,
+  },
+  {
+    path: "/scanner",
+    element: <ScanOCR />,
+  },
+  {
+    path: "/liste-courses",
+    element: <ListeCourses />,
+  },
 ]);
