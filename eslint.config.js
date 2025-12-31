@@ -1,20 +1,9 @@
-import js from '@eslint/js';
-import react from 'eslint-plugin-react';
-
-/**
- * ESLint Flat Config
- * Compatible:
- * - Termux / Node ESM
- * - Vite / React 17+ / JSX
- * - Cloudflare Pages
- *
- * Objectif:
- * - Zéro erreur bloquante
- * - Warnings utiles uniquement
- * - Aucun hack, aucune suppression abusive
- */
+import js from '@eslint/js'
+import globals from 'globals'
+import react from 'eslint-plugin-react'
 
 export default [
+
   // =========================
   // GLOBAL IGNORES
   // =========================
@@ -24,97 +13,128 @@ export default [
       'dist/**',
       'build/**',
       '.firebase/**',
-      '*.min.js',
-
-      // fichiers Node / tooling (hors navigateur)
-      'vite.config.js',
-      'postcss.config.js',
-      'tailwind.config.js',
-
-      // archives / exports divers
-      'akiprisaye_web/**',
-      'akiprisaye_web_final_full_*/**',
-      'test_extract/**',
-      'SentinelQuantumVanguardAIPro/**',
-    ],
+      'coverage/**'
+    ]
   },
 
   // =========================
-  // BASE ESLINT RECOMMANDÉ
-  // =========================
-  js.configs.recommended,
-
-  // =========================
-  // CODE NAVIGATEUR / REACT
+  // REACT / BROWSER (Vite)
   // =========================
   {
-    files: ['**/*.js', '**/*.jsx'],
+    files: ['src/**/*.{js,jsx}', 'src/**/*.jsx'],
+    plugins: { react },
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
       globals: {
-        // Browser
-        window: 'readonly',
-        document: 'readonly',
-        navigator: 'readonly',
-        fetch: 'readonly',
-        URL: 'readonly',
-
-        // Timers
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-
-        // Console autorisée (warning uniquement)
-        console: 'readonly',
-      },
+        ...globals.browser,
+        localStorage: 'readonly',
+        alert: 'readonly',
+        Blob: 'readonly',
+        Event: 'readonly'
+      }
     },
-
-    plugins: {
-      react,
-    },
-
     rules: {
-      /**
-       * React 17+ JSX transform
-       * => plus besoin d'import React
-       */
+      ...js.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
-
-      /**
-       * Console autorisée mais surveillée
-       */
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-
-      /**
-       * Variables inutilisées:
-       * - warning uniquement
-       * - arguments préfixés "_" ignorés
-       */
-      'no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
-
-      /**
-       * Debugger interdit en prod
-       */
-      'no-debugger': 'warn',
-    },
-
-    settings: {
-      react: {
-        version: 'detect',
-      },
-    },
+      'no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }]
+    }
   },
-];
+
+  // =========================
+  // SERVICE WORKERS (PWA)
+  // =========================
+  {
+    files: ['**/service-worker.js', '**/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        Request: 'readonly',
+        Response: 'readonly',
+        fetch: 'readonly'
+      }
+    }
+  },
+
+  // =========================
+  // CHROME EXTENSION
+  // =========================
+  {
+    files: ['extension/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        chrome: 'readonly',
+        MutationObserver: 'readonly',
+        URLSearchParams: 'readonly',
+        AbortController: 'readonly'
+      }
+    }
+  },
+
+  // =========================
+  // NODE ESM (SCRIPTS .mjs)
+  // =========================
+  {
+    files: ['scripts/**/*.mjs', '*.mjs'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        fetch: 'readonly',
+        setTimeout: 'readonly',
+        console: 'readonly'
+      }
+    }
+  },
+
+  // =========================
+  // NODE COMMONJS (SCRIPTS / FUNCTIONS)
+  // =========================
+  {
+    files: ['scripts/**/*.js', 'functions/**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        process: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly'
+      }
+    }
+  },
+
+  // =========================
+  // CLOUDflare WORKERS
+  // =========================
+  {
+    files: ['functions/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: {
+        Request: 'readonly',
+        Response: 'readonly',
+        fetch: 'readonly'
+      }
+    }
+  },
+
+  // =========================
+  // VITE CONFIG
+  // =========================
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        __dirname: 'readonly'
+      }
+    }
+  }
+
+]
