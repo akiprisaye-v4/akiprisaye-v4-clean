@@ -1,24 +1,23 @@
-
 import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 
 /**
  * ESLint Flat Config
- * Compatible :
- * - Browser / React (JSX)
- * - Node / Vite (ESM)
- * - Termux / Linux
+ * Compatible:
+ * - Termux / Node ESM
+ * - Vite / React 17+ / JSX
+ * - Cloudflare Pages
+ *
+ * Objectif:
+ * - Zéro erreur bloquante
+ * - Warnings utiles uniquement
+ * - Aucun hack, aucune suppression abusive
  */
 
 export default [
-  // =====================================================
-  // Base ESLint recommended
-  // =====================================================
-  js.configs.recommended,
-
-  // =====================================================
-  // Global ignores
-  // =====================================================
+  // =========================
+  // GLOBAL IGNORES
+  // =========================
   {
     ignores: [
       'node_modules/**',
@@ -26,8 +25,13 @@ export default [
       'build/**',
       '.firebase/**',
       '*.min.js',
-      'public/assets/**',
-      'Assets/**',
+
+      // fichiers Node / tooling (hors navigateur)
+      'vite.config.js',
+      'postcss.config.js',
+      'tailwind.config.js',
+
+      // archives / exports divers
       'akiprisaye_web/**',
       'akiprisaye_web_final_full_*/**',
       'test_extract/**',
@@ -35,9 +39,14 @@ export default [
     ],
   },
 
-  // =====================================================
-  // Main Browser / React code
-  // =====================================================
+  // =========================
+  // BASE ESLINT RECOMMANDÉ
+  // =========================
+  js.configs.recommended,
+
+  // =========================
+  // CODE NAVIGATEUR / REACT
+  // =========================
   {
     files: ['**/*.js', '**/*.jsx'],
     languageOptions: {
@@ -49,14 +58,12 @@ export default [
         },
       },
       globals: {
-        // Browser globals
+        // Browser
         window: 'readonly',
         document: 'readonly',
         navigator: 'readonly',
         fetch: 'readonly',
         URL: 'readonly',
-        Event: 'readonly',
-        localStorage: 'readonly',
 
         // Timers
         setTimeout: 'readonly',
@@ -64,42 +71,49 @@ export default [
         setInterval: 'readonly',
         clearInterval: 'readonly',
 
-        // Console (controlled by rule)
+        // Console autorisée (warning uniquement)
         console: 'readonly',
       },
     },
+
     plugins: {
       react,
     },
+
     rules: {
-      // React 17+ JSX transform
+      /**
+       * React 17+ JSX transform
+       * => plus besoin d'import React
+       */
       'react/react-in-jsx-scope': 'off',
 
-      // Controlled console usage
+      /**
+       * Console autorisée mais surveillée
+       */
       'no-console': ['warn', { allow: ['warn', 'error'] }],
 
-      // Unused vars: warnings only, ignore "_" prefixed args
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      /**
+       * Variables inutilisées:
+       * - warning uniquement
+       * - arguments préfixés "_" ignorés
+       */
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
 
-      // Debugger warning only
+      /**
+       * Debugger interdit en prod
+       */
       'no-debugger': 'warn',
     },
+
     settings: {
       react: {
         version: 'detect',
-      },
-    },
-  },
-
-  // =====================================================
-  // Node / Vite config (vite.config.js)
-  // =====================================================
-  {
-    files: ['vite.config.js'],
-    languageOptions: {
-      globals: {
-        __dirname: 'readonly',
-        process: 'readonly',
       },
     },
   },
