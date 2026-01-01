@@ -22,7 +22,9 @@ try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
-  console.log('✅ Firebase initialized successfully');
+  if (import.meta.env.DEV) {
+    console.log('✅ Firebase initialized successfully');
+  }
 } catch (error: any) {
   console.warn('⚠️ Firebase disabled - app running without backend:', error?.code || error?.message);
   // Services remain null - app will continue to function
