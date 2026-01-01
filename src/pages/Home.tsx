@@ -4,19 +4,30 @@ export default function Home() {
   return (
     <div className="space-y-6">
 
-      {/* 🔴 TEST VISUEL FORCE – À SUPPRIMER APRÈS VALIDATION */}
+      {/* 🟢 Version Client Officielle v1.0 */}
       <div
         style={{
-          background: "red",
-          color: "white",
-          padding: "16px",
+          background: "#0f172a",
+          border: "1px solid #1e293b",
+          borderRadius: "12px",
+          padding: "12px 16px",
+          margin: "16px auto",
+          maxWidth: "520px",
           textAlign: "center",
-          fontSize: "18px",
-          fontWeight: "bold",
-          borderRadius: "8px",
+          fontSize: "14px",
+          color: "#e5e7eb",
         }}
       >
-        VERSION TEST HOME – 31/12/2025
+        🟢 <strong>Version Client Officielle v1.0</strong><br />
+        Plateforme publique stable – données vérifiées<br />
+        <a
+          href="https://github.com/teetee971/akiprisaye-web/releases/tag/v1.0"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#60a5fa", textDecoration: "underline" }}
+        >
+          Voir la version de référence
+        </a>
       </div>
 
       {/* Carte principale */}
@@ -25,7 +36,7 @@ export default function Home() {
           Comparateur de prix citoyen – DOM-ROM-COM
         </h1>
         <p className="text-gray-300 mt-2">
-          Données publiques, transparence totale, aucun suivi commercial.
+          Comparez les prix réels dans les DOM-COM et suivez l’évolution des produits du quotidien.
         </p>
       </GlassCard>
 
