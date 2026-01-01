@@ -23,6 +23,15 @@ import type {
 import type { Territory, DataSource } from '../types/priceAlerts';
 
 /**
+ * Configuration constants for price comparison service
+ */
+const PRICE_COMPARISON_CONFIG = {
+  AVERAGE_PRICE_TOLERANCE_PERCENT: 5,  // Tolerance for 'average' category (±5%)
+  MIN_COVERAGE_WARNING_PERCENT: 50,    // Warn if coverage below 50%
+  MAX_PRICE_AGE_WARNING_DAYS: 30,      // Warn if prices older than 30 days
+} as const;
+
+/**
  * Compare prices for a product across stores in a territory
  * Read-only operation - does not modify any data
  */
@@ -52,9 +61,11 @@ export function comparePricesByEAN(
   const rankings = rankStorePrices(sortedPrices, aggregation);
 
   // Extract product information from first price point
+  // Note: productName should ideally be fetched from a product database service
+  // For now, it's left empty and should be populated by the caller if needed
   const product: ProductIdentifier = {
     ean: ean,
-    productName: '', // Should be populated from product database
+    productName: '', // TODO: Fetch from product database service
     category: undefined,
     brand: undefined,
   };
@@ -146,7 +157,7 @@ export function rankStorePrices(
       priceCategory = 'most_expensive';
     } else if (storePrice.price < averagePrice) {
       priceCategory = 'below_average';
-    } else if (Math.abs(percentageDiffFromAverage) < 5) {
+    } else if (Math.abs(percentageDiffFromAverage) < PRICE_COMPARISON_CONFIG.AVERAGE_PRICE_TOLERANCE_PERCENT) {
       priceCategory = 'average';
     } else {
       priceCategory = 'above_average';
@@ -201,13 +212,13 @@ export function generateComparisonMetadata(
 
   // Generate warnings
   const warnings: string[] = [];
-  if (coveragePercentage < 50) {
-    warnings.push('Limited data coverage - less than 50% of stores have data');
+  if (coveragePercentage < PRICE_COMPARISON_CONFIG.MIN_COVERAGE_WARNING_PERCENT) {
+    warnings.push(`Limited data coverage - less than ${PRICE_COMPARISON_CONFIG.MIN_COVERAGE_WARNING_PERCENT}% of stores have data`);
   }
   
   const ageInDays = (Date.now() - Math.min(...dates)) / (1000 * 60 * 60 * 24);
-  if (ageInDays > 30) {
-    warnings.push('Some price data is older than 30 days');
+  if (ageInDays > PRICE_COMPARISON_CONFIG.MAX_PRICE_AGE_WARNING_DAYS) {
+    warnings.push(`Some price data is older than ${PRICE_COMPARISON_CONFIG.MAX_PRICE_AGE_WARNING_DAYS} days`);
   }
 
   return {
