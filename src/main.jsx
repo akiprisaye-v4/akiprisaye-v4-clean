@@ -23,6 +23,7 @@ const Methodologie = lazy(() => import('./pages/Methodologie'));
 const MentionsLegales = lazy(() => import('./pages/MentionsLegales'));
 const MonCompte = lazy(() => import('./pages/MonCompte'));
 const Pricing = lazy(() => import('./pages/Pricing'));
+const PricingDetailed = lazy(() => import('./pages/PricingDetailed'));
 const Subscribe = lazy(() => import('./pages/Subscribe'));
 const LicenceInstitution = lazy(() => import('./pages/LicenceInstitution'));
 const ContactCollectivites = lazy(() => import('./pages/ContactCollectivites'));
@@ -101,6 +102,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='mentions-legales' element={<MentionsLegales />} />
                   <Route path='mon-compte' element={<MonCompte />} />
                   <Route path='pricing' element={<Pricing />} />
+                  <Route path='pricing-detailed' element={<PricingDetailed />} />
                   <Route path='subscribe' element={<Subscribe />} />
                   <Route path='licence-institution' element={<LicenceInstitution />} />
                   <Route path='contact-collectivites' element={<ContactCollectivites />} />

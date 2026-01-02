@@ -141,16 +141,16 @@ const modules = [
 
 const contributionIndicators = [
   {
-    title: 'Accès Étendu actif',
-    description: 'Contribution citoyenne en cours',
+    title: 'Soutien actif',
+    description: 'Contribution financière au maintien du service',
   },
   {
-    title: 'Contribution citoyenne en cours',
-    description: 'Soutien au maintien du service',
+    title: 'Utilisateur observateur',
+    description: 'Usage régulier des outils de consultation',
   },
   {
-    title: 'Utilisateur observateur territorial',
-    description: 'Usage des outils d\'analyse',
+    title: 'Analyste territorial',
+    description: 'Utilisation des outils d\'analyse avancés',
   },
 ];
 

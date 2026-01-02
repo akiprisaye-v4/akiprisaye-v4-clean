@@ -67,7 +67,6 @@ export const FEATURES = {
 } as const;
 
 export type Feature = keyof typeof FEATURES;
-export type { AccessLevel };
 
 /**
  * Check if an access level has a specific feature
