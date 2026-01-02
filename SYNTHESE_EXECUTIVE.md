@@ -214,7 +214,7 @@ L'application **A KI PRI SA YÉ** est **techniquement prête** pour une présent
 **Statut final :** 🟠 **PUBLIABLE AVEC AJUSTEMENTS MINEURS**
 
 **Signature institutionnelle recommandée :**
-> "Application techniquement conforme pour diffusion institutionnelle. Remplacement des données de démonstration par données officielles requis avant diffusion publique grand public."
+> "Application techniquement conforme pour diffusion institutionnelle. Remplacement des données de démonstration par données officielles requises avant diffusion publique grand public."
 
 ---
 
