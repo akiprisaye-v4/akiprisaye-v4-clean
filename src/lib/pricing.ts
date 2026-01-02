@@ -1,126 +1,89 @@
 /**
- * Feature Access Control System
- * NO FREEMIUM - All plans are paid
- * Defines which features are available for each plan tier
+ * Access Levels System
+ * Service civique numérique - Observatoire public indépendant
+ * L'accès aux données essentielles est libre
  */
 
-export type Plan =
-  | 'CITIZEN'
-  | 'PRO'
-  | 'BUSINESS'
-  | 'ENTERPRISE'
-  | 'INSTITUTION';
+export type AccessLevel =
+  | 'PUBLIC'
+  | 'EXTENDED'
+  | 'ANALYSIS'
+  | 'INSTITUTIONAL';
 
-export const PLAN_PRICES = {
-  CITIZEN: { 
-    monthly: 4.99, 
-    yearly: 49,
-    description: 'Pour les citoyens - Accès complet aux outils de comparaison et d\'optimisation'
+export const ACCESS_LEVEL_PRICES = {
+  PUBLIC: { 
+    monthly: 0, 
+    yearly: 0,
+    description: 'Accès citoyen de base — Consultation libre des données publiques observées'
   },
-  PRO: { 
-    monthly: 19, 
-    yearly: 190,
-    description: 'Pour les enseignes & professionnels - Gestion des points de vente'
+  EXTENDED: { 
+    monthly: 2.50, 
+    yearly: 25,
+    description: 'Contribution volontaire au maintien du service'
   },
-  BUSINESS: { 
-    monthly: 99, 
-    yearly: 990,
-    description: 'Pour les professionnels - Analytics avancés et marketplace'
+  ANALYSIS: { 
+    monthly: 12, 
+    yearly: 120,
+    description: 'Accès aux outils d\'analyse pour l\'observation territoriale'
   },
-  ENTERPRISE: { 
+  INSTITUTIONAL: { 
     monthly: null, 
-    yearly: 2500,
-    description: 'Sur devis - Secteur privé, données agrégées et API'
-  },
-  INSTITUTION: { 
-    monthly: null, 
-    yearly: 500,
-    description: 'Sur devis - Secteur public, tableaux de bord institutionnels'
+    yearly: null,
+    description: 'Convention annuelle — Accès contractuel aux données publiques consolidées'
   },
 } as const;
 
 export const FEATURES = {
-  // Core Features (All paid plans)
-  PRICE_COMPARISON: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  SHOPPING_LIST: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  MAP_BASIC: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  GEOLOCATION: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  SCANNER_BASIC: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  PRICE_ALERTS: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  TREND_PREDICTIONS: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
+  // Accès Public (Gratuit pour tous)
+  PRICE_COMPARISON: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  TERRITORY_VIEW: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  PRICE_SOURCES_VISIBLE: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  BASIC_HISTORY: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  READ_ONLY_ACCESS: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  NO_ADS: ['PUBLIC', 'EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
   
-  // Citizen Features
-  MULTI_TRIP_OPTIMIZATION: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  TERRITORY_COMPARE: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  EXPORT_PDF: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  ALERTS_ADVANCED: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  OFFLINE_MODE: ['CITIZEN', 'PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
+  // Accès Étendu Citoyen
+  LOCAL_ALERTS: ['EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  EXTENDED_HISTORY: ['EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  PRODUCT_TRACKING: ['EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
+  TEMPORAL_COMPARISON: ['EXTENDED', 'ANALYSIS', 'INSTITUTIONAL'],
   
-  // Professional Features
-  STORE_MANAGEMENT: ['PRO', 'BUSINESS', 'ENTERPRISE'],
-  REALTIME_PRICE_UPDATE: ['PRO', 'BUSINESS', 'ENTERPRISE'],
-  GEO_VISIBILITY: ['PRO', 'BUSINESS', 'ENTERPRISE'],
-  CONSULTATION_STATS: ['PRO', 'BUSINESS', 'ENTERPRISE'],
-  MARKETPLACE_ACCESS: ['BUSINESS', 'ENTERPRISE'],
-  EXPORT_CSV: ['PRO', 'BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
+  // Accès Analyse Territoriale
+  MULTI_TERRITORY: ['ANALYSIS', 'INSTITUTIONAL'],
+  LONG_TIME_SERIES: ['ANALYSIS', 'INSTITUTIONAL'],
+  DOMAIN_AGGREGATION: ['ANALYSIS', 'INSTITUTIONAL'],
+  CSV_EXPORT_LIMITED: ['ANALYSIS', 'INSTITUTIONAL'],
+  METHODOLOGY_ACCESS: ['ANALYSIS', 'INSTITUTIONAL'],
   
-  // Business & Enterprise Features
-  ANALYTICS_ADVANCED: ['BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  DASHBOARDS: ['BUSINESS', 'ENTERPRISE', 'INSTITUTION'],
-  MULTI_STORE_MANAGEMENT: ['BUSINESS', 'ENTERPRISE'],
-  
-  // Enterprise & Institution Features
-  API_READ_ONLY: ['ENTERPRISE', 'INSTITUTION'],
-  TERRITORIAL_DATA: ['ENTERPRISE', 'INSTITUTION'],
-  LONG_HISTORY: ['ENTERPRISE', 'INSTITUTION'],
-  COMPARATIVE_ANALYSIS: ['ENTERPRISE', 'INSTITUTION'],
-  
-  // Institution Only
-  REPORTS_PUBLIC: ['INSTITUTION'],
-  INSTITUTIONAL_DASHBOARDS: ['INSTITUTION'],
-  REGULATED_EXPORT: ['INSTITUTION'],
-  AI_QUOTES: ['ENTERPRISE', 'INSTITUTION'],
+  // Licence Institutionnelle
+  ALL_DOMAINS: ['INSTITUTIONAL'],
+  ADVANCED_EXPORT: ['INSTITUTIONAL'],
+  CONSOLIDATED_SERIES: ['INSTITUTIONAL'],
+  GLOBAL_INDICES: ['INSTITUTIONAL'],
+  TECHNICAL_DOCUMENTATION: ['INSTITUTIONAL'],
+  PUBLIC_API: ['INSTITUTIONAL'],
+  AUDITABILITY: ['INSTITUTIONAL'],
+  TRACEABILITY: ['INSTITUTIONAL'],
 } as const;
 
 export type Feature = keyof typeof FEATURES;
+export type { AccessLevel };
 
 /**
- * Check if a plan has access to a specific feature
+ * Check if an access level has a specific feature
  */
-export const canUse = (plan: Plan, feature: Feature): boolean => {
-  return FEATURES[feature].includes(plan);
+export const canUse = (level: AccessLevel, feature: Feature): boolean => {
+  return FEATURES[feature].includes(level);
 };
 
 /**
- * Get DOM-ROM-COM territory-based pricing
- * Pricing varies by territory to reflect local economics
+ * Get pricing for an access level
  */
-export const getTerritoryPrice = (
-  plan: Plan, 
-  billingCycle: 'monthly' | 'yearly',
-  territory?: string
+export const getAccessPrice = (
+  level: AccessLevel, 
+  billingCycle: 'monthly' | 'yearly'
 ): number | null => {
-  const basePrice = PLAN_PRICES[plan][billingCycle];
-  if (basePrice === null || basePrice === 0) return basePrice;
-  
-  // Territory-specific pricing adjustments
-  const territoryMultipliers: Record<string, number> = {
-    'GP': 0.85, // Guadeloupe
-    'MQ': 0.85, // Martinique
-    'GF': 0.80, // Guyane
-    'RE': 0.90, // Réunion
-    'YT': 0.75, // Mayotte
-    'PM': 1.0,  // Saint-Pierre-et-Miquelon
-    'BL': 1.0,  // Saint-Barthélemy
-    'MF': 1.0,  // Saint-Martin
-    'WF': 0.80, // Wallis-et-Futuna
-    'PF': 0.90, // Polynésie française
-    'NC': 0.90, // Nouvelle-Calédonie
-    'TF': 1.0,  // Terres australes
-  };
-  
-  const multiplier = territory ? (territoryMultipliers[territory] || 1.0) : 1.0;
-  return Math.round(basePrice * multiplier * 100) / 100;
+  return ACCESS_LEVEL_PRICES[level][billingCycle];
 };
 
 /**
@@ -128,44 +91,36 @@ export const getTerritoryPrice = (
  */
 export const getFeatureDescription = (feature: Feature): string => {
   const descriptions: Record<Feature, string> = {
-    // Core
-    PRICE_COMPARISON: 'Comparaison de prix multi-enseignes',
-    SHOPPING_LIST: 'Liste de courses intelligente',
-    MAP_BASIC: 'Carte interactive des magasins',
-    GEOLOCATION: 'Géolocalisation opt-in',
-    SCANNER_BASIC: 'Scanner de tickets de caisse',
-    PRICE_ALERTS: 'Alertes de variation de prix',
-    TREND_PREDICTIONS: 'Prévisions de tendances (non spéculatives)',
+    // Accès Public
+    PRICE_COMPARISON: 'Comparateur citoyen DOM · ROM · COM',
+    TERRITORY_VIEW: 'Consultation par territoire',
+    PRICE_SOURCES_VISIBLE: 'Prix observés, datés et sourcés',
+    BASIC_HISTORY: 'Historique simple',
+    READ_ONLY_ACCESS: 'Lecture seule',
+    NO_ADS: 'Sans publicité',
     
-    // Citizen
-    MULTI_TRIP_OPTIMIZATION: 'Optimisation par distance/coût/territoire',
-    TERRITORY_COMPARE: 'Comparaison inter-territoires',
-    EXPORT_PDF: 'Export PDF citoyen',
-    ALERTS_ADVANCED: 'Alertes avancées personnalisées',
-    OFFLINE_MODE: 'Mode hors ligne renforcé',
+    // Accès Étendu
+    LOCAL_ALERTS: 'Alertes locales de variation de prix',
+    EXTENDED_HISTORY: 'Historique étendu (12 mois)',
+    PRODUCT_TRACKING: 'Suivi de produits / territoires',
+    TEMPORAL_COMPARISON: 'Comparaisons temporelles simples',
     
-    // Professional
-    STORE_MANAGEMENT: 'Gestion des points de vente',
-    REALTIME_PRICE_UPDATE: 'Mise à jour des prix en temps réel',
-    GEO_VISIBILITY: 'Visibilité géolocalisée',
-    CONSULTATION_STATS: 'Statistiques de consultation',
-    MARKETPLACE_ACCESS: 'Intégration marketplace',
-    EXPORT_CSV: 'Export CSV pour analyses',
+    // Accès Analyse
+    MULTI_TERRITORY: 'Comparaisons multi-territoires',
+    LONG_TIME_SERIES: 'Séries temporelles longues',
+    DOMAIN_AGGREGATION: 'Agrégation par domaine (alimentation, énergie, mobilité…)',
+    CSV_EXPORT_LIMITED: 'Exports CSV limités',
+    METHODOLOGY_ACCESS: 'Méthodologie détaillée',
     
-    // Business
-    ANALYTICS_ADVANCED: 'Analytics avancés',
-    DASHBOARDS: 'Tableaux de bord personnalisés',
-    MULTI_STORE_MANAGEMENT: 'Gestion multi-points de vente',
-    
-    // Enterprise/Institution
-    API_READ_ONLY: 'Accès API sécurisé (lecture)',
-    TERRITORIAL_DATA: 'Données agrégées territoriales',
-    LONG_HISTORY: 'Historique longue durée',
-    COMPARATIVE_ANALYSIS: 'Analyses comparatives inter-zones',
-    REPORTS_PUBLIC: 'Rapports publics institutionnels',
-    INSTITUTIONAL_DASHBOARDS: 'Tableaux de bord institutionnels',
-    REGULATED_EXPORT: 'Export de données réglementé',
-    AI_QUOTES: 'Devis générés par IA',
+    // Licence Institutionnelle
+    ALL_DOMAINS: 'Tous les domaines agrégés',
+    ADVANCED_EXPORT: 'Export open-data avancé (CSV / JSON)',
+    CONSOLIDATED_SERIES: 'Séries consolidées multi-services',
+    GLOBAL_INDICES: 'Accès indices globaux',
+    TECHNICAL_DOCUMENTATION: 'Documentation technique',
+    PUBLIC_API: 'API publique',
+    AUDITABILITY: 'Auditabilité complète',
+    TRACEABILITY: 'Transparence méthodologique',
   };
   
   return descriptions[feature];
@@ -173,8 +128,8 @@ export const getFeatureDescription = (feature: Feature): string => {
 
 export default {
   canUse,
-  getTerritoryPrice,
+  getAccessPrice,
   getFeatureDescription,
-  PLAN_PRICES,
+  ACCESS_LEVEL_PRICES,
   FEATURES,
 };
