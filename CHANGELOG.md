@@ -5,7 +5,12 @@ Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) 
 
 ## [Unreleased]
 ### Added
-- Feature flags Vite: `VITE_FEATURE_FUZZY_SEARCH` (par défaut true), `VITE_FEATURE_TRENDING` (par défaut false).
+- Feature flags Vite: `VITE_FEATURE_FUZZY_SEARCH` (par défaut true), `VITE_FEATURE_TRENDING` (par défaut false), `VITE_FEATURE_PRICE_COMPARISON` (par défaut false).
+- **v1.4.0 - Comparateur de Prix Citoyen**: Comparaison multi-enseignes par territoire avec correspondance EAN, agrégation transparente, classement du moins cher au plus cher, et calculs d'écarts en pourcentage.
+- Types TypeScript stricts pour la comparaison de prix (`src/types/priceComparison.ts`).
+- Service de comparaison de prix production-ready (`src/services/priceComparisonService.ts`).
+- Documentation méthodologique complète (`METHODOLOGIE_COMPARATEUR_v1.4.0.md`).
+- Tests unitaires complets pour le service de comparaison (41 tests).
 - Règles d'alerting Prometheus initiales (taux d'erreurs, latence p95, zero-results spike).
 
 ### Changed

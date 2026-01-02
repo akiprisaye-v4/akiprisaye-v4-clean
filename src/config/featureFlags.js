@@ -10,3 +10,4 @@ function toBool(val, fallback) {
 
 export const FEATURE_FUZZY_SEARCH = toBool(import.meta.env.VITE_FEATURE_FUZZY_SEARCH, true);
 export const FEATURE_TRENDING = toBool(import.meta.env.VITE_FEATURE_TRENDING, false);
+export const FEATURE_PRICE_COMPARISON = toBool(import.meta.env.VITE_FEATURE_PRICE_COMPARISON, false);
