@@ -162,10 +162,7 @@ export interface AdditiveInsight {
   /** Function in product */
   function: string;
   
-  /** Risk classification (if documented) */
-  riskClassification?: string;
-  
-  /** Regulatory notes */
+  /** Regulatory notes (factual status from official sources) */
   regulatoryNotes: string;
   
   /** Status by country */

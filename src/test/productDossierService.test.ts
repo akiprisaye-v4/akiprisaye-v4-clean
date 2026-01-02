@@ -447,7 +447,7 @@ describe('Product Dossier Service', () => {
       expect(quality.warnings!.length).toBeGreaterThan(0);
     });
     
-    it('should generate recommendations', async () => {
+    it('should generate quality notes', async () => {
       const dossier = await addAnalysisToDossier(
         mockProductInsight.ean,
         mockProductInsight,
@@ -456,8 +456,8 @@ describe('Product Dossier Service', () => {
       
       const quality = calculateDataQuality(dossier);
       
-      expect(quality.recommendations).toBeDefined();
-      expect(quality.recommendations!.length).toBeGreaterThan(0);
+      expect(quality.qualityNotes).toBeDefined();
+      expect(quality.qualityNotes!.length).toBeGreaterThan(0);
     });
   });
   

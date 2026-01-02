@@ -266,13 +266,13 @@ export function calculateDataQuality(dossier: ProductDossier): DataQualityInsigh
     warnings.push('Peu d\'observations - fiabilité limitée');
   }
   
-  // Generate recommendations
-  const recommendations: string[] = [];
+  // Generate quality notes (factual options, not prescriptive)
+  const qualityNotes: string[] = [];
   if (dossier.analysisHistory.length < 5) {
-    recommendations.push('Scanner à nouveau pour améliorer la fiabilité');
+    qualityNotes.push('Plus d\'observations disponibles en scannant à nouveau');
   }
   if (!crossSourceConsistency) {
-    recommendations.push('Vérifier avec une autre source');
+    qualityNotes.push('Vérification par source alternative possible');
   }
   
   return {
@@ -283,7 +283,7 @@ export function calculateDataQuality(dossier: ProductDossier): DataQualityInsigh
     dataCompleteness,
     verificationStatus: determineVerificationStatus(dossier, crossSourceConsistency),
     warnings: warnings.length > 0 ? warnings : undefined,
-    recommendations: recommendations.length > 0 ? recommendations : undefined,
+    qualityNotes: qualityNotes.length > 0 ? qualityNotes : undefined,
   };
 }
 
@@ -588,8 +588,8 @@ function createReformulationEvent(
     type = 'additive_change';
   }
   
-  // Assess impact
-  const impact = assessReformulationImpact(delta);
+  // Describe observed changes (factual, no evaluation)
+  const observedChanges = describeObservedChanges(delta);
   
   return {
     detectedAt: new Date().toISOString(),
@@ -597,32 +597,32 @@ function createReformulationEvent(
     type,
     delta,
     isSilent: true, // Assume silent unless proven otherwise
-    impact,
+    observedChanges,
   };
 }
 
-function assessReformulationImpact(delta: ProductDelta): ReformulationEvent['impact'] {
-  let nutritional: 'positive' | 'negative' | 'neutral' | 'mixed' = 'neutral';
+function describeObservedChanges(delta: ProductDelta): ReformulationEvent['observedChanges'] {
+  let nutritional: 'increase' | 'decrease' | 'stable' | 'mixed' = 'stable';
   
   if (delta.nutritionalChanges) {
-    let positiveChanges = 0;
-    let negativeChanges = 0;
+    let increases = 0;
+    let decreases = 0;
     
     // Check sugar change
     if (delta.nutritionalChanges.sugars) {
-      if (delta.nutritionalChanges.sugars.percentChange < -5) positiveChanges++;
-      if (delta.nutritionalChanges.sugars.percentChange > 5) negativeChanges++;
+      if (delta.nutritionalChanges.sugars.percentChange < -5) decreases++;
+      if (delta.nutritionalChanges.sugars.percentChange > 5) increases++;
     }
     
     // Check salt change
     if (delta.nutritionalChanges.salt) {
-      if (delta.nutritionalChanges.salt.percentChange < -5) positiveChanges++;
-      if (delta.nutritionalChanges.salt.percentChange > 5) negativeChanges++;
+      if (delta.nutritionalChanges.salt.percentChange < -5) decreases++;
+      if (delta.nutritionalChanges.salt.percentChange > 5) increases++;
     }
     
-    if (positiveChanges > negativeChanges) nutritional = 'positive';
-    else if (negativeChanges > positiveChanges) nutritional = 'negative';
-    else if (positiveChanges > 0 && negativeChanges > 0) nutritional = 'mixed';
+    if (increases > decreases) nutritional = 'increase';
+    else if (decreases > increases) nutritional = 'decrease';
+    else if (increases > 0 && decreases > 0) nutritional = 'mixed';
   }
   
   return {

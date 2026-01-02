@@ -252,8 +252,8 @@ export interface DataQualityInsight {
   /** Warnings about data quality */
   warnings?: string[];
   
-  /** Recommendations for improving data quality */
-  recommendations?: string[];
+  /** Quality improvement options (factual, not prescriptive) */
+  qualityNotes?: string[];
 }
 
 /**
@@ -275,10 +275,10 @@ export interface ReformulationEvent {
   /** Is this a silent reformulation (no declaration) */
   isSilent: boolean;
   
-  /** Impact assessment */
-  impact: {
-    nutritional: 'positive' | 'negative' | 'neutral' | 'mixed';
-    transparency: 'improved' | 'degraded' | 'unchanged';
+  /** Observed changes (factual description, no evaluation) */
+  observedChanges: {
+    nutritional: 'increase' | 'decrease' | 'stable' | 'mixed';
+    transparency: 'more_detailed' | 'less_detailed' | 'unchanged';
   };
 }
 
