@@ -51,6 +51,10 @@ const CompareSimple = lazy(() => import('./pages/Compare.tsx'));
 const NewsSimple = lazy(() => import('./pages/News.tsx'));
 const PricingSimple = lazy(() => import('./pages/Pricing.tsx'));
 
+// PR #1 - Assistant + FAQ étendue (v1.6.0)
+const Faq = lazy(() => import('./pages/Faq'));
+const AssistantChat = lazy(() => import('./components/AssistantChat'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -128,9 +132,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='comparer' element={<CompareSimple />} />
                   <Route path='tarifs' element={<PricingSimple />} />
                   
+                  {/* PR #1 - Assistant + FAQ étendue (v1.6.0) */}
+                  <Route path='faq' element={<Faq />} />
+                  
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
+              
+              {/* Assistant Chat - Floating button available on all pages */}
+              {import.meta.env.VITE_FEATURE_ASSISTANT !== 'false' && <AssistantChat />}
             </Suspense>
           </BrowserRouter>
         </AuthProvider>
