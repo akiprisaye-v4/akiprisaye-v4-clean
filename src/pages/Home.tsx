@@ -52,4 +52,8 @@ export default function Home() {
         <h2 className="text-xl font-semibold mb-4">📊 Indicateurs publics de transparence</h2>
         <p className="text-sm text-gray-400 mb-6">Indicateurs d'usage réel</p>
 
+      </GlassCard>
 
+    </div>
+  )
+}
