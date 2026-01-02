@@ -84,7 +84,7 @@ function exportToCSV(dataset, filePath) {
   );
   
   const content = [headers, ...rows].join('\n');
-  fs.writeFileSync(filePath, '\uFEFF' + content, 'utf-8'); // UTF-8 with BOM
+  fs.writeFileSync(filePath, content, 'utf-8'); // UTF-8 without BOM for better compatibility
 }
 
 /**

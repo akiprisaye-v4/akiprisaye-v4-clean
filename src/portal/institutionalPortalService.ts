@@ -449,7 +449,7 @@ export async function exportData(
   });
   
   // Mock implementation - in production, would generate and return actual file URL
-  const exportId = `export-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const exportId = `export-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   return `https://akiprisaye.fr/exports/${exportId}.${format}`;
 }
 
