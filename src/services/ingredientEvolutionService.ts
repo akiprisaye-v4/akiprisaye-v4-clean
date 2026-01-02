@@ -126,9 +126,25 @@ function buildTimeline(
   }
   
   // Sort snapshots by timestamp
-  const sorted = [...snapshots].sort((a, b) => 
+  let sorted = [...snapshots].sort((a, b) => 
     new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
+  
+  // Apply filters before building timeline to ensure correct previous snapshot reference
+  // Filter by territory if specified
+  if (request.territory) {
+    sorted = sorted.filter(s => s.territory === request.territory);
+  }
+  
+  // Filter by date range
+  if (request.startDate) {
+    const startTime = new Date(request.startDate).getTime();
+    sorted = sorted.filter(s => new Date(s.timestamp).getTime() >= startTime);
+  }
+  if (request.endDate) {
+    const endTime = new Date(request.endDate).getTime();
+    sorted = sorted.filter(s => new Date(s.timestamp).getTime() <= endTime);
+  }
   
   const timeline: TimelineEntry[] = [];
   
@@ -136,21 +152,7 @@ function buildTimeline(
     const current = sorted[i];
     const previous = i > 0 ? sorted[i - 1] : null;
     
-    // Filter by territory if specified
-    if (request.territory && current.territory !== request.territory) {
-      continue;
-    }
-    
-    // Filter by date range
-    const currentTime = new Date(current.timestamp).getTime();
-    if (request.startDate && currentTime < new Date(request.startDate).getTime()) {
-      continue;
-    }
-    if (request.endDate && currentTime > new Date(request.endDate).getTime()) {
-      continue;
-    }
-    
-    // Detect changes from previous snapshot
+    // Detect changes from previous snapshot (now guaranteed to be same territory/date range)
     const changes = previous
       ? detectChanges(
           previous.ingredients,
@@ -262,6 +264,11 @@ export async function getIngredientEvolution(
       };
     }
     
+    // Sort filtered snapshots by timestamp to get most recent
+    const sortedFiltered = [...filteredSnapshots].sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    
     // Build timeline
     const timeline = buildTimeline(filteredSnapshots, request);
     
@@ -272,8 +279,8 @@ export async function getIngredientEvolution(
     // Get unique territories
     const territories = [...new Set(timeline.map(t => t.territory))];
     
-    // Get product info from most recent snapshot
-    const mostRecent = filteredSnapshots[filteredSnapshots.length - 1];
+    // Get product info from most recent snapshot (use sorted array)
+    const mostRecent = sortedFiltered[sortedFiltered.length - 1];
     
     return {
       success: true,
