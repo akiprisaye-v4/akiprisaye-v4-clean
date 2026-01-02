@@ -14,22 +14,22 @@ export const ACCESS_LEVEL_PRICES = {
   PUBLIC: { 
     monthly: 0, 
     yearly: 0,
-    description: 'Accès citoyen de base — Consultation libre des données publiques observées'
+    description: 'Accès gratuit — Comparaisons basiques, lecture seule'
   },
   CITIZEN: { 
-    monthly: 3.99, 
-    yearly: 39,
-    description: 'Accès individuel — Contribution de soutien au fonctionnement du service'
+    monthly: 2.99, 
+    yearly: 29,
+    description: 'Citoyen+ — Historique, alertes, exports basiques'
   },
   PROFESSIONAL: { 
-    monthly: 19, 
-    yearly: 190,
-    description: 'Droits étendus — Analyses territoriales avancées'
+    monthly: 9.99, 
+    yearly: 99,
+    description: 'Pro — Agrégations avancées, multi-territoires'
   },
   INSTITUTIONAL: { 
     monthly: null, 
     yearly: null,
-    description: 'Licence institutionnelle — Accès contractuel sur convention'
+    description: 'Institution — API, open-data, rapports (sur devis)'
   },
 } as const;
 

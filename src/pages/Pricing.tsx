@@ -11,26 +11,26 @@ export default function Pricing() {
       </div>
 
       <GlassCard>
-        <h3 className="font-semibold text-gray-100">🧑 Citoyen</h3>
-        <p className="text-sm text-gray-200">3,99 € / mois</p>
+        <h3 className="font-semibold text-gray-100">🧑 Citoyen+</h3>
+        <p className="text-sm text-gray-200">2,99 € / mois</p>
         <p className="text-xs text-gray-400 mt-1">
-          Accès individuel • Contribution de soutien
+          Historique · Alertes · Exports basiques
         </p>
       </GlassCard>
 
       <GlassCard>
-        <h3 className="font-semibold text-gray-100">🧑‍💼 Professionnel</h3>
-        <p className="text-sm text-gray-200">19 € / mois</p>
+        <h3 className="font-semibold text-gray-100">🧑‍💼 Pro</h3>
+        <p className="text-sm text-gray-200">9,99 € / mois</p>
         <p className="text-xs text-gray-400 mt-1">
-          Droits étendus • Analyses territoriales avancées
+          Agrégations avancées · Multi-territoires
         </p>
       </GlassCard>
 
       <GlassCard>
         <h3 className="font-semibold text-gray-100">🏛️ Institution</h3>
-        <p className="text-sm text-gray-200">Licence annuelle</p>
+        <p className="text-sm text-gray-200">Sur devis</p>
         <p className="text-xs text-gray-400 mt-1">
-          Licence institutionnelle • Données publiques auditées
+          API · Open-data · Rapports
         </p>
       </GlassCard>
 

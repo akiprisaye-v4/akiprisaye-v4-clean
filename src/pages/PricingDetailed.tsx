@@ -3,61 +3,60 @@ import { GlassContainer } from '@/components/ui/GlassContainer';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { CivicButton } from '@/components/ui/CivicButton';
 import { DataBadge } from '@/components/ui/DataBadge';
+import GratificationDisplay from '@/components/GratificationDisplay';
 
 const accessLevels = [
   {
-    id: 'CITIZEN',
-    title: '🧑 Citoyen',
-    price: '3,99 € / mois',
-    subtitle: 'Accès individuel',
+    id: 'PUBLIC',
+    title: '📖 Gratuit',
+    price: '0 €',
+    subtitle: 'Accès public',
     features: [
-      'Consultation des comparateurs',
-      'Historique des prix',
-      'Alertes locales personnalisées',
-      'Accès aux données publiques',
+      'Comparaisons basiques',
+      'Lecture seule',
+      'Données observées',
+      'Sans publicité',
     ],
-    note: 'Contribution de soutien au fonctionnement du service.',
+    note: 'Accès de base pour tous les citoyens.',
+  },
+  {
+    id: 'CITIZEN',
+    title: '🧑 Citoyen+',
+    price: '2,99 € / mois',
+    subtitle: 'Contribution volontaire',
+    features: [
+      'Historique étendu',
+      'Alertes locales',
+      'Exports basiques',
+      'Suivi de produits',
+    ],
+    note: 'Soutien au fonctionnement du service.',
   },
   {
     id: 'PROFESSIONAL',
-    title: '🧑‍💼 Professionnel',
-    price: '19 € / mois',
-    subtitle: 'Droits étendus',
+    title: '🧑‍💼 Pro',
+    price: '9,99 € / mois',
+    subtitle: 'Agrégations avancées',
     features: [
-      'Analyses territoriales avancées',
-      'Séries historiques complètes',
+      'Multi-territoires',
+      'Séries historiques longues',
       'Exports CSV / JSON',
-      'Comparaisons multi-territoires',
+      'Analyses territoriales',
     ],
-    note: '',
+    note: 'Pour associations, journalistes, chercheurs.',
   },
   {
     id: 'INSTITUTIONAL',
     title: '🏛️ Institution',
-    price: 'Licence annuelle',
-    subtitle: 'Licence institutionnelle',
+    price: 'Sur devis',
+    subtitle: 'Licence annuelle',
     features: [
-      'Données publiques auditées',
-      'Exports normalisés (INSEE / Eurostat)',
-      'Accès API open-data',
-      'Documentation méthodologique officielle',
+      'API open-data',
+      'Exports normalisés INSEE/Eurostat',
+      'Documentation complète',
+      'Support méthodologique',
     ],
     note: 'Paiement non activé — accès sur convention ou demande officielle.',
-  },
-];
-
-const badges = [
-  {
-    title: 'Badge Utilisateur actif',
-    description: 'Reconnaissance d\'usage régulier du service',
-  },
-  {
-    title: 'Badge Contributeur open-data',
-    description: 'Participation à l\'amélioration des données',
-  },
-  {
-    title: 'Mention Partenaire institutionnel',
-    description: 'Collaboration institutionnelle reconnue',
   },
 ];
 
@@ -81,7 +80,7 @@ export default function PricingDetailed() {
         </div>
 
         {/* Access Levels Cards */}
-        <div className="grid gap-6 md:grid-cols-3 mb-12">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
           {accessLevels.map((level) => (
             <GlassCard key={level.id} className="flex flex-col">
               <div className="flex-1 space-y-4">
@@ -144,26 +143,12 @@ export default function PricingDetailed() {
           ))}
         </div>
 
-        {/* Badge System - Sober */}
+        {/* Gratification System - Visual with Counters */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-4 text-center">
-            Système de gratification
-          </h2>
-          <p className="text-center text-gray-400 text-sm mb-2">
-            Reconnaissance d'usage (sobre)
-          </p>
-          <p className="text-center text-gray-500 text-xs mb-8">
-            Aucune compétition • Aucune notation individuelle • Reconnaissance purement informative
-          </p>
-          
-          <div className="grid gap-6 md:grid-cols-3 mb-6">
-            {badges.map((badge, idx) => (
-              <GlassCard key={idx} className="bg-slate-800/30 text-center border-slate-600/30">
-                <h3 className="font-semibold text-base text-gray-200 mb-2">{badge.title}</h3>
-                <p className="text-sm text-gray-400">{badge.description}</p>
-              </GlassCard>
-            ))}
-          </div>
+          <GratificationDisplay 
+            accessLevel="CITIZEN"
+            showStats={true}
+          />
         </div>
 
         {/* FAQ - Limited to 5 */}
