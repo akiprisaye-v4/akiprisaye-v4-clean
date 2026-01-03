@@ -193,6 +193,84 @@ export const SEED_COMPANIES: Company[] = [
     lastUpdate: '2024-12-18T12:00:00Z',
     source: 'REGISTRE_ENTREPRISES',
   },
+
+  // Groupe Caillé - Major retail group in La Réunion
+  {
+    id: 'company-caille',
+    siretCode: '31806506600015', // Groupe Caillé headquarters
+    sirenCode: '318065066',
+    vatCode: 'FR42318065066',
+    legalName: 'Groupe Caillé',
+    tradeName: 'Groupe Caillé',
+    activityStatus: 'ACTIVE',
+    creationDate: '1965-01-01',
+    headOffice: {
+      streetNumber: '1',
+      streetName: 'Rue du Commerce',
+      city: 'Saint-Denis',
+      department: '974',
+      postalCode: '97400',
+      country: 'France',
+    },
+    geoLocation: {
+      latitude: -20.8823,
+      longitude: 55.4504,
+    },
+    lastUpdate: '2024-12-18T12:00:00Z',
+    source: 'REGISTRE_ENTREPRISES',
+  },
+
+  // Groupe Parfait - Major retail group in Guadeloupe and Martinique
+  {
+    id: 'company-parfait',
+    siretCode: '32456789000015', // Groupe Parfait headquarters
+    sirenCode: '324567890',
+    vatCode: 'FR38324567890',
+    legalName: 'Groupe Parfait',
+    tradeName: 'Groupe Parfait',
+    activityStatus: 'ACTIVE',
+    creationDate: '1970-01-01',
+    headOffice: {
+      streetNumber: 'Zone',
+      streetName: 'Commerciale de Dillon',
+      city: 'Fort-de-France',
+      department: '972',
+      postalCode: '97200',
+      country: 'France',
+    },
+    geoLocation: {
+      latitude: 14.6118,
+      longitude: -61.0736,
+    },
+    lastUpdate: '2024-12-18T12:00:00Z',
+    source: 'REGISTRE_ENTREPRISES',
+  },
+
+  // Groupe Hayot-Sodiprav - Retail group in Martinique
+  {
+    id: 'company-hayot-sodiprav',
+    siretCode: '34512345600015', // Hayot-Sodiprav headquarters
+    sirenCode: '345123456',
+    vatCode: 'FR55345123456',
+    legalName: 'Groupe Hayot-Sodiprav',
+    tradeName: 'Hayot-Sodiprav',
+    activityStatus: 'ACTIVE',
+    creationDate: '1968-01-01',
+    headOffice: {
+      streetNumber: 'Zone',
+      streetName: 'Industrielle de Rivière Roche',
+      city: 'Fort-de-France',
+      department: '972',
+      postalCode: '97200',
+      country: 'France',
+    },
+    geoLocation: {
+      latitude: 14.6160,
+      longitude: -61.0588,
+    },
+    lastUpdate: '2024-12-18T12:00:00Z',
+    source: 'REGISTRE_ENTREPRISES',
+  },
 ];
 
 /**

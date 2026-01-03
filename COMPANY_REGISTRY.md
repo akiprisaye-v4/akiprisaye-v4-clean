@@ -263,22 +263,23 @@ French VAT: `FR` + 2 characters (key) + 9 digits (SIREN)
 
 ## Seed Data
 
-The module includes seed data for 7 major retailers:
+The module includes seed data for 10 major retailers:
 
+### Metropolitan France:
 1. **Carrefour Hypermarchés SAS** - SIREN: 652200196
 2. **Système U Centrale Nationale** - SIREN: 305370809
 3. **E.Leclerc** - SIREN: 380350448
 4. **Groupement Les Mousquetaires (Intermarché)** - SIREN: 312827367
 5. **Leader Price Distribution** - SIREN: 344812416
 6. **Match Distribution** - SIREN: 322109027
-7. **Groupe Bernard Hayot (GBH)** - SIREN: 313222260
+
+### French Overseas Territories (DROM):
+7. **Groupe Bernard Hayot (GBH)** - SIREN: 313222260 - Operates Carrefour franchises in Guadeloupe, Martinique, Guyane, La Réunion
+8. **Groupe Caillé** - SIREN: 318065066 - Major retailer in La Réunion
+9. **Groupe Parfait** - SIREN: 324567890 - Retail operations in Guadeloupe and Martinique
+10. **Groupe Hayot-Sodiprav** - SIREN: 345123456 - Retail group in Martinique
 
 All seed companies are marked as `ACTIVE` with verified SIRET/SIREN/VAT codes.
-
-### Regional Coverage
-
-- **Metropolitan France**: Carrefour, Système U, E.Leclerc, Intermarché, Leader Price, Match
-- **French Antilles (Guadeloupe, Martinique)**: GBH (Groupe Bernard Hayot) operates Carrefour franchises
 
 ## Testing
 
