@@ -24,14 +24,20 @@ export default function BarcodeScanner({ onScan, onClose }) {
   const startScanning = async () => {
     setError(null);
     setIsScanning(true);
+    setHasPermission(null); // Reset permission state
 
     try {
-      // Request camera permission
+      // Request camera permission with proper constraints
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: { 
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
       });
       
       streamRef.current = stream;
+      setHasPermission(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -45,12 +51,10 @@ export default function BarcodeScanner({ onScan, onClose }) {
         setTorchSupported(true);
       }
 
-      setHasPermission(true);
-
       // Start decoding with timeout
       const timeoutId = setTimeout(() => {
         setError('⏱️ Timeout: Approchez le code-barres de la caméra');
-      }, 8000);
+      }, 15000); // Augmenter timeout à 15s
 
       readerRef.current.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
         if (result) {
@@ -71,11 +75,13 @@ export default function BarcodeScanner({ onScan, onClose }) {
       setIsScanning(false);
       
       if (err.name === 'NotAllowedError') {
-        setError('📷 Accès caméra refusé. Autorisez l\'accès dans les paramètres.');
+        setError('📷 Accès caméra refusé. Veuillez autoriser l\'accès à la caméra dans les paramètres de votre navigateur.');
       } else if (err.name === 'NotFoundError') {
-        setError('📷 Aucune caméra détectée sur cet appareil.');
+        setError('📷 Aucune caméra détectée sur cet appareil. Utilisez l\'import d\'image ou la saisie manuelle.');
+      } else if (err.name === 'NotReadableError') {
+        setError('📷 Caméra déjà utilisée par une autre application. Fermez les autres applications utilisant la caméra.');
       } else {
-        setError(`❌ Erreur: ${err.message}`);
+        setError(`❌ Erreur: ${err.message || 'Impossible d\'accéder à la caméra'}`);
       }
     }
   };
@@ -207,10 +213,24 @@ export default function BarcodeScanner({ onScan, onClose }) {
             <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 text-sm text-blue-200">
               <p className="font-semibold mb-2">📋 Instructions :</p>
               <ul className="space-y-1 ml-4 list-disc">
+                <li>Cliquez sur "Scanner avec la caméra" pour activer la caméra</li>
                 <li>Positionnez le code-barres à 10-20 cm de la caméra</li>
                 <li>Assurez-vous d'avoir un bon éclairage</li>
                 <li>Maintenez le téléphone stable pendant 1-2 secondes</li>
               </ul>
+            </div>
+          )}
+
+          {/* Permission denied help */}
+          {hasPermission === false && (
+            <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-4 text-sm text-yellow-200">
+              <p className="font-semibold mb-2">🔐 Comment autoriser l'accès à la caméra ?</p>
+              <ul className="space-y-2 ml-4 list-disc">
+                <li><strong>Chrome/Edge :</strong> Cliquez sur l'icône 🔒 ou ℹ️ dans la barre d'adresse → Paramètres du site → Caméra → Autoriser</li>
+                <li><strong>Safari (iOS) :</strong> Réglages → Safari → Caméra → Autoriser</li>
+                <li><strong>Firefox :</strong> Cliquez sur l'icône 🔒 → Autorisations → Caméra → Autoriser</li>
+              </ul>
+              <p className="mt-3 text-xs">Une fois l'autorisation donnée, rechargez la page et réessayez.</p>
             </div>
           )}
 
