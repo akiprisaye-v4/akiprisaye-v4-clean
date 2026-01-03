@@ -27,6 +27,13 @@ export default function BarcodeScanner({ onScan, onClose }) {
     setHasPermission(null); // Reset permission state
 
     try {
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('getUserMedia non disponible sur ce navigateur');
+      }
+
+      console.log('📷 Requesting camera access...');
+      
       // Request camera permission with proper constraints
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
@@ -36,30 +43,52 @@ export default function BarcodeScanner({ onScan, onClose }) {
         },
       });
       
+      console.log('✅ Camera access granted');
       streamRef.current = stream;
       setHasPermission(true);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        
+        // Wait for video to be ready
+        await new Promise((resolve, reject) => {
+          videoRef.current.onloadedmetadata = () => {
+            console.log('📹 Video metadata loaded');
+            resolve();
+          };
+          videoRef.current.onerror = (e) => {
+            console.error('❌ Video error:', e);
+            reject(new Error('Erreur de chargement vidéo'));
+          };
+        });
+        
         await videoRef.current.play();
+        console.log('▶️ Video playing');
       }
 
       // Check if torch is supported
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities();
+      console.log('📱 Camera capabilities:', capabilities);
+      
       if (capabilities.torch) {
         setTorchSupported(true);
+        console.log('🔦 Torch supported');
       }
 
       // Start decoding with timeout
       const timeoutId = setTimeout(() => {
-        setError('⏱️ Timeout: Approchez le code-barres de la caméra');
-      }, 15000); // Augmenter timeout à 15s
+        console.warn('⏱️ Scan timeout');
+        setError('⏱️ Timeout: Approchez le code-barres de la caméra (10-20 cm)');
+      }, 15000);
 
+      console.log('🔍 Starting barcode detection...');
+      
       readerRef.current.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
         if (result) {
           clearTimeout(timeoutId);
           const code = result.getText();
+          console.log('✅ Barcode detected:', code);
           stopScanning();
           onScan(code);
         }
@@ -70,7 +99,7 @@ export default function BarcodeScanner({ onScan, onClose }) {
       });
 
     } catch (err) {
-      console.error('Camera error:', err);
+      console.error('❌ Camera error:', err);
       setHasPermission(false);
       setIsScanning(false);
       
@@ -80,8 +109,10 @@ export default function BarcodeScanner({ onScan, onClose }) {
         setError('📷 Aucune caméra détectée sur cet appareil. Utilisez l\'import d\'image ou la saisie manuelle.');
       } else if (err.name === 'NotReadableError') {
         setError('📷 Caméra déjà utilisée par une autre application. Fermez les autres applications utilisant la caméra.');
+      } else if (err.name === 'NotSupportedError' || err.message.includes('getUserMedia')) {
+        setError('📷 Caméra non supportée sur ce navigateur. Utilisez Chrome, Firefox ou Safari récent. Ou utilisez l\'import d\'image.');
       } else {
-        setError(`❌ Erreur: ${err.message || 'Impossible d\'accéder à la caméra'}`);
+        setError(`❌ Erreur: ${err.message || 'Impossible d\'accéder à la caméra'}. Essayez l\'import d\'image.`);
       }
     }
   };
@@ -214,10 +245,18 @@ export default function BarcodeScanner({ onScan, onClose }) {
               <p className="font-semibold mb-2">📋 Instructions :</p>
               <ul className="space-y-1 ml-4 list-disc">
                 <li>Cliquez sur "Scanner avec la caméra" pour activer la caméra</li>
+                <li>Autorisez l'accès à la caméra quand le navigateur le demande</li>
                 <li>Positionnez le code-barres à 10-20 cm de la caméra</li>
                 <li>Assurez-vous d'avoir un bon éclairage</li>
                 <li>Maintenez le téléphone stable pendant 1-2 secondes</li>
               </ul>
+              
+              <div className="mt-3 pt-3 border-t border-blue-700/30">
+                <p className="text-xs text-blue-300">
+                  <strong>⚠️ Important :</strong> La caméra nécessite HTTPS ou localhost. 
+                  Si vous voyez "getUserMedia non disponible", utilisez l'import d'image.
+                </p>
+              </div>
             </div>
           )}
 
