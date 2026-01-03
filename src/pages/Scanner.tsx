@@ -120,11 +120,11 @@ export default function Scanner() {
                   min="5"
                   max="30"
                   step="5"
-                  value={settings.timeout! / 1000}
+                  value={(settings.timeout ?? 15000) / 1000}
                   onChange={(e) => setSettings({ ...settings, timeout: parseInt(e.target.value) * 1000 })}
                   className="w-full"
                 />
-                <span className="text-gray-400 text-xs">{settings.timeout! / 1000}s</span>
+                <span className="text-gray-400 text-xs">{(settings.timeout ?? 15000) / 1000}s</span>
               </div>
 
               {/* Not found behavior */}
@@ -134,7 +134,12 @@ export default function Scanner() {
                 </label>
                 <select
                   value={settings.notFoundBehavior}
-                  onChange={(e) => setSettings({ ...settings, notFoundBehavior: e.target.value as any })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === 'manual_search' || value === 'local_save' || value === 'show_empty') {
+                      setSettings({ ...settings, notFoundBehavior: value });
+                    }
+                  }}
                   className="w-full bg-slate-700 text-white border border-slate-600 px-3 py-2 rounded-lg"
                 >
                   <option value="manual_search">Proposer une recherche manuelle</option>

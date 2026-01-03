@@ -153,11 +153,11 @@ export default function ScanOCR() {
                       min="10"
                       max="60"
                       step="10"
-                      value={settings.timeout! / 1000}
+                      value={(settings.timeout ?? 30000) / 1000}
                       onChange={(e) => setSettings({ ...settings, timeout: parseInt(e.target.value) * 1000 })}
                       className="w-full"
                     />
-                    <span className="text-gray-400 text-xs">{settings.timeout! / 1000}s</span>
+                    <span className="text-gray-400 text-xs">{(settings.timeout ?? 30000) / 1000}s</span>
                   </div>
                 </>
               )}
@@ -239,7 +239,7 @@ export default function ScanOCR() {
                     <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                   </div>
                   <p className="text-gray-500 text-xs mt-2">
-                    Seuil: {settings.confidenceThreshold}% | Timeout: {settings.timeout! / 1000}s
+                    Seuil: {settings.confidenceThreshold}% | Timeout: {(settings.timeout ?? 30000) / 1000}s
                   </p>
                 </>
               )}
