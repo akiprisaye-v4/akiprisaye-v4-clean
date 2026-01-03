@@ -9,6 +9,7 @@ import PriceDataWarning from '../components/PriceDataWarning'
 import ExportDataButton from '../components/ExportDataButton'
 import DataReliabilityBadge from '../components/DataReliabilityBadge'
 import LocalHistoryPanel from '../components/LocalHistoryPanel'
+import PriceVariationAlert from '../components/PriceVariationAlert'
 import { useLocalHistory } from '../hooks/useLocalHistory'
 import {
   getProductList,
@@ -166,6 +167,18 @@ export default function ComparaisonEnseignes() {
 
       {/* Local History Panel (PR-09) */}
       <LocalHistoryPanel />
+
+      {/* Price Variation Alert (PR-10) */}
+      {observations.length > 0 && (
+        <div className="mb-6">
+          <PriceVariationAlert
+            prices={observations.map((o) => ({
+              value: o.price,
+              date: o.observationDate,
+            }))}
+          />
+        </div>
+      )}
 
       {/* Avertissements sur les données */}
       {(oldData || storeCount < 2) && (
