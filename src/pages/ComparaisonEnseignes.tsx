@@ -7,6 +7,7 @@ import { GlassCard } from '../components/ui/glass-card'
 import PriceComparisonTable from '../components/PriceComparisonTable'
 import PriceDataWarning from '../components/PriceDataWarning'
 import ExportDataButton from '../components/ExportDataButton'
+import DataReliabilityBadge from '../components/DataReliabilityBadge'
 import {
   getProductList,
   getObservationsByEAN,
@@ -160,6 +161,16 @@ export default function ComparaisonEnseignes() {
       {aggregation && (
         <div className="mb-6">
           <GlassCard title="Statistiques factuelles">
+            {/* Data Reliability Badge (PR-08) */}
+            {observations.length > 0 && (
+              <div className="mb-4 flex justify-end">
+                <DataReliabilityBadge
+                  values={observations.map((o) => o.price)}
+                  lastUpdated={aggregation.periodEnd}
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
               <div>
                 <div className="text-white/60 text-sm mb-1">Prix minimum observé</div>
