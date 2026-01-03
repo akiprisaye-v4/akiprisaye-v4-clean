@@ -8,6 +8,8 @@ import PriceComparisonTable from '../components/PriceComparisonTable'
 import PriceDataWarning from '../components/PriceDataWarning'
 import ExportDataButton from '../components/ExportDataButton'
 import DataReliabilityBadge from '../components/DataReliabilityBadge'
+import LocalHistoryPanel from '../components/LocalHistoryPanel'
+import { useLocalHistory } from '../hooks/useLocalHistory'
 import {
   getProductList,
   getObservationsByEAN,
@@ -33,6 +35,7 @@ export default function ComparaisonEnseignes() {
 
   const products = getProductList()
   const territories = getUniqueTerritories()
+  const { add: addToHistory } = useLocalHistory()
 
   // Initialiser la mise à jour automatique au montage
   useEffect(() => {
@@ -57,7 +60,18 @@ export default function ComparaisonEnseignes() {
     }
 
     setObservations(obs)
-  }, [selectedEAN, selectedTerritory])
+
+    // Add to local history (PR-09)
+    const product = products.find((p) => p.ean === selectedEAN)
+    if (product) {
+      addToHistory({
+        id: `comparison-${selectedEAN}-${selectedTerritory}`,
+        label: product.name,
+        type: 'comparison',
+        territory: selectedTerritory !== 'all' ? selectedTerritory : undefined,
+      })
+    }
+  }, [selectedEAN, selectedTerritory, products, addToHistory])
 
   // Sélectionner le premier produit par défaut
   useEffect(() => {
@@ -149,6 +163,9 @@ export default function ComparaisonEnseignes() {
           </select>
         </GlassCard>
       </div>
+
+      {/* Local History Panel (PR-09) */}
+      <LocalHistoryPanel />
 
       {/* Avertissements sur les données */}
       {(oldData || storeCount < 2) && (
