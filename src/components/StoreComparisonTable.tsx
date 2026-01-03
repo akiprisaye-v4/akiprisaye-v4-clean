@@ -33,6 +33,9 @@ export default function StoreComparisonTable({
     <div className="overflow-x-auto">
       <GlassCard>
         <table className="w-full min-w-[600px]" aria-label={`Comparaison des prix pour ${productName}`}>
+          <caption className="sr-only">
+            Tableau de comparaison des prix de {productName} entre différentes enseignes
+          </caption>
           <thead>
             <tr className="border-b border-white/[0.22]">
               <th className="text-left py-3 px-4 text-white/90 font-semibold">Enseigne</th>

@@ -127,7 +127,7 @@ export default function Predictions() {
             <select
               id="status-filter"
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value as any)}
+              onChange={e => setStatusFilter(e.target.value as PredictionScore['status'] | 'all')}
               className="w-full px-3 py-2 bg-white/[0.1] border border-white/[0.22] rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="Filtrer par statut"
             >

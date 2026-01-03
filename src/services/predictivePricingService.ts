@@ -7,6 +7,14 @@ export type PricePoint = {
   price: number
 }
 
+export type CatalogueItem = {
+  id?: string
+  name?: string
+  store?: string
+  observations?: Array<{ date: string; price: number; [key: string]: any }>
+  [key: string]: any
+}
+
 export type PredictionScore = {
   probability: number // 0-100
   confidence: 'low' | 'medium' | 'high'
@@ -292,13 +300,13 @@ export function predictPriceChange(observations: PricePoint[]): PredictionScore 
 /**
  * Analyse tous les produits du catalogue
  */
-export function analyzeCatalogue(catalogueData: any[]): ProductPrediction[] {
+export function analyzeCatalogue(catalogueData: CatalogueItem[]): ProductPrediction[] {
   const predictions: ProductPrediction[] = []
 
   catalogueData.forEach(item => {
     if (!item.observations || item.observations.length === 0) return
 
-    const observations: PricePoint[] = item.observations.map((obs: any) => ({
+    const observations: PricePoint[] = item.observations.map((obs) => ({
       date: obs.date,
       price: obs.price,
     }))

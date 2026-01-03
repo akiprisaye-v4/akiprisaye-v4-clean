@@ -8,6 +8,14 @@ export type PriceObservation = {
   promoLabel?: string
 }
 
+export type CatalogueItem = {
+  id?: string
+  name?: string
+  store?: string
+  observations?: PriceObservation[]
+  [key: string]: any
+}
+
 export type StoreComparison = {
   store: string
   currentPrice: number
@@ -76,7 +84,7 @@ function calculateTrend30d(observations: PriceObservation[]): number {
  */
 export function compareStoresForProduct(
   productName: string,
-  catalogueData: any[]
+  catalogueData: CatalogueItem[]
 ): ComparisonResult | null {
   // Filtrer les produits qui correspondent au nom
   const matchingProducts = catalogueData.filter(
@@ -151,7 +159,7 @@ export function compareStoresForProduct(
 /**
  * Récupère les données du catalogue depuis le fichier local
  */
-export async function loadCatalogueData(): Promise<any[]> {
+export async function loadCatalogueData(): Promise<CatalogueItem[]> {
   try {
     const response = await fetch('/data/catalogue.json')
     if (!response.ok) {
@@ -169,7 +177,7 @@ export async function loadCatalogueData(): Promise<any[]> {
 /**
  * Liste tous les produits uniques du catalogue
  */
-export function getUniqueProducts(catalogueData: any[]): string[] {
+export function getUniqueProducts(catalogueData: CatalogueItem[]): string[] {
   const names = new Set<string>()
   catalogueData.forEach(item => {
     if (item.name) {
