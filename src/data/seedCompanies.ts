@@ -190,7 +190,7 @@ export const SEED_COMPANIES: Company[] = [
       latitude: 16.2469,
       longitude: -61.5717,
     },
-    lastUpdate: '2026-01-03T13:00:00Z',
+    lastUpdate: '2024-12-18T12:00:00Z',
     source: 'REGISTRE_ENTREPRISES',
   },
 ];
