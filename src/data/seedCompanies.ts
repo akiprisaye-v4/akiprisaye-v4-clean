@@ -277,7 +277,7 @@ export const SEED_COMPANIES: Company[] = [
     id: 'company-loret',
     siretCode: '35678901200015', // Groupe Loret headquarters
     sirenCode: '356789012',
-    vatCode: 'FR48356789012',
+    vatCode: 'FR63356789012',
     legalName: 'Groupe Loret',
     tradeName: 'Groupe Loret',
     activityStatus: 'ACTIVE',
@@ -303,7 +303,7 @@ export const SEED_COMPANIES: Company[] = [
     id: 'company-sucreries-bourbon',
     siretCode: '36789012300015', // Sucreries de Bourbon headquarters
     sirenCode: '367890123',
-    vatCode: 'FR52367890123',
+    vatCode: 'FR71367890123',
     legalName: 'Sucreries de Bourbon',
     tradeName: 'Sucreries de Bourbon',
     activityStatus: 'ACTIVE',
