@@ -86,7 +86,7 @@ export default function AssistantChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-slate-900/95 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-2xl flex flex-col" style={{zIndex: 'var(--z-modal)'}}>
+        <div className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-slate-900/95 backdrop-blur-lg border border-slate-700/50 rounded-xl shadow-2xl flex flex-col z-modal">
           {/* Header */}
           <div className="p-4 border-b border-slate-700/50 flex items-center justify-between">
             <div>

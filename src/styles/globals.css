@@ -177,3 +177,12 @@
     bottom: 72px; /* évite la barre système Android */
   }
 }
+
+/* Z-index utility classes */
+.z-header {
+  z-index: var(--z-header);
+}
+
+.z-modal {
+  z-index: var(--z-modal);
+}
