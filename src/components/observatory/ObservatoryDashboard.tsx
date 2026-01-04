@@ -10,9 +10,9 @@ import './ObservatoryDashboard.css';
 import type {
   IndicatorSnapshot,
   ObservatoryGlobalStats,
-} from '../types/observatoryIndicators';
-import type { TerritoireName } from '../types/canonicalPriceObservation';
-import { loadSnapshotLocally, isSnapshotStale } from '../services/snapshotGenerationService';
+} from '../../types/observatoryIndicators';
+import type { TerritoireName } from '../../types/canonicalPriceObservation';
+import { loadSnapshotLocally, isSnapshotStale } from '../../services/snapshotGenerationService';
 
 interface ObservatoryDashboardProps {
   territoire?: TerritoireName;
