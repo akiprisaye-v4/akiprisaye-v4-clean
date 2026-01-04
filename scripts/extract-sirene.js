@@ -12,7 +12,7 @@
  * Tous les résultats sont marqués "a_confirmer"
  */
 
-const fs = require('fs');
+// const fs = require('fs'); // Unused for now
 const path = require('path');
 
 // Codes APE/NAF commerce de détail
