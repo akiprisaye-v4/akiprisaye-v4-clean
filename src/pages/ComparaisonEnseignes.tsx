@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { GlassCard } from '../components/ui/glass-card'
+import { EmptyState } from '../components/ui/DataStateIndicator'
 import PriceComparisonTable from '../components/PriceComparisonTable'
 import PriceDataWarning from '../components/PriceDataWarning'
 import ExportDataButton from '../components/ExportDataButton'
@@ -285,18 +286,10 @@ export default function ComparaisonEnseignes() {
         </div>
         
         {observations.length === 0 ? (
-          <GlassCard className="bg-gray-900/10 border-gray-500/30">
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold text-white mb-3">
-                Aucune donnée disponible
-              </h3>
-              <p className="text-gray-300 text-sm max-w-md mx-auto">
-                Ce produit n'est pas encore référencé pour ce territoire. 
-                Les données sont en cours de consolidation.
-              </p>
-            </div>
-          </GlassCard>
+          <EmptyState 
+            title="Aucune donnée disponible"
+            message="Ce produit n'est pas encore référencé pour ce territoire. Les données sont en cours de consolidation."
+          />
         ) : (
           <GlassCard>
             <PriceComparisonTable observations={observations} groupedByStore={groupedStores} />

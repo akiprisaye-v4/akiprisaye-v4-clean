@@ -404,15 +404,11 @@ export default function Comparateur() {
 
         {/* No Results */}
         {!loading && results.length === 0 && ean && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-              Produit non référencé
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Ce produit (code EAN <span className="font-mono font-semibold">{ean}</span>) n'est pas encore référencé pour ce territoire.
-              Les données sont en cours de consolidation et seront ajoutées progressivement.
-            </p>
+          <div className="space-y-4">
+            <EmptyState 
+              title="Produit non référencé"
+              message={`Ce produit (code EAN ${ean}) n'est pas encore référencé pour ce territoire. Les données sont en cours de consolidation et seront ajoutées progressivement.`}
+            />
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => {
