@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import '../styles/layout.css';
 import { Menu, X } from 'lucide-react';
 import TiPanierButton from './TiPanierButton';
+import FloatingActions from './ui/FloatingActions';
 
 export default function Layout() {
   const [open, setOpen] = React.useState(false);
@@ -87,8 +88,8 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Floating ti‑panier button (mobile/global) */}
-      <TiPanierButton />
+      {/* Floating actions (chat + panier) - managed by single container */}
+      <FloatingActions />
 
       {/* FOOTER */}
       <footer className="border-t border-slate-800 bg-slate-900/90 text-center py-6 text-sm text-slate-400">
