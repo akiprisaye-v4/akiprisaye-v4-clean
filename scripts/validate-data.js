@@ -165,8 +165,9 @@ function findDataFiles(dir, fileList = []) {
         findDataFiles(filePath, fileList);
       }
     } else if (file.endsWith('.json') && !file.includes('package')) {
-      // Vérifier si c'est dans src/data/
-      if (filePath.includes('src/data/') || filePath.includes('src\\data\\')) {
+      // Vérifier si c'est dans src/data/ ou data/observatoire/
+      if (filePath.includes('src/data/') || filePath.includes('src\\data\\') || 
+          filePath.includes('data/observatoire/') || filePath.includes('data\\observatoire\\')) {
         fileList.push(filePath);
       }
     }
@@ -187,24 +188,30 @@ async function main() {
   console.log('   4. URLs sources valides (https://)');
   console.log('   5. Champs obligatoires présents\n');
 
-  const dataDir = path.join(__dirname, '..', 'src', 'data');
+  const srcDataDir = path.join(__dirname, '..', 'src', 'data');
+  const observatoireDir = path.join(__dirname, '..', 'data', 'observatoire');
   
-  if (!fs.existsSync(dataDir)) {
-    console.error('❌ Répertoire src/data/ introuvable');
-    process.exit(EXIT_FAILURE);
+  let allDataFiles = [];
+  
+  // Scan src/data if it exists
+  if (fs.existsSync(srcDataDir)) {
+    allDataFiles = allDataFiles.concat(findDataFiles(srcDataDir));
+  }
+  
+  // Scan data/observatoire if it exists
+  if (fs.existsSync(observatoireDir)) {
+    allDataFiles = allDataFiles.concat(findDataFiles(observatoireDir));
   }
 
-  const dataFiles = findDataFiles(dataDir);
-
-  if (dataFiles.length === 0) {
-    console.log('⚠️  Aucun fichier JSON trouvé dans src/data/');
+  if (allDataFiles.length === 0) {
+    console.log('⚠️  Aucun fichier JSON trouvé dans src/data/ ou data/observatoire/');
     process.exit(EXIT_SUCCESS);
   }
 
-  console.log(`📂 ${dataFiles.length} fichier(s) de données trouvé(s)\n`);
+  console.log(`📂 ${allDataFiles.length} fichier(s) de données trouvé(s)\n`);
 
   // Valider chaque fichier
-  dataFiles.forEach(validateDataFile);
+  allDataFiles.forEach(validateDataFile);
 
   // Rapport final
   console.log('\n' + '='.repeat(60));
