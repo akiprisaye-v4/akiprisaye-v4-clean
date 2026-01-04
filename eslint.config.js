@@ -154,6 +154,28 @@ export default [
   },
 
   // =====================================================
+  // BROWSER-SIDE SCRIPTS (run in HTML pages)
+  // =====================================================
+  {
+    files: [
+      'scripts/news-feed.js',
+      'scripts/promo-ai.js',
+      'scripts/auto-import-stores.js',
+      'scripts/gps-navigator.js',
+      'scripts/promotions-firestore.js',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.es2021,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
+  // =====================================================
   // NODE SCRIPTS / TERMUX / CLI
   // =====================================================
   {
