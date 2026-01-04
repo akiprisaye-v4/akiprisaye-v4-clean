@@ -3,6 +3,7 @@ import TerritorySelector from '../components/TerritorySelector';
 import ProductSearch from '../components/ProductSearch';
 import BarcodeScanner from '../components/BarcodeScanner';
 import { findProductByEan, filterPricesByTerritory } from '../data/seedProducts';
+import { EmptyState } from '../components/ui/DataStateIndicator';
 
 export default function Comparateur() {
   const [ean, setEan] = useState('');
