@@ -87,6 +87,10 @@ jobs:
         run: node scripts/validate-data.js
         continue-on-error: false
 
+      - name: 🔍 Validate observatoire data
+        run: node scripts/validate-observatoire-data.js
+        continue-on-error: false
+
       - name: 📊 Data validation summary
         if: always()
         run: |
