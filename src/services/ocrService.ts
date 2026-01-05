@@ -18,6 +18,16 @@
 import Tesseract from 'tesseract.js';
 
 /**
+ * OCR Result structure (for compatibility with existing components)
+ */
+export interface OCRResult {
+  success: boolean;
+  rawText: string;
+  confidence: number;
+  processingTime: number;
+}
+
+/**
  * OCR plein texte unifié
  * - Sans whitelist chiffres
  * - Espaces inter-mots préservés

@@ -178,7 +178,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
         }
         
         if (readerRef.current && videoRef.current) {
-          readerRef.current.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+          readerRef.current.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
             if (result) {
               clearTimeout(timeoutId);
               const code = result.getText();
