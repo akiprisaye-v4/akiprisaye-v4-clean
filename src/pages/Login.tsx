@@ -27,11 +27,6 @@ export default function Login() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères.");
-      return;
-    }
-
     setLoading(true);
 
     try {

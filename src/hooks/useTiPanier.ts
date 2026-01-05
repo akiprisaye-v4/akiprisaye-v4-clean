@@ -5,6 +5,9 @@ import { doc, setDoc, getDoc, collection, onSnapshot } from 'firebase/firestore'
 // Local storage key for ti-panier v1
 const STORAGE_KEY = 'ti-panier:v1';
 
+// Price comparison tolerance for determining min/max
+const PRICE_COMPARISON_TOLERANCE = 0.01;
+
 // Item stored in the panier
 export type TiPanierItem = {
   id: string; // unique identifier for the item
@@ -15,6 +18,12 @@ export type TiPanierItem = {
 
 // Types for cart (comparison) vs wishlist (favorites)
 export type PanierType = 'comparison' | 'wishlist';
+
+// Helper to extract price from item metadata
+function extractPrice(item: TiPanierItem): number {
+  const price = item.meta && (item.meta as any).price;
+  return typeof price === 'number' ? price : parseFloat(String(price || '0'));
+}
 
 function safeParse(raw: string | null): TiPanierItem[] {
   if (!raw) return [];
@@ -161,9 +170,7 @@ export function useTiPanier(type: PanierType = 'comparison') {
 
   // Calculate min/max prices
   const priceStats = items.reduce((acc, item) => {
-    const price = item.meta && typeof (item.meta as any).price === 'number' 
-      ? (item.meta as any).price 
-      : parseFloat(String((item.meta as any)?.price || '0'));
+    const price = extractPrice(item);
     
     if (price > 0) {
       if (acc.min === null || price < acc.min) acc.min = price;

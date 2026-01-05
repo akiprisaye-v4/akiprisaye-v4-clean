@@ -71,6 +71,23 @@ export default function SignalerAbus() {
     setLoading(true);
 
     try {
+      // Validate and parse prices
+      const observedPriceNum = formData.observedPrice ? parseFloat(formData.observedPrice) : null;
+      const expectedPriceNum = formData.expectedPrice ? parseFloat(formData.expectedPrice) : null;
+      
+      // Check for invalid numbers
+      if (observedPriceNum !== null && (isNaN(observedPriceNum) || observedPriceNum < 0)) {
+        setError("Le prix observé doit être un nombre positif valide.");
+        setLoading(false);
+        return;
+      }
+      
+      if (expectedPriceNum !== null && (isNaN(expectedPriceNum) || expectedPriceNum < 0)) {
+        setError("Le prix attendu doit être un nombre positif valide.");
+        setLoading(false);
+        return;
+      }
+
       // Submit to Firestore
       await addDoc(collection(db, "price_abuse_reports"), {
         userId: auth.currentUser.uid,
@@ -80,8 +97,8 @@ export default function SignalerAbus() {
         store: formData.store.trim(),
         territory: formData.territory,
         commune: formData.commune.trim() || null,
-        observedPrice: formData.observedPrice ? parseFloat(formData.observedPrice) : null,
-        expectedPrice: formData.expectedPrice ? parseFloat(formData.expectedPrice) : null,
+        observedPrice: observedPriceNum,
+        expectedPrice: expectedPriceNum,
         description: formData.description.trim(),
         status: "pending", // pending, investigating, resolved, dismissed
         createdAt: serverTimestamp(),

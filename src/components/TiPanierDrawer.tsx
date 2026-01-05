@@ -3,6 +3,9 @@ import { X, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { useTiPanier } from "../hooks/useTiPanier";
 import { GlassCard } from "./ui/glass-card";
 
+// Price comparison tolerance for determining min/max
+const PRICE_COMPARISON_TOLERANCE = 0.01;
+
 /**
  * Drawer/modal showing saved items.
  * - Full client-side, localStorage via useTiPanier
@@ -155,8 +158,8 @@ export default function TiPanierDrawer({ open, onClose, type = 'comparison' }: {
                   const territory = (it.meta && (it.meta as any).territory) ?? '';
                   
                   // Determine if this is the min or max price
-                  const isMinPrice = priceStats.min !== null && priceNum > 0 && Math.abs(priceNum - priceStats.min) < 0.01;
-                  const isMaxPrice = priceStats.max !== null && priceNum > 0 && Math.abs(priceNum - priceStats.max) < 0.01;
+                  const isMinPrice = priceStats.min !== null && priceNum > 0 && Math.abs(priceNum - priceStats.min) < PRICE_COMPARISON_TOLERANCE;
+                  const isMaxPrice = priceStats.max !== null && priceNum > 0 && Math.abs(priceNum - priceStats.max) < PRICE_COMPARISON_TOLERANCE;
 
                   return (
                     <li key={it.id} className="flex items-start justify-between p-2 rounded bg-slate-800/30">
