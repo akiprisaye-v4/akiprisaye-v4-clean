@@ -4,6 +4,7 @@ import { useEANScanner } from '../hooks/useEANScanner'
 import { useEANResolver } from '../hooks/useEANResolver'
 import { useScanHistory } from '../hooks/useScanHistory'
 import { validateEAN, getAllProducts } from '../services/eanPublicCatalog'
+import { runOCR } from '../services/ocrService'
 import { extractProductHints, fuzzySearchProducts } from '../services/textProductRecognition'
 import ScanCamera from '../components/ScanCamera'
 import ScanResultCard from '../components/ScanResultCard'
@@ -77,7 +78,7 @@ export default function ScanEAN() {
 
   /**
    * Separate image pipeline - independent from camera
-   * Includes OCR fallback with Tesseract.js
+   * Includes OCR fallback with unified runOCR API
    */
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -86,13 +87,14 @@ export default function ScanEAN() {
     setImageUploadStatus('🔍 Analyse de l\'image en cours...')
     setIsProcessingImage(true)
 
-    const imageUrl = URL.createObjectURL(file)
-    let ean: string | null = null
+    let objectUrl: string | null = null
 
     try {
+      objectUrl = URL.createObjectURL(file)
+
       // Step 1: Load image properly
       const img = new Image()
-      img.src = imageUrl
+      img.src = objectUrl
 
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve()
@@ -100,6 +102,8 @@ export default function ScanEAN() {
       })
 
       await img.decode()
+
+      let ean: string | null = null
 
       // Step 2: Try native BarcodeDetector (if available)
       if ('BarcodeDetector' in window) {
@@ -118,19 +122,12 @@ export default function ScanEAN() {
         }
       }
 
-      // Step 3: OCR Fallback with Tesseract.js (INDISPENSABLE)
+      // Step 3: OCR Fallback with unified runOCR API (INDISPENSABLE)
       let ocrText = '';
       if (!ean) {
         setImageUploadStatus('📝 Détection OCR en cours...')
         
-        const Tesseract = await import('tesseract.js')
-        
-        // ✅ OCR textuel réel (pas de whitelist chiffres uniquement)
-        const { data } = await Tesseract.recognize(img, 'fra', {
-          preserve_interword_spaces: '1'
-        })
-
-        ocrText = data.text;
+        ocrText = await runOCR(objectUrl);
         console.log('OCR raw text:', ocrText)
 
         // Look for EAN-13 (13 digits) or EAN-8 (8 digits)
@@ -184,7 +181,9 @@ export default function ScanEAN() {
       setIsProcessingImage(false)
     } finally {
       // ✅ Nettoyage mémoire garanti
-      URL.revokeObjectURL(imageUrl)
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
     }
   }
 
