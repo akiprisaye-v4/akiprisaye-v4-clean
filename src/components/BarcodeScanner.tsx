@@ -48,11 +48,13 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   // Check camera permission state using Permissions API
   const checkCameraPermission = async (): Promise<'granted' | 'prompt' | 'denied' | 'unsupported'> => {
     try {
-      if ('permissions' in navigator && 'query' in navigator.permissions) {
-        const result = await navigator.permissions.query({ name: "camera" as PermissionName });
-        return result.state as 'granted' | 'prompt' | 'denied';
+      // Guard for non-browser environments (Node.js, SSR)
+      if (typeof navigator === 'undefined' || !navigator.permissions || !navigator.permissions.query) {
+        return 'unsupported';
       }
-      return 'unsupported';
+      
+      const result = await navigator.permissions.query({ name: "camera" as PermissionName });
+      return result.state as 'granted' | 'prompt' | 'denied';
     } catch (error) {
       if (enableDebugLogging) {
         console.log('[SCAN] Permissions API not available or error:', error);
@@ -96,11 +98,11 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
       console.log('[SCAN] Camera permission state:', permission);
     }
 
-    // If permission is granted or prompt, try to access camera
-    if (permission === 'granted' || permission === 'prompt') {
+    // Try camera if permission is granted, prompt, or unsupported (browsers without Permissions API)
+    if (permission === 'granted' || permission === 'prompt' || permission === 'unsupported') {
       try {
-        // Check if getUserMedia is available
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        // Guard for non-browser environments
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('getUserMedia non disponible sur ce navigateur');
         }
 
