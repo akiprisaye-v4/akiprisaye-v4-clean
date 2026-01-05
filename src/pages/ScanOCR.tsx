@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { extractTextFromImage } from '../services/ocrService';
+import { runOCR } from '../services/ocrService';
 import OCRResultView from '../components/OCRResultView';
 import type { ScanState, OcrOptions } from '../types/scan';
 
 export default function ScanOCR() {
   const [image, setImage] = useState<string | null>(null);
-  const [ocrResult, setOcrResult] = useState<any | null>(null);
+  const [ocrText, setOcrText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -28,46 +28,50 @@ export default function ScanOCR() {
       return;
     }
 
-    setImage(URL.createObjectURL(file));
-    setLoading(true);
-    setError(null);
-    setOcrResult(null);
-    setScanState('processing');
+    let objectUrl: string | null = null;
 
-    // OPTIMIZATION 3: Async non-blocking OCR
-    // Use setTimeout to allow UI to update immediately
-    setTimeout(async () => {
-      try {
-        setScanState('processing');
-        
-        const result = await extractTextFromImage(file);
-        
-        if (result.success) {
-          setOcrResult(result);
+    try {
+      objectUrl = URL.createObjectURL(file);
+      setImage(objectUrl);
+      setLoading(true);
+      setError(null);
+      setOcrText(null);
+      setScanState('processing');
+
+      // OPTIMIZATION 3: Async non-blocking OCR
+      // Use setTimeout to allow UI to update immediately
+      setTimeout(async () => {
+        try {
+          setScanState('processing');
+          
+          const text = await runOCR(objectUrl!);
+          
+          setOcrText(text);
           setScanState('success');
-        } else {
-          // Handle timeout or error gracefully
-          if (result.timeoutTriggered) {
-            setError('Le traitement a pris trop de temps. Le produit pourrait ne pas être référencé dans notre base.');
-            setScanState('error');
-          } else {
-            setError(result.error || 'Erreur lors de l\'extraction du texte');
-            setScanState('error');
-          }
+        } catch (err: any) {
+          console.error('OCR error:', err);
+          setError('Une erreur s\'est produite lors de l\'analyse de l\'image');
+          setScanState('error');
+        } finally {
+          setLoading(false);
         }
-      } catch (err: any) {
-        console.error('OCR error:', err);
-        setError('Une erreur s\'est produite lors de l\'analyse de l\'image');
-        setScanState('error');
-      } finally {
-        setLoading(false);
+      }, 0);
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setError('Erreur lors du chargement de l\'image');
+      setScanState('error');
+      setLoading(false);
+    } finally {
+      // ✅ Nettoyage mémoire garanti
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
       }
-    }, 0);
+    }
   };
 
   const handleRetry = () => {
     setImage(null);
-    setOcrResult(null);
+    setOcrText(null);
     setError(null);
     setScanState('idle');
   };
@@ -187,7 +191,7 @@ export default function ScanOCR() {
           )}
 
           {/* Initial State - Upload */}
-          {!loading && !ocrResult && !error && (
+          {!loading && !ocrText && !error && (
             <div className="space-y-4">
               <div className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center">
                 <svg className="w-16 h-16 mx-auto mb-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,7 +275,7 @@ export default function ScanOCR() {
           )}
 
           {/* Success State - Show Results */}
-          {ocrResult && scanState === 'success' && (
+          {ocrText && scanState === 'success' && (
             <div className="space-y-4">
               <div className="bg-green-900/20 border border-green-700 rounded-lg p-3 text-center">
                 <p className="text-green-200 text-sm">
@@ -279,14 +283,14 @@ export default function ScanOCR() {
                 </p>
               </div>
               <OCRResultView 
-                result={ocrResult} 
+                result={{ success: true, rawText: ocrText, confidence: 100, processingTime: 0 }} 
                 onRetry={handleRetry}
               />
             </div>
           )}
 
           {/* Image Preview */}
-          {image && !ocrResult && (
+          {image && !ocrText && (
             <div className="mt-6">
               <h3 className="text-white font-semibold mb-2">Aperçu de l'image</h3>
               <img 

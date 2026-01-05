@@ -356,9 +356,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
         try {
           // Dynamic import for code splitting - only load OCR when needed
           const Tesseract = await import('tesseract.js');
-          const { data } = await Tesseract.recognize(img, 'eng', {
-            tessedit_char_whitelist: '0123456789'
-          });
+          const { data } = await Tesseract.recognize(img, 'eng');
 
           if (enableDebugLogging) {
             console.log('[SCAN] OCR raw text:', data.text);
