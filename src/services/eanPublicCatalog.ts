@@ -56,10 +56,10 @@ const LOCAL_CATALOG: PublicProduct[] = [
     category: 'Test',
     territories: ['GP', 'MQ', 'RE'],
     observedPrices: [
-      { territory: 'GP', store: 'Test Store', price: 3.99, date: '2026-01-05T10:00:00Z' },
-      { territory: 'MQ', store: 'Test Store 2', price: 4.20, date: '2026-01-05T10:00:00Z' },
+      { territory: 'GP', store: 'Test Store', price: 3.99, date: '2025-01-05T10:00:00Z' },
+      { territory: 'MQ', store: 'Test Store 2', price: 4.20, date: '2025-01-05T10:00:00Z' },
     ],
-    lastUpdate: '2026-01-05T10:00:00Z',
+    lastUpdate: '2025-01-05T10:00:00Z',
   },
 ]
 

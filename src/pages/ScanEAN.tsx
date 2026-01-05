@@ -24,11 +24,11 @@ export default function ScanEAN() {
   /**
    * Unified EAN handler - Single source of truth
    * Handles EAN from: camera, image upload, manual input
+   * Note: Validation errors should be handled by the caller before calling this function
    */
   const handleEAN = useCallback(async (ean: string) => {
-    // Validate EAN
+    // Validate EAN (already validated by caller for manual input)
     if (!validateEAN(ean)) {
-      // Only set manual error for manual input - other sources show their own errors
       return
     }
 

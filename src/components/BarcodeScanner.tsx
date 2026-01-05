@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
-import Tesseract from 'tesseract.js';
 import type { ScanState, ScannerOptions, ScanStateTransition } from '../types/scan';
 import { SCANNER_MESSAGES, type ScannerMessage } from '../constants/scannerMessages';
 
@@ -355,6 +354,8 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
         });
 
         try {
+          // Dynamic import for code splitting - only load OCR when needed
+          const Tesseract = await import('tesseract.js');
           const { data } = await Tesseract.recognize(img, 'eng', {
             tessedit_char_whitelist: '0123456789'
           });
