@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader, Result } from "@zxing/browser";
+import { SCANNER_MESSAGES, type ScannerMessage } from "./src/constants/scannerMessages";
 
 export default function BarcodeScanner() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -10,7 +11,7 @@ export default function BarcodeScanner() {
   const [loading, setLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanMode, setScanMode] = useState<'camera' | 'upload'>('camera');
-  const [userMessage, setUserMessage] = useState<{ type: 'info' | 'warning' | 'error', title: string, message: string } | null>(null);
+  const [userMessage, setUserMessage] = useState<ScannerMessage | null>(null);
 
   useEffect(() => {
     readerRef.current = new BrowserMultiFormatReader();
@@ -36,11 +37,7 @@ export default function BarcodeScanner() {
   // Activate fallback to image upload mode
   const activateImageUploadFallback = () => {
     setScanMode('upload');
-    setUserMessage({
-      type: 'info',
-      title: 'Caméra indisponible',
-      message: 'La caméra n\'est pas accessible sur ce navigateur. Vous pouvez importer une photo du code-barres.'
-    });
+    setUserMessage(SCANNER_MESSAGES.CAMERA_UNAVAILABLE);
   };
 
   const startScanning = async () => {
