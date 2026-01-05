@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
+  base: '/',
   plugins: [react()],
 
   resolve: {
@@ -15,8 +16,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
-  // Optionnel: si tu utilises Cloudflare Pages avec SPA routes
-  // (sinon, laisse tel quel)
-  // base: '/',
 });
