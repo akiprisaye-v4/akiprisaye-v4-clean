@@ -3,16 +3,59 @@ import { BrowserMultiFormatReader, Result } from "@zxing/browser";
 
 export default function BarcodeScanner() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState<string | null>(null);
   const [productInfo, setProductInfo] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanMode, setScanMode] = useState<'camera' | 'upload'>('camera');
+  const [userMessage, setUserMessage] = useState<{ type: 'info' | 'warning' | 'error', title: string, message: string } | null>(null);
 
   useEffect(() => {
-    const reader = new BrowserMultiFormatReader();
-    let stopped = false;
+    readerRef.current = new BrowserMultiFormatReader();
+    
+    return () => {
+      stopScanning();
+    };
+  }, []);
 
-    async function start() {
+  // Check camera permission state using Permissions API
+  const checkCameraPermission = async (): Promise<'granted' | 'prompt' | 'denied' | 'unsupported'> => {
+    try {
+      if ('permissions' in navigator && 'query' in navigator.permissions) {
+        const result = await navigator.permissions.query({ name: "camera" as PermissionName });
+        return result.state as 'granted' | 'prompt' | 'denied';
+      }
+      return 'unsupported';
+    } catch (error) {
+      return 'unsupported';
+    }
+  };
+
+  // Activate fallback to image upload mode
+  const activateImageUploadFallback = () => {
+    setScanMode('upload');
+    setUserMessage({
+      type: 'info',
+      title: 'Caméra indisponible',
+      message: 'La caméra n\'est pas accessible sur ce navigateur. Vous pouvez importer une photo du code-barres.'
+    });
+  };
+
+  const startScanning = async () => {
+    setError(null);
+    setUserMessage(null);
+    setIsScanning(true);
+
+    const reader = readerRef.current;
+    if (!reader) return;
+
+    // Check camera permission first
+    const permission = await checkCameraPermission();
+
+    // If permission is granted or prompt, try to access camera
+    if (permission === 'granted' || permission === 'prompt') {
       try {
         const videoInputDevices = await BrowserMultiFormatReader.listVideoInputDevices();
         const back = videoInputDevices.find(d => /back|rear|environment/i.test(d.label));
@@ -28,31 +71,64 @@ export default function BarcodeScanner() {
         await videoRef.current.play();
 
         reader.decodeFromVideoDevice(deviceId ?? null, videoRef.current, (res?: Result, err?: unknown) => {
-          if (stopped) return;
           if (res) {
             const ean = res.getText();
             setCode(ean);
-            stop();
+            stopScanning();
             fetchPriceByEAN(ean);
           }
         });
+
+        return; // Success - camera is working
       } catch (e: any) {
-        setError(e?.message ?? "Erreur caméra");
+        console.error("Camera error:", e);
+        // Camera technically inaccessible - fall through to fallback
       }
     }
 
-    function stop() {
-      stopped = true;
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
-        videoRef.current.srcObject = null;
-      }
-      reader.reset();
-    }
+    // 🔴 FALLBACK AUTOMATIQUE - Camera denied, not supported, or failed
+    setIsScanning(false);
+    activateImageUploadFallback();
+  };
 
-    start();
-    return stop;
-  }, []);
+  const stopScanning = () => {
+    setIsScanning(false);
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+      videoRef.current.srcObject = null;
+    }
+    if (readerRef.current) {
+      readerRef.current.reset();
+    }
+  };
+
+  const retryCamera = () => {
+    setScanMode('camera');
+    setUserMessage(null);
+    setError(null);
+    startScanning();
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !readerRef.current) return;
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const imageUrl = URL.createObjectURL(file);
+      const result = await readerRef.current.decodeFromImageUrl(imageUrl);
+      const ean = result.getText();
+      URL.revokeObjectURL(imageUrl);
+      setCode(ean);
+      fetchPriceByEAN(ean);
+    } catch (err: any) {
+      setError('❌ Code-barres non détecté dans l\'image. Vérifiez que le code-barres est visible et net.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   async function fetchPriceByEAN(ean: string) {
     try {
@@ -72,7 +148,83 @@ export default function BarcodeScanner() {
 
   return (
     <div className="space-y-3">
-      <video ref={videoRef} className="w-full rounded-xl bg-black aspect-video" playsInline />
+      {/* User Message (Fallback Info) */}
+      {userMessage && (
+        <div className={`rounded-lg p-4 text-sm ${
+          userMessage.type === 'info' ? 'bg-blue-900/20 border border-blue-700/30 text-blue-200' :
+          userMessage.type === 'warning' ? 'bg-yellow-900/20 border border-yellow-700/30 text-yellow-200' :
+          'bg-red-900/20 border border-red-700/30 text-red-200'
+        }`}>
+          <p className="font-semibold mb-2">📷 {userMessage.title}</p>
+          <p>{userMessage.message}</p>
+        </div>
+      )}
+
+      {/* Video display */}
+      {isScanning && (
+        <video ref={videoRef} className="w-full rounded-xl bg-black aspect-video" playsInline />
+      )}
+
+      {/* Scanner button (only when not scanning and not in upload mode) */}
+      {!isScanning && scanMode === 'camera' && !userMessage && (
+        <button
+          onClick={startScanning}
+          className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+        >
+          📷 Scanner avec la caméra
+        </button>
+      )}
+
+      {/* Fallback mode buttons */}
+      {scanMode === 'upload' && userMessage && (
+        <div className="space-y-2">
+          {/* Primary: Image upload */}
+          <label className="block w-full">
+            <div className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-center cursor-pointer transition-colors">
+              🖼️ Importer une image
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+          
+          {/* Secondary: Retry camera */}
+          <button
+            onClick={retryCamera}
+            className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors text-sm"
+          >
+            🔄 Réessayer la caméra
+          </button>
+        </div>
+      )}
+
+      {/* Image upload (always available as alternative when not in fallback) */}
+      {!userMessage && !isScanning && (
+        <label className="block w-full">
+          <div className="px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-center cursor-pointer transition-colors">
+            🖼️ Importer une image
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+        </label>
+      )}
+
+      {/* Stop button */}
+      {isScanning && (
+        <button
+          onClick={stopScanning}
+          className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
+        >
+          Arrêter le scan
+        </button>
+      )}
       
       {code && <div className="text-sm">📦 Code détecté : <b>{code}</b></div>}
       {loading && <div className="text-blue-400 text-sm">Chargement des prix...</div>}
