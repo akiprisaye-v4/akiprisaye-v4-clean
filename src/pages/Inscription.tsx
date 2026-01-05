@@ -5,6 +5,7 @@ import { auth } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import { db, firebaseError } from "@/lib/firebase";
+import { PasswordInput } from "@/components/PasswordInput";
 
 const DEFAULT_USER_PLAN = "freemium";
 
@@ -116,21 +117,16 @@ export default function Inscription() {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-              Mot de passe
-            </label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Minimum 6 caractères"
-              required
-              minLength={6}
-              className="w-full p-3 rounded-lg bg-slate-800 text-white border border-gray-700 focus:border-blue-500 focus:outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={setPassword}
+            label="Mot de passe"
+            placeholder="Minimum 6 caractères"
+            required
+            minLength={6}
+            autoComplete="new-password"
+          />
 
           <button
             type="submit"
