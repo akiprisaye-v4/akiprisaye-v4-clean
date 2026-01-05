@@ -3,11 +3,13 @@ import React, { useState, useCallback } from 'react'
 import { useEANScanner } from '../hooks/useEANScanner'
 import { useEANResolver } from '../hooks/useEANResolver'
 import { useScanHistory } from '../hooks/useScanHistory'
-import { validateEAN } from '../services/eanPublicCatalog'
+import { validateEAN, getAllProducts } from '../services/eanPublicCatalog'
+import { extractProductHints, fuzzySearchProducts } from '../services/textProductRecognition'
 import ScanCamera from '../components/ScanCamera'
 import ScanResultCard from '../components/ScanResultCard'
 import ScanErrorState from '../components/ScanErrorState'
 import AddToTiPanierButton from '../components/AddToTiPanierButton'
+import { ProductTextReviewModal } from '../components/ProductTextReviewModal'
 import { GlassCard } from '../components/ui/glass-card'
 
 export default function ScanEAN() {
@@ -16,10 +18,15 @@ export default function ScanEAN() {
   const [showHistory, setShowHistory] = useState(false)
   const [imageUploadStatus, setImageUploadStatus] = useState<string | null>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [textProductSuggestions, setTextProductSuggestions] = useState<Array<{ label: string; score: number }>>([])
+  const [showTextProductModal, setShowTextProductModal] = useState(false)
 
   const scanner = useEANScanner()
   const resolver = useEANResolver()
   const { history, addToHistory, removeFromHistory, clearHistory } = useScanHistory()
+  
+  // Cache product catalog to avoid repeated calls
+  const productCatalog = React.useMemo(() => getAllProducts().map(p => ({ label: p.name, ean: p.ean })), [])
 
   /**
    * Unified EAN handler - Single source of truth
@@ -112,6 +119,7 @@ export default function ScanEAN() {
       }
 
       // Step 3: OCR Fallback with Tesseract.js (INDISPENSABLE)
+      let ocrText = '';
       if (!ean) {
         setImageUploadStatus('📝 Détection OCR en cours...')
         
@@ -120,10 +128,11 @@ export default function ScanEAN() {
           tessedit_char_whitelist: '0123456789'
         })
 
-        console.log('OCR raw text:', data.text)
+        ocrText = data.text;
+        console.log('OCR raw text:', ocrText)
 
         // Look for EAN-13 (13 digits) or EAN-8 (8 digits)
-        const match = data.text.match(/\b\d{13}\b|\b\d{8}\b/)
+        const match = ocrText.match(/\b\d{13}\b|\b\d{8}\b/)
         if (match) {
           ean = match[0]
           console.log('✅ EAN detected via OCR:', ean)
@@ -135,7 +144,7 @@ export default function ScanEAN() {
 
       // Step 4: Handle result
       if (ean) {
-        // SUCCESS CASE
+        // SUCCESS CASE - EAN found
         setImageUploadStatus(`✅ Code détecté automatiquement: ${ean}`)
         setTimeout(() => setImageUploadStatus(null), 3000)
         
@@ -145,8 +154,29 @@ export default function ScanEAN() {
           setIsProcessingImage(false)
         }
       } else {
-        // FAILURE CASE - Honest message
-        setImageUploadStatus('❌ Aucun code détecté automatiquement. 👉 Vous pouvez saisir le code manuellement.')
+        // FAILURE CASE - No EAN found, try text-based product recognition (PR D)
+        setImageUploadStatus('🔍 Code EAN non trouvé, recherche par texte...')
+        
+        try {
+          // Extract product hints from OCR text
+          const hints = extractProductHints(ocrText)
+          
+          // Fuzzy search for suggestions using cached catalog
+          const suggestions = fuzzySearchProducts(hints.keywords, productCatalog)
+          
+          if (suggestions.length > 0) {
+            // Show modal for user validation
+            setTextProductSuggestions(suggestions)
+            setShowTextProductModal(true)
+            setImageUploadStatus('✅ Produits suggérés - Veuillez confirmer')
+          } else {
+            setImageUploadStatus('❌ Aucun code détecté automatiquement. 👉 Vous pouvez saisir le code manuellement.')
+          }
+        } catch (textError) {
+          console.error('Text product recognition error:', textError)
+          setImageUploadStatus('❌ Aucun code détecté automatiquement. 👉 Vous pouvez saisir le code manuellement.')
+        }
+        
         setIsProcessingImage(false)
       }
     } catch (err) {
@@ -154,6 +184,37 @@ export default function ScanEAN() {
       setImageUploadStatus('❌ Erreur lors du traitement de l\'image')
       setIsProcessingImage(false)
     }
+  }
+
+  /**
+   * Handle text product confirmation from modal
+   * User has validated a suggested product
+   */
+  const handleTextProductConfirm = async (productLabel: string) => {
+    setShowTextProductModal(false)
+    setImageUploadStatus(`✅ Recherche de "${productLabel}"...`)
+    
+    // Find the product by name in cached catalog
+    const product = productCatalog.find(p => p.label === productLabel)
+    
+    if (product && product.ean) {
+      // Launch comparator with the confirmed product's EAN
+      await handleEAN(product.ean)
+      setImageUploadStatus(null)
+    } else {
+      setImageUploadStatus('❌ Produit non trouvé dans le catalogue')
+      setTimeout(() => setImageUploadStatus(null), 3000)
+    }
+  }
+
+  /**
+   * Handle text product modal cancellation
+   */
+  const handleTextProductCancel = () => {
+    setShowTextProductModal(false)
+    setTextProductSuggestions([])
+    setImageUploadStatus('❌ Recherche annulée - Utilisez la saisie manuelle')
+    setTimeout(() => setImageUploadStatus(null), 3000)
   }
 
   return (
@@ -340,6 +401,15 @@ export default function ScanEAN() {
             </GlassCard>
           )}
         </div>
+      )}
+
+      {/* Text Product Review Modal (PR D) */}
+      {showTextProductModal && (
+        <ProductTextReviewModal
+          suggestions={textProductSuggestions}
+          onConfirm={handleTextProductConfirm}
+          onCancel={handleTextProductCancel}
+        />
       )}
     </main>
   )
