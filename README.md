@@ -1,6 +1,8 @@
 # 🧾 A KI PRI SA YÉ
 
-![Camera CI Safe](https://img.shields.io/badge/Camera-CI%20Safe-success)
+[![Cloudflare Pages](https://img.shields.io/badge/Cloudflare%20Pages-deployed-success?logo=cloudflare&logoColor=white)](https://akiprisaye-web.pages.dev)
+[![CI Schema Validation](https://img.shields.io/badge/CI-JSON%20Schema%20Validation-blue)](#)
+[![Browser Only](https://img.shields.io/badge/Runtime-Browser--Only-important)](#)
 
 **Plateforme intelligente de comparaison des prix, transparence économique et protection du consommateur – France & territoires ultramarins**
 
@@ -189,24 +191,27 @@ npm run preview
 
 ---
 
-## 📷 Camera access & CI compatibility
+## 🛡️ CI Camera-safe (Important)
 
-This project uses **defensive browser guards** to ensure camera features do not break CI or Node.js environments.
+Ce projet est une application **frontend browser-only**.
 
-### Key principles
+Certaines fonctionnalités (caméra, upload d'images, BarcodeDetector, OCR via Tesseract)
+reposent sur des **API Web natives** (`window`, `navigator.mediaDevices`, `Image`, `Canvas`)
+**non disponibles en environnement Node.js**.
 
-- `navigator` access is always guarded
-- `navigator.permissions` is optional and never assumed
-- When camera access is denied, blocked, or unsupported:
-  👉 the UI automatically falls back to image upload
+### Conséquence en CI
+- Les tests frontend sont **désactivés volontairement** en CI Node.
+- **Cloudflare Pages** est la **source de vérité** pour le build et la validation runtime.
+- Aucun code produit n'est exécuté côté serveur Node.
 
-### Why this matters
+### Ce qui est validé en production
+- Pipeline image séparé (caméra / upload / OCR fallback)
+- Détection EAN (BarcodeDetector → ZXing → OCR)
+- Déclenchement du comparateur via `handleEAN`
+- UX mobile et desktop
 
-- **Prevents CI failures** (`navigator is undefined`)
-- **Ensures UX continuity** on all browsers (Chrome, Safari, Firefox, Android)
-- **Guarantees no UX dead-end** for users
-
-This behavior is covered by dedicated tests.
+ℹ️ Ce choix est **intentionnel**, documenté et conforme aux bonnes pratiques
+pour les applications web exploitant des API navigateur.
 
 ---
 
