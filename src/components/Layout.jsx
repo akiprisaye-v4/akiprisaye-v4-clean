@@ -25,11 +25,11 @@ export default function Layout() {
   ];
 
   const publicNavItems = [
+    { path: '/observatoire', label: 'Observatoire' },
     { path: '/methodologie', label: 'Méthodologie' },
     { path: '/transparence', label: 'Transparence' },
-    { path: '/perimetre', label: 'Périmètre' },
-    { path: '/versions', label: 'Versions' },
-    { path: '/gouvernance', label: 'Gouvernance' },
+    { path: '/donnees-publiques', label: 'Données publiques' },
+    { path: '/mentions-legales', label: 'Mentions légales' },
   ];
 
   return (
