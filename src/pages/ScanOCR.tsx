@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { runOCR, type OCRResult } from '../services/ocrService';
+import { runOCR, GENERIC_OCR_ERROR, type OCRResult } from '../services/ocrService';
 import OCRResultView from '../components/OCRResultView';
 import type { ScanState, OcrOptions } from '../types/scan';
-
-const GENERIC_OCR_ERROR = 'Une erreur s\'est produite lors de l\'analyse de l\'image';
 
 export default function ScanOCR() {
   const [image, setImage] = useState<string | null>(null);

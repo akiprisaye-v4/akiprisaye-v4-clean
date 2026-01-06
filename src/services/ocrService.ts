@@ -29,6 +29,8 @@
 
 import Tesseract from 'tesseract.js';
 
+export const GENERIC_OCR_ERROR = 'Une erreur s\'est produite lors de l\'analyse de l\'image';
+
 /**
  * OCR Result structure (for compatibility with existing components)
  * - timeoutTriggered: indicates when an execution guard stopped processing
@@ -58,6 +60,18 @@ export interface OCRResult {
  */
 function isOffline(): boolean {
   return !navigator.onLine;
+}
+
+function normalizeConfidence(confidence: unknown): number {
+  if (typeof confidence === 'number') {
+    return confidence;
+  }
+
+  if (import.meta.env.DEV) {
+    console.warn('OCR confidence missing, defaulting to 0');
+  }
+
+  return 0;
 }
 
 /**
@@ -99,11 +113,7 @@ export async function runOCR(
       data: { text, confidence },
     } = await worker.recognize(imageUrl);
 
-    if (typeof confidence !== 'number' && import.meta.env.DEV) {
-      console.warn('OCR confidence missing, defaulting to 0');
-    }
-
-    const normalizedConfidence = typeof confidence === 'number' ? confidence : 0;
+    const normalizedConfidence = normalizeConfidence(confidence);
 
     return {
       success: true,

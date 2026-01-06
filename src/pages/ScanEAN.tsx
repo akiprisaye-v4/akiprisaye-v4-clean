@@ -4,7 +4,7 @@ import { useEANScanner } from '../hooks/useEANScanner'
 import { useEANResolver } from '../hooks/useEANResolver'
 import { useScanHistory } from '../hooks/useScanHistory'
 import { validateEAN, getAllProducts } from '../services/eanPublicCatalog'
-import { runOCR } from '../services/ocrService'
+import { runOCR, GENERIC_OCR_ERROR } from '../services/ocrService'
 import { extractProductHints, fuzzySearchProducts } from '../services/textProductRecognition'
 import ScanCamera from '../components/ScanCamera'
 import ScanResultCard from '../components/ScanResultCard'
@@ -12,8 +12,6 @@ import ScanErrorState from '../components/ScanErrorState'
 import AddToTiPanierButton from '../components/AddToTiPanierButton'
 import { ProductTextReviewModal } from '../components/ProductTextReviewModal'
 import { GlassCard } from '../components/ui/glass-card'
-
-const GENERIC_OCR_ERROR = 'Échec de la lecture OCR'
 
 export default function ScanEAN() {
   const [manualEAN, setManualEAN] = useState('')
