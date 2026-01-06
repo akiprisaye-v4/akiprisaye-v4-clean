@@ -23,6 +23,7 @@ const Actualites = lazyWithRetry(() => import('./pages/Actualites'));
 const Alertes = lazyWithRetry(() => import('./pages/Alertes'));
 const APropos = lazyWithRetry(() => import('./pages/APropos'));
 const Methodologie = lazyWithRetry(() => import('./pages/Methodologie'));
+const Transparence = lazyWithRetry(() => import('./pages/Transparence'));
 const MentionsLegales = lazyWithRetry(() => import('./pages/MentionsLegales'));
 const MonCompte = lazyWithRetry(() => import('./pages/MonCompte'));
 const Inscription = lazyWithRetry(() => import('./pages/Inscription'));
@@ -197,6 +198,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='civic-modules' element={<CivicModules />} />
                   <Route path='evaluation-cosmetique' element={<EvaluationCosmetique />} />
                   <Route path='observatoire' element={<Observatoire />} />
+                  <Route path='transparence' element={<Transparence />} />
                   <Route path='observatoire/methodologie' element={<ObservatoryMethodology />} />
                   <Route path='comparateur-citoyen' element={<ComparateurCitoyen />} />
                   
