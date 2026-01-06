@@ -24,7 +24,7 @@ const Alertes = lazyWithRetry(() => import('./pages/Alertes'));
 const APropos = lazyWithRetry(() => import('./pages/APropos'));
 const Methodologie = lazyWithRetry(() => import('./pages/Methodologie'));
 const Transparence = lazyWithRetry(() => import('./pages/Transparence'));
-const MentionsLegales = lazyWithRetry(() => import('./pages/MentionsLegales.tsx'));
+const MentionsLegales = lazyWithRetry(() => import('./pages/MentionsLegales'));
 const DonneesPubliques = lazyWithRetry(() => import('./pages/DonneesPubliques'));
 const MonCompte = lazyWithRetry(() => import('./pages/MonCompte'));
 const Inscription = lazyWithRetry(() => import('./pages/Inscription'));
