@@ -107,7 +107,7 @@ export async function runOCR(
     
     const message = offline
       ? 'Erreur OCR hors ligne. Vérifiez que l\'image est valide.'
-      : 'Erreur OCR. Veuillez réessayer ou vérifier votre connexion.';
+      : `Erreur OCR (langue ${language}). Veuillez réessayer ou vérifier votre connexion.`;
 
     return {
       success: false,

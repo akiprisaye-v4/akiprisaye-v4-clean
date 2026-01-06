@@ -51,10 +51,9 @@ export default function ScanOCR() {
            if (!result.success) {
              setError(result.error ?? GENERIC_OCR_ERROR);
              setScanState('error');
-             return;
+           } else {
+             setScanState('success');
            }
-
-           setScanState('success');
          } catch (err: any) {
            console.error('OCR error:', err);
            setError(err?.message ?? GENERIC_OCR_ERROR);
