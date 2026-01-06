@@ -4,6 +4,7 @@ import OCRResultView from '../components/OCRResultView';
 import type { ScanState, OcrOptions } from '../types/scan';
 
 export default function ScanOCR() {
+  const GENERIC_OCR_ERROR = 'Une erreur s\'est produite lors de l\'analyse de l\'image';
   const [image, setImage] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ export default function ScanOCR() {
            
            setOcrResult(result);
            if (!result.success) {
-             setError(result.error ?? 'Une erreur s\'est produite lors de l\'analyse de l\'image');
+             setError(result.error ?? GENERIC_OCR_ERROR);
              setScanState('error');
              return;
            }
@@ -56,7 +57,7 @@ export default function ScanOCR() {
            setScanState('success');
          } catch (err: any) {
            console.error('OCR error:', err);
-           setError(err?.message ?? 'Une erreur s\'est produite lors de l\'analyse de l\'image');
+           setError(err?.message ?? GENERIC_OCR_ERROR);
            setScanState('error');
          } finally {
            setLoading(false);

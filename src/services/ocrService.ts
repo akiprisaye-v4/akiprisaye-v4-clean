@@ -101,7 +101,6 @@ export async function runOCR(
       rawText: text,
       confidence: confidence ?? 0,
       processingTime: performance.now() - startedAt,
-      sections: undefined,
     };
   } catch (error) {
     console.error('OCR processing failed:', error);
