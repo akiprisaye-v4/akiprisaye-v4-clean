@@ -35,6 +35,9 @@ const WORKER_PATH = `${OCR_ASSET_BASE_PATH}/worker.min.js`;
 const CORE_PATH = `${OCR_ASSET_BASE_PATH}/tesseract-core.wasm`;
 const LANG_PATH = OCR_ASSET_BASE_PATH;
 const DEFAULT_LANG = 'fra';
+// Gentle post-processing boosts to improve OCR legibility on low-light mobile captures
+const CONTRAST_BOOST = 1.08;
+const SATURATION_BOOST = 1.02;
 
 /**
  * OCR Result structure (for compatibility with existing components)
@@ -60,6 +63,10 @@ export interface OCRResult {
   error?: string;
   errorCode?: 'ASSET_MISSING' | 'TIMEOUT' | 'PROCESSING_ERROR';
 }
+
+const OCR_LOAD_ERROR_MESSAGE =
+  'Le module OCR n’a pas pu se charger correctement en production. Les fichiers linguistiques sont peut-être indisponibles.';
+const KNOWN_ASSET_LABELS = new Set(['worker', 'core', 'language']);
 
 /**
  * Check if running in offline mode
@@ -87,12 +94,22 @@ async function ensureAssetAvailable(url: string, label: string): Promise<void> {
     if (!response.ok) {
       const error = new Error(`Asset ${label} unavailable (${response.status})`);
       (error as any).status = response.status;
+      (error as any).assetLabel = label;
       throw error;
     }
   } catch (error) {
     console.error(`[OCR] Asset check failed for ${label}:`, error);
     throw error;
   }
+}
+
+function isAssetLoadError(error: unknown): boolean {
+  const status = (error as { status?: number })?.status;
+  const assetLabel = (error as { assetLabel?: string })?.assetLabel;
+  if (assetLabel && KNOWN_ASSET_LABELS.has(assetLabel)) {
+    return true;
+  }
+  return status === 404;
 }
 
 async function preprocessImage(
@@ -137,7 +154,12 @@ async function preprocessImage(
     throw new Error('Canvas context not available');
   }
 
-  ctx.drawImage(bitmap, 0, 0, width, height);
+  ctx.filter = `contrast(${CONTRAST_BOOST}) saturate(${SATURATION_BOOST})`;
+  try {
+    ctx.drawImage(bitmap, 0, 0, width, height);
+  } finally {
+    ctx.filter = 'none';
+  }
 
   const processedBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -210,6 +232,7 @@ export async function runOCR(
     corePath: CORE_PATH,
     langPath: LANG_PATH,
     gzip: true,
+    logger: (m) => console.debug('[OCR]', m),
   });
 
   let timeoutTriggered = false;
@@ -252,14 +275,14 @@ export async function runOCR(
     };
   } catch (error) {
     console.error('OCR processing failed:', error, (error as Error)?.stack);
-    const status = (error as { status?: number })?.status;
     const isTimeout = (error as Error)?.message === 'OCR_TIMEOUT';
+    const isAssetError = isAssetLoadError(error);
     if (isTimeout) {
       timeoutTriggered = true;
     }
     const message =
-      status === 404
-        ? 'Asset OCR manquant (chemin invalide)'
+      isAssetError
+        ? OCR_LOAD_ERROR_MESSAGE
         : isTimeout
           ? 'Délai dépassé, réessayez avec une image plus nette'
           : offline
@@ -273,7 +296,7 @@ export async function runOCR(
       processingTime: performance.now() - startedAt,
       error: message,
       timeoutTriggered,
-      errorCode: status === 404 ? 'ASSET_MISSING' : isTimeout ? 'TIMEOUT' : 'PROCESSING_ERROR',
+      errorCode: isAssetError ? 'ASSET_MISSING' : isTimeout ? 'TIMEOUT' : 'PROCESSING_ERROR',
     };
   } finally {
     if (timeoutId !== undefined) {
