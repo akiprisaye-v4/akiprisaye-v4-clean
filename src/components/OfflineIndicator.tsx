@@ -21,7 +21,6 @@ export function OfflineIndicator() {
     <div 
       className="fixed top-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-sm font-medium shadow-lg transition-all duration-300 z-floating"
       style={{ 
-        zIndex: 'var(--z-floating)',
         backgroundColor: quality === 'offline' ? 'rgb(239 68 68 / 0.9)' : 'rgb(251 191 36 / 0.9)',
       }}
     >

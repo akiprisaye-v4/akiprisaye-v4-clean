@@ -104,7 +104,7 @@ export default function TiPanierDrawer({ open, onClose, type = 'comparison' }: {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-modal flex items-end md:items-center justify-center p-4" style={{ zIndex: 'var(--z-modal)' }} role="dialog" aria-modal="true" aria-labelledby="ti-panier-title" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-end md:items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="ti-panier-title" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 w-full max-w-md" onClick={(e) => e.stopPropagation()} ref={containerRef} tabIndex={-1}>

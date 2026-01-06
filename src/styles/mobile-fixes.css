@@ -73,11 +73,16 @@
 }
 
 /* Touch target size for mobile (WCAG AAA - 44px minimum) */
+/* Scope to specific interactive elements to avoid layout issues */
 button,
-a,
+a[role="button"],
 input[type="checkbox"],
 input[type="radio"],
-[role="button"] {
+input[type="submit"],
+input[type="button"],
+[role="button"],
+[role="tab"],
+[role="menuitem"] {
   min-height: 44px;
   min-width: 44px;
 }
