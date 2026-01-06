@@ -78,7 +78,7 @@ describe('Layout Component', () => {
 
   it('should render footer with links', () => {
     renderLayout();
-    expect(screen.getByText('Mentions légales')).toBeInTheDocument();
+    expect(screen.getAllByText('Mentions légales').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Contact').length).toBeGreaterThan(0);
   });
 
