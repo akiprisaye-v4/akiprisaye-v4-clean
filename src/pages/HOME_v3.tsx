@@ -53,6 +53,10 @@ export default function HomeV3() {
             📊 Consulter l'observatoire
           </Link>
         </div>
+        <div className="mt-4 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-slate-800/60 text-xs text-slate-200">
+          <span className="text-blue-300">●</span>
+          Données publiques • stockage local • aucun suivi utilisateur
+        </div>
       </GlassCard>
 
       {/* Public Counters - Transparency */}
