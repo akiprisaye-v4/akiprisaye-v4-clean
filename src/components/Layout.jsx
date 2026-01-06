@@ -22,6 +22,7 @@ export default function Layout() {
     { path: '/evaluation-cosmetique', label: 'Cosmétiques' },
     { path: '/actualites', label: 'Actualités' },
     { path: '/pricing', label: 'Tarifs' },
+    { path: '/presse', label: 'Presse' },
     { path: '/mon-espace', label: 'Mon espace' },
     { path: '/contact', label: 'Contact' },
   ];
@@ -34,6 +35,7 @@ export default function Layout() {
     { path: '/transparence', label: 'Transparence' },
     { path: '/donnees-publiques', label: 'Données publiques' },
     { path: '/mentions-legales', label: 'Mentions légales' },
+    { path: '/presse', label: 'Presse' },
   ];
 
   return (

@@ -63,6 +63,7 @@ const Perimetre = lazyWithRetry(() => import('./pages/Perimetre'));
 const Versions = lazyWithRetry(() => import('./pages/Versions'));
 const Gouvernance = lazyWithRetry(() => import('./pages/Gouvernance'));
 const Contribuer = lazyWithRetry(() => import('./pages/Contribuer'));
+const Presse = lazyWithRetry(() => import('./pages/Presse'));
 
 const CompareSimple = lazyWithRetry(() => import('./pages/Compare'));
 const NewsSimple = lazyWithRetry(() => import('./pages/News'));
@@ -174,6 +175,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='perimetre' element={<Perimetre />} />
                   <Route path='versions' element={<Versions />} />
                   <Route path='gouvernance' element={<Gouvernance />} />
+                  <Route path='presse' element={<Presse />} />
                   <Route path='mentions-legales' element={<MentionsLegales />} />
                   <Route path='donnees-publiques' element={<DonneesPubliques />} />
                   <Route path='mon-compte' element={<MonCompte />} />
