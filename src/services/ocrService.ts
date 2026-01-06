@@ -99,6 +99,10 @@ export async function runOCR(
       data: { text, confidence },
     } = await worker.recognize(imageUrl);
 
+    if (typeof confidence !== 'number' && import.meta.env.DEV) {
+      console.warn('OCR confidence missing, defaulting to 0');
+    }
+
     const normalizedConfidence = typeof confidence === 'number' ? confidence : 0;
 
     return {
@@ -112,7 +116,7 @@ export async function runOCR(
     
     const message = offline
       ? 'Erreur OCR hors ligne. Vérifiez que l\'image est valide.'
-      : `Erreur OCR (langue ${language}). Veuillez réessayer ou vérifier votre connexion.`;
+      : `Erreur OCR (langue ${language}). Veuillez réessayer ou recharger la page.`;
 
     return {
       success: false,

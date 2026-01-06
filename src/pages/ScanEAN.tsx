@@ -13,6 +13,8 @@ import AddToTiPanierButton from '../components/AddToTiPanierButton'
 import { ProductTextReviewModal } from '../components/ProductTextReviewModal'
 import { GlassCard } from '../components/ui/glass-card'
 
+const GENERIC_OCR_ERROR = 'Échec de la lecture OCR'
+
 export default function ScanEAN() {
   const [manualEAN, setManualEAN] = useState('')
   const [manualError, setManualError] = useState<string | null>(null)
@@ -129,7 +131,7 @@ export default function ScanEAN() {
         
         const ocrResult = await runOCR(objectUrl);
         if (!ocrResult.success) {
-          const ocrError = ocrResult.error ?? 'Échec de la lecture OCR';
+          const ocrError = ocrResult.error ?? GENERIC_OCR_ERROR;
           throw new Error(ocrError);
         }
         ocrText = ocrResult.rawText;
