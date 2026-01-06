@@ -23,6 +23,7 @@ import {
   calculateDistance as calcDist,
   getPriceDataFreshness,
 } from '../services/shoppingListService';
+import { db } from '../lib/firebase';
 
 // OPTIMIZATION MODES (user chooses)
 const OPTIMIZATION_MODES = {
@@ -70,6 +71,16 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
   const [optimizationResults, setOptimizationResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [savedRoutes, setSavedRoutes] = useState([]);
+  const [hasAttemptedOptimization, setHasAttemptedOptimization] = useState(false);
+
+  const dbAvailable = !!db;
+  const geolocStatus = !gpsConsent
+    ? 'awaiting'
+    : gpsError
+    ? 'error'
+    : userLocation
+    ? 'active'
+    : 'pending';
 
   // Request GPS location (opt-in only)
   const requestLocation = () => {
@@ -198,6 +209,7 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
     }
 
     setLoading(true);
+    setHasAttemptedOptimization(true);
 
     // Match products with real observations
     const matchedProducts = await matchProductsWithObservations();
@@ -496,6 +508,12 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
     alert('Route sauvegardée!');
   };
 
+  const noOptimizationData =
+    hasAttemptedOptimization &&
+    shoppingList.length > 0 &&
+    userLocation &&
+    (!optimizationResults || (optimizationResults.breakdown || []).length === 0);
+
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-6">
       {/* Header */}
@@ -507,6 +525,11 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
         <p className="text-slate-300">
           Aide à l'achat CITOYEN basée sur des données RÉELLES et OBSERVÉES uniquement
         </p>
+        {!dbAvailable && (
+          <div className="mt-3 p-3 bg-amber-900/30 border border-amber-500/40 rounded-lg text-amber-100 text-sm">
+            Fonctionnalité en cours de déploiement : les premiers relevés prix géolocalisés seront ajoutés prochainement.
+          </div>
+        )}
       </div>
 
       {/* Mandatory Disclaimer */}
@@ -549,6 +572,13 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
                 J'accepte explicitement l'utilisation de ma position GPS locale
               </span>
             </label>
+            <p className="text-xs text-blue-200 mt-2">
+              Statut géolocalisation :{' '}
+              {geolocStatus === 'awaiting' && 'en attente de votre accord'}
+              {geolocStatus === 'pending' && 'demande envoyée au navigateur'}
+              {geolocStatus === 'active' && 'activée ✅'}
+              {geolocStatus === 'error' && 'refusée ou indisponible'}
+            </p>
             {gpsConsent && (
               <div className="mt-3 flex gap-2">
                 <button
@@ -853,6 +883,14 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
                 </div>
               </div>
             </>
+          ) : noOptimizationData ? (
+            <div className="bg-amber-900/20 backdrop-blur-xl border border-amber-600/40 rounded-xl p-10 text-center shadow-xl">
+              <MapPin className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+              <p className="text-amber-100 font-semibold mb-2">Aucune donnée de prix disponible pour ce panier</p>
+              <p className="text-sm text-amber-200">
+                Fonctionnalité en cours de déploiement : les parcours optimisés seront affichés dès que les relevés prix seront intégrés pour votre territoire.
+              </p>
+            </div>
           ) : (
             <div className="bg-slate-800/60 backdrop-blur-xl border border-slate-700/50 rounded-xl p-12 text-center shadow-xl">
               <MapPin className="w-16 h-16 text-slate-600 mx-auto mb-4" />

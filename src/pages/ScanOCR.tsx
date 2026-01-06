@@ -3,6 +3,8 @@ import { runOCR, GENERIC_OCR_ERROR, type OCRResult } from '../services/ocrServic
 import OCRResultView from '../components/OCRResultView';
 import type { ScanState, OcrOptions } from '../types/scan';
 
+const SAMPLE_IMAGE = '/images/ocr-example.png';
+
 export default function ScanOCR() {
   const [image, setImage] = useState<string | null>(null);
   const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
@@ -19,6 +21,39 @@ export default function ScanOCR() {
     timeout: 30000,
   });
 
+  const executeOcr = (source: string, cleanup?: () => void) => {
+    setLoading(true);
+    setError(null);
+    setOcrResult(null);
+    setScanState('processing');
+
+    void Promise.resolve().then(async () => {
+      try {
+        const result = await runOCR(source, settings.language);
+        const trimmedText = (result.rawText || '').trim();
+
+        if (!result.success || trimmedText.length === 0) {
+          const message = result.success
+            ? "Aucun texte détecté. Essayez l'image d'exemple fournie."
+            : result.error ?? GENERIC_OCR_ERROR;
+          setError(message);
+          setScanState('error');
+          setOcrResult(null);
+        } else {
+          setOcrResult(result);
+          setScanState('success');
+        }
+      } catch (err: any) {
+        console.error('OCR error:', err);
+        setError(err?.message ?? GENERIC_OCR_ERROR);
+        setScanState('error');
+      } finally {
+        setLoading(false);
+        if (cleanup) cleanup();
+      }
+    });
+  };
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -33,38 +68,11 @@ export default function ScanOCR() {
     try {
       objectUrl = URL.createObjectURL(file);
       setImage(objectUrl);
-      setLoading(true);
-      setError(null);
-       setOcrResult(null);
-       setScanState('processing');
-
-       // OPTIMIZATION 3: Async non-blocking OCR
-       // Use setTimeout to allow UI to update immediately
-       setTimeout(async () => {
-         try {
-           setScanState('processing');
-           
-           const result = await runOCR(objectUrl!, settings.language);
-           
-           setOcrResult(result);
-           if (!result.success) {
-             setError(result.error ?? GENERIC_OCR_ERROR);
-             setScanState('error');
-           } else {
-             setScanState('success');
-           }
-         } catch (err: any) {
-           console.error('OCR error:', err);
-           setError(err?.message ?? GENERIC_OCR_ERROR);
-           setScanState('error');
-         } finally {
-           setLoading(false);
-           // ✅ Nettoyage mémoire après traitement OCR
-           if (objectUrl) {
-            URL.revokeObjectURL(objectUrl);
-          }
+      executeOcr(objectUrl, () => {
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
         }
-      }, 0);
+      });
     } catch (err: any) {
       console.error('Upload error:', err);
       setError('Erreur lors du chargement de l\'image');
@@ -75,6 +83,11 @@ export default function ScanOCR() {
         URL.revokeObjectURL(objectUrl);
       }
     }
+  };
+
+  const handleUseSample = () => {
+    setImage(SAMPLE_IMAGE);
+    executeOcr(SAMPLE_IMAGE);
   };
 
   const handleRetry = () => {
@@ -199,7 +212,7 @@ export default function ScanOCR() {
           )}
 
           {/* Initial State - Upload */}
-          {!loading && !ocrText && !error && (
+          {!loading && !ocrResult && !error && scanState === 'idle' && (
             <div className="space-y-4">
               <div className="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center">
                 <svg className="w-16 h-16 mx-auto mb-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,17 +230,36 @@ export default function ScanOCR() {
                     disabled={!settings.enabled}
                   />
                 </label>
-              </div>
-              
-              {/* Instructions */}
-              <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-                <h3 className="text-white font-semibold mb-2">💡 Conseils pour une meilleure lecture</h3>
-                <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
-                  <li>Privilégiez un bon éclairage</li>
-                  <li>Cadrez bien la zone de texte</li>
-                  <li>Évitez les reflets et ombres</li>
-                  <li>Tenez le téléphone stable</li>
-                </ul>
+                </div>
+                
+                {/* Instructions */}
+                <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                  <h3 className="text-white font-semibold mb-2">💡 Conseils pour une meilleure lecture</h3>
+                  <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
+                    <li>Privilégiez un bon éclairage</li>
+                    <li>Cadrez bien la zone de texte</li>
+                    <li>Évitez les reflets et ombres</li>
+                    <li>Tenez le téléphone stable</li>
+                  </ul>
+                </div>
+              <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 flex flex-col md:flex-row items-center gap-4">
+                <img
+                  src={SAMPLE_IMAGE}
+                  alt="Exemple d'étiquette ingrédients"
+                  className="w-full md:w-48 rounded-lg border border-slate-700"
+                />
+                <div className="text-left space-y-2">
+                  <p className="text-white font-semibold">Pas d'image sous la main ?</p>
+                  <p className="text-gray-300 text-sm">
+                    Utilisez l'étiquette d'exemple pour tester l'OCR ingrédients immédiatement.
+                  </p>
+                  <button
+                    onClick={handleUseSample}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm"
+                  >
+                    Utiliser l'image d'exemple
+                  </button>
+                </div>
               </div>
             </div>
           )}

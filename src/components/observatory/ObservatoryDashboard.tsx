@@ -85,6 +85,19 @@ export const ObservatoryDashboard: React.FC<ObservatoryDashboardProps> = ({ terr
     loadSnapshot();
   }, [selectedTerritory, loadSnapshot]);
 
+  const renderDeploymentState = (message?: string) => (
+    <div className="observatory-dashboard empty">
+      <div className="error-message">
+        <h3>Observatoire public en cours de déploiement</h3>
+        <p>Les premières données seront publiées prochainement.</p>
+        {message && <p className="mt-2">{message}</p>}
+        <button onClick={() => (window.location.href = '/observatoire/methodologie')}>
+          Comprendre le projet
+        </button>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="observatory-dashboard loading">
@@ -97,28 +110,11 @@ export const ObservatoryDashboard: React.FC<ObservatoryDashboardProps> = ({ terr
   }
 
   if (error && !snapshot) {
-    return (
-      <div className="observatory-dashboard error">
-        <div className="error-message">
-          <h3>⚠️ Erreur</h3>
-          <p>{error}</p>
-          <button onClick={loadSnapshot}>Réessayer</button>
-        </div>
-      </div>
-    );
+    return renderDeploymentState(error);
   }
 
   if (!snapshot) {
-    return (
-      <div className="observatory-dashboard error">
-        <div className="error-message">
-          <h3>⚠️ Données indisponibles</h3>
-          <p>Le module Observatoire n'a pas pu charger les données.</p>
-          {error && <p className="mt-2">{error}</p>}
-          <button onClick={loadSnapshot}>Réessayer</button>
-        </div>
-      </div>
-    );
+    return renderDeploymentState(error ?? undefined);
   }
 
   const { indicateurs, metadata } = snapshot;
@@ -128,6 +124,10 @@ export const ObservatoryDashboard: React.FC<ObservatoryDashboardProps> = ({ terr
     indicateurs.indices_vie_chere.length > 0 ||
     indicateurs.evolutions_temporelles.length > 0 ||
     indicateurs.dispersions_enseignes.length > 0;
+
+  if (!hasData) {
+    return renderDeploymentState(error ?? undefined);
+  }
 
   return (
     <div className="observatory-dashboard">
@@ -149,8 +149,8 @@ export const ObservatoryDashboard: React.FC<ObservatoryDashboardProps> = ({ terr
         <div className="metadata-card">
           <h3>Période couverte</h3>
           <p>
-            Du {new Date(metadata.periode_couverte.debut).toLocaleDateString('fr-FR')} au{' '}
-            {new Date(metadata.periode_couverte.fin).toLocaleDateString('fr-FR')}
+            Du {formatDateSafe(metadata?.periode_couverte?.debut)} au{' '}
+            {formatDateSafe(metadata?.periode_couverte?.fin)}
           </p>
         </div>
         <div className="metadata-card">
@@ -394,6 +394,17 @@ function formatTendance(tendance: 'hausse' | 'baisse' | 'stable'): string {
     stable: '➡️ Stable',
   };
   return labels[tendance];
+}
+
+function formatDateSafe(value?: string): string {
+  if (!value) {
+    return 'à publier';
+  }
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) {
+    return 'à publier';
+  }
+  return date.toLocaleDateString('fr-FR');
 }
 
 export default ObservatoryDashboard;

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Check, Sparkles, TrendingUp, Shield, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const pricingPlans = [
   {
@@ -17,7 +19,7 @@ const pricingPlans = [
       'Accès à tous les territoires',
     ],
     cta: 'Commencer gratuitement',
-    ctaLink: '/mon-compte',
+    ctaLink: '/inscription?plan=free',
     popular: false,
     note: 'Accès libre aux comparaisons, inscription pour fonctionnalités avancées',
     color: 'from-slate-600 to-slate-700',
@@ -41,7 +43,7 @@ const pricingPlans = [
       'Support prioritaire',
     ],
     cta: 'Choisir Citoyen',
-    ctaLink: '/subscribe?plan=citizen',
+    ctaLink: '/inscription?plan=citizen',
     popular: true,
     note: 'Le plus populaire auprès des familles',
     color: 'from-blue-600 to-blue-700',
@@ -65,7 +67,7 @@ const pricingPlans = [
       'Support dédié',
     ],
     cta: 'Choisir Pro',
-    ctaLink: '/subscribe?plan=professional',
+    ctaLink: '/inscription?plan=professional',
     popular: false,
     note: 'Idéal pour artisans, associations, journalistes',
     color: 'from-purple-600 to-purple-700',
@@ -98,6 +100,18 @@ const pricingPlans = [
 ];
 
 export default function Pricing() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleSelectPlan = (planId: string) => {
+    const target = `/inscription?plan=${planId}`;
+    if (!user) {
+      navigate(`/connexion?next=${encodeURIComponent(target)}`);
+      return;
+    }
+    navigate(target);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
@@ -222,16 +236,30 @@ export default function Pricing() {
               )}
 
               {/* CTA Button */}
-              <a
-                href={plan.ctaLink}
-                className={`block w-full py-3 px-6 text-center font-bold rounded-xl transition-all ${
-                  plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white'
-                }`}
-              >
-                {plan.cta}
-              </a>
+              {plan.id === 'institutional' ? (
+                <a
+                  href={plan.ctaLink}
+                  className={`block w-full py-3 px-6 text-center font-bold rounded-xl transition-all ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white'
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan(plan.id)}
+                  className={`w-full py-3 px-6 text-center font-bold rounded-xl transition-all ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white'
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -322,18 +350,20 @@ export default function Pricing() {
             Rejoignez des milliers de citoyens qui comparent déjà leurs prix
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/mon-compte"
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('free')}
               className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl"
             >
               Essayer gratuitement
-            </a>
-            <a
-              href="/subscribe?plan=citizen"
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('citizen')}
               className="px-8 py-4 bg-blue-800 text-white font-bold rounded-xl hover:bg-blue-900 transition-all border-2 border-white"
             >
               Choisir Citoyen (3,99 €)
-            </a>
+            </button>
           </div>
         </div>
       </div>
