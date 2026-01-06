@@ -350,26 +350,20 @@ export default function Pricing() {
             Rejoignez des milliers de citoyens qui comparent déjà leurs prix
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              onClick={(e) => {
-                e.preventDefault();
-                handleSelectPlan('free');
-              }}
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('free')}
               className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl"
-              href="/inscription?plan=free"
             >
               Essayer gratuitement
-            </a>
-            <a
-              onClick={(e) => {
-                e.preventDefault();
-                handleSelectPlan('citizen');
-              }}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('citizen')}
               className="px-8 py-4 bg-blue-800 text-white font-bold rounded-xl hover:bg-blue-900 transition-all border-2 border-white"
-              href="/inscription?plan=citizen"
             >
               Choisir Citoyen (3,99 €)
-            </a>
+            </button>
           </div>
         </div>
       </div>
