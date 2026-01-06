@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Card } from '../components/card';
+import { Card } from '../components/card.jsx';
 
 export default function Presse() {
   const currentDate = new Date().toLocaleDateString('fr-FR', {
@@ -195,7 +195,7 @@ export default function Presse() {
               <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
                 <li>Observatoire des prix vivant</li>
                 <li>Comparaison inter-territoires</li>
-                <li>Détection d'anomalies explicable</li>
+                <li>Détection d'anomalies expliquée</li>
                 <li>Export open data (JSON / CSV)</li>
               </ul>
             </div>
