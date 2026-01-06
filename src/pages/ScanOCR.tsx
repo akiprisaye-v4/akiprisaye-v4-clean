@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { runOCR, GENERIC_OCR_ERROR, type OCRResult } from '../services/ocrService';
 import OCRResultView from '../components/OCRResultView';
 import type { ScanState, OcrOptions } from '../types/scan';
 
 const SAMPLE_IMAGE = '/images/ocr-example.png';
+const COPY_FEEDBACK_DURATION = 2000;
 
 export default function ScanOCR() {
   const [image, setImage] = useState<string | null>(null);
@@ -11,6 +12,10 @@ export default function ScanOCR() {
   const [loading, setLoading] = useState(false);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [error, setError] = useState<string | null>(null);
+  const [manualNotes, setManualNotes] = useState('');
+  const [manualCopied, setManualCopied] = useState(false);
+  const uploadInputRef = useRef<HTMLInputElement | null>(null);
+  const manualCopyTimeoutRef = useRef<number | null>(null);
   
   // Settings panel state
   const [showSettings, setShowSettings] = useState(false);
@@ -88,6 +93,33 @@ export default function ScanOCR() {
   const handleUseSample = () => {
     setImage(SAMPLE_IMAGE);
     executeOcr(SAMPLE_IMAGE);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (manualCopyTimeoutRef.current) {
+        window.clearTimeout(manualCopyTimeoutRef.current);
+        manualCopyTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleCopyManualNotes = () => {
+    if (!manualNotes.trim() || !navigator.clipboard) return;
+    if (manualCopyTimeoutRef.current) {
+      window.clearTimeout(manualCopyTimeoutRef.current);
+      manualCopyTimeoutRef.current = null;
+    }
+    navigator.clipboard
+      .writeText(manualNotes)
+      .then(() => {
+        setManualCopied(true);
+        manualCopyTimeoutRef.current = window.setTimeout(() => {
+          setManualCopied(false);
+          manualCopyTimeoutRef.current = null;
+        }, COPY_FEEDBACK_DURATION);
+      })
+      .catch(() => setManualCopied(false));
   };
 
   const handleRetry = () => {
@@ -228,6 +260,7 @@ export default function ScanOCR() {
                     onChange={handleUpload}
                     className="hidden"
                     disabled={!settings.enabled}
+                    ref={uploadInputRef}
                   />
                 </label>
                 </div>
@@ -302,7 +335,44 @@ export default function ScanOCR() {
                     <li>Essayez d'améliorer l'éclairage</li>
                     <li>Réduisez le seuil de confiance dans les paramètres</li>
                     <li>Augmentez le délai d'attente</li>
+                    <li>En cas d'indisponibilité du module OCR, rechargez la page puis réessayez.</li>
                   </ul>
+                </div>
+                <div className="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+                  <button
+                    onClick={() => uploadInputRef.current?.click()}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white hover:bg-slate-700"
+                  >
+                    📂 Recharger une image
+                  </button>
+                  <button
+                    onClick={handleUseSample}
+                    className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white hover:bg-slate-700"
+                  >
+                    🖼️ Utiliser l'image d'exemple
+                  </button>
+                </div>
+                <div className="mt-4 p-4 bg-slate-800 border border-slate-700 rounded-lg text-left text-sm text-slate-200">
+                  <p className="font-semibold mb-2">✏️ Saisie manuelle disponible</p>
+                  <p className="text-slate-400 mb-2">Si l'OCR reste indisponible, copiez les ingrédients ici pour continuer.</p>
+                  <textarea
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-sm"
+                    rows={4}
+                    value={manualNotes}
+                    onChange={(e) => setManualNotes(e.target.value)}
+                    placeholder="Saisissez les ingrédients ou notes importantes..."
+                  />
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="text-xs text-slate-500">Les informations saisies restent sur votre appareil.</p>
+                    <button
+                      type="button"
+                      onClick={handleCopyManualNotes}
+                      className="px-3 py-2 bg-slate-700 text-white text-xs rounded-lg hover:bg-slate-600"
+                      disabled={!manualNotes.trim()}
+                    >
+                      {manualCopied ? 'Copié ✅' : 'Copier les notes'}
+                    </button>
+                  </div>
                 </div>
               </div>
               <button
