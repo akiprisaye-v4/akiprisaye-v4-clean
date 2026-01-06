@@ -1,3 +1,5 @@
+import { buildRealtimeFallback } from '../../shared/realtimeFallback';
+
 export type RealtimePriceState = 'live' | 'cached' | 'offline';
 
 export type RealtimePrice = {
@@ -21,36 +23,8 @@ export type RealtimePriceResult = {
 
 const API_URL = '/api/prices/realtime';
 const FALLBACK_URL = '/data/prices.json';
-
-const LOCAL_FALLBACK: RealtimePrice[] = [
-  {
-    productId: 'riz-1kg',
-    productLabel: 'Riz blanc 1kg',
-    territory: 'Guadeloupe',
-    price: 2.45,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-  {
-    productId: 'lait-uht-1l',
-    productLabel: 'Lait demi-écrémé UHT 1L',
-    territory: 'Guadeloupe',
-    price: 1.44,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-  {
-    productId: 'yaourt-nature-4x125g',
-    productLabel: 'Yaourt nature 4x125g',
-    territory: 'Guadeloupe',
-    price: 1.92,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-];
+const DEFAULT_TIMEOUT_MS = 6000;
+const MIN_TIMEOUT_MS = 2000;
 
 function isValidPrice(item: any): item is RealtimePrice {
   return (
@@ -61,28 +35,30 @@ function isValidPrice(item: any): item is RealtimePrice {
     typeof item.price === 'number' &&
     Number.isFinite(item.price) &&
     typeof item.currency === 'string' &&
-    typeof item.source === 'string'
+    typeof item.source === 'string' &&
+    (typeof item.observedAt === 'string' || item.observedAt === null)
   );
 }
 
 function parseItems(payload: any): RealtimePrice[] {
   if (!Array.isArray(payload)) return [];
-  return payload
-    .map((item) => {
-      const normalized = {
-        ...item,
-        currency: item?.currency ?? 'EUR',
-        observedAt:
-          typeof item?.observedAt === 'string' ? item.observedAt : item?.updated_at ?? null,
-      };
-      return normalized;
-    })
-    .filter(isValidPrice);
+  const items: RealtimePrice[] = [];
+  for (const item of payload) {
+    const normalized = {
+      ...item,
+      currency: item?.currency ?? 'EUR',
+      observedAt: typeof item?.observedAt === 'string' ? item.observedAt : item?.updated_at ?? null,
+    };
+    if (isValidPrice(normalized)) {
+      items.push(normalized);
+    }
+  }
+  return items;
 }
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
@@ -107,11 +83,11 @@ async function loadLocalFallback(): Promise<RealtimePrice[]> {
       console.warn('Fallback local indisponible, utilisation des données embarquées', error);
     }
   }
-  return LOCAL_FALLBACK;
+  return buildRealtimeFallback();
 }
 
 export async function getRealtimePrices(options?: { timeoutMs?: number }): Promise<RealtimePriceResult> {
-  const timeoutMs = Math.max(1500, options?.timeoutMs ?? 4500);
+  const timeoutMs = Math.max(MIN_TIMEOUT_MS, options?.timeoutMs ?? DEFAULT_TIMEOUT_MS);
 
   try {
     const response = await fetchWithTimeout(API_URL, timeoutMs);

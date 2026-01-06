@@ -1,3 +1,5 @@
+import { buildRealtimeFallback } from '../../../shared/realtimeFallback';
+
 type NormalizedPrice = {
   productId: string;
   productLabel: string;
@@ -24,53 +26,38 @@ type ApiPayload = {
   message?: string;
 };
 
-const SOURCE_URL =
-  'https://raw.githubusercontent.com/teetee971/akiprisaye-web/main/data/observatoire/guadeloupe_2026-02.json';
+type Env = {
+  REALTIME_SOURCE_URL?: string;
+};
+
+const DEFAULT_SOURCE_URL =
+  'https://raw.githubusercontent.com/teetee971/akiprisaye-web/main/public/data/prices.json';
 const CACHE_TTL = 3600;
 const REQUEST_TIMEOUT_MS = 4500;
 
-const FALLBACK_DATA: NormalizedPrice[] = [
-  {
-    productId: 'riz-1kg',
-    productLabel: 'Riz blanc 1kg',
-    territory: 'Guadeloupe',
-    price: 2.45,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-  {
-    productId: 'lait-uht-1l',
-    productLabel: 'Lait demi-écrémé UHT 1L',
-    territory: 'Guadeloupe',
-    price: 1.44,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-  {
-    productId: 'yaourt-nature-4x125g',
-    productLabel: 'Yaourt nature 4x125g',
-    territory: 'Guadeloupe',
-    price: 1.92,
-    currency: 'EUR',
-    source: 'fallback-local',
-    observedAt: '2026-01-06T11:30:00Z',
-  },
-];
+async function fetchWithTimeout(url: string, timeoutMs: number, externalSignal?: AbortSignal) {
+  if (externalSignal?.aborted) {
+    throw new DOMException('Aborted', 'AbortError');
+  }
 
-async function fetchWithTimeout(url: string, timeoutMs: number, signal?: AbortSignal) {
   const controller = new AbortController();
+  const onExternalAbort = () => controller.abort();
+  if (externalSignal) {
+    externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+  }
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const response = await fetch(url, {
-      signal: signal ?? controller.signal,
+      signal: controller.signal,
       cf: { cacheTtl: CACHE_TTL, cacheEverything: true },
     });
     return response;
   } finally {
     clearTimeout(timeoutId);
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
   }
 }
 
@@ -143,24 +130,26 @@ function normalizeSource(
   }));
 }
 
-function buildResponse(body: ApiPayload, status = 200) {
+function buildResponse(body: ApiPayload, status = 200, cacheControl = 'public, max-age=60') {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=60',
+      'Cache-Control': cacheControl,
     },
   });
 }
 
-export async function onRequestGet(context: { request: Request }) {
-  const { request } = context;
+export async function onRequestGet(context: { request: Request; env: Env }) {
+  const { request, env } = context;
   const url = new URL(request.url);
   const territory = url.searchParams.get('territory');
   const product = url.searchParams.get('product');
   const cache = caches.default;
   const cacheKey = new Request(
-    `${url.origin}/cache/prices/realtime?territory=${territory ?? 'all'}&product=${product ?? 'all'}`
+    `${url.origin}/cache/prices/realtime?territory=${encodeURIComponent(
+      territory ?? 'all'
+    )}&product=${encodeURIComponent(product ?? 'all')}`
   );
 
   try {
@@ -180,7 +169,8 @@ export async function onRequestGet(context: { request: Request }) {
   }
 
   try {
-    const upstream = await fetchWithTimeout(SOURCE_URL, REQUEST_TIMEOUT_MS, request.signal);
+    const sourceUrl = env?.REALTIME_SOURCE_URL || DEFAULT_SOURCE_URL;
+    const upstream = await fetchWithTimeout(sourceUrl, REQUEST_TIMEOUT_MS, request.signal);
     if (!upstream.ok) {
       throw new Error(`Statut source: ${upstream.status}`);
     }
@@ -194,7 +184,7 @@ export async function onRequestGet(context: { request: Request }) {
     const payload: ApiPayload = {
       state: 'live',
       cache: 'miss',
-      source: { name: 'Open data observatoire (GitHub)', url: SOURCE_URL },
+      source: { name: 'Open data observatoire (GitHub)', url: sourceUrl },
       updated_at:
         typeof json?.date_snapshot === 'string'
           ? new Date(json.date_snapshot).toISOString()
@@ -207,8 +197,7 @@ export async function onRequestGet(context: { request: Request }) {
       },
     };
 
-    const response = buildResponse(payload, 200);
-    response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+    const response = buildResponse(payload, 200, 'public, max-age=3600, s-maxage=3600');
 
     try {
       await cache.put(cacheKey, response.clone());
@@ -219,9 +208,10 @@ export async function onRequestGet(context: { request: Request }) {
     return response;
   } catch (error) {
     console.error('Erreur source temps réel', error);
+    const fallbackData = buildRealtimeFallback();
     const filteredFallback =
       territory || product
-        ? FALLBACK_DATA.filter((item) => {
+        ? fallbackData.filter((item) => {
             const territoryOk = territory
               ? item.territory.toLowerCase().includes(territory.toLowerCase())
               : true;
@@ -230,7 +220,7 @@ export async function onRequestGet(context: { request: Request }) {
               : true;
             return territoryOk && productOk;
           })
-        : FALLBACK_DATA;
+        : fallbackData;
 
     const payload: ApiPayload = {
       state: 'offline',

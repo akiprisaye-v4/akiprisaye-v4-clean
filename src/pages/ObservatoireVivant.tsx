@@ -300,6 +300,9 @@ export default function ObservatoireVivant() {
             </div>
             <div
               className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border ${STATUS_STYLES[realtimeState.state].classes}`}
+              role="status"
+              aria-live="polite"
+              aria-label={`État des données : ${STATUS_STYLES[realtimeState.state].label}. Dernière mise à jour : ${realtimeUpdated}`}
             >
               <span className="text-lg">{STATUS_STYLES[realtimeState.state].icon}</span>
               <div className="flex flex-col">
