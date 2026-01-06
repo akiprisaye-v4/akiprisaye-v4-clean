@@ -22,6 +22,17 @@ export const ObservatoryMethodology: React.FC = () => {
       </section>
 
       <section style={{ marginBottom: '3rem' }}>
+        <h2>ℹ️ Transparence opérationnelle</h2>
+        <ul>
+          <li><strong>Fréquence réelle des relevés :</strong> flux horaires, consolidations quotidiennes, hebdomadaires et mensuelles.</li>
+          <li><strong>Sources :</strong> relevés terrain, tickets OCR, partenaires, données ouvertes et contributions citoyennes horodatées.</li>
+          <li><strong>Territoires couverts :</strong> Guadeloupe (GP), Martinique (MQ), Guyane (GF), La Réunion (RE), Hexagone (FR).</li>
+          <li><strong>Limites connues :</strong> certaines enseignes peuvent publier avec décalage ; biais possibles en cas de faible nombre de relevés.</li>
+          <li><strong>Dernière mise à jour :</strong> 06/01/2026 (donnée publique prices.json synchronisée Cloudflare Pages).</li>
+        </ul>
+      </section>
+
+      <section style={{ marginBottom: '3rem' }}>
         <h2>🔍 Sources de Données</h2>
         <h3>1. Relevés Citoyens</h3>
         <p>

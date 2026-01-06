@@ -9,6 +9,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { PriceChart } from '../components/PriceChart';
+import { filterByRange } from '../utils/priceRange';
+import type { PriceObservation } from '../types/priceObservation';
 
 type Period = 'hour' | 'day' | 'week' | 'month';
 
@@ -32,6 +35,13 @@ type ApiResponse = {
 
 const TERRITORIES = ['Guadeloupe', 'Martinique', 'Guyane', 'La Réunion', 'Mayotte'];
 const PRODUCTS = ['Riz 1kg', 'Lait UHT 1L', 'Pâtes 500g', 'Sucre 1kg'];
+const TERRITORY_CODES: Record<string, PriceObservation['territory']> = {
+  Guadeloupe: 'GP',
+  Martinique: 'MQ',
+  Guyane: 'GF',
+  'La Réunion': 'RE',
+  Mayotte: 'YT',
+};
 const PERIOD_OPTIONS: Array<{ value: Period; label: string; subtitle: string }> = [
   { value: 'hour', label: 'Heure', subtitle: 'Flux commerçants' },
   { value: 'day', label: 'Jour', subtitle: 'Agrégation 24h' },
@@ -84,6 +94,7 @@ export default function ObservatoireVivant() {
   const [meta, setMeta] = useState<Omit<ApiResponse, 'data'> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openData, setOpenData] = useState<PriceObservation[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -141,6 +152,26 @@ export default function ObservatoireVivant() {
     return () => controller.abort();
   }, [territoire, produit, period]);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/data/prices.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: PriceObservation[] | null) => {
+        if (!cancelled && Array.isArray(json)) {
+          setOpenData(json);
+        }
+      })
+      .catch(() => {
+        if (import.meta.env.DEV) {
+          console.warn('Données publiques indisponibles');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const latestUpdate = useMemo(() => formatDate(meta?.updated_at), [meta?.updated_at]);
 
   const currency = meta?.currency ?? '€';
@@ -158,6 +189,25 @@ export default function ObservatoireVivant() {
     }
     return latest ?? meta?.updated_at ?? null;
   }, [data, meta?.updated_at]);
+
+  const filteredOpenData = useMemo(() => {
+    if (!openData.length) return [];
+    const territoryCode = TERRITORY_CODES[territoire];
+    const normalizedProduct = produit.toLowerCase();
+    return filterByRange(
+      openData.filter(
+        (obs) =>
+          (!territoryCode || obs.territory === territoryCode) &&
+          (obs.productLabel === produit || obs.productId.toLowerCase().includes(normalizedProduct))
+      ),
+      period
+    );
+  }, [openData, territoire, produit, period]);
+
+  const chartData = useMemo(
+    () => filteredOpenData.map((entry) => ({ observedAt: entry.observedAt, price: entry.price })),
+    [filteredOpenData]
+  );
 
   const sourceCategory = useMemo(() => {
     const value = (meta?.source_type ?? '').toLowerCase();
@@ -388,6 +438,25 @@ export default function ObservatoireVivant() {
             </div>
           )}
         </section>
+
+        {chartData.length > 0 && (
+          <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-lg font-semibold text-white">Observations publiques</h3>
+                <p className="text-sm text-slate-300">
+                  Données versionnables (Cloudflare Pages) filtrées sur la période sélectionnée.
+                </p>
+              </div>
+              <span className="text-xs text-slate-400">
+                {chartData.length} relevé(s) • dernière heure/jour/semaine/mois
+              </span>
+            </div>
+            <div className="h-72">
+              <PriceChart data={chartData} />
+            </div>
+          </section>
+        )}
 
         <section className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-3">
           <h3 className="text-lg font-semibold text-white">Transparence & mentions</h3>
