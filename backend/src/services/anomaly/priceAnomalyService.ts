@@ -21,6 +21,8 @@ import { Territory } from '../comparison/types.js';
 /**
  * Type d'anomalie détectée
  */
+// Enum members are used as values, not directly referenced
+/* eslint-disable no-unused-vars */
 export enum AnomalyType {
   /** Variation temporelle anormale */
   TEMPORAL = 'TEMPORAL',
@@ -41,6 +43,7 @@ export enum AnomalySeverity {
   /** Variation importante, critique */
   HIGH = 'HIGH',
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Anomalie de prix détectée
