@@ -2,7 +2,8 @@ import { useState } from 'react';
 import TerritorySelector from '../components/TerritorySelector';
 import ProductSearch from '../components/ProductSearch';
 import BarcodeScanner from '../components/BarcodeScanner';
-import { findProductByEan, filterPricesByTerritory } from '../data/seedProducts';
+import { findProductByEan } from '../data/seedProducts';
+import { EmptyState } from '../components/ui/DataStateIndicator';
 
 export default function Comparateur() {
   const [ean, setEan] = useState('');
@@ -12,6 +13,7 @@ export default function Comparateur() {
   const [error, setError] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
   const [productName, setProductName] = useState(''); // Pour afficher le nom du produit
+  const [infoMessage, setInfoMessage] = useState('');
 
   const handlePickEAN = (code) => {
     setEan(code);
@@ -41,6 +43,8 @@ export default function Comparateur() {
 
     setLoading(true);
     setError(null);
+    setInfoMessage('');
+    setResults([]);
 
     try {
       // Try to fetch from API, fallback to mock data
@@ -48,73 +52,25 @@ export default function Comparateur() {
       
       if (response && response.ok) {
         const data = await response.json();
-        setResults(data);
-      } else {
-        // Mock data fallback
-        setResults(getMockPrices(ean, territory));
+        if (Array.isArray(data) && data.length > 0) {
+          setResults(data);
+          setProductName(data[0]?.product || productName);
+          return;
+        }
       }
+      const seededProduct = findProductByEan(ean);
+      if (seededProduct?.name) {
+        setProductName(seededProduct.name);
+      } else {
+        setProductName('');
+      }
+      setInfoMessage("Données en cours d'intégration. Les comparaisons réelles seront publiées dès que l'API prix sera connectée.");
     } catch (err) {
       console.error('Error fetching prices:', err);
-      setResults(getMockPrices(ean, territory));
+      setInfoMessage("Données en cours d'intégration. Les comparaisons réelles seront publiées dès que l'API prix sera connectée.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const getMockPrices = (ean, territory) => {
-    // Try to find product in seed data first
-    const product = findProductByEan(ean);
-    
-    if (product) {
-      setProductName(product.name || ''); // Stocker le nom du produit
-      // Filter prices by territory
-      const filteredPrices = filterPricesByTerritory(product, territory);
-      
-      // Convert to component format
-      return filteredPrices.map((price, idx) => ({
-        id: idx + 1,
-        store: price.storeName,
-        price: price.price,
-        unit: price.currency === 'EUR' ? '€' : price.currency,
-        location: `${price.city}, ${price.territory}`,
-        lastUpdate: price.ts,
-        promotion: idx === 1, // Mark second store as promo for variety
-      }));
-    }
-    
-    setProductName(''); // Pas de nom si produit inconnu
-    // Fallback: Generate random mock data
-    const basePrice = parseFloat((Math.random() * 10 + 2).toFixed(2));
-    
-    return [
-      {
-        id: 1,
-        store: 'Carrefour Market',
-        price: basePrice,
-        unit: '€',
-        location: territory,
-        lastUpdate: new Date().toISOString(),
-        promotion: false,
-      },
-      {
-        id: 2,
-        store: 'Super U',
-        price: (basePrice * 0.95).toFixed(2),
-        unit: '€',
-        location: territory,
-        lastUpdate: new Date().toISOString(),
-        promotion: true,
-      },
-      {
-        id: 3,
-        store: 'Leader Price',
-        price: (basePrice * 0.88).toFixed(2),
-        unit: '€',
-        location: territory,
-        lastUpdate: new Date().toISOString(),
-        promotion: false,
-      },
-    ];
   };
 
   const formatDate = (dateString) => {
@@ -266,7 +222,16 @@ export default function Comparateur() {
 
         {/* Results - Loading State */}
         {loading && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-blue-200 dark:border-blue-700 p-8">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-3 text-blue-600 dark:text-blue-400">
+                <svg className="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-lg font-semibold">Recherche en cours...</span>
+              </div>
+            </div>
             <div className="animate-pulse space-y-4">
               {[1, 2, 3].map(i => (
                 <div key={i} className="flex gap-4">
@@ -277,6 +242,25 @@ export default function Comparateur() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {infoMessage && (
+          <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-xl p-4 mb-6">
+            <p className="text-amber-800 dark:text-amber-200 text-sm font-semibold">
+              {infoMessage}
+            </p>
+            <p className="text-amber-700 dark:text-amber-300 text-xs mt-2">
+              Transparence : nous n'affichons pas de prix simulés. Les tarifs seront visibles dès que les relevés publics seront connectés.
+            </p>
+            <div className="mt-3">
+              <a
+                href="/observatoire/methodologie"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-semibold transition-colors"
+              >
+                Comprendre le périmètre
+              </a>
             </div>
           </div>
         )}
@@ -394,14 +378,11 @@ export default function Comparateur() {
 
         {/* No Results */}
         {!loading && results.length === 0 && ean && (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
-              Aucun résultat trouvé
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              Le code EAN <span className="font-mono font-semibold">{ean}</span> n'a pas été trouvé dans notre base de données
-            </p>
+          <div className="space-y-4">
+            <EmptyState 
+              title="Données en cours d'intégration"
+              message={`Ce produit (code EAN ${ean}) n'affiche pas encore de prix publics pour ce territoire. Les données seront publiées dès leur validation.`}
+            />
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => {

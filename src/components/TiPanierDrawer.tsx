@@ -1,18 +1,23 @@
 import React, { useEffect, useRef } from "react";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { useTiPanier } from "../hooks/useTiPanier";
 import { GlassCard } from "./ui/glass-card";
+
+// Price comparison tolerance for determining min/max
+const PRICE_COMPARISON_TOLERANCE = 0.01;
 
 /**
  * Drawer/modal showing saved items.
  * - Full client-side, localStorage via useTiPanier
+ * - Firestore persistence for authenticated users
  * - Accessible: role="dialog", aria-labelledby
  * - Mobile-first: appears from bottom on small screens
  *
  * Adds: ESC key handling and lightweight focus trap (no extra dependency)
+ * Enhanced: Price statistics, min/max indicators
  */
-export default function TiPanierDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { items, removeItem, clear } = useTiPanier();
+export default function TiPanierDrawer({ open, onClose, type = 'comparison' }: { open: boolean; onClose: () => void; type?: 'comparison' | 'wishlist' }) {
+  const { items, removeItem, clear, priceStats, isAuthenticated } = useTiPanier(type);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
@@ -67,6 +72,9 @@ export default function TiPanierDrawer({ open, onClose }: { open: boolean; onClo
     if (open) {
       previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
 
+      // Lock body scroll on mobile when modal is open
+      document.body.classList.add('modal-open');
+
       // Wait for DOM render then focus the first focusable or the container
       requestAnimationFrame(() => {
         const focusables = getFocusableElements(containerRef.current);
@@ -83,6 +91,9 @@ export default function TiPanierDrawer({ open, onClose }: { open: boolean; onClo
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
 
+      // Unlock body scroll when modal closes
+      document.body.classList.remove('modal-open');
+
       // restore focus when closing
       if (!open) {
         previouslyFocusedRef.current?.focus?.();
@@ -93,52 +104,106 @@ export default function TiPanierDrawer({ open, onClose }: { open: boolean; onClo
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-60 flex items-end md:items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="ti-panier-title" onClick={onClose}>
+    <div className="fixed inset-0 z-modal flex items-end md:items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="ti-panier-title" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
 
       <div className="relative z-10 w-full max-w-md" onClick={(e) => e.stopPropagation()} ref={containerRef} tabIndex={-1}>
         <GlassCard>
           <div className="flex items-start justify-between mb-4">
-            <h3 id="ti-panier-title" className="text-lg font-semibold">Ti‑panier</h3>
+            <div>
+              <h3 id="ti-panier-title" className="text-lg font-semibold">
+                {type === 'wishlist' ? '⭐ Ma Liste' : '🛒 Ti‑panier'}
+              </h3>
+              {isAuthenticated && (
+                <p className="text-xs text-gray-400 mt-1">
+                  💾 Sauvegardé automatiquement
+                </p>
+              )}
+            </div>
             <button aria-label="Fermer le ti‑panier" onClick={onClose} className="text-slate-300 hover:text-white p-1 rounded">
               <X />
             </button>
           </div>
 
           {items.length === 0 ? (
-            <p className="text-sm text-gray-400">Votre ti‑panier est vide.</p>
+            <p className="text-sm text-gray-400">
+              {type === 'wishlist' ? 'Votre liste est vide.' : 'Votre ti‑panier est vide.'}
+            </p>
           ) : (
-            <ul className="space-y-3 max-h-64 overflow-auto">
-              {items.map((it) => {
-                const name = String((it.meta && (it.meta as any).name) ?? 'Produit');
-                const price = (it.meta && (it.meta as any).price) ?? '';
-                const store = (it.meta && (it.meta as any).store) ?? '';
-                const territory = (it.meta && (it.meta as any).territory) ?? '';
+            <>
+              {/* Price Statistics */}
+              {priceStats.min !== null && priceStats.max !== null && (
+                <div className="mb-4 p-3 bg-slate-800/50 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <TrendingDown className="text-green-400" size={16} />
+                      <span className="text-gray-300">Prix le plus bas:</span>
+                    </div>
+                    <span className="font-semibold text-green-400">{priceStats.min.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="text-red-400" size={16} />
+                      <span className="text-gray-300">Prix le plus haut:</span>
+                    </div>
+                    <span className="font-semibold text-red-400">{priceStats.max.toFixed(2)} €</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-700">
+                    <span className="text-gray-300">Total estimé:</span>
+                    <span className="font-semibold text-white">{priceStats.total.toFixed(2)} €</span>
+                  </div>
+                </div>
+              )}
 
-                return (
-                  <li key={it.id} className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-white">{name}</div>
-                      <div className="text-xs text-gray-400">
-                        {price ? `${price}` : ''}{store ? ` — ${store}` : ''}{territory ? ` — ${territory}` : ''}
+              <ul className="space-y-3 max-h-64 overflow-auto">
+                {items.map((it) => {
+                  const name = String((it.meta && (it.meta as any).name) ?? 'Produit');
+                  const price = (it.meta && (it.meta as any).price) ?? '';
+                  const priceNum = typeof price === 'number' ? price : parseFloat(String(price || '0'));
+                  const store = (it.meta && (it.meta as any).store) ?? '';
+                  const territory = (it.meta && (it.meta as any).territory) ?? '';
+                  
+                  // Determine if this is the min or max price
+                  const isMinPrice = priceStats.min !== null && priceNum > 0 && Math.abs(priceNum - priceStats.min) < PRICE_COMPARISON_TOLERANCE;
+                  const isMaxPrice = priceStats.max !== null && priceNum > 0 && Math.abs(priceNum - priceStats.max) < PRICE_COMPARISON_TOLERANCE;
+
+                  return (
+                    <li key={it.id} className="flex items-start justify-between p-2 rounded bg-slate-800/30">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-white">{name}</div>
+                          {isMinPrice && (
+                            <span className="px-1.5 py-0.5 text-xs bg-green-900/30 border border-green-700 text-green-300 rounded">
+                              🟢 Moins cher
+                            </span>
+                          )}
+                          {isMaxPrice && priceStats.min !== priceStats.max && (
+                            <span className="px-1.5 py-0.5 text-xs bg-red-900/30 border border-red-700 text-red-300 rounded">
+                              🔴 Plus cher
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {price ? `${typeof price === 'number' ? price.toFixed(2) : price} €` : ''}{store ? ` — ${store}` : ''}{territory ? ` — ${territory}` : ''}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">Quantité: {it.quantity}</div>
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">Quantité: {it.quantity}</div>
-                    </div>
 
-                    <div className="ml-3 flex-shrink-0">
-                      <button onClick={() => removeItem(it.id)} aria-label={`Supprimer ${name}`} className="p-1 rounded text-red-400 hover:text-red-200">
-                        <Trash2 />
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                      <div className="ml-3 flex-shrink-0">
+                        <button onClick={() => removeItem(it.id)} aria-label={`Supprimer ${name}`} className="p-1 rounded text-red-400 hover:text-red-200">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
           )}
 
           <div className="mt-4 flex gap-3 justify-end">
-            <button onClick={() => { clear(); onClose(); }} className="px-3 py-2 bg-red-600 hover:bg-red-500 rounded-md text-white text-sm" aria-disabled={items.length === 0}>
-              Vider le ti‑panier
+            <button onClick={() => { clear(); onClose(); }} className="px-3 py-2 bg-red-600 hover:bg-red-500 rounded-md text-white text-sm" disabled={items.length === 0}>
+              Vider
             </button>
 
             <button onClick={onClose} className="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-md text-white text-sm">

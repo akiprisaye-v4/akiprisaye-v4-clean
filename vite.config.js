@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
+  base: '/',
   plugins: [react()],
 
   resolve: {
@@ -10,8 +11,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
-  // Optionnel: si tu utilises Cloudflare Pages avec SPA routes
-  // (sinon, laisse tel quel)
-  // base: '/',
+  build: {
+    chunkSizeWarningLimit: 1200,
+  },
 });

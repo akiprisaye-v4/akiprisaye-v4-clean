@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles/globals.css';
 import './styles/civic-glass.css';
 import './styles/glass.css';
+import './styles/mobile-fixes.css';
 import Home from './pages/Home';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -11,51 +12,63 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import NotFound from './pages/NotFound';
 
-// Lazy load other pages for better performance
-const ChatIALocal = lazy(() => import('./components/ChatIALocal'));
-const ScanOCR = lazy(() => import('./pages/ScanOCR'));
-const ScanEAN = lazy(() => import('./pages/ScanEAN'));
-const ComparaisonEnseignes = lazy(() => import('./pages/ComparaisonEnseignes'));
-const Comparateur = lazy(() => import('./pages/Comparateur'));
-const Carte = lazy(() => import('./pages/Carte'));
-const Actualites = lazy(() => import('./pages/Actualites'));
-const Alertes = lazy(() => import('./pages/Alertes'));
-const APropos = lazy(() => import('./pages/APropos'));
-const Methodologie = lazy(() => import('./pages/Methodologie'));
-const MentionsLegales = lazy(() => import('./pages/MentionsLegales'));
-const MonCompte = lazy(() => import('./pages/MonCompte'));
-const Pricing = lazy(() => import('./pages/Pricing.tsx'));
-const PricingDetailed = lazy(() => import('./pages/PricingDetailed'));
-const Subscribe = lazy(() => import('./pages/Subscribe'));
-const LicenceInstitution = lazy(() => import('./pages/LicenceInstitution'));
-const ContactCollectivites = lazy(() => import('./pages/ContactCollectivites'));
-const Contact = lazy(() => import('./pages/Contact'));
-const IaConseiller = lazy(() => import('./pages/IaConseiller'));
-const TiPanie = lazy(() => import('./pages/TiPanie'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const AIDashboard = lazy(() => import('./pages/AIDashboard'));
-const AiMarketInsights = lazy(() => import('./pages/AiMarketInsights'));
-const IEVR = lazy(() => import('./pages/IEVR'));
-const DossierMedia = lazy(() => import('./pages/DossierMedia'));
-const HistoriquePrix = lazy(() => import('./pages/HistoriquePrix'));
-const AlertesPrix = lazy(() => import('./pages/AlertesPrix'));
-const BudgetVital = lazy(() => import('./pages/BudgetVital'));
-const FauxBonsPlan = lazy(() => import('./pages/FauxBonsPlan'));
-const BudgetReelMensuel = lazy(() => import('./pages/BudgetReelMensuel'));
-const ComparateurFormats = lazy(() => import('./pages/ComparateurFormats'));
-const ListeCourses = lazy(() => import('./pages/ListeCourses'));
-const CivicModules = lazy(() => import('./pages/CivicModules'));
-const EvaluationCosmetique = lazy(() => import('./pages/EvaluationCosmetique'));
-const Observatoire = lazy(() => import('./pages/Observatoire'));
+// Lazy load other pages for better performance with retry logic
+const ChatIALocal = lazyWithRetry(() => import('./components/ChatIALocal'));
+const ScanOCR = lazyWithRetry(() => import('./pages/ScanOCR'));
+const ScanEAN = lazyWithRetry(() => import('./pages/ScanEAN'));
+const ComparaisonEnseignes = lazyWithRetry(() => import('./pages/ComparaisonEnseignes'));
+const Comparateur = lazyWithRetry(() => import('./pages/Comparateur'));
+const Carte = lazyWithRetry(() => import('./pages/Carte'));
+const Actualites = lazyWithRetry(() => import('./pages/Actualites'));
+const Alertes = lazyWithRetry(() => import('./pages/Alertes'));
+const APropos = lazyWithRetry(() => import('./pages/APropos'));
+const Methodologie = lazyWithRetry(() => import('./pages/Methodologie'));
+const Transparence = lazyWithRetry(() => import('./pages/Transparence'));
+const MentionsLegales = lazyWithRetry(() => import('./pages/MentionsLegales'));
+const MonCompte = lazyWithRetry(() => import('./pages/MonCompte'));
+const Inscription = lazyWithRetry(() => import('./pages/Inscription'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'));
+const ComprendrePrix = lazyWithRetry(() => import('./pages/ComprendrePrix'));
+const ContribuerPrix = lazyWithRetry(() => import('./pages/ContribuerPrix'));
+const SignalerAbus = lazyWithRetry(() => import('./pages/SignalerAbus'));
+const Pricing = lazyWithRetry(() => import('./pages/Pricing.tsx'));
+const PricingDetailed = lazyWithRetry(() => import('./pages/PricingDetailed'));
+const Subscribe = lazyWithRetry(() => import('./pages/Subscribe'));
+const LicenceInstitution = lazyWithRetry(() => import('./pages/LicenceInstitution'));
+const ContactCollectivites = lazyWithRetry(() => import('./pages/ContactCollectivites'));
+const Contact = lazyWithRetry(() => import('./pages/Contact'));
+const IaConseiller = lazyWithRetry(() => import('./pages/IaConseiller'));
+const TiPanie = lazyWithRetry(() => import('./pages/TiPanie'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
+const AIDashboard = lazyWithRetry(() => import('./pages/AIDashboard'));
+const AiMarketInsights = lazyWithRetry(() => import('./pages/AiMarketInsights'));
+const IEVR = lazyWithRetry(() => import('./pages/IEVR'));
+const DossierMedia = lazyWithRetry(() => import('./pages/DossierMedia'));
+const HistoriquePrix = lazyWithRetry(() => import('./pages/HistoriquePrix'));
+const AlertesPrix = lazyWithRetry(() => import('./pages/AlertesPrix'));
+const BudgetVital = lazyWithRetry(() => import('./pages/BudgetVital'));
+const FauxBonsPlan = lazyWithRetry(() => import('./pages/FauxBonsPlan'));
+const BudgetReelMensuel = lazyWithRetry(() => import('./pages/BudgetReelMensuel'));
+const ComparateurFormats = lazyWithRetry(() => import('./pages/ComparateurFormats'));
+const ListeCourses = lazyWithRetry(() => import('./pages/ListeCourses'));
+const CivicModules = lazyWithRetry(() => import('./pages/CivicModules'));
+const EvaluationCosmetique = lazyWithRetry(() => import('./pages/EvaluationCosmetique'));
+const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
+const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
+const MonEspace = lazyWithRetry(() => import('./pages/MonEspace'));
+const Perimetre = lazyWithRetry(() => import('./pages/Perimetre'));
+const Versions = lazyWithRetry(() => import('./pages/Versions'));
+const Gouvernance = lazyWithRetry(() => import('./pages/Gouvernance'));
 
-// New simplified pages for automatic generation
-const HomeSimple = lazy(() => import('./pages/Home.tsx'));
-const CompareSimple = lazy(() => import('./pages/Compare.tsx'));
-const NewsSimple = lazy(() => import('./pages/News.tsx'));
+const CompareSimple = lazyWithRetry(() => import('./pages/Compare'));
+const NewsSimple = lazyWithRetry(() => import('./pages/News'));
 
 // PR #1 - Assistant + FAQ étendue (v1.6.0)
-const Faq = lazy(() => import('./pages/Faq'));
-const AssistantChat = lazy(() => import('./components/AssistantChat'));
+const Faq = lazyWithRetry(() => import('./pages/Faq'));
+
+// Comparateur Citoyen - Observatoire data
+const ComparateurCitoyen = lazyWithRetry(() => import('./pages/ComparateurCitoyen'));
 
 // Loading component
 function LoadingFallback() {
@@ -67,6 +80,37 @@ function LoadingFallback() {
       </div>
     </div>
   );
+}
+
+// Lazy loading error handler to prevent black screens
+function lazyWithRetry(componentImport) {
+  return lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.error('Failed to load component:', error);
+      // Return a fallback component instead of crashing
+      return {
+        default: () => (
+          <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+            <div className="max-w-md bg-slate-900 rounded-xl p-6 text-center">
+              <div className="text-5xl mb-4">⚠️</div>
+              <h2 className="text-xl font-semibold text-white mb-2">Module non disponible</h2>
+              <p className="text-gray-300 mb-4">
+                Cette fonctionnalité n'a pas pu être chargée. Veuillez rafraîchir la page.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                Rafraîchir
+              </button>
+            </div>
+          </div>
+        )
+      };
+    }
+  });
 }
 
 // Service Worker registration
@@ -86,6 +130,23 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Global error handler to prevent black screens
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event.error);
+  // Prevent default behavior that might cause black screen
+  if (import.meta.env.PROD) {
+    event.preventDefault();
+  }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  // Prevent default behavior
+  if (import.meta.env.PROD) {
+    event.preventDefault();
+  }
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -107,14 +168,25 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='alertes' element={<Alertes />} />
                   <Route path='a-propos' element={<APropos />} />
                   <Route path='methodologie' element={<Methodologie />} />
+                  <Route path='perimetre' element={<Perimetre />} />
+                  <Route path='versions' element={<Versions />} />
+                  <Route path='gouvernance' element={<Gouvernance />} />
                   <Route path='mentions-legales' element={<MentionsLegales />} />
                   <Route path='mon-compte' element={<MonCompte />} />
+                  <Route path='inscription' element={<Inscription />} />
+                  <Route path='login' element={<Login />} />
+                  <Route path='connexion' element={<Login />} />
+                  <Route path='reset-password' element={<ResetPassword />} />
+                  <Route path='comprendre-prix' element={<ComprendrePrix />} />
+                  <Route path='contribuer-prix' element={<ContribuerPrix />} />
+                  <Route path='signaler-abus' element={<SignalerAbus />} />
                   <Route path='pricing' element={<Pricing />} />
                   <Route path='pricing-detailed' element={<PricingDetailed />} />
                   <Route path='subscribe' element={<Subscribe />} />
                   <Route path='licence-institution' element={<LicenceInstitution />} />
                   <Route path='contact-collectivites' element={<ContactCollectivites />} />
                   <Route path='contact' element={<Contact />} />
+                  <Route path='mon-espace' element={<MonEspace />} />
                   <Route path='ia-conseiller' element={<IaConseiller />} />
                   <Route path='ti-panie' element={<TiPanie />} />
                   <Route path='admin/dashboard' element={<AdminDashboard />} />
@@ -132,6 +204,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='civic-modules' element={<CivicModules />} />
                   <Route path='evaluation-cosmetique' element={<EvaluationCosmetique />} />
                   <Route path='observatoire' element={<Observatoire />} />
+                  <Route path='transparence' element={<Transparence />} />
+                  <Route path='observatoire/methodologie' element={<ObservatoryMethodology />} />
+                  <Route path='comparateur-citoyen' element={<ComparateurCitoyen />} />
                   
                   {/* New simplified pages for automatic generation */}
                   <Route path='comparer' element={<CompareSimple />} />
@@ -143,9 +218,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
-              
-              {/* Assistant Chat - Floating button available on all pages */}
-              {import.meta.env.VITE_FEATURE_ASSISTANT !== 'false' && <AssistantChat />}
             </Suspense>
           </BrowserRouter>
         </AuthProvider>

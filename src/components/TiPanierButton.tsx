@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
 import { useTiPanier } from "../hooks/useTiPanier";
 import TiPanierDrawer from "./TiPanierDrawer";
 
@@ -7,12 +7,22 @@ import TiPanierDrawer from "./TiPanierDrawer";
  * Ti‑panier button (mobile-first floating + optional header placement).
  * - Shows counter
  * - Opens TiPanierDrawer
+ * - Supports both 'comparison' and 'wishlist' types
  */
-export default function TiPanierButton({ float = true }: { float?: boolean }) {
-  const { count } = useTiPanier();
+export default function TiPanierButton({ float = true, type = 'comparison' }: { float?: boolean; type?: 'comparison' | 'wishlist' }) {
+  const { count } = useTiPanier(type);
   const [open, setOpen] = useState(false);
 
-  const label = count > 0 ? `Ti‑panier — ${count} éléments` : "Ti‑panier vide";
+  const Icon = type === 'wishlist' ? Heart : ShoppingCart;
+  const label = type === 'wishlist' 
+    ? (count > 0 ? `Ma liste — ${count} éléments` : "Ma liste vide")
+    : (count > 0 ? `Ti‑panier — ${count} éléments` : "Ti‑panier vide");
+  
+  const bgColor = type === 'wishlist' ? 'bg-pink-600 hover:bg-pink-500' : 'bg-blue-600 hover:bg-blue-500';
+  const ringColor = type === 'wishlist' ? 'focus:ring-pink-400' : 'focus:ring-blue-400';
+  const buttonClass = float
+    ? `flex items-center gap-2 px-3 py-2 ${bgColor} text-white rounded-full shadow-lg focus:outline-none focus:ring-2 ${ringColor}`
+    : `inline-flex items-center gap-2 px-3 py-2 ${bgColor} text-white rounded-md focus:outline-none focus:ring-2 ${ringColor}`;
 
   return (
     <>
@@ -21,18 +31,14 @@ export default function TiPanierButton({ float = true }: { float?: boolean }) {
         aria-label={label}
         title={label}
         onClick={() => setOpen(true)}
-        className={
-          float
-            ? "fixed right-4 bottom-6 z-50 md:relative md:bottom-auto md:right-auto flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            : "inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-        }
+        className={buttonClass}
       >
-        <ShoppingCart size={18} aria-hidden />
+        <Icon size={18} aria-hidden />
         <span className="sr-only">{label}</span>
         <span aria-hidden className="font-medium">{count}</span>
       </button>
 
-      <TiPanierDrawer open={open} onClose={() => setOpen(false)} />
+      <TiPanierDrawer open={open} onClose={() => setOpen(false)} type={type} />
     </>
   );
 }
