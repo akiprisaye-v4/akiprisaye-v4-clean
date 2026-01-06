@@ -32,6 +32,20 @@ function safeParse<T>(value: string | null): T | null {
   }
 }
 
+function createId() {
+  if (typeof crypto !== 'undefined') {
+    if (crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    if (crypto.getRandomValues) {
+      const buffer = new Uint32Array(4);
+      crypto.getRandomValues(buffer);
+      return Array.from(buffer, (value) => value.toString(16)).join('-');
+    }
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function UserHistory() {
   const [history, setHistory] = useState<UserHistoryState | null>(null);
 
@@ -92,6 +106,7 @@ function PriceAlerts() {
   const [product, setProduct] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [alerts, setAlerts] = useState<Alert[]>(() => safeParse<Alert[]>(localStorage.getItem(ALERTS_KEY)) ?? []);
+  const [alertError, setAlertError] = useState('');
 
   useEffect(() => {
     localStorage.setItem(ALERTS_KEY, JSON.stringify(alerts));
@@ -99,11 +114,16 @@ function PriceAlerts() {
 
   const handleAdd = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const priceValue = Number.parseFloat(targetPrice);
-    if (!product.trim() || Number.isNaN(priceValue) || priceValue <= 0) return;
+    const priceValue = Number(targetPrice);
+    if (!product.trim() || !Number.isFinite(priceValue) || priceValue <= 0) {
+      setAlertError('Ajoutez un produit et un prix cible valide (supérieur à 0).');
+      return;
+    }
+    setAlertError('');
+    const normalizedPrice = Math.round(priceValue * 100) / 100;
     setAlerts((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), product: product.trim(), targetPrice: Number(priceValue.toFixed(2)) },
+      { id: createId(), product: product.trim(), targetPrice: normalizedPrice },
     ]);
     setProduct('');
     setTargetPrice('');
@@ -152,6 +172,8 @@ function PriceAlerts() {
           Ajouter
         </button>
       </form>
+
+      {alertError && <p className="text-sm text-red-300">{alertError}</p>}
 
       {alerts.length === 0 ? (
         <p className="text-slate-300 text-sm">Aucune alerte définie. Les données restent locales à cet appareil.</p>
@@ -204,6 +226,7 @@ function ShoppingList() {
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [items, setItems] = useState<ShoppingItem[]>(() => safeParse<ShoppingItem[]>(localStorage.getItem(SHOPPING_KEY)) ?? []);
+  const [listError, setListError] = useState('');
 
   useEffect(() => {
     localStorage.setItem(SHOPPING_KEY, JSON.stringify(items));
@@ -211,10 +234,15 @@ function ShoppingList() {
 
   const addItem = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!itemName.trim() || quantity <= 0) return;
+    if (!itemName.trim() || quantity <= 0) {
+      setListError('Renseignez un produit et une quantité valide (minimum 1).');
+      return;
+    }
+    setListError('');
+    const normalizedQuantity = Math.max(1, Math.round(quantity));
     setItems((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), name: itemName.trim(), quantity: Math.max(1, Math.round(quantity)) },
+      { id: createId(), name: itemName.trim(), quantity: normalizedQuantity },
     ]);
     setItemName('');
     setQuantity(1);
@@ -222,9 +250,9 @@ function ShoppingList() {
 
   const updateQuantity = (id: string, delta: number) =>
     setItems((prev) =>
-      prev
-        .map((item) => (item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item))
-        .filter((item) => item.quantity > 0),
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+      ),
     );
 
   const removeItem = (id: string) => setItems((prev) => prev.filter((item) => item.id !== id));
@@ -264,6 +292,8 @@ function ShoppingList() {
           Ajouter
         </button>
       </form>
+
+      {listError && <p className="text-sm text-red-300">{listError}</p>}
 
       {items.length === 0 ? (
         <p className="text-slate-300 text-sm">Aucun article enregistré pour le moment.</p>

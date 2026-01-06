@@ -61,9 +61,8 @@ const Perimetre = lazyWithRetry(() => import('./pages/Perimetre'));
 const Versions = lazyWithRetry(() => import('./pages/Versions'));
 const Gouvernance = lazyWithRetry(() => import('./pages/Gouvernance'));
 
-// New simplified pages for automatic generation
-const CompareSimple = lazyWithRetry(() => import('./pages/Compare.tsx'));
-const NewsSimple = lazyWithRetry(() => import('./pages/News.tsx'));
+const CompareSimple = lazyWithRetry(() => import('./pages/Compare'));
+const NewsSimple = lazyWithRetry(() => import('./pages/News'));
 
 // PR #1 - Assistant + FAQ étendue (v1.6.0)
 const Faq = lazyWithRetry(() => import('./pages/Faq'));
