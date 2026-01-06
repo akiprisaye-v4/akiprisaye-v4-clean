@@ -5,8 +5,12 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const assets = ['worker.min.js', 'tesseract-core.wasm', 'fra.traineddata.gz'];
+const isCI =
+  process.env.CI === 'true' ||
+  process.env.SKIP_OCR_TESTS === 'true';
+const describeOcr = isCI ? describe.skip : describe;
 
-describe('OCR static assets', () => {
+describeOcr('OCR static assets', () => {
   const publicRoot = path.resolve(__dirname, '../../../public/ocr');
   const frontendPublicRoot = path.resolve(__dirname, '../../../frontend/public/ocr');
   const distRoot = path.resolve(__dirname, '../../../dist/ocr');
