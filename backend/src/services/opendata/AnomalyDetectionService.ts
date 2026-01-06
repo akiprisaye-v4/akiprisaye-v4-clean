@@ -99,7 +99,7 @@ export class AnomalyDetectionService {
     for (const product of products) {
       if (product.prices.length < 2) continue;
 
-      // Grouper par territoire avec dates
+      // Grouper par territoire avec dates (les prix sont déjà triés par effectiveDate asc)
       const pricesByTerritory = new Map<Territory, Array<{ price: number; date: Date }>>();
       
       for (const priceEntry of product.prices) {
