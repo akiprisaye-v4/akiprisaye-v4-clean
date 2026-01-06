@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ShoppingBasket, TrendingUp, Eye, Clock } from 'lucide-react';
 
 interface QuickSummaryProps {
@@ -25,14 +26,17 @@ export default function QuickSummary({
     }).format(date);
   };
 
-  const getGapColor = () => {
-    if (territorialGap > 0) return 'text-rose-400';
-    if (territorialGap < 0) return 'text-emerald-400';
-    return 'text-gray-400';
-  };
-
-  const gapColor = getGapColor();
-  const gapSign = territorialGap > 0 ? '+' : '';
+  // Memoize color and sign calculations to optimize re-renders
+  const { gapColor, gapSign } = useMemo(() => {
+    let color = 'text-gray-400';
+    if (territorialGap > 0) color = 'text-rose-400';
+    else if (territorialGap < 0) color = 'text-emerald-400';
+    
+    return {
+      gapColor: color,
+      gapSign: territorialGap > 0 ? '+' : ''
+    };
+  }, [territorialGap]);
 
   return (
     <div className={`bg-slate-900/70 backdrop-blur-md rounded-xl border border-slate-700/50 p-5 ${className || ''}`}>

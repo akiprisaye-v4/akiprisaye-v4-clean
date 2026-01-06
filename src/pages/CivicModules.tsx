@@ -84,7 +84,12 @@ export default function CivicModules() {
                   href="#gps-shopping"
                   onClick={(e) => {
                     e.preventDefault();
-                    document.getElementById('gps-shopping')?.scrollIntoView({ behavior: 'smooth' });
+                    const element = document.getElementById('gps-shopping');
+                    if (element) {
+                      // Respect user's reduced motion preference
+                      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                      element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                    }
                   }}
                   className="block p-3 bg-slate-800/50 border border-blue-700/50 rounded-lg hover:bg-slate-800/70 transition-colors"
                 >
