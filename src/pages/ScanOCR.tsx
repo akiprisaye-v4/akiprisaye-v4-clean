@@ -47,7 +47,13 @@ export default function ScanOCR() {
            const result = await runOCR(objectUrl!, settings.language);
            
            setOcrResult(result);
-           setScanState(result.success ? 'success' : 'error');
+           if (!result.success) {
+             setError(result.error ?? 'Une erreur s\'est produite lors de l\'analyse de l\'image');
+             setScanState('error');
+             return;
+           }
+
+           setScanState('success');
          } catch (err: any) {
            console.error('OCR error:', err);
            setError(err?.message ?? 'Une erreur s\'est produite lors de l\'analyse de l\'image');

@@ -47,6 +47,7 @@ export interface OCRResult {
   timeoutTriggered?: boolean;
   fromCache?: boolean;
   sections?: OCRSections;
+  error?: string;
 }
 
 /**
@@ -105,12 +106,17 @@ export async function runOCR(
   } catch (error) {
     console.error('OCR processing failed:', error);
     
-    // Provide helpful error message
-    if (offline) {
-      throw new Error('Erreur OCR hors ligne. Vérifiez que l\'image est valide.');
-    } else {
-      throw new Error('Erreur OCR. Veuillez réessayer ou vérifier votre connexion.');
-    }
+    const message = offline
+      ? 'Erreur OCR hors ligne. Vérifiez que l\'image est valide.'
+      : 'Erreur OCR. Veuillez réessayer ou vérifier votre connexion.';
+
+    return {
+      success: false,
+      rawText: '',
+      confidence: 0,
+      processingTime: performance.now() - startedAt,
+      error: message,
+    };
   } finally {
     await worker.terminate();
   }

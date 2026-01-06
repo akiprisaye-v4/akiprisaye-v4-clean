@@ -128,6 +128,9 @@ export default function ScanEAN() {
         setImageUploadStatus('📝 Détection OCR en cours...')
         
         const ocrResult = await runOCR(objectUrl);
+        if (!ocrResult.success) {
+          throw new Error(ocrResult.error ?? 'Échec de la lecture OCR');
+        }
         ocrText = ocrResult.rawText;
         console.log('OCR raw text:', ocrText)
 
