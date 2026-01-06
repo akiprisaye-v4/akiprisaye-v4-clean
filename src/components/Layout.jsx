@@ -16,6 +16,7 @@ export default function Layout() {
     { path: '/carte', label: 'Carte' },
     { path: '/observatoire', label: 'Observatoire' },
     { path: '/observatoire-vivant', label: 'Observatoire vivant' },
+    { path: '/contribuer', label: 'Contribuer' },
     { path: '/civic-modules', label: 'Modules' },
     { path: '/liste-courses', label: 'Liste de courses' },
     { path: '/evaluation-cosmetique', label: 'Cosmétiques' },
@@ -28,6 +29,7 @@ export default function Layout() {
   const publicNavItems = [
     { path: '/observatoire', label: 'Observatoire' },
     { path: '/observatoire-vivant', label: 'Observatoire vivant' },
+    { path: '/contribuer', label: 'Contribuer' },
     { path: '/methodologie', label: 'Méthodologie' },
     { path: '/transparence', label: 'Transparence' },
     { path: '/donnees-publiques', label: 'Données publiques' },

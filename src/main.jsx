@@ -62,6 +62,7 @@ const MonEspace = lazyWithRetry(() => import('./pages/MonEspace'));
 const Perimetre = lazyWithRetry(() => import('./pages/Perimetre'));
 const Versions = lazyWithRetry(() => import('./pages/Versions'));
 const Gouvernance = lazyWithRetry(() => import('./pages/Gouvernance'));
+const Contribuer = lazyWithRetry(() => import('./pages/Contribuer'));
 
 const CompareSimple = lazyWithRetry(() => import('./pages/Compare'));
 const NewsSimple = lazyWithRetry(() => import('./pages/News'));
@@ -209,6 +210,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='observatoire' element={<Observatoire />} />
                   <Route path='observatoire-vivant' element={<ObservatoireVivant />} />
                   <Route path='transparence' element={<Transparence />} />
+                  <Route path='contribuer' element={<Contribuer />} />
                   <Route path='observatoire/methodologie' element={<ObservatoryMethodology />} />
                   <Route path='comparateur-citoyen' element={<ComparateurCitoyen />} />
                   
