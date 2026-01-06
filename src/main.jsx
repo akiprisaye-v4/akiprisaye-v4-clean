@@ -169,6 +169,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='mon-compte' element={<MonCompte />} />
                   <Route path='inscription' element={<Inscription />} />
                   <Route path='login' element={<Login />} />
+                  <Route path='connexion' element={<Login />} />
                   <Route path='reset-password' element={<ResetPassword />} />
                   <Route path='comprendre-prix' element={<ComprendrePrix />} />
                   <Route path='contribuer-prix' element={<ContribuerPrix />} />
