@@ -24,7 +24,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           "transition-all duration-250 ease-smooth",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none",
-          "active:scale-[0.98]",
+          "active:scale-[0.97]",
           "will-change-transform",
           
           // Variant styles

@@ -112,8 +112,13 @@ input[type="button"],
     -webkit-overflow-scrolling: touch;
   }
   
-  /* Optimize animation performance on mobile */
-  * {
+  /* Optimize animation performance on mobile - only for animated elements */
+  .transition-smooth,
+  .hover-lift,
+  .hover-scale,
+  button,
+  a,
+  [role="button"] {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }

@@ -163,7 +163,7 @@ export default {
         'slide-right': 'slideRight 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         'scale-in': 'scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'bounce-soft': 'bounceSoft 1s ease-in-out',
+        'bounce-soft': 'bounceSoft 1s cubic-bezier(0.4, 0, 0.2, 1)',
       },
       keyframes: {
         fadeIn: {
