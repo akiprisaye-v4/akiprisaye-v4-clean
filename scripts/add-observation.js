@@ -10,11 +10,12 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Validation functions (from observation.ts)
+// Validation functions (duplicated from observation.ts for standalone use without TypeScript compilation)
 function validateProduct(product) {
   const errors = [];
 
@@ -208,7 +209,6 @@ async function main() {
 
     // Regenerate index
     console.log('Regenerating index...');
-    const { execSync } = await import('child_process');
     execSync('node scripts/generate-index.js', { stdio: 'inherit' });
 
   } catch (error) {
