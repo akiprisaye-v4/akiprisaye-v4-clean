@@ -67,6 +67,11 @@ export default function GPSShoppingList({ items, lastUpdate = DEFAULT_UPDATE_TIM
   }, []);
 
   const calculateStoreOptions = useCallback(async (userPos: GeoPosition) => {
+    // Constants for travel cost calculation
+    const ROUND_TRIP_MULTIPLIER = 2; // Account for return trip
+    const COST_PER_KM = 0.5; // Average fuel cost per km (€)
+    const CENTS_MULTIPLIER = 100; // For rounding to cents
+    
     // Mock data - in production, fetch from API with real prices and GPS coordinates
     const mockStores = [
       {
@@ -107,8 +112,8 @@ export default function GPSShoppingList({ items, lastUpdate = DEFAULT_UPDATE_TIM
       name: store.name,
       distance: store.distance,
       totalCost: store.totalCost,
-      // Recalculate travel cost: 0.5€/km (round trip = distance * 2)
-      travelCost: Math.round(store.distance * 2 * 0.5 * 100) / 100,
+      // Travel cost: distance * round trip * cost per km, rounded to cents
+      travelCost: Math.round(store.distance * ROUND_TRIP_MULTIPLIER * COST_PER_KM * CENTS_MULTIPLIER) / CENTS_MULTIPLIER,
       address: store.address,
     }));
     

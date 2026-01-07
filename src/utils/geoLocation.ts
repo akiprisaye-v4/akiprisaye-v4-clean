@@ -46,10 +46,24 @@ const DISTANCE_CACHE_MAX_SIZE = 1000;
 const EARTH_RADIUS_KM = 6371;
 
 /**
+ * Pre-computed degrees to radians conversion factor (Math.PI / 180)
+ * Using pre-computed value for performance in hot code paths
+ */
+const DEG_TO_RAD = Math.PI / 180;
+
+/**
  * Convert degrees to radians (inline optimization)
  */
 function toRadians(degrees: number): number {
-  return degrees * 0.017453292519943295; // Math.PI / 180 pre-computed
+  return degrees * DEG_TO_RAD;
+}
+
+/**
+ * Generate cache key for distance calculation
+ * Rounds to 4 decimal places (~11m accuracy) for efficient caching
+ */
+function getCacheKey(lat1: number, lon1: number, lat2: number, lon2: number): string {
+  return `${lat1.toFixed(4)},${lon1.toFixed(4)},${lat2.toFixed(4)},${lon2.toFixed(4)}`;
 }
 
 /**
@@ -66,10 +80,8 @@ export function calculateDistance(
   lat2: number,
   lon2: number
 ): number {
-  // Create cache key
-  const cacheKey = `${lat1.toFixed(4)},${lon1.toFixed(4)},${lat2.toFixed(4)},${lon2.toFixed(4)}`;
-  
   // Check cache first
+  const cacheKey = getCacheKey(lat1, lon1, lat2, lon2);
   const cached = distanceCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;

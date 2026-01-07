@@ -63,14 +63,25 @@ describe('geoLocation utilities', () => {
     });
 
     it('should handle cache size limit', () => {
-      // Create more than 1000 unique calculations
-      for (let i = 0; i < 1100; i++) {
+      // Create more than 1000 unique calculations (reduced for test performance)
+      // Testing cache limit behavior with smaller sample
+      for (let i = 0; i < 500; i++) {
+        calculateDistance(48.0 + i * 0.01, 2.0, 43.0, 5.0);
+      }
+      
+      // Verify cache is working
+      const stats = getCacheStats();
+      expect(stats.distanceCacheSize).toBeGreaterThan(0);
+      expect(stats.distanceCacheSize).toBeLessThanOrEqual(1000);
+      
+      // Add more to exceed limit
+      for (let i = 500; i < 1100; i++) {
         calculateDistance(48.0 + i * 0.01, 2.0, 43.0, 5.0);
       }
       
       // Cache should be limited to 1000
-      const stats = getCacheStats();
-      expect(stats.distanceCacheSize).toBeLessThanOrEqual(1000);
+      const finalStats = getCacheStats();
+      expect(finalStats.distanceCacheSize).toBeLessThanOrEqual(1000);
     });
   });
 
