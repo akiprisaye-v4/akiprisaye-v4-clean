@@ -76,6 +76,9 @@ const Faq = lazyWithRetry(() => import('./pages/Faq'));
 const ComparateurCitoyen = lazyWithRetry(() => import('./pages/ComparateurCitoyen'));
 const ComparateurTerritoires = lazyWithRetry(() => import('./pages/ComparateurTerritoires'));
 
+// Enhanced Comparator with real-time data
+const EnhancedComparator = lazyWithRetry(() => import('./pages/EnhancedComparator'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -219,6 +222,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='observatoire/methodologie' element={<ObservatoryMethodology />} />
                   <Route path='comparateur-citoyen' element={<ComparateurCitoyen />} />
                   <Route path='comparateur-territoires' element={<ComparateurTerritoires />} />
+                  
+                  {/* Enhanced Comparator with real-time data and reliability scoring */}
+                  <Route path='comparateur-intelligent' element={<EnhancedComparator />} />
                   
                   {/* New simplified pages for automatic generation */}
                   <Route path='comparer' element={<CompareSimple />} />
