@@ -12,11 +12,13 @@
  */
 
 import { useState } from 'react';
+import { Navigation, MapPin } from 'lucide-react';
 import EnhancedSearch from '../components/search/EnhancedSearch';
 import EnhancedComparisonDisplay from '../components/comparison/EnhancedComparisonDisplay';
 import TerritorySelector from '../components/TerritorySelector';
 import { comparePrices } from '../services/enhancedPriceService';
 import type { EnhancedPriceComparison } from '../types/enhancedPrice';
+import { getUserPosition, calculateDistance, formatDistance, type GeoPosition } from '../utils/geoLocation';
 
 export default function EnhancedComparator() {
   const [territory, setTerritory] = useState('GP');
@@ -25,6 +27,9 @@ export default function EnhancedComparator() {
   const [comparison, setComparison] = useState<EnhancedPriceComparison | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userPosition, setUserPosition] = useState<GeoPosition | null>(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [sortByDistance, setSortByDistance] = useState(false);
   
   const handleSelectProduct = async (ean: string, productName: string) => {
     setSelectedEAN(ean);
@@ -95,6 +100,73 @@ export default function EnhancedComparator() {
     // Navigate to store comparison page
     window.location.href = `/comparaison-enseignes?territory=${territory}`;
   };
+
+  const handleGetLocation = async () => {
+    setGpsLoading(true);
+    try {
+      const position = await getUserPosition();
+      if (position) {
+        setUserPosition(position);
+        setSortByDistance(true);
+        
+        // If comparison exists, update it with distances
+        if (comparison) {
+          const updatedComparison = { ...comparison };
+          updatedComparison.pricesByStore = updatedComparison.pricesByStore.map((priceData) => {
+            if (priceData.store.lat && priceData.store.lon) {
+              const distance = calculateDistance(
+                position.lat,
+                position.lon,
+                priceData.store.lat,
+                priceData.store.lon
+              );
+              return { ...priceData, distance };
+            }
+            return priceData;
+          });
+          
+          // Sort by distance
+          updatedComparison.pricesByStore.sort((a, b) => {
+            if (a.distance === undefined) return 1;
+            if (b.distance === undefined) return -1;
+            return a.distance - b.distance;
+          });
+          
+          setComparison(updatedComparison);
+        }
+      } else {
+        setError('Impossible d\'obtenir votre position. Veuillez autoriser la géolocalisation.');
+      }
+    } catch (err) {
+      console.error('GPS error:', err);
+      setError('Erreur lors de l\'accès à la géolocalisation');
+    } finally {
+      setGpsLoading(false);
+    }
+  };
+  
+  const handleToggleSort = () => {
+    if (!comparison) return;
+    
+    const newSortByDistance = !sortByDistance;
+    setSortByDistance(newSortByDistance);
+    
+    const updatedComparison = { ...comparison };
+    
+    if (newSortByDistance && userPosition) {
+      // Sort by distance
+      updatedComparison.pricesByStore.sort((a, b) => {
+        if (a.distance === undefined) return 1;
+        if (b.distance === undefined) return -1;
+        return a.distance - b.distance;
+      });
+    } else {
+      // Sort by price (default)
+      updatedComparison.pricesByStore.sort((a, b) => a.price - b.price);
+    }
+    
+    setComparison(updatedComparison);
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
@@ -128,6 +200,66 @@ export default function EnhancedComparator() {
             onChange={handleTerritoryChange}
           />
         </div>
+        
+        {/* GPS Button */}
+        {comparison && (
+          <div className="mb-6 flex gap-4">
+            <button
+              onClick={handleGetLocation}
+              disabled={gpsLoading}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all
+                ${userPosition && !gpsLoading
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                }
+                ${gpsLoading ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              {gpsLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Localisation...</span>
+                </>
+              ) : userPosition ? (
+                <>
+                  <MapPin className="w-5 h-5" />
+                  <span>📍 Position activée</span>
+                </>
+              ) : (
+                <>
+                  <Navigation className="w-5 h-5" />
+                  <span>Magasins près de moi</span>
+                </>
+              )}
+            </button>
+            
+            {userPosition && (
+              <button
+                onClick={handleToggleSort}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all
+                  ${sortByDistance
+                    ? 'bg-purple-500 text-white hover:bg-purple-600'
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }
+                `}
+              >
+                {sortByDistance ? (
+                  <>
+                    <Navigation className="w-5 h-5" />
+                    <span>Tri par distance</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-lg">💰</span>
+                    <span>Tri par prix</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
         
         {/* Search Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">

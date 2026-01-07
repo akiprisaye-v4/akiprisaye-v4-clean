@@ -284,6 +284,17 @@ export async function comparePrices(
       return null;
     }
     
+    // Load stores database
+    let storesData: any = null;
+    try {
+      const storesResponse = await fetch('/data/stores-database.json');
+      if (storesResponse.ok) {
+        storesData = await storesResponse.json();
+      }
+    } catch (err) {
+      console.warn('Could not load stores database:', err);
+    }
+    
     // Filter prices for territory
     const territoryPrices = product.prices.filter(p => p.territory === territory);
     
@@ -304,7 +315,35 @@ export async function comparePrices(
       ? (priceRange / cheapestPrice) * 100 
       : 0;
     
-    // Build comparison
+    // Build comparison with store data
+    const pricesByStore = sortedPrices.map((price, index) => {
+      // Find store in stores database
+      const store = storesData?.stores?.find((s: any) => s.id === price.storeId);
+      
+      return {
+        storeName: price.storeName,
+        storeChain: price.storeChain,
+        storeId: price.storeId,
+        price: price.price,
+        observedAt: price.observedAt,
+        source: price.source,
+        reliability: price.reliability,
+        rank: index + 1,
+        differenceFromCheapest: {
+          absolute: Math.round((price.price - cheapestPrice) * 100) / 100,
+          percentage: cheapestPrice > 0 
+            ? Math.round(((price.price - cheapestPrice) / cheapestPrice) * 10000) / 100
+            : 0,
+        },
+        store: {
+          address: store?.address,
+          lat: store?.lat,
+          lon: store?.lon,
+        },
+      };
+    });
+    
+    // Build legacy prices array for backward compatibility
     const pricesWithRank = sortedPrices.map((price, index) => ({
       storeName: price.storeName,
       storeChain: price.storeChain,
@@ -335,6 +374,7 @@ export async function comparePrices(
         ean: product.ean,
       },
       territory,
+      pricesByStore,
       prices: pricesWithRank,
       statistics: {
         cheapestPrice: Math.round(cheapestPrice * 100) / 100,

@@ -188,10 +188,11 @@ export default function EnhancedComparisonDisplay({
           Prix dans {comparison.metadata.totalStores} magasin{comparison.metadata.totalStores > 1 ? 's' : ''}
         </h3>
         
-        {comparison.prices.map((priceData, index) => {
+        {(comparison.pricesByStore || comparison.prices).map((priceData, index) => {
           const isExpanded = expandedPriceIndex === index;
           const isCheapest = index === 0;
-          const isMostExpensive = index === comparison.prices.length - 1 && comparison.prices.length > 1;
+          const isMostExpensive = index === (comparison.pricesByStore || comparison.prices).length - 1 && (comparison.pricesByStore || comparison.prices).length > 1;
+          const hasDistance = 'distance' in priceData && priceData.distance !== undefined;
           
           return (
             <div
@@ -222,6 +223,14 @@ export default function EnhancedComparisonDisplay({
                     
                     <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                       <span>Observé {formatDate(priceData.observedAt)}</span>
+                      {hasDistance && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center gap-1 text-blue-600 font-medium">
+                            📍 {priceData.distance!.toFixed(1)} km
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                   

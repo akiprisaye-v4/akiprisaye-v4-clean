@@ -159,6 +159,26 @@ export interface EnhancedPriceComparison {
     ean: string;
   };
   territory: string;
+  pricesByStore: Array<{
+    storeName: string;
+    storeChain: string;
+    storeId: string;
+    price: number;
+    observedAt: string;
+    source: PriceSource;
+    reliability: PriceReliability;
+    rank: number;
+    differenceFromCheapest: {
+      absolute: number;
+      percentage: number;
+    };
+    store: {
+      address?: string;
+      lat?: number;
+      lon?: number;
+    };
+    distance?: number; // Distance in km from user position (optional)
+  }>;
   prices: Array<{
     storeName: string;
     storeChain: string;
