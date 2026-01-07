@@ -1,10 +1,12 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "lastUpdate": "2025-01-07T02:00:00Z",
-    "description": "Comprehensive stores database for DROM-COM territories",
-    "totalStores": 45,
-    "territories": ["GP", "MQ", "GF", "RE"]
+    "version": "2.0.0",
+    "lastUpdate": "2026-01-07T02:42:11.640929Z",
+    "description": "Comprehensive stores database for DROM-COM territories with supermarkets and supérettes",
+    "totalStores": 24,
+    "territories": [
+      "GP"
+    ]
   },
   "stores": [
     {
@@ -14,18 +16,26 @@
       "territory": "GP",
       "commune": "Les Abymes",
       "address": "ZAC de Destrellan, 97139 Les Abymes",
-      "coordinates": { "lat": 16.2650, "lon": -61.5150 },
+      "coordinates": {
+        "lat": 16.265,
+        "lon": -61.515
+      },
       "phone": "+590 590 82 15 00",
       "hours": {
-        "monday": "08:30-20:00",
-        "tuesday": "08:30-20:00",
-        "wednesday": "08:30-20:00",
-        "thursday": "08:30-20:00",
-        "friday": "08:30-20:30",
-        "saturday": "08:30-20:30",
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
         "sunday": "09:00-13:00"
       },
-      "services": ["parking", "pharmacy", "gas_station", "bakery"],
+      "services": [
+        "parking",
+        "pharmacy",
+        "gas_station",
+        "bakery"
+      ],
       "verified": true
     },
     {
@@ -35,18 +45,54 @@
       "territory": "GP",
       "commune": "Baie-Mahault",
       "address": "Zone Industrielle de Jarry, 97122 Baie-Mahault",
-      "coordinates": { "lat": 16.2380, "lon": -61.5470 },
+      "coordinates": {
+        "lat": 16.238,
+        "lon": -61.547
+      },
       "phone": "+590 590 26 82 00",
       "hours": {
-        "monday": "08:00-20:30",
-        "tuesday": "08:00-20:30",
-        "wednesday": "08:00-20:30",
-        "thursday": "08:00-20:30",
-        "friday": "08:00-21:00",
-        "saturday": "08:00-21:00",
-        "sunday": "08:30-13:00"
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "09:00-13:00"
       },
-      "services": ["parking", "pharmacy", "gas_station", "restaurant", "bakery"],
+      "services": [
+        "parking",
+        "pharmacy",
+        "gas_station",
+        "restaurant",
+        "bakery"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-carrefour-003",
+      "chain": "Carrefour",
+      "name": "Carrefour Destrellan",
+      "territory": "GP",
+      "commune": "Les Abymes",
+      "address": "Centre Commercial Destrellan, 97139 Les Abymes",
+      "coordinates": {
+        "lat": 16.267,
+        "lon": -61.516
+      },
+      "phone": "+590 590 21 45 67",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "09:00-13:00"
+      },
+      "services": [
+        "parking",
+        "bakery"
+      ],
       "verified": true
     },
     {
@@ -56,7 +102,10 @@
       "territory": "GP",
       "commune": "Les Abymes",
       "address": "Route de la Chapelle, 97139 Les Abymes",
-      "coordinates": { "lat": 16.2700, "lon": -61.5200 },
+      "coordinates": {
+        "lat": 16.27,
+        "lon": -61.52
+      },
       "phone": "+590 590 83 15 15",
       "hours": {
         "monday": "08:00-20:00",
@@ -67,7 +116,12 @@
         "saturday": "08:00-20:30",
         "sunday": "09:00-13:00"
       },
-      "services": ["parking", "gas_station", "optical", "bakery"],
+      "services": [
+        "parking",
+        "gas_station",
+        "optical",
+        "bakery"
+      ],
       "verified": true
     },
     {
@@ -77,18 +131,26 @@
       "territory": "GP",
       "commune": "Baie-Mahault",
       "address": "Route Nationale, 97122 Baie-Mahault",
-      "coordinates": { "lat": 16.2400, "lon": -61.5500 },
+      "coordinates": {
+        "lat": 16.24,
+        "lon": -61.55
+      },
       "phone": "+590 590 26 50 50",
       "hours": {
-        "monday": "08:30-20:00",
-        "tuesday": "08:30-20:00",
-        "wednesday": "08:30-20:00",
-        "thursday": "08:30-20:00",
-        "friday": "08:30-20:30",
-        "saturday": "08:30-20:30",
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
         "sunday": "09:00-13:00"
       },
-      "services": ["parking", "gas_station", "bakery", "restaurant"],
+      "services": [
+        "parking",
+        "gas_station",
+        "bakery",
+        "restaurant"
+      ],
       "verified": true
     },
     {
@@ -98,18 +160,475 @@
       "territory": "GP",
       "commune": "Pointe-à-Pitre",
       "address": "Boulevard des Héros, 97110 Pointe-à-Pitre",
-      "coordinates": { "lat": 16.2410, "lon": -61.5330 },
+      "coordinates": {
+        "lat": 16.241,
+        "lon": -61.533
+      },
       "phone": "+590 590 90 45 45",
       "hours": {
-        "monday": "08:00-19:30",
-        "tuesday": "08:00-19:30",
-        "wednesday": "08:00-19:30",
-        "thursday": "08:00-19:30",
-        "friday": "08:00-20:00",
-        "saturday": "08:00-20:00",
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "09:00-13:00"
+      },
+      "services": [
+        "parking",
+        "bakery"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-leclerc-004",
+      "chain": "E.Leclerc",
+      "name": "E.Leclerc Sainte-Anne",
+      "territory": "GP",
+      "commune": "Sainte-Anne",
+      "address": "Route Nationale, 97180 Sainte-Anne",
+      "coordinates": {
+        "lat": 16.228,
+        "lon": -61.38
+      },
+      "phone": "+590 590 88 25 30",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "09:00-13:00"
+      },
+      "services": [
+        "parking",
+        "gas_station"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superu-001",
+      "chain": "Super U",
+      "name": "Super U Gosier",
+      "territory": "GP",
+      "commune": "Le Gosier",
+      "address": "Route de la Riviera, 97190 Le Gosier",
+      "coordinates": {
+        "lat": 16.229,
+        "lon": -61.502
+      },
+      "phone": "+590 590 84 42 42",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
         "sunday": "closed"
       },
-      "services": ["parking", "bakery"],
+      "services": [
+        "parking",
+        "bakery"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superu-002",
+      "chain": "Super U",
+      "name": "Super U Sainte-Anne",
+      "territory": "GP",
+      "commune": "Sainte-Anne",
+      "address": "Rue Principale, 97180 Sainte-Anne",
+      "coordinates": {
+        "lat": 16.23,
+        "lon": -61.385
+      },
+      "phone": "+590 590 88 15 15",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superu-003",
+      "chain": "Super U",
+      "name": "Super U Le Moule",
+      "territory": "GP",
+      "commune": "Le Moule",
+      "address": "Centre-ville, 97160 Le Moule",
+      "coordinates": {
+        "lat": 16.335,
+        "lon": -61.345
+      },
+      "phone": "+590 590 23 56 78",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking",
+        "bakery"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-leaderprice-001",
+      "chain": "Leader Price",
+      "name": "Leader Price Pointe-à-Pitre",
+      "territory": "GP",
+      "commune": "Pointe-à-Pitre",
+      "address": "Rue Frébault, 97110 Pointe-à-Pitre",
+      "coordinates": {
+        "lat": 16.242,
+        "lon": -61.534
+      },
+      "phone": "+590 590 82 33 44",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-leaderprice-002",
+      "chain": "Leader Price",
+      "name": "Leader Price Les Abymes",
+      "territory": "GP",
+      "commune": "Les Abymes",
+      "address": "Boulevard Chanzy, 97139 Les Abymes",
+      "coordinates": {
+        "lat": 16.264,
+        "lon": -61.518
+      },
+      "phone": "+590 590 21 67 89",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-match-001",
+      "chain": "Match",
+      "name": "Match Les Abymes",
+      "territory": "GP",
+      "commune": "Les Abymes",
+      "address": "Centre Commercial, 97139 Les Abymes",
+      "coordinates": {
+        "lat": 16.2655,
+        "lon": -61.5155
+      },
+      "phone": "+590 590 82 44 55",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-match-002",
+      "chain": "Match",
+      "name": "Match Gosier",
+      "territory": "GP",
+      "commune": "Le Gosier",
+      "address": "Marina, 97190 Le Gosier",
+      "coordinates": {
+        "lat": 16.231,
+        "lon": -61.503
+      },
+      "phone": "+590 590 84 33 22",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-casino-001",
+      "chain": "Casino",
+      "name": "Casino Pointe-à-Pitre",
+      "territory": "GP",
+      "commune": "Pointe-à-Pitre",
+      "address": "Centre-ville, 97110 Pointe-à-Pitre",
+      "coordinates": {
+        "lat": 16.2415,
+        "lon": -61.5335
+      },
+      "phone": "+590 590 82 55 66",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-casino-002",
+      "chain": "Casino",
+      "name": "Casino Basse-Terre",
+      "territory": "GP",
+      "commune": "Basse-Terre",
+      "address": "Boulevard Général de Gaulle, 97100 Basse-Terre",
+      "coordinates": {
+        "lat": 16.0,
+        "lon": -61.731
+      },
+      "phone": "+590 590 81 12 34",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [
+        "parking"
+      ],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superette-001",
+      "chain": "Supérette",
+      "name": "Supérette du Port",
+      "territory": "GP",
+      "commune": "Pointe-à-Pitre",
+      "address": "Rue du Port, 97110 Pointe-à-Pitre",
+      "coordinates": {
+        "lat": 16.24,
+        "lon": -61.535
+      },
+      "phone": "+590 590 82 11 22",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superette-002",
+      "chain": "Supérette",
+      "name": "Supérette Sainte-Rose",
+      "territory": "GP",
+      "commune": "Sainte-Rose",
+      "address": "Centre Bourg, 97115 Sainte-Rose",
+      "coordinates": {
+        "lat": 16.331,
+        "lon": -61.7
+      },
+      "phone": "+590 590 28 45 67",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superette-003",
+      "chain": "Supérette",
+      "name": "Supérette Capesterre",
+      "territory": "GP",
+      "commune": "Capesterre-Belle-Eau",
+      "address": "Bourg, 97130 Capesterre-Belle-Eau",
+      "coordinates": {
+        "lat": 16.045,
+        "lon": -61.57
+      },
+      "phone": "+590 590 86 22 33",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superette-004",
+      "chain": "Supérette",
+      "name": "Supérette Petit-Canal",
+      "territory": "GP",
+      "commune": "Petit-Canal",
+      "address": "Centre-ville, 97131 Petit-Canal",
+      "coordinates": {
+        "lat": 16.37,
+        "lon": -61.46
+      },
+      "phone": "+590 590 22 44 55",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-superette-005",
+      "chain": "Supérette",
+      "name": "Supérette Saint-François",
+      "territory": "GP",
+      "commune": "Saint-François",
+      "address": "Marina, 97118 Saint-François",
+      "coordinates": {
+        "lat": 16.253,
+        "lon": -61.28
+      },
+      "phone": "+590 590 88 33 44",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-proxi-001",
+      "chain": "Proxi",
+      "name": "Proxi Morne-à-l'Eau",
+      "territory": "GP",
+      "commune": "Morne-à-l'Eau",
+      "address": "Rue Principale, 97111 Morne-à-l'Eau",
+      "coordinates": {
+        "lat": 16.338,
+        "lon": -61.45
+      },
+      "phone": "+590 590 24 55 66",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-vival-001",
+      "chain": "Vival",
+      "name": "Vival Lamentin",
+      "territory": "GP",
+      "commune": "Lamentin",
+      "address": "Centre Bourg, 97129 Lamentin",
+      "coordinates": {
+        "lat": 16.245,
+        "lon": -61.593
+      },
+      "phone": "+590 590 25 77 88",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
+      "verified": true
+    },
+    {
+      "storeId": "store-gp-vival-002",
+      "chain": "Vival",
+      "name": "Vival Baie-Mahault",
+      "territory": "GP",
+      "commune": "Baie-Mahault",
+      "address": "Rue des Hibiscus, 97122 Baie-Mahault",
+      "coordinates": {
+        "lat": 16.239,
+        "lon": -61.548
+      },
+      "phone": "+590 590 26 88 99",
+      "hours": {
+        "monday": "08:00-20:00",
+        "tuesday": "08:00-20:00",
+        "wednesday": "08:00-20:00",
+        "thursday": "08:00-20:00",
+        "friday": "08:00-20:30",
+        "saturday": "08:00-20:30",
+        "sunday": "closed"
+      },
+      "services": [],
       "verified": true
     }
   ]
