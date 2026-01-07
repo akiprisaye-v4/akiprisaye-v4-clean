@@ -89,6 +89,9 @@ const ScanFlow = lazyWithRetry(() => import('./pages/ScanFlow'));
 // Product Photo Analysis
 const ProductPhotoAnalysis = lazyWithRetry(() => import('./pages/ProductPhotoAnalysis'));
 
+// Store Detail Page with company info, graphs, and history
+const StoreDetail = lazyWithRetry(() => import('./pages/StoreDetail'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -242,6 +245,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   {/* Service Comparator (flights, boats, telecoms, utilities) */}
                   <Route path='comparateur-services' element={<ServiceComparator />} />
                   <Route path='services' element={<ServiceComparator />} />
+                  
+                  {/* Store Detail Page - Fiche enseigne avec graphs, filiales, etc. */}
+                  <Route path='enseigne/:storeId' element={<StoreDetail />} />
                   
                   {/* New simplified pages for automatic generation */}
                   <Route path='comparer' element={<CompareSimple />} />
