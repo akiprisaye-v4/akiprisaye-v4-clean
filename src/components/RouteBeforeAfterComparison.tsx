@@ -29,11 +29,19 @@ export default function RouteBeforeAfterComparison({
   const optimizedFuel = (optimizedDistance * 6) / 100;
   const optimizedCO2 = optimizedFuel * 2.3;
 
-  // Calculate percentage savings
-  const distanceSavingsPercent = ((unoptimizedDistance - optimizedDistance) / unoptimizedDistance * 100).toFixed(0);
-  const timeSavingsPercent = ((unoptimizedTime - optimizedTime) / unoptimizedTime * 100).toFixed(0);
-  const fuelSavingsPercent = ((unoptimizedFuel - optimizedFuel) / unoptimizedFuel * 100).toFixed(0);
-  const co2SavingsPercent = ((unoptimizedCO2 - optimizedCO2) / unoptimizedCO2 * 100).toFixed(0);
+  // Calculate percentage savings (guard against division by zero)
+  const distanceSavingsPercent = unoptimizedDistance > 0 
+    ? ((unoptimizedDistance - optimizedDistance) / unoptimizedDistance * 100).toFixed(0)
+    : '0';
+  const timeSavingsPercent = unoptimizedTime > 0
+    ? ((unoptimizedTime - optimizedTime) / unoptimizedTime * 100).toFixed(0)
+    : '0';
+  const fuelSavingsPercent = unoptimizedFuel > 0
+    ? ((unoptimizedFuel - optimizedFuel) / unoptimizedFuel * 100).toFixed(0)
+    : '0';
+  const co2SavingsPercent = unoptimizedCO2 > 0
+    ? ((unoptimizedCO2 - optimizedCO2) / unoptimizedCO2 * 100).toFixed(0)
+    : '0';
 
   return (
     <div className={`bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700 rounded-lg p-5 ${className}`}>

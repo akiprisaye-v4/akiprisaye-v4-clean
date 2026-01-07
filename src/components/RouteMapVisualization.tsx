@@ -3,6 +3,9 @@
  * 
  * Displays an interactive map with the optimized shopping route
  * Shows user position, store markers, and route polylines
+ * 
+ * Note: Uses Leaflet.js loaded dynamically. Type declarations for window.L
+ * are not available since Leaflet is loaded at runtime via CDN.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -21,6 +24,8 @@ export default function RouteMapVisualization({
   className = '' 
 }: RouteMapVisualizationProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  // Using any for mapInstanceRef since Leaflet is loaded dynamically
+  // and proper TypeScript types are not available at compile time
   const mapInstanceRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
