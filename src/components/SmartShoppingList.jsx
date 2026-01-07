@@ -143,6 +143,12 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
       ean: '',
     });
   };
+  
+  // Handle form submission
+  const handleAddItemSubmit = (e) => {
+    e.preventDefault();
+    addItemToList();
+  };
 
   // Remove item from list
   const removeItem = (id) => {
@@ -670,14 +676,13 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
             <h2 id="shopping-list-title" className="text-xl font-semibold text-white mb-4">Votre liste de courses</h2>
 
             {/* Add Item Form */}
-            <form className="space-y-3 mb-4 p-4 bg-slate-900/50 rounded-lg" onSubmit={(e) => { e.preventDefault(); addItemToList(); }} aria-label="Formulaire d'ajout d'article">
+            <form className="space-y-3 mb-4 p-4 bg-slate-900/50 rounded-lg" onSubmit={handleAddItemSubmit} aria-label="Formulaire d'ajout d'article">
               <input
                 type="text"
                 placeholder="Nom du produit *"
                 value={newItem.product_name}
                 onChange={(e) => setNewItem({ ...newItem, product_name: e.target.value })}
                 className="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white placeholder-slate-400"
-                aria-label="Nom du produit"
                 required
               />
               <div className="grid grid-cols-2 gap-2">
@@ -685,7 +690,6 @@ export default function SmartShoppingList({ territoire = 'Guadeloupe' }) {
                   value={newItem.category}
                   onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
                   className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white"
-                  aria-label="Catégorie du produit"
                   required
                 >
                   <option value="">Catégorie *</option>

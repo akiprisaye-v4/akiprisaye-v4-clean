@@ -43,19 +43,19 @@ export default function OptimalRouteDisplay({ route, onClose }: OptimalRouteDisp
       {/* Summary */}
       <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-slate-800/50 rounded-lg" role="group" aria-label="Résumé de l'itinéraire">
         <div className="text-center">
-          <div className="text-2xl font-bold text-emerald-300" aria-label={`${route.stores.length} magasins à visiter`}>
+          <div className="text-2xl font-bold text-emerald-300">
             {route.stores.length}
           </div>
           <div className="text-xs text-gray-400">magasins</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-blue-300" aria-label={`Distance totale : ${route.totalDistance.toFixed(1)} kilomètres`}>
+          <div className="text-2xl font-bold text-blue-300">
             {route.totalDistance.toFixed(1)}
           </div>
           <div className="text-xs text-gray-400">km total</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-purple-300" aria-label={`Temps estimé : environ ${route.totalTime} minutes`}>
+          <div className="text-2xl font-bold text-purple-300">
             ~{route.totalTime}
           </div>
           <div className="text-xs text-gray-400">minutes</div>
@@ -71,19 +71,19 @@ export default function OptimalRouteDisplay({ route, onClose }: OptimalRouteDisp
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div className="flex items-center gap-1">
               <MapPin className="w-3 h-3 text-blue-400" aria-hidden="true" />
-              <span className="text-gray-300" aria-label={`${route.savings.distance.toFixed(1)} kilomètres économisés`}>
+              <span className="text-gray-300">
                 {route.savings.distance.toFixed(1)} km
               </span>
             </div>
             <div className="flex items-center gap-1">
               <Fuel className="w-3 h-3 text-orange-400" aria-hidden="true" />
-              <span className="text-gray-300" aria-label={`${route.savings.fuel.toFixed(1)} litres de carburant économisés`}>
+              <span className="text-gray-300">
                 {route.savings.fuel.toFixed(1)} L
               </span>
             </div>
             <div className="flex items-center gap-1">
               <Leaf className="w-3 h-3 text-green-400" aria-hidden="true" />
-              <span className="text-gray-300" aria-label={`${route.savings.co2.toFixed(1)} kilogrammes de CO2 évités`}>
+              <span className="text-gray-300">
                 {route.savings.co2.toFixed(1)} kg CO₂
               </span>
             </div>

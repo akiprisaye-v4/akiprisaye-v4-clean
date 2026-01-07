@@ -47,33 +47,33 @@ export default function StatsDisplay({ stats, badges, onClearStats }: StatsDispl
 
         <div className="grid grid-cols-2 gap-3" role="group" aria-labelledby="stats-title">
           <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1" id="distance-label">
               <MapPin className="w-4 h-4 text-blue-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Distance</span>
             </div>
-            <div className="text-2xl font-bold text-blue-300" aria-label={`Distance totale : ${stats.totalDistance.toFixed(1)} kilomètres`}>
+            <div className="text-2xl font-bold text-blue-300" aria-describedby="distance-label">
               {stats.totalDistance.toFixed(1)} km
             </div>
             <div className="text-xs text-gray-500">{stats.totalTrips} courses</div>
           </div>
 
           <div className="bg-slate-800/50 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1" id="fuel-label">
               <Fuel className="w-4 h-4 text-orange-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Carburant</span>
             </div>
-            <div className="text-2xl font-bold text-orange-300" aria-label={`Carburant économisé : ${stats.fuelSaved.toFixed(1)} litres`}>
+            <div className="text-2xl font-bold text-orange-300" aria-describedby="fuel-label">
               {stats.fuelSaved.toFixed(1)} L
             </div>
             <div className="text-xs text-gray-500">économisés</div>
           </div>
 
           <div className="bg-slate-800/50 rounded-lg p-3 col-span-2">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1" id="co2-label">
               <Leaf className="w-4 h-4 text-green-400" aria-hidden="true" />
               <span className="text-xs text-gray-400">Impact écologique</span>
             </div>
-            <div className="text-2xl font-bold text-green-300" aria-label={`Impact écologique : ${stats.co2Saved.toFixed(1)} kilogrammes de CO2 évités`}>
+            <div className="text-2xl font-bold text-green-300" aria-describedby="co2-label">
               {stats.co2Saved.toFixed(1)} kg CO₂
             </div>
             <div className="text-xs text-gray-500">évités grâce à l'optimisation</div>
