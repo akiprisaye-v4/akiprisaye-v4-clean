@@ -16,6 +16,9 @@ import { DailyShockCard } from "../components/home/DailyShockCard";
 import { MonthlySavingsDashboard } from "../components/home/MonthlySavingsDashboard";
 import { SmartShoppingList } from "../components/home/SmartShoppingList";
 import { TerritorySignal } from "../components/home/TerritorySignal";
+import { AnonymousSocialComparison } from "../components/home/AnonymousSocialComparison";
+import { PersonalizedDealOfDay } from "../components/home/PersonalizedDealOfDay";
+import { ShareVictory } from "../components/home/ShareVictory";
 
 export default function HomeV3() {
   const [stats, setStats] = useState({
@@ -77,8 +80,14 @@ export default function HomeV3() {
       {/* ⑰ BILAN MENSUEL - GAMIFICATION - FIERTÉ + ENGAGEMENT */}
       <MonthlySavingsDashboard />
 
+      {/* ⑳ DEAL DU JOUR - PERSONNALISÉ - URGENCE + ACTION IMMÉDIATE */}
+      <PersonalizedDealOfDay />
+
       {/* ① BLOC "ÉCONOMIES RÉELLES" - PRIORITÉ ABSOLUE - IMPACT MAX */}
       <RealSavingsBlock />
+
+      {/* ⑲ COMPARAISON SOCIALE ANONYME - COMPÉTITION SAINE + MOTIVATION */}
+      <AnonymousSocialComparison />
 
       {/* ⑯ PROCHAINE COURSE - PERSONNALISATION - RÉTENTION TRÈS ÉLEVÉE */}
       <SmartShoppingList />
@@ -91,6 +100,9 @@ export default function HomeV3() {
 
       {/* ⑱ SIGNAL TERRITOIRE - COMMUNITY ENGAGEMENT */}
       <TerritorySignal />
+
+      {/* ㉑ PARTAGE VICTOIRE - VIRALITÉ + RECRUTEMENT ORGANIQUE */}
+      <ShareVictory />
 
       {/* ⑤ CLASSEMENT DES ENSEIGNES - Social + Crédible */}
       <StoreRanking />

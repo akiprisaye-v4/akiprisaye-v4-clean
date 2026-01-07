@@ -1,6 +1,6 @@
 /**
  * Export des composants "Effet Waouh" de la page d'accueil
- * Ces 13 composants sont conçus pour déclencher un impact immédiat et augmenter la rétention
+ * Ces 16 composants sont conçus pour déclencher un impact immédiat, augmenter la rétention et favoriser la viralité
  */
 
 // Composants originaux ①-⑤
@@ -23,3 +23,8 @@ export { FauxBonPlanBadge, FauxBonPlanBadgeSimple } from './FauxBonPlanBadge';
 export { SmartShoppingList } from './SmartShoppingList';
 export { MonthlySavingsDashboard } from './MonthlySavingsDashboard';
 export { TerritorySignal } from './TerritorySignal';
+
+// Composants viralité & engagement social ⑲-㉑
+export { AnonymousSocialComparison } from './AnonymousSocialComparison';
+export { PersonalizedDealOfDay } from './PersonalizedDealOfDay';
+export { ShareVictory } from './ShareVictory';
