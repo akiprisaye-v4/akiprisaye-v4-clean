@@ -79,6 +79,9 @@ const ComparateurTerritoires = lazyWithRetry(() => import('./pages/ComparateurTe
 // Enhanced Comparator with real-time data
 const EnhancedComparator = lazyWithRetry(() => import('./pages/EnhancedComparator'));
 
+// Service Comparator (flights, boats, internet, mobile, water, electricity)
+const ServiceComparator = lazyWithRetry(() => import('./pages/ServiceComparator'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -225,6 +228,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   
                   {/* Enhanced Comparator with real-time data and reliability scoring */}
                   <Route path='comparateur-intelligent' element={<EnhancedComparator />} />
+                  
+                  {/* Service Comparator (flights, boats, telecoms, utilities) */}
+                  <Route path='comparateur-services' element={<ServiceComparator />} />
+                  <Route path='services' element={<ServiceComparator />} />
                   
                   {/* New simplified pages for automatic generation */}
                   <Route path='comparer' element={<CompareSimple />} />
