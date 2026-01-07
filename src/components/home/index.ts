@@ -1,6 +1,6 @@
 /**
  * Export des composants "Effet Waouh" de la page d'accueil
- * Ces 10 composants sont conçus pour déclencher un impact immédiat et augmenter la rétention
+ * Ces 13 composants sont conçus pour déclencher un impact immédiat et augmenter la rétention
  */
 
 // Composants originaux ①-⑤
@@ -18,3 +18,8 @@ export { DataConfidenceCard } from './DataConfidenceCard';
 // Composants haute impact ⑭-⑮
 export { DailyShockCard } from './DailyShockCard';
 export { FauxBonPlanBadge, FauxBonPlanBadgeSimple } from './FauxBonPlanBadge';
+
+// Composants supplémentaires ⑯-⑱
+export { SmartShoppingList } from './SmartShoppingList';
+export { MonthlySavingsDashboard } from './MonthlySavingsDashboard';
+export { TerritorySignal } from './TerritorySignal';

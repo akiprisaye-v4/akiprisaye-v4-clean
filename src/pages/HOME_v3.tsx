@@ -13,6 +13,9 @@ import { BeforeAfterComparison } from "../components/home/BeforeAfterComparison"
 import { OptimalRoutePreview } from "../components/home/OptimalRoutePreview";
 import { StoreRanking } from "../components/home/StoreRanking";
 import { DailyShockCard } from "../components/home/DailyShockCard";
+import { MonthlySavingsDashboard } from "../components/home/MonthlySavingsDashboard";
+import { SmartShoppingList } from "../components/home/SmartShoppingList";
+import { TerritorySignal } from "../components/home/TerritorySignal";
 
 export default function HomeV3() {
   const [stats, setStats] = useState({
@@ -71,14 +74,23 @@ export default function HomeV3() {
       {/* ⑭ HAUSSES DU JOUR - EMOTIONAL HOOK - AU-DESSUS DE TOUT */}
       <DailyShockCard territory="GP" />
 
+      {/* ⑰ BILAN MENSUEL - GAMIFICATION - FIERTÉ + ENGAGEMENT */}
+      <MonthlySavingsDashboard />
+
       {/* ① BLOC "ÉCONOMIES RÉELLES" - PRIORITÉ ABSOLUE - IMPACT MAX */}
       <RealSavingsBlock />
+
+      {/* ⑯ PROCHAINE COURSE - PERSONNALISATION - RÉTENTION TRÈS ÉLEVÉE */}
+      <SmartShoppingList />
 
       {/* ② COMPARAISON VISUELLE "AVANT / APRÈS" - Exemple concret */}
       <BeforeAfterComparison />
 
       {/* ③ ITINÉRAIRE OPTIMAL - Différenciation forte */}
       <OptimalRoutePreview />
+
+      {/* ⑱ SIGNAL TERRITOIRE - COMMUNITY ENGAGEMENT */}
+      <TerritorySignal />
 
       {/* ⑤ CLASSEMENT DES ENSEIGNES - Social + Crédible */}
       <StoreRanking />
