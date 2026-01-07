@@ -7,30 +7,14 @@
  * - GET /api/observations/:id - Observation unique
  */
 
-interface Observation {
-  id: string;
-  territoire: string;
-  commune?: string;
-  enseigne: string;
-  magasin_id?: string;
-  date: string;
-  heure?: string;
-  produits: Array<{
-    nom: string;
-    quantite: number;
-    prix_unitaire: number;
-    prix_total: number;
-    tva_pct?: number;
-    categorie?: string;
-    ean?: string;
-  }>;
-  total_ttc: number;
-  source: string;
-  fiabilite: string;
-  verifie: boolean;
-  notes?: string;
-  created_at: string;
-}
+import { 
+  loadObservations, 
+  matchesProductQuery, 
+  getApiHeaders, 
+  createOptionsResponse, 
+  API_CONFIG,
+  type Observation 
+} from './utils';
 
 interface ApiResponse {
   meta: {
@@ -73,25 +57,7 @@ function sanitizeNumber(value: string | null, defaultValue: number, min: number,
   return Math.max(min, Math.min(max, num));
 }
 
-/**
- * Load observations from JSON file
- */
-async function loadObservations(): Promise<Observation[]> {
-  try {
-    // In Cloudflare Pages Functions, we need to fetch from the public URL
-    // or load from the file system if available
-    const response = await fetch('https://akiprisaye.pages.dev/data/observations/index.json');
-    if (!response.ok) {
-      // Fallback: try to load from local path (for development)
-      throw new Error('Failed to fetch observations');
-    }
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Error loading observations:', error);
-    return [];
-  }
-}
+
 
 /**
  * Filter observations based on query parameters
@@ -115,9 +81,8 @@ function filterObservations(
   }
 
   if (filters.produit) {
-    const produit = filters.produit.toLowerCase();
     filtered = filtered.filter(obs =>
-      obs.produits.some(p => p.nom.toLowerCase().includes(produit))
+      obs.produits.some(p => matchesProductQuery(p.nom, filters.produit!))
     );
   }
 
@@ -145,7 +110,7 @@ function paginate<T>(items: T[], limit: number, offset: number): T[] {
 function createResponse(data: any[], filters?: Record<string, any>): ApiResponse {
   return {
     meta: {
-      source: 'A KI PRI SA YÉ',
+      source: API_CONFIG.SOURCE_NAME,
       generated_at: new Date().toISOString(),
       count: data.length,
       ...(filters && { filters }),
@@ -159,7 +124,7 @@ function createResponse(data: any[], filters?: Record<string, any>): ApiResponse
  * Returns list of validated observations with optional filters
  */
 export async function onRequestGet(context: any) {
-  const { request, env } = context;
+  const { request } = context;
   const url = new URL(request.url);
 
   // Extract and sanitize query parameters
@@ -196,13 +161,7 @@ export async function onRequestGet(context: any) {
 
     return new Response(JSON.stringify(response, null, 2), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+      headers: getApiHeaders(),
     });
   } catch (error) {
     console.error('Error in observations API:', error);
@@ -210,7 +169,7 @@ export async function onRequestGet(context: any) {
     return new Response(
       JSON.stringify({
         meta: {
-          source: 'A KI PRI SA YÉ',
+          source: API_CONFIG.SOURCE_NAME,
           generated_at: new Date().toISOString(),
           count: 0,
           error: 'Internal server error',
@@ -219,11 +178,7 @@ export async function onRequestGet(context: any) {
       }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': 'no-cache',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getApiHeaders(false),
       }
     );
   }
@@ -234,13 +189,5 @@ export async function onRequestGet(context: any) {
  * CORS preflight request handler
  */
 export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return createOptionsResponse();
 }

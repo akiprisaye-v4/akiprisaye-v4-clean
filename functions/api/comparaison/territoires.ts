@@ -9,22 +9,14 @@
  * - Données observées uniquement
  */
 
-interface Product {
-  nom: string;
-  quantite: number;
-  prix_unitaire: number;
-  categorie?: string;
-  ean?: string;
-}
-
-interface Observation {
-  id: string;
-  territoire: string;
-  commune?: string;
-  date: string;
-  produits: Product[];
-  [key: string]: any;
-}
+import { 
+  loadObservations, 
+  matchesProductQuery, 
+  getApiHeaders, 
+  createOptionsResponse, 
+  API_CONFIG,
+  type Observation 
+} from '../utils';
 
 interface TerritorialComparison {
   territoire: string;
@@ -35,29 +27,7 @@ interface TerritorialComparison {
   derniere_mise_a_jour: string;
 }
 
-/**
- * Load observations from JSON file
- */
-async function loadObservations(): Promise<Observation[]> {
-  try {
-    const response = await fetch('https://akiprisaye.pages.dev/data/observations/index.json');
-    if (!response.ok) {
-      throw new Error('Failed to fetch observations');
-    }
-    const data = await response.json();
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Error loading observations:', error);
-    return [];
-  }
-}
 
-/**
- * Normalize product name for matching
- */
-function normalizeProductName(name: string): string {
-  return name.toLowerCase().trim();
-}
 
 /**
  * Filter observations by date range
@@ -88,8 +58,6 @@ function calculateTerritorialComparison(
   productQuery: string,
   territories?: string[]
 ): TerritorialComparison[] {
-  const productNorm = normalizeProductName(productQuery);
-  
   // Group prices by territory
   const territoryData = new Map<string, {
     prices: number[];
@@ -108,8 +76,7 @@ function calculateTerritorialComparison(
       if (!produit.nom) continue;
       
       // Match product by name (partial match for flexibility)
-      const produitNorm = normalizeProductName(produit.nom);
-      if (!produitNorm.includes(productNorm) && !productNorm.includes(produitNorm)) {
+      if (!matchesProductQuery(produit.nom, productQuery)) {
         continue;
       }
 
@@ -192,7 +159,7 @@ export async function onRequestGet(context: any) {
     return new Response(
       JSON.stringify({
         meta: {
-          source: 'A KI PRI SA YÉ',
+          source: API_CONFIG.SOURCE_NAME,
           generated_at: new Date().toISOString(),
           error: 'Le paramètre "produit" est requis',
         },
@@ -200,11 +167,7 @@ export async function onRequestGet(context: any) {
       }),
       {
         status: 400,
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': 'no-cache',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getApiHeaders(false),
       }
     );
   }
@@ -257,13 +220,7 @@ export async function onRequestGet(context: any) {
 
     return new Response(JSON.stringify(response, null, 2), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+      headers: getApiHeaders(),
     });
   } catch (error) {
     console.error('Error in territorial comparison API:', error);
@@ -271,7 +228,7 @@ export async function onRequestGet(context: any) {
     return new Response(
       JSON.stringify({
         meta: {
-          source: 'A KI PRI SA YÉ',
+          source: API_CONFIG.SOURCE_NAME,
           generated_at: new Date().toISOString(),
           error: 'Erreur interne du serveur',
         },
@@ -279,11 +236,7 @@ export async function onRequestGet(context: any) {
       }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          'Cache-Control': 'no-cache',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: getApiHeaders(false),
       }
     );
   }
@@ -294,13 +247,5 @@ export async function onRequestGet(context: any) {
  * CORS preflight request handler
  */
 export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return createOptionsResponse();
 }
