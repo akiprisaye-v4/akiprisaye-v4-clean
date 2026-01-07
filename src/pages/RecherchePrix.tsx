@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, Search, Barcode, Receipt } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
+import ReceiptScanner from '../components/ReceiptScanner';
+import type { ReceiptAnalysisResult } from '../services/receiptScanService';
 
 /**
  * UNIFIED PRICE SEARCH HUB
@@ -18,8 +21,18 @@ import { Helmet } from 'react-helmet-async';
 type SearchMode = 'text' | 'barcode' | 'photo' | 'receipt';
 
 export default function RecherchePrix() {
+  const [searchParams] = useSearchParams();
   const [searchMode, setSearchMode] = useState<SearchMode | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [receiptAnalysis, setReceiptAnalysis] = useState<ReceiptAnalysisResult | null>(null);
+  
+  // Check for source parameter (e.g., ?source=ticket)
+  useEffect(() => {
+    const source = searchParams.get('source');
+    if (source === 'ticket') {
+      setSearchMode('receipt');
+    }
+  }, [searchParams]);
 
   const handleSearchModeSelect = (mode: SearchMode) => {
     setSearchMode(mode);
@@ -33,12 +46,19 @@ export default function RecherchePrix() {
         window.location.href = '/analyse-photo-produit?from=recherche-prix';
         break;
       case 'receipt':
-        window.location.href = '/scan?from=recherche-prix';
+        // Stay on this page - render ReceiptScanner component
         break;
       case 'text':
         // Stay on this page for text search
         break;
     }
+  };
+  
+  const handleReceiptAnalysisComplete = (result: ReceiptAnalysisResult) => {
+    setReceiptAnalysis(result);
+    // TODO: Navigate to comparison view with receipt data
+    // For now, just log it
+    console.log('Receipt analysis complete:', result);
   };
 
   const handleTextSearch = (e: React.FormEvent) => {
@@ -62,15 +82,23 @@ export default function RecherchePrix() {
       <div className="min-h-screen bg-slate-950 dark:bg-slate-900 pt-20 pb-12 px-4">
         <div className="max-w-5xl mx-auto">
           
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Recherche de prix
-            </h1>
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-              Recherchez, scannez et comparez les prix dans votre territoire en 3 étapes simples.
-            </p>
-          </div>
+          {/* Receipt Scanner Mode */}
+          {searchMode === 'receipt' ? (
+            <ReceiptScanner 
+              onAnalysisComplete={handleReceiptAnalysisComplete}
+              onClose={() => setSearchMode(null)}
+            />
+          ) : (
+            <>
+              {/* Header */}
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                  Recherche de prix
+                </h1>
+                <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+                  Recherchez, scannez et comparez les prix dans votre territoire en 3 étapes simples.
+                </p>
+              </div>
 
           {/* Main Search Input */}
           <div className="glass-container mb-8">
@@ -232,6 +260,8 @@ export default function RecherchePrix() {
 
             </div>
           </div>
+            </>
+          )}
 
         </div>
       </div>
