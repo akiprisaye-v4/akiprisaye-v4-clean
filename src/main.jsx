@@ -133,6 +133,9 @@ const DelaisTensionsLogistiques = lazyWithRetry(() => import('./pages/recherche-
 // Logistics Explanation Module (feature flagged) - PRIORITY 10
 const PourquoiDelaisProduit = lazyWithRetry(() => import('./pages/recherche-prix/PourquoiDelaisProduit'));
 
+// Logistics FAQ Module (feature flagged) - PRIORITY 12-13
+const QuestionsLogistiqueDOM = lazyWithRetry(() => import('./pages/ressources/QuestionsLogistiqueDOM'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -525,6 +528,27 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                             </h2>
                             <p className="text-gray-400 text-sm">
                               Le module d'explication des délais produits sera bientôt disponible.
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    } 
+                  />
+                  
+                  {/* Logistics FAQ Module (feature flagged) - PRIORITY 12-13 */}
+                  <Route 
+                    path='ressources/questions-logistique-dom' 
+                    element={
+                      import.meta.env.VITE_FEATURE_LOGISTICS_FAQ === 'true' ? (
+                        <QuestionsLogistiqueDOM />
+                      ) : (
+                        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                          <div className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-8 text-center max-w-md">
+                            <h2 className="text-xl font-semibold text-gray-100 mb-2">
+                              Module en préparation
+                            </h2>
+                            <p className="text-gray-400 text-sm">
+                              La FAQ logistique DOM sera bientôt disponible.
                             </p>
                           </div>
                         </div>
