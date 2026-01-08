@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
+import { Car, Footprints, Navigation } from 'lucide-react';
 import { getStoresByTerritory } from '../services/mapService';
 import { getActiveTerritories, TERRITORIES } from '../constants/territories';
 
@@ -24,6 +25,12 @@ export default function Carte() {
   const [territory, setTerritory] = useState('GP'); // Code territoire
   const [stores, setStores] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
+
+  // Helper function to open Google Maps navigation
+  const handleGPS = (lat, lon, mode) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${mode}`;
+    window.open(url, '_blank');
+  };
 
   // Construire la liste des territoires actifs
   const activeTerritories = getActiveTerritories();
@@ -98,6 +105,22 @@ export default function Carte() {
                     <h3 className="font-semibold">{store.name}</h3>
                     <p className="text-sm text-slate-600">{store.category}</p>
                     <p className="text-xs text-slate-500">{currentTerritory?.name || territory}</p>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleGPS(store.lat, store.lon, 'driving')}
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                        title="Naviguer en voiture"
+                      >
+                        <Car size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleGPS(store.lat, store.lon, 'walking')}
+                        className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                        title="Naviguer à pied"
+                      >
+                        <Footprints size={14} />
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -138,9 +161,25 @@ export default function Carte() {
               >
                 <h3 className="font-semibold text-slate-100 mb-1">{store.name}</h3>
                 <p className="text-slate-400 text-sm mb-2">{store.category}</p>
-                <p className="text-slate-500 text-xs">
+                <p className="text-slate-500 text-xs mb-3">
                   📍 {store.lat.toFixed(4)}°, {store.lon.toFixed(4)}°
                 </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleGPS(store.lat, store.lon, 'driving')}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg text-sm hover:bg-blue-600/30 transition border border-blue-500/30"
+                  >
+                    <Car size={16} />
+                    <span>En voiture</span>
+                  </button>
+                  <button
+                    onClick={() => handleGPS(store.lat, store.lon, 'walking')}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg text-sm hover:bg-green-600/30 transition border border-green-500/30"
+                  >
+                    <Footprints size={16} />
+                    <span>À pied</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
