@@ -48,7 +48,7 @@ export default function Carte() {
       const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
       
       // Check if popup was blocked
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      if (newWindow === null) {
         alert('Le navigateur a bloqué l\'ouverture de Google Maps. Veuillez autoriser les popups pour ce site.');
       }
     } catch (error) {
