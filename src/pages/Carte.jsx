@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import { Car, Footprints, Bus, MapPin, Navigation2, Loader2 } from 'lucide-react';
+import { Car, Footprints, Bus, MapPin, Loader2 } from 'lucide-react';
 import { getStoresByTerritory } from '../services/mapService';
 import { getActiveTerritories, TERRITORIES } from '../constants/territories';
 
@@ -26,6 +26,9 @@ export default function Carte() {
   const [stores, setStores] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
   const [isNavigating, setIsNavigating] = useState(false);
+
+  // Constants
+  const NAVIGATION_TIMEOUT = 1000; // Timeout for resetting navigation state
 
   // Helper function to calculate distance between two points (Haversine formula)
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -114,7 +117,7 @@ export default function Carte() {
       }
       
       // Reset loading state after a short delay
-      setTimeout(() => setIsNavigating(false), 1000);
+      setTimeout(() => setIsNavigating(false), NAVIGATION_TIMEOUT);
     } catch (error) {
       console.error('Error opening navigation:', error);
       alert('Erreur lors de l\'ouverture de la navigation. Veuillez réessayer.');
