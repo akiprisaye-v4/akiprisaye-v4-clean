@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import uxMonitor from '../utils/uxMonitor';
 import type { ScanState, ScannerOptions, ScanStateTransition } from '../types/scan';
 import { SCANNER_MESSAGES, type ScannerMessage } from '../constants/scannerMessages';
 
@@ -94,9 +95,15 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     setScanFeedback('searching'); // OPTIMIZATION #2: Set initial feedback
     scanStartTimeRef.current = Date.now();
     transitionState('scanning', 'User initiated scan');
+    
+    // PROMPT 4: Monitor scan start
+    uxMonitor.scanStarted('barcode');
 
     // Check camera permission first
     const permission = await checkCameraPermission();
+    
+    // PROMPT 4: Monitor permission request
+    uxMonitor.cameraPermissionRequested();
     
     if (enableDebugLogging) {
       console.log('[SCAN] Camera permission state:', permission);
@@ -401,6 +408,9 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
         // Clear message after a short delay so user can see it
         setTimeout(() => setUserMessage(null), 2000);
         
+        // PROMPT 4: Monitor scan success from image upload
+        uxMonitor.scanCompleted('barcode', true);
+        
         try {
           onScan(ean);
         } catch (err) {
@@ -416,6 +426,9 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
           message: '❌ Aucun code détecté automatiquement. 👉 Vous pouvez saisir le code manuellement ci-dessous.' 
         });
         transitionState('error', 'No barcode found in image');
+        
+        // PROMPT 4: Monitor scan failure from image upload
+        uxMonitor.scanCompleted('barcode', false);
       }
     } catch (err: any) {
       console.error('[SCAN] Image processing error:', err);

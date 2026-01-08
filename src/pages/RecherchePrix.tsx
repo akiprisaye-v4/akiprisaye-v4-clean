@@ -3,6 +3,7 @@ import { Camera, Search, Barcode, Receipt } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import ReceiptScanner from '../components/ReceiptScanner';
+import uxMonitor from '../utils/uxMonitor';
 import type { ReceiptAnalysisResult } from '../services/receiptScanService';
 
 /**
@@ -44,6 +45,9 @@ export default function RecherchePrix() {
     if (!preferredMode && hasCamera && !searchMode) {
       setShowQuickScan(true);
     }
+    
+    // PROMPT 4: Monitor page view
+    uxMonitor.pageView('/recherche-prix');
   }, [searchMode]);
 
   const handleSearchModeSelect = (mode: SearchMode) => {
@@ -51,6 +55,12 @@ export default function RecherchePrix() {
     
     // Remember user preference for next time
     localStorage.setItem('preferredSearchMode', mode);
+    
+    // PROMPT 4: Monitor search mode selection
+    uxMonitor.searchModeSelected(mode);
+    if (showQuickScan && mode === 'barcode') {
+      uxMonitor.quickScanUsed();
+    }
     
     // Redirect to appropriate scan interface if needed
     switch (mode) {
