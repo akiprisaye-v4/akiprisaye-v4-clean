@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -25,7 +25,7 @@ export default function Carte() {
   const [territory, setTerritory] = useState('GP'); // Code territoire
   const [stores, setStores] = useState([]);
   const [userPosition, setUserPosition] = useState(null);
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [isNavigating, setIsNavigating] = useState({});
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [recentDestinations, setRecentDestinations] = useState([]);
   const [showRecentDestinations, setShowRecentDestinations] = useState(false);
@@ -48,6 +48,9 @@ export default function Carte() {
         setRecentDestinations(JSON.parse(saved));
       } catch (e) {
         console.error('Error loading recent destinations:', e);
+        // Clear corrupted data to prevent repeated failures on subsequent loads
+        localStorage.removeItem(RECENT_DESTINATIONS_KEY);
+        setRecentDestinations([]);
       }
     }
   }, []);
@@ -68,6 +71,12 @@ export default function Carte() {
 
   // Helper function to save destination to recent history
   const saveToRecentDestinations = (store) => {
+    // Validate store object has required properties
+    if (!store || !store.name || typeof store.lat !== 'number' || typeof store.lon !== 'number' || !store.category) {
+      console.error('Invalid store object provided to saveToRecentDestinations');
+      return;
+    }
+
     const newDestination = {
       name: store.name,
       lat: store.lat,
@@ -81,13 +90,19 @@ export default function Carte() {
       const filtered = prev.filter(d => !(d.lat === store.lat && d.lon === store.lon));
       // Add new destination at the beginning
       const updated = [newDestination, ...filtered].slice(0, MAX_RECENT_DESTINATIONS);
-      // Save to localStorage
-      localStorage.setItem(RECENT_DESTINATIONS_KEY, JSON.stringify(updated));
+      // Save to localStorage with error handling
+      try {
+        localStorage.setItem(RECENT_DESTINATIONS_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error('Error saving recent destinations to localStorage:', e);
+      }
       return updated;
     });
   };
 
   // Helper function to estimate travel time
+  // Note: These are rough estimates based on average speeds and don't account for
+  // real-world variables like traffic, road conditions, terrain, or individual pace
   const estimateTravelTime = (distance, mode) => {
     // Use speed constants
     const speeds = {
@@ -115,6 +130,12 @@ export default function Carte() {
 
   // Helper function to share store location
   const shareLocation = (store) => {
+    // Validate store object has required properties
+    if (!store || !store.name || typeof store.lat !== 'number' || typeof store.lon !== 'number' || !store.category) {
+      console.error('Invalid store object provided to shareLocation');
+      return;
+    }
+
     const shareData = {
       title: `${store.name} - ${store.category}`,
       text: `Localisation de ${store.name}`,
@@ -129,9 +150,31 @@ export default function Carte() {
     } else {
       // Fallback: copy to clipboard
       const text = `${store.name} - ${store.category}\nCoordonnées GPS: ${store.lat}, ${store.lon}\nLien: https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lon}`;
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Coordonnées copiées dans le presse-papier !'))
-        .catch(() => alert(`${store.name}\nCoordonnées: ${store.lat}, ${store.lon}`));
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => console.log('Coordonnées copiées dans le presse-papier !'))
+          .catch((error) => {
+            console.error('Erreur lors de la copie dans le presse-papier :', error);
+            console.log(
+              `Impossible de copier automatiquement dans le presse-papier.\n\n` +
+              `Cela peut être dû aux restrictions de votre navigateur ` +
+              `(contexte non sécurisé HTTP ou autorisation refusée).\n\n` +
+              `Vous pouvez copier manuellement ces informations :\n\n` +
+              `${store.name}\n` +
+              `Coordonnées: ${store.lat}, ${store.lon}\n` +
+              `Lien: https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lon}`
+            );
+          });
+      } else {
+        console.log(
+          `Le partage automatique du lien n'est pas disponible dans ce navigateur ` +
+          `ou dans ce contexte (par exemple, page non sécurisée HTTP).\n\n` +
+          `Vous pouvez copier manuellement ces informations :\n\n` +
+          `${store.name}\n` +
+          `Coordonnées: ${store.lat}, ${store.lon}\n` +
+          `Lien: https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lon}`
+        );
+      }
     }
   };
 
@@ -158,7 +201,7 @@ export default function Carte() {
   };
 
   // Helper function to detect platform and open appropriate navigation app
-  const handleGPS = (lat, lon, mode, storeName, store) => {
+  const handleGPS = (lat, lon, mode, _storeName, store) => {
     // Check if offline - show inline message instead of alert
     if (!isOnline) {
       // Coordinates are still available offline, just can't navigate
@@ -184,7 +227,9 @@ export default function Carte() {
       return;
     }
     
-    setIsNavigating(true);
+    // Use per-store navigation state using a unique key
+    const storeKey = `${lat},${lon}`;
+    setIsNavigating(prev => ({ ...prev, [storeKey]: true }));
     
     try {
       // Detect platform
@@ -201,8 +246,8 @@ export default function Carte() {
       if (isIOS) {
         const useAppleMaps = confirm('Ouvrir dans Apple Maps ?\n\nOK = Apple Maps\nAnnuler = Google Maps');
         if (useAppleMaps) {
-          // Apple Maps URL
-          url = `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=${mode === 'driving' ? 'd' : mode === 'walking' ? 'w' : 'r'}`;
+          // Apple Maps URL (using https)
+          url = `https://maps.apple.com/?daddr=${lat},${lon}&dirflg=${mode === 'driving' ? 'd' : mode === 'walking' ? 'w' : 'r'}`;
         } else {
           // Google Maps URL
           url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${lat},${lon}&travelmode=${mode}`;
@@ -231,15 +276,26 @@ export default function Carte() {
         console.warn('Popup was blocked by browser');
       }
       
-      // Reset loading state after a short delay
-      setTimeout(() => setIsNavigating(false), NAVIGATION_TIMEOUT);
+      // Reset loading state after a short delay.
+      setTimeout(() => {
+        setIsNavigating(prev => ({ ...prev, [storeKey]: false }));
+      }, NAVIGATION_TIMEOUT);
     } catch (error) {
       console.error('Error opening navigation:', error);
-      setIsNavigating(false);
+      const storeKey = `${lat},${lon}`;
+      setIsNavigating(prev => ({ ...prev, [storeKey]: false }));
     }
   };
 
-  // Construire la liste des territoires actifs
+  // Memoize store distances to avoid recalculating on every render
+  const storesWithDistance = useMemo(() => {
+    if (!userPosition) return stores.map(store => ({ ...store, distance: null }));
+    
+    return stores.map(store => ({
+      ...store,
+      distance: calculateDistance(userPosition[0], userPosition[1], store.lat, store.lon)
+    }));
+  }, [stores, userPosition]);
   const activeTerritories = getActiveTerritories();
   const territoryPositions = {};
   activeTerritories.forEach(t => {
@@ -307,6 +363,8 @@ export default function Carte() {
                   const distance = userPosition 
                     ? calculateDistance(userPosition[0], userPosition[1], dest.lat, dest.lon)
                     : null;
+                  const destKey = `${dest.lat},${dest.lon}`;
+                  const isDestNavigating = isNavigating[destKey] || false;
                   return (
                     <div
                       key={idx}
@@ -322,10 +380,12 @@ export default function Carte() {
                         </div>
                         <button
                           onClick={() => handleGPS(dest.lat, dest.lon, 'driving', dest.name, dest)}
-                          className="px-2 py-1 bg-blue-600/30 text-blue-300 rounded text-xs hover:bg-blue-600/40"
-                          disabled={isNavigating || !isOnline}
+                          className="px-2 py-1 bg-blue-600/30 text-blue-300 rounded text-xs hover:bg-blue-600/40 disabled:opacity-50"
+                          aria-label={`Naviguer vers ${dest.name}`}
+                          title={!isOnline ? "Navigation désactivée (hors ligne)" : "Naviguer vers ce magasin"}
+                          disabled={isDestNavigating || !isOnline}
                         >
-                          <Car size={14} />
+                          {isDestNavigating ? <Loader2 size={14} className="animate-spin" /> : <Car size={14} />}
                         </button>
                       </div>
                     </div>
@@ -368,10 +428,9 @@ export default function Carte() {
             />
             <MapUpdater position={territoryPositions[territory]} />
             
-            {stores.map((store, index) => {
-              const distance = userPosition 
-                ? calculateDistance(userPosition[0], userPosition[1], store.lat, store.lon)
-                : null;
+            {storesWithDistance.map((store, index) => {
+              const storeKey = `${store.lat},${store.lon}`;
+              const isStoreNavigating = isNavigating[storeKey] || false;
               
               return (
               <Marker key={index} position={[store.lat, store.lon]}>
@@ -380,26 +439,27 @@ export default function Carte() {
                     <h3 className="font-semibold">{store.name}</h3>
                     <p className="text-sm text-slate-600">{store.category}</p>
                     <p className="text-xs text-slate-500">{currentTerritory?.name || territory}</p>
-                    {distance && (
+                    {store.distance && (
                       <div className="text-xs mt-1 space-y-1">
                         <p className="text-blue-600 font-medium">
                           <MapPin size={12} className="inline mr-1" />
-                          Distance: {formatDistance(distance)}
+                          Distance: {formatDistance(store.distance)} <span className="text-slate-500">(estimée)</span>
                         </p>
                         <div className="flex gap-2 text-slate-600">
-                          <span title="Temps en voiture">
+                          <span title="Temps estimé en voiture">
                             <Car size={12} className="inline mr-1" />
-                            {formatTravelTime(estimateTravelTime(distance, 'driving'))}
+                            {formatTravelTime(estimateTravelTime(store.distance, 'driving'))}
                           </span>
-                          <span title="Temps à pied">
+                          <span title="Temps estimé à pied">
                             <Footprints size={12} className="inline mr-1" />
-                            {formatTravelTime(estimateTravelTime(distance, 'walking'))}
+                            {formatTravelTime(estimateTravelTime(store.distance, 'walking'))}
                           </span>
-                          <span title="Temps en transport">
+                          <span title="Temps estimé en transport">
                             <Bus size={12} className="inline mr-1" />
-                            {formatTravelTime(estimateTravelTime(distance, 'transit'))}
+                            {formatTravelTime(estimateTravelTime(store.distance, 'transit'))}
                           </span>
                         </div>
+                        <p className="text-xs text-slate-400 italic">Temps estimés - ne tiennent pas compte du trafic</p>
                       </div>
                     )}
                     <div className="flex gap-2 mt-2">
@@ -407,34 +467,43 @@ export default function Carte() {
                         onClick={() => handleGPS(store.lat, store.lon, 'driving', store.name, store)}
                         className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50"
                         title="Naviguer en voiture"
-                        disabled={isNavigating || !isOnline}
+                        aria-label={`Naviguer en voiture vers ${store.name}`}
+                        disabled={isStoreNavigating || !isOnline}
                       >
-                        {isNavigating ? <Loader2 size={14} className="animate-spin" /> : <Car size={14} />}
+                        {isStoreNavigating ? <Loader2 size={14} className="animate-spin" /> : <Car size={14} />}
                       </button>
                       <button
                         onClick={() => handleGPS(store.lat, store.lon, 'walking', store.name, store)}
                         className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 disabled:opacity-50"
                         title="Naviguer à pied"
-                        disabled={isNavigating || !isOnline}
+                        aria-label={`Naviguer à pied vers ${store.name}`}
+                        disabled={isStoreNavigating || !isOnline}
                       >
-                        {isNavigating ? <Loader2 size={14} className="animate-spin" /> : <Footprints size={14} />}
+                        {isStoreNavigating ? <Loader2 size={14} className="animate-spin" /> : <Footprints size={14} />}
                       </button>
                       <button
                         onClick={() => handleGPS(store.lat, store.lon, 'transit', store.name, store)}
                         className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700 disabled:opacity-50"
                         title="Transports en commun"
-                        disabled={isNavigating || !isOnline}
+                        aria-label={`Naviguer en transport en commun vers ${store.name}`}
+                        disabled={isStoreNavigating || !isOnline}
                       >
-                        {isNavigating ? <Loader2 size={14} className="animate-spin" /> : <Bus size={14} />}
+                        {isStoreNavigating ? <Loader2 size={14} className="animate-spin" /> : <Bus size={14} />}
                       </button>
                       <button
                         onClick={() => shareLocation(store)}
                         className="flex items-center gap-1 px-2 py-1 bg-slate-600 text-white rounded text-xs hover:bg-slate-700"
-                        title="Partager"
+                        title="Partager la localisation"
+                        aria-label={`Partager la localisation de ${store.name}`}
                       >
                         <Share2 size={14} />
                       </button>
                     </div>
+                    {!isOnline && (
+                      <p className="text-xs text-orange-600 mt-2">
+                        Navigation désactivée (hors ligne)
+                      </p>
+                    )}
                   </div>
                 </Popup>
               </Marker>
@@ -469,10 +538,9 @@ export default function Carte() {
             Magasins en {currentTerritory?.name || territory} ({stores.length})
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {stores.map((store, index) => {
-              const distance = userPosition 
-                ? calculateDistance(userPosition[0], userPosition[1], store.lat, store.lon)
-                : null;
+            {storesWithDistance.map((store, index) => {
+              const storeKey = `${store.lat},${store.lon}`;
+              const isStoreNavigating = isNavigating[storeKey] || false;
               
               return (
               <div
@@ -483,26 +551,29 @@ export default function Carte() {
                 <p className="text-slate-400 text-sm mb-2">{store.category}</p>
                 <div className="flex items-center justify-between text-slate-500 text-xs mb-2">
                   <span>📍 {store.lat.toFixed(4)}°, {store.lon.toFixed(4)}°</span>
-                  {distance && (
+                  {store.distance && (
                     <span className="text-blue-400 font-medium">
-                      {formatDistance(distance)}
+                      {formatDistance(store.distance)}
                     </span>
                   )}
                 </div>
-                {distance && (
-                  <div className="grid grid-cols-3 gap-2 text-xs text-slate-400 mb-3 bg-slate-900/50 rounded p-2">
-                    <div className="flex items-center gap-1">
-                      <Car size={12} />
-                      <span>{formatTravelTime(estimateTravelTime(distance, 'driving'))}</span>
+                {store.distance && (
+                  <div className="space-y-2 mb-3">
+                    <div className="grid grid-cols-3 gap-2 text-xs text-slate-400 bg-slate-900/50 rounded p-2">
+                      <div className="flex items-center gap-1" title="Temps estimé en voiture">
+                        <Car size={12} />
+                        <span>{formatTravelTime(estimateTravelTime(store.distance, 'driving'))}</span>
+                      </div>
+                      <div className="flex items-center gap-1" title="Temps estimé à pied">
+                        <Footprints size={12} />
+                        <span>{formatTravelTime(estimateTravelTime(store.distance, 'walking'))}</span>
+                      </div>
+                      <div className="flex items-center gap-1" title="Temps estimé en transport">
+                        <Bus size={12} />
+                        <span>{formatTravelTime(estimateTravelTime(store.distance, 'transit'))}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Footprints size={12} />
-                      <span>{formatTravelTime(estimateTravelTime(distance, 'walking'))}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Bus size={12} />
-                      <span>{formatTravelTime(estimateTravelTime(distance, 'transit'))}</span>
-                    </div>
+                    <p className="text-xs text-slate-500 italic">Temps estimés - ne tiennent pas compte du trafic</p>
                   </div>
                 )}
                 <div className="space-y-2">
@@ -510,17 +581,21 @@ export default function Carte() {
                     <button
                       onClick={() => handleGPS(store.lat, store.lon, 'driving', store.name, store)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg text-sm hover:bg-blue-600/30 transition border border-blue-500/30 disabled:opacity-50"
-                      disabled={isNavigating || !isOnline}
+                      aria-label={`Naviguer en voiture vers ${store.name}`}
+                      title={!isOnline ? "Navigation désactivée (hors ligne)" : "Naviguer en voiture"}
+                      disabled={isStoreNavigating || !isOnline}
                     >
-                      {isNavigating ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
+                      {isStoreNavigating ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
                       <span>En voiture</span>
                     </button>
                     <button
                       onClick={() => handleGPS(store.lat, store.lon, 'walking', store.name, store)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600/20 text-green-400 rounded-lg text-sm hover:bg-green-600/30 transition border border-green-500/30 disabled:opacity-50"
-                      disabled={isNavigating || !isOnline}
+                      aria-label={`Naviguer à pied vers ${store.name}`}
+                      title={!isOnline ? "Navigation désactivée (hors ligne)" : "Naviguer à pied"}
+                      disabled={isStoreNavigating || !isOnline}
                     >
-                      {isNavigating ? <Loader2 size={16} className="animate-spin" /> : <Footprints size={16} />}
+                      {isStoreNavigating ? <Loader2 size={16} className="animate-spin" /> : <Footprints size={16} />}
                       <span>À pied</span>
                     </button>
                   </div>
@@ -528,15 +603,18 @@ export default function Carte() {
                     <button
                       onClick={() => handleGPS(store.lat, store.lon, 'transit', store.name, store)}
                       className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600/20 text-purple-400 rounded-lg text-sm hover:bg-purple-600/30 transition border border-purple-500/30 disabled:opacity-50"
-                      disabled={isNavigating || !isOnline}
+                      aria-label={`Naviguer en transport en commun vers ${store.name}`}
+                      title={!isOnline ? "Navigation désactivée (hors ligne)" : "Transports en commun"}
+                      disabled={isStoreNavigating || !isOnline}
                     >
-                      {isNavigating ? <Loader2 size={16} className="animate-spin" /> : <Bus size={16} />}
+                      {isStoreNavigating ? <Loader2 size={16} className="animate-spin" /> : <Bus size={16} />}
                       <span>Transports en commun</span>
                     </button>
                     <button
                       onClick={() => shareLocation(store)}
                       className="flex items-center justify-center px-3 py-2 bg-slate-600/20 text-slate-400 rounded-lg text-sm hover:bg-slate-600/30 transition border border-slate-500/30"
                       title="Partager la localisation"
+                      aria-label={`Partager la localisation de ${store.name}`}
                     >
                       <Share2 size={16} />
                     </button>
