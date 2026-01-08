@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import { Car, Footprints, Navigation } from 'lucide-react';
+import { Car, Footprints } from 'lucide-react';
 import { getStoresByTerritory } from '../services/mapService';
 import { getActiveTerritories, TERRITORIES } from '../constants/territories';
 
@@ -28,8 +28,15 @@ export default function Carte() {
 
   // Helper function to open Google Maps navigation
   const handleGPS = (lat, lon, mode) => {
+    // Validate coordinates
+    if (typeof lat !== 'number' || typeof lon !== 'number' || 
+        isNaN(lat) || isNaN(lon) ||
+        lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      console.error('Invalid coordinates provided');
+      return;
+    }
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${mode}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   // Construire la liste des territoires actifs
