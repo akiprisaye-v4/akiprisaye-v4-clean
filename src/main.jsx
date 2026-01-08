@@ -124,6 +124,15 @@ const Fret = lazyWithRetry(() => import('./pages/recherche-prix/Fret'));
 // Air Freight Price Module (feature flagged)
 const FretAerien = lazyWithRetry(() => import('./pages/recherche-prix/FretAerien'));
 
+// Logistics Index Module (feature flagged) - PRIORITY 8
+const IndiceLogistique = lazyWithRetry(() => import('./pages/recherche-prix/IndiceLogistique'));
+
+// Logistics Delays & Tensions Module (feature flagged) - PRIORITY 9
+const DelaisTensionsLogistiques = lazyWithRetry(() => import('./pages/recherche-prix/DelaisTensionsLogistiques'));
+
+// Logistics Explanation Module (feature flagged) - PRIORITY 10
+const PourquoiDelaisProduit = lazyWithRetry(() => import('./pages/recherche-prix/PourquoiDelaisProduit'));
+
 // Loading component
 function LoadingFallback() {
   return (
@@ -453,6 +462,69 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                             </h2>
                             <p className="text-gray-400 text-sm">
                               Le comparateur de coûts de fret aérien sera bientôt disponible.
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    } 
+                  />
+                  
+                  {/* Logistics Index Module (feature flagged) - PRIORITY 8 */}
+                  <Route 
+                    path='recherche-prix/indice-logistique' 
+                    element={
+                      import.meta.env.VITE_FEATURE_LOGISTICS_INDEX === 'true' ? (
+                        <IndiceLogistique />
+                      ) : (
+                        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                          <div className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-8 text-center max-w-md">
+                            <h2 className="text-xl font-semibold text-gray-100 mb-2">
+                              Module en préparation
+                            </h2>
+                            <p className="text-gray-400 text-sm">
+                              L'indice logistique DOM sera bientôt disponible.
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    } 
+                  />
+                  
+                  {/* Logistics Delays & Tensions Module (feature flagged) - PRIORITY 9 */}
+                  <Route 
+                    path='recherche-prix/delais-logistiques' 
+                    element={
+                      import.meta.env.VITE_FEATURE_LOGISTICS_DELAYS === 'true' ? (
+                        <DelaisTensionsLogistiques />
+                      ) : (
+                        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                          <div className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-8 text-center max-w-md">
+                            <h2 className="text-xl font-semibold text-gray-100 mb-2">
+                              Module en préparation
+                            </h2>
+                            <p className="text-gray-400 text-sm">
+                              Le module délais & tensions logistiques sera bientôt disponible.
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    } 
+                  />
+                  
+                  {/* Logistics Explanation Module (feature flagged) - PRIORITY 10 */}
+                  <Route 
+                    path='recherche-prix/pourquoi-delais-produit' 
+                    element={
+                      import.meta.env.VITE_FEATURE_LOGISTICS_EXPLANATION === 'true' ? (
+                        <PourquoiDelaisProduit />
+                      ) : (
+                        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+                          <div className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-8 text-center max-w-md">
+                            <h2 className="text-xl font-semibold text-gray-100 mb-2">
+                              Module en préparation
+                            </h2>
+                            <p className="text-gray-400 text-sm">
+                              Le module d'explication des délais produits sera bientôt disponible.
                             </p>
                           </div>
                         </div>
