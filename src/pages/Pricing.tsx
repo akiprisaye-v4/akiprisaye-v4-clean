@@ -252,7 +252,7 @@ export default function Pricing() {
                 className={`w-full py-3 px-6 text-center font-bold rounded-xl transition-all ${
                   plan.popular
                     ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gradient-to-r ' + plan.color + ' hover:opacity-90 text-white'
+                    : `bg-gradient-to-r ${plan.color} hover:opacity-90 text-white`
                 }`}
               >
                 {plan.cta}
