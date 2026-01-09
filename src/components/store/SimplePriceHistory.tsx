@@ -12,6 +12,12 @@
 
 import React, { useState } from 'react';
 
+// SVG Chart constants for maintainability
+const CHART_WIDTH = 100; // percentage
+const CHART_HEIGHT = 60; // pixels
+const CHART_PADDING = 5; // pixels
+const HALF_HEIGHT = 30; // for grid line positioning
+
 export interface PriceHistoryPoint {
   date: string;
   price: number;
@@ -53,15 +59,11 @@ export default function SimplePriceHistory({
   const generatePath = () => {
     if (!hasData) return '';
 
-    const width = 100; // percentage
-    const height = 60; // pixels
-    const padding = 5;
-
     const points = filteredHistory.map((point, index) => {
-      const x = (index / (filteredHistory.length - 1)) * width;
+      const x = (index / (filteredHistory.length - 1)) * CHART_WIDTH;
       const y = priceRange > 0 
-        ? height - padding - ((point.price - minPrice) / priceRange) * (height - 2 * padding)
-        : height / 2;
+        ? CHART_HEIGHT - CHART_PADDING - ((point.price - minPrice) / priceRange) * (CHART_HEIGHT - 2 * CHART_PADDING)
+        : HALF_HEIGHT;
       
       return `${x},${y}`;
     });
@@ -142,12 +144,12 @@ export default function SimplePriceHistory({
           {/* SVG Chart */}
           <div className="relative bg-slate-900 rounded p-4 h-32 overflow-hidden">
             <svg
-              viewBox="0 0 100 60"
+              viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
               preserveAspectRatio="none"
               className="w-full h-full"
             >
               {/* Grid lines */}
-              <line x1="0" y1="30" x2="100" y2="30" stroke="#374151" strokeWidth="0.3" strokeDasharray="2,2" />
+              <line x1="0" y1={HALF_HEIGHT} x2={CHART_WIDTH} y2={HALF_HEIGHT} stroke="#374151" strokeWidth="0.3" strokeDasharray="2,2" />
               
               {/* Price line */}
               <path
@@ -160,10 +162,10 @@ export default function SimplePriceHistory({
               
               {/* Data points */}
               {filteredHistory.map((point, index) => {
-                const x = (index / (filteredHistory.length - 1)) * 100;
+                const x = (index / (filteredHistory.length - 1)) * CHART_WIDTH;
                 const y = priceRange > 0
-                  ? 60 - 5 - ((point.price - minPrice) / priceRange) * 50
-                  : 30;
+                  ? CHART_HEIGHT - CHART_PADDING - ((point.price - minPrice) / priceRange) * (CHART_HEIGHT - 2 * CHART_PADDING)
+                  : HALF_HEIGHT;
                 
                 return (
                   <circle

@@ -10,6 +10,10 @@ import { SEED_STORES } from '../data/seedStores';
 import type { TiPanierItem } from '../hooks/useTiPanier';
 import { calculateDistance } from '../utils/geoLocation';
 
+// Constants for comparison thresholds
+const PRICE_TOLERANCE = 0.01; // Price differences < 1 cent are considered equal
+const FRESHNESS_TOLERANCE = 5; // Data freshness differences < 5 points are considered equal
+
 export interface BasketStoreComparison {
   storeId: string;
   storeName: string;
@@ -113,10 +117,14 @@ export function compareBasketAcrossStores(
       const product = SEED_PRODUCTS.find(p => p.ean === basketItem.id);
       
       if (!product) {
-        // Product not found in catalog
+        // Product not found in catalog - use metadata if available
+        const itemName = basketItem.meta && typeof basketItem.meta === 'object' && 'name' in basketItem.meta
+          ? String(basketItem.meta.name)
+          : 'Produit inconnu';
+        
         storeItems.push({
           id: basketItem.id,
-          name: (basketItem.meta as any)?.name || 'Produit inconnu',
+          name: itemName,
           quantity: basketItem.quantity,
           available: false,
         });
@@ -185,11 +193,11 @@ export function compareBasketAcrossStores(
   return storeComparisons.sort((a, b) => {
     // Primary: Total price (lower is better)
     const priceDiff = a.totalPrice - b.totalPrice;
-    if (Math.abs(priceDiff) > 0.01) return priceDiff;
+    if (Math.abs(priceDiff) > PRICE_TOLERANCE) return priceDiff;
 
     // Secondary: Data freshness (higher is better)
     const freshnessDiff = b.dataFreshness - a.dataFreshness;
-    if (Math.abs(freshnessDiff) > 5) return freshnessDiff;
+    if (Math.abs(freshnessDiff) > FRESHNESS_TOLERANCE) return freshnessDiff;
 
     // Tertiary: Distance (closer is better) - only if both have distance
     if (a.distance !== undefined && b.distance !== undefined) {
