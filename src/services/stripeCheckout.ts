@@ -25,10 +25,12 @@
  */
 const STRIPE_CHECKOUT_URLS = {
   // CITOYEN+ subscription: 3.99€/month or 39€/year
-  CITOYEN_PLUS: 'https://buy.stripe.com/test_CITOYEN_PLUS_REPLACE_WITH_ACTUAL_URL',
+  // TODO: Replace with actual Stripe Payment Link URL before going live
+  CITOYEN_PLUS: 'https://buy.stripe.com/REPLACE_WITH_ACTUAL_CITOYEN_PLUS_PAYMENT_LINK',
   
   // ANALYSE subscription: 9.90€/month or 99€/year
-  ANALYSE: 'https://buy.stripe.com/test_ANALYSE_REPLACE_WITH_ACTUAL_URL',
+  // TODO: Replace with actual Stripe Payment Link URL before going live
+  ANALYSE: 'https://buy.stripe.com/REPLACE_WITH_ACTUAL_ANALYSE_PAYMENT_LINK',
 };
 
 /**
@@ -56,7 +58,8 @@ function isPaymentsEnabled(): boolean {
  */
 export function redirectToCitizenPlusCheckout(): void {
   if (!isPaymentsEnabled()) {
-    alert('Paiement indisponible');
+    // More informative message when payments are disabled
+    alert('Les paiements ne sont pas encore activés. Vous pouvez utiliser gratuitement la formule CITOYEN avec toutes les fonctionnalités essentielles.');
     return;
   }
 
@@ -88,7 +91,8 @@ export function redirectToCitizenPlusCheckout(): void {
  */
 export function redirectToAnalyseCheckout(): void {
   if (!isPaymentsEnabled()) {
-    alert('Paiement indisponible');
+    // More informative message when payments are disabled
+    alert('Les paiements ne sont pas encore activés. Vous pouvez utiliser gratuitement la formule CITOYEN avec toutes les fonctionnalités essentielles.');
     return;
   }
 
