@@ -48,7 +48,7 @@ echo "4. NEVER commit this keystore to version control"
 echo "5. Store the password in a secure password manager"
 echo ""
 echo -e "${YELLOW}Press Enter to continue or Ctrl+C to cancel...${NC}"
-read
+read -r
 
 echo ""
 echo -e "${GREEN}Generating release keystore...${NC}"
