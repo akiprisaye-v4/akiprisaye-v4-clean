@@ -268,7 +268,7 @@ export function getCheapestProductsByStore(storeId: string): CheapestByStore | n
 
   return {
     store: storeInfo,
-    cheapestProducts: products.filter(p => p.isCheapestInTerritory === true), // Only return actually cheapest products
+    cheapestProducts: products.filter(p => p.isCheapestInTerritory),
     lastObservation: latestDate.toISOString(),
   };
 }
@@ -278,6 +278,6 @@ export function getCheapestProductsByStore(storeId: string): CheapestByStore | n
  * Used for the ranking display
  */
 export function getCheapestProductsCount(storeId: string): number {
-  const products = getCheapestProductsAtStore(storeId, 100); // Check all products
-  return products.filter(p => p.isCheapestInTerritory === true).length;
+  const products = getCheapestProductsAtStore(storeId, 100);
+  return products.filter(p => p.isCheapestInTerritory).length;
 }

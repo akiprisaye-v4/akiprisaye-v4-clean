@@ -6,7 +6,7 @@
  * and make cards clickable to open detail panel
  */
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { GlassCard } from "../ui/glass-card";
 import { SEED_STORES } from "../../data/seedStores";
 import { getCheapestProductsCount, getCheapestProductsByStore } from "../../services/storeCheapestProductsService";
@@ -82,7 +82,7 @@ export function StoreRanking() {
                 <button
                   key={store.rank}
                   onClick={() => handleStoreClick(store.storeId)}
-                  className="w-full flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all transform hover:scale-102 cursor-pointer"
+                  className="w-full flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all transform hover:scale-102"
                 >
                   <div className="text-4xl">{store.medal}</div>
                   <div className="flex-1 text-left">
