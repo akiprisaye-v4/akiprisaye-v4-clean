@@ -282,7 +282,26 @@ To sign your Android App Bundle (AAB) in GitHub Actions, you must encode your ke
 
 #### Step 1: Encode Your Keystore to Base64
 
-After generating your `release.jks` keystore, encode it to Base64:
+After generating your `release.jks` keystore, encode it to Base64.
+
+**Option A: Using the Helper Script (Recommended)**
+
+```bash
+# Navigate to the android directory where release.jks is located
+cd android
+
+# Run the Base64 encoding script
+./encode-keystore-base64.sh
+```
+
+The script will:
+- Verify the keystore exists
+- Encode it to Base64
+- Display the content for copying
+- Guide you through adding it to GitHub Secrets
+- Optionally delete the temporary file
+
+**Option B: Manual Encoding**
 
 ```bash
 # Navigate to the android directory where release.jks is located

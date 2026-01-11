@@ -26,7 +26,15 @@ This directory contains the Android native project for **A KI PRI SA YÉ**, buil
    
    📚 See [ANDROID_KEYSTORE_GUIDE.md](../ANDROID_KEYSTORE_GUIDE.md) for detailed instructions.
 
-3. **Build signed AAB for Google Play:**
+3. **Encode keystore for GitHub Actions (first time only):**
+   ```bash
+   cd android
+   ./encode-keystore-base64.sh
+   ```
+   
+   This creates a Base64-encoded version for GitHub Secrets.
+
+4. **Build signed AAB for Google Play:**
    ```bash
    cd android
    ./gradlew bundleRelease
@@ -56,6 +64,7 @@ android/
 ├── gradlew                             # Gradle wrapper script (Unix)
 ├── gradlew.bat                         # Gradle wrapper script (Windows)
 ├── generate-release-keystore.sh       # Keystore generation script
+├── encode-keystore-base64.sh          # Base64 encoding script for CI/CD
 └── release.jks                         # Release keystore (not in Git)
 ```
 
@@ -65,6 +74,7 @@ android/
 - **`app/src/main/AndroidManifest.xml`**: App permissions and configuration
 - **`release.jks`**: Release keystore for app signing (generated locally, not committed)
 - **`generate-release-keystore.sh`**: Script to generate the release keystore
+- **`encode-keystore-base64.sh`**: Script to encode keystore for GitHub Actions
 
 ## Important Commands
 
