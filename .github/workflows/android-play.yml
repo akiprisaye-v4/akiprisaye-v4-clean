@@ -36,15 +36,49 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Decode Android keystore from Base64
+        run: |
+          echo "🔐 Decoding keystore from Base64..."
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/release.jks
+          
+          if [ ! -f android/release.jks ]; then
+            echo "❌ ERROR: Failed to decode keystore from ANDROID_KEYSTORE_BASE64"
+            echo "⚠️  Ensure the secret exists and contains valid Base64-encoded keystore"
+            exit 1
+          fi
+          
+          echo "✅ Keystore decoded successfully"
+
       - name: Grant execute permission for gradlew
         run: chmod +x android/gradlew
 
-      - name: Build Android AAB
+      - name: Build signed Android App Bundle
         working-directory: android
-        run: ./gradlew bundleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "🔨 Building signed Android App Bundle..."
+          ./gradlew bundleRelease --stacktrace
 
-      - name: Upload AAB artifact
+      - name: Verify signed AAB
+        run: |
+          if [ ! -f android/app/build/outputs/bundle/release/app-release.aab ]; then
+            echo "❌ ERROR: AAB not found"
+            exit 1
+          fi
+          echo "✅ Signed AAB created successfully"
+
+      - name: Clean up keystore
+        if: always()
+        run: |
+          rm -f android/release.jks
+          echo "🧹 Keystore cleaned up"
+
+      - name: Upload signed AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-aab
+          name: app-release-aab-signed
           path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
