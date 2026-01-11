@@ -62,12 +62,6 @@ jobs:
         run: |
           echo "🔨 Building signed Android App Bundle..."
           ./gradlew bundleRelease --stacktrace
-          
-          if [ $? -ne 0 ]; then
-            echo "❌ ERROR: Gradle build failed"
-            exit 1
-          fi
-          
           echo "✅ Build completed successfully"
 
       - name: Verify signed AAB was created
@@ -84,12 +78,15 @@ jobs:
           echo "📦 File: $AAB_PATH"
           echo "📏 Size: $AAB_SIZE"
           
-          # Verify AAB is signed
+          # Verify AAB is signed (fail if not signed)
           echo "🔍 Verifying AAB signature..."
-          jarsigner -verify -verbose "$AAB_PATH" || {
-            echo "⚠️  WARNING: AAB signature verification failed"
-            echo "⚠️  This may indicate the AAB is unsigned or improperly signed"
-          }
+          if ! jarsigner -verify -verbose "$AAB_PATH"; then
+            echo "❌ ERROR: AAB signature verification failed"
+            echo "❌ The AAB is unsigned or improperly signed"
+            echo "⚠️  Check keystore configuration and environment variables"
+            exit 1
+          fi
+          echo "✅ AAB signature verified successfully"
 
       - name: Clean up keystore
         if: always()

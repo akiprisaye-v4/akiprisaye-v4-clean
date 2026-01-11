@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.akiprisaye.app"
     compileSdk rootProject.ext.compileSdkVersion
+    
+    // Keystore configuration
+    def keystoreFile = 'release.jks'
+    
     defaultConfig {
         applicationId "com.akiprisaye.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -21,7 +25,7 @@ android {
     signingConfigs {
         release {
             // Keystore file location (relative to android/ directory)
-            storeFile file('release.jks')
+            storeFile file(keystoreFile)
             
             // Get passwords from environment variables (for CI/CD)
             // Or use gradle.properties for local builds (NOT recommended for security)
@@ -40,10 +44,10 @@ android {
             
             // Apply signing configuration to release builds
             // Only if keystore file exists (allows building without keystore for web-only deploys)
-            if (file('release.jks').exists()) {
+            if (file(keystoreFile).exists()) {
                 signingConfig signingConfigs.release
             } else {
-                logger.warn("⚠️  WARNING: release.jks not found. AAB will be unsigned.")
+                logger.warn("⚠️  WARNING: ${keystoreFile} not found. AAB will be unsigned.")
                 logger.warn("⚠️  Generate keystore: cd android && ./generate-release-keystore.sh")
                 logger.warn("⚠️  Or use Google Play App Signing for unsigned AABs")
             }
