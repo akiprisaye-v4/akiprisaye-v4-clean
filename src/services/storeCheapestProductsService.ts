@@ -8,6 +8,7 @@
  */
 
 import { SEED_PRODUCTS } from '../data/seedProducts';
+import { SEED_STORES } from '../data/seedStores';
 
 export interface CheapestProduct {
   id: string;
@@ -21,6 +22,28 @@ export interface CheapestProduct {
   priceComparison?: 'lower' | 'equal' | 'higher'; // ↓ = ↑
   savingsPercent?: number;
   isCheapestInTerritory?: boolean;
+}
+
+/**
+ * Store information for cheapest products view
+ */
+export interface StoreInfo {
+  id: string;
+  name: string;
+  chain: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  territory: string;
+}
+
+/**
+ * Cheapest products grouped by store
+ */
+export interface CheapestByStore {
+  store: StoreInfo;
+  cheapestProducts: CheapestProduct[];
+  lastObservation: string;
 }
 
 /**
@@ -196,4 +219,65 @@ export function calculateDataReliability(dateString: string): number {
   } catch (e) {
     return 50; // Default to 50% if date parsing fails
   }
+}
+
+/**
+ * Get store information by ID
+ */
+export function getStoreInfo(storeId: string): StoreInfo | null {
+  const store = SEED_STORES.find(s => s.id === storeId);
+  if (!store) return null;
+
+  return {
+    id: store.id,
+    name: store.name,
+    chain: store.chain,
+    address: store.address,
+    city: store.city,
+    postalCode: store.postalCode,
+    territory: store.territory,
+  };
+}
+
+/**
+ * Get cheapest products by store with full store information
+ * This is the main function for the detail view
+ * 
+ * @param storeId - Store identifier
+ * @returns Store info with cheapest products or null if store not found
+ */
+export function getCheapestProductsByStore(storeId: string): CheapestByStore | null {
+  const storeInfo = getStoreInfo(storeId);
+  if (!storeInfo) return null;
+
+  const products = getCheapestProductsAtStore(storeId, 20); // Get more products for detail view
+  
+  if (products.length === 0) {
+    return {
+      store: storeInfo,
+      cheapestProducts: [],
+      lastObservation: new Date().toISOString(),
+    };
+  }
+
+  // Find the most recent observation date
+  const latestDate = products.reduce((latest, product) => {
+    const productDate = new Date(product.observationDate);
+    return productDate > latest ? productDate : latest;
+  }, new Date(products[0].observationDate));
+
+  return {
+    store: storeInfo,
+    cheapestProducts: products.filter(p => p.isCheapestInTerritory === true), // Only return actually cheapest products
+    lastObservation: latestDate.toISOString(),
+  };
+}
+
+/**
+ * Get count of cheapest products for a store
+ * Used for the ranking display
+ */
+export function getCheapestProductsCount(storeId: string): number {
+  const products = getCheapestProductsAtStore(storeId, 100); // Check all products
+  return products.filter(p => p.isCheapestInTerritory === true).length;
 }
