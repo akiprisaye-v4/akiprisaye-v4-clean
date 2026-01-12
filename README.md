@@ -166,6 +166,46 @@ Comparateur de prix existant
 
 ---
 
+## ✨ Qualité & Transparence
+
+### Politique Qualité Non Négociable
+
+Ce projet applique **Lighthouse CI avec des seuils stricts** pour garantir une expérience utilisateur de qualité, même sur réseaux dégradés (DOM/ROM/COM) :
+
+- **Performance ≥ 85** — Navigation fluide même en 3G/4G instable
+- **Accessibilité ≥ 95** — Application utilisable par tous
+- **Bonnes pratiques ≥ 95** — Sécurité et compatibilité garanties
+- **SEO ≥ 90** — Visibilité et partage optimaux
+
+**Métriques Core Web Vitals (strictes) :**
+- LCP (Largest Contentful Paint) < 3.5s
+- CLS (Cumulative Layout Shift) < 0.1
+- FCP (First Contentful Paint) < 2.5s
+- TBT (Total Blocking Time) < 300ms
+
+### CI Strict — Zéro Warning Autorisé
+
+Toute Pull Request provoquant :
+- ❌ Une régression Lighthouse
+- ❌ Un warning TypeScript
+- ❌ Un warning ESLint
+- ❌ Une vulnérabilité npm ≥ moderate
+
+**est automatiquement rejetée.**
+
+👉 **Cohérent avec la philosophie anti-faux-bons-plans et anti-marketing creux.**
+
+### Bonnes Pratiques Appliquées
+
+✅ Lazy-load des cartes (Leaflet)  
+✅ Images optimisées < 150 Ko  
+✅ Fonts locales uniquement  
+✅ Zéro tracker tiers bloquant  
+✅ Compression texte activée  
+✅ Contrast de couleurs WCAG AA
+
+---
+
 ## 🚀 Déploiement & CI/CD
 
 **Hébergement :** Cloudflare Pages  
