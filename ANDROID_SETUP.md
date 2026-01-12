@@ -276,10 +276,18 @@ In Android Studio:
 
 ### Android App Bundle (Production)
 
+**First time?** Generate your release keystore:
+```bash
+cd android
+./generate-release-keystore.sh
+```
+
+See [ANDROID_KEYSTORE_GUIDE.md](./ANDROID_KEYSTORE_GUIDE.md) for detailed instructions.
+
 In Android Studio:
 1. Build > Generate Signed Bundle / APK
 2. Select Android App Bundle
-3. Sign with release keystore
+3. Sign with release keystore (`android/release.jks`)
 4. Upload to Google Play Console
 
 ## Google Play Console Setup
@@ -360,6 +368,7 @@ export function hasCitoyenAccess(): boolean {
 
 ## Next Steps
 
+- [ ] Generate release keystore (see [ANDROID_KEYSTORE_GUIDE.md](./ANDROID_KEYSTORE_GUIDE.md))
 - [ ] Add Google Play Billing plugin
 - [ ] Configure subscription products in Google Play Console
 - [ ] Implement real subscription verification

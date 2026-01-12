@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.akiprisaye.app"
     compileSdk rootProject.ext.compileSdkVersion
+    
+    // Keystore configuration
+    // Path is relative to this build.gradle file location (android/app/)
+    // Keystore is stored one directory up in android/
+    def keystoreFile = '../release.jks'
+    
     defaultConfig {
         applicationId "com.akiprisaye.app"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -16,11 +22,44 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    
+    // Signing configuration for release builds
+    signingConfigs {
+        release {
+            // Keystore file location
+            // Path relative to this build.gradle (android/app/)
+            // Keystore is in android/release.jks, one directory up
+            storeFile file(keystoreFile)
+            
+            // Get passwords from environment variables (for CI/CD)
+            // Or use gradle.properties for local builds (NOT recommended for security)
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: System.getProperty("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS") ?: System.getProperty("KEY_ALIAS") ?: 'release'
+            keyPassword System.getenv("KEY_PASSWORD") ?: System.getProperty("KEY_PASSWORD")
+        }
+    }
+    
     buildTypes {
         release {
+            // Disable debugging in release builds
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            
+            // Apply signing configuration to release builds
+            // Only if keystore file exists (allows building without keystore for web-only deploys)
+            if (file(keystoreFile).exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                logger.warn("⚠️  WARNING: ${keystoreFile} not found. AAB will be unsigned.")
+                logger.warn("⚠️  Generate keystore: cd android && ./generate-release-keystore.sh")
+                logger.warn("⚠️  Or use Google Play App Signing for unsigned AABs")
+            }
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
@@ -43,6 +82,14 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Override Capacitor's Java version requirement to use Java 17
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
 
 try {
     def servicesJSON = file('google-services.json')
