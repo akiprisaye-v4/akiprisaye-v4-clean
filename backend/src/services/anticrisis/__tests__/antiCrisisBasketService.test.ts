@@ -16,6 +16,8 @@ import {
   PriceObservation,
 } from '../antiCrisisBasketService.js';
 import { priceObservations } from './priceObservations.mock.js';
+import { priceObservationsMultiTerritories } from './priceObservations.multiTerritories.mock.js';
+import { priceObservationsLarge } from './priceObservations.large.mock.js';
 
 describe('AntiCrisisBasketService', () => {
   let service: AntiCrisisBasketService;
@@ -550,6 +552,234 @@ describe('AntiCrisisBasketService', () => {
 
       // Vérifier le format de la date
       expect(() => new Date(product.lastObservedAt)).not.toThrow();
+    });
+  });
+
+  describe('Jeu de données multi-territoires', () => {
+    test('devrait retourner un panier anti-crise par territoire (971 - Guadeloupe)', () => {
+      const basket = service.getAntiCrisisBasket('971', priceObservationsMultiTerritories);
+
+      // ✅ Résultat attendu: 1 produit (riz), soda exclu (promo)
+      expect(basket).toHaveLength(1);
+      expect(basket[0].productId).toBe('p_rice_1kg');
+      expect(basket[0].productName).toBe('Riz long grain 1kg');
+      expect(basket[0].storeId).toBe('lp_971');
+      expect(basket[0].storeName).toBe('Leader Price');
+      expect(basket[0].avgPrice).toBeCloseTo(1.29, 2);
+      expect(basket[0].cheapestRate).toBeGreaterThanOrEqual(70);
+    });
+
+    test('devrait retourner un panier anti-crise par territoire (972 - Martinique)', () => {
+      const basket = service.getAntiCrisisBasket('972', priceObservationsMultiTerritories);
+
+      // ✅ Résultat attendu: 1 produit (riz), huile exclue (instable)
+      expect(basket).toHaveLength(1);
+      expect(basket[0].productId).toBe('p_rice_1kg');
+      expect(basket[0].productName).toBe('Riz long grain 1kg');
+      expect(basket[0].storeId).toBe('u_972');
+      expect(basket[0].storeName).toBe('Super U');
+      expect(basket[0].avgPrice).toBeCloseTo(1.35, 2);
+      expect(basket[0].cheapestRate).toBeGreaterThanOrEqual(70);
+    });
+
+    test('devrait retourner un panier anti-crise par territoire (973 - Guyane)', () => {
+      const basket = service.getAntiCrisisBasket('973', priceObservationsMultiTerritories);
+
+      // ✅ Résultat attendu: 1 produit (riz)
+      // Prix plus élevé en Guyane (logistique), mais stable
+      expect(basket).toHaveLength(1);
+      expect(basket[0].productId).toBe('p_rice_1kg');
+      expect(basket[0].productName).toBe('Riz long grain 1kg');
+      expect(basket[0].storeId).toBe('cg_973');
+      expect(basket[0].storeName).toBe('Carrefour Guyane');
+      expect(basket[0].avgPrice).toBeCloseTo(1.56, 2);
+      expect(basket[0].cheapestRate).toBeGreaterThanOrEqual(70);
+    });
+
+    test('devrait retourner un panier anti-crise par territoire (974 - La Réunion)', () => {
+      const basket = service.getAntiCrisisBasket('974', priceObservationsMultiTerritories);
+
+      // ✅ Résultat attendu: 1 produit (riz)
+      expect(basket).toHaveLength(1);
+      expect(basket[0].productId).toBe('p_rice_1kg');
+      expect(basket[0].productName).toBe('Riz long grain 1kg');
+      expect(basket[0].storeId).toBe('lp_974');
+      expect(basket[0].storeName).toBe('Leader Price');
+      expect(basket[0].avgPrice).toBeCloseTo(1.33, 2);
+      expect(basket[0].cheapestRate).toBeGreaterThanOrEqual(70);
+    });
+
+    test('ne devrait jamais comparer les prix entre territoires', () => {
+      // Récupérer les paniers de deux territoires différents
+      const guadeloupe = service.getAntiCrisisBasket('971', priceObservationsMultiTerritories);
+      const guyane = service.getAntiCrisisBasket('973', priceObservationsMultiTerritories);
+
+      // Les prix doivent être différents (reflet des écarts logistiques réels)
+      expect(guadeloupe[0].avgPrice).not.toBe(guyane[0].avgPrice);
+      
+      // Guadeloupe doit être moins cher que Guyane (réalité logistique DOM)
+      expect(guadeloupe[0].avgPrice).toBeLessThan(guyane[0].avgPrice);
+    });
+
+    test('devrait respecter les écarts logistiques réels DOM', () => {
+      const territories = ['971', '972', '973', '974'];
+      const baskets = territories.map(t => 
+        service.getAntiCrisisBasket(t, priceObservationsMultiTerritories)
+      );
+
+      // Tous les territoires doivent avoir le riz dans leur panier
+      baskets.forEach(basket => {
+        expect(basket).toHaveLength(1);
+        expect(basket[0].productId).toBe('p_rice_1kg');
+      });
+
+      // Guyane (973) doit être le plus cher (écart logistique réel)
+      const guyaneBasket = baskets[2]; // index 2 = 973
+      const otherPrices = baskets.filter((_, i) => i !== 2).map(b => b[0].avgPrice);
+      
+      otherPrices.forEach(price => {
+        expect(guyaneBasket[0].avgPrice).toBeGreaterThan(price);
+      });
+    });
+
+    test('devrait exclure le soda en Guadeloupe (promo ponctuelle)', () => {
+      const basket = service.getAntiCrisisBasket('971', priceObservationsMultiTerritories);
+      
+      // Le soda ne doit pas être dans le panier
+      const sodaProduct = basket.find(p => p.productId === 'p_soda_15l');
+      expect(sodaProduct).toBeUndefined();
+    });
+
+    test('devrait exclure l\'huile en Martinique (prix instable)', () => {
+      const basket = service.getAntiCrisisBasket('972', priceObservationsMultiTerritories);
+      
+      // L'huile ne doit pas être dans le panier
+      const oilProduct = basket.find(p => p.productId === 'p_oil_1l');
+      expect(oilProduct).toBeUndefined();
+    });
+
+    test('devrait analyser chaque territoire indépendamment', () => {
+      // Récupérer les paniers de tous les territoires
+      const territories = ['971', '972', '973', '974'];
+      const baskets = territories.map(t => 
+        service.getAntiCrisisBasket(t, priceObservationsMultiTerritories)
+      );
+
+      // Chaque territoire doit avoir des enseignes locales différentes
+      const stores = baskets.map(b => b[0].storeId);
+      const uniqueStores = new Set(stores);
+      
+      // Au moins 3 enseignes différentes (certaines peuvent être présentes dans plusieurs territoires)
+      expect(uniqueStores.size).toBeGreaterThanOrEqual(3);
+
+      // Vérifier que chaque résultat correspond bien au territoire demandé
+      expect(baskets[0][0].storeId).toContain('971'); // Guadeloupe
+      expect(baskets[1][0].storeId).toContain('972'); // Martinique
+      expect(baskets[2][0].storeId).toContain('973'); // Guyane
+      expect(baskets[3][0].storeId).toContain('974'); // La Réunion
+    });
+  });
+
+  describe('Dataset étendu (192 observations sur 12 mois)', () => {
+    test('devrait sélectionner uniquement les produits stables (excluant l\'huile)', () => {
+      // Test pour chaque territoire
+      const territories = ['971', '972', '973', '974'];
+      
+      for (const territory of territories) {
+        const basket = service.getAntiCrisisBasket(territory, priceObservationsLarge);
+        
+        // Vérifier qu'aucun produit instable n'est inclus
+        const oilProduct = basket.find(p => p.productId === 'p_oil_1l');
+        expect(oilProduct).toBeUndefined();
+        
+        // Vérifier que les produits stables sont présents
+        expect(basket.length).toBeGreaterThanOrEqual(2); // Au moins riz, pâtes, lait
+        expect(basket.every(p => p.productId !== 'p_oil_1l')).toBe(true);
+      }
+    });
+
+    test('devrait respecter les contraintes anti-crise sur 12 mois de données', () => {
+      const basket971 = service.getAntiCrisisBasket('971', priceObservationsLarge);
+      
+      // Tous les produits doivent avoir au moins 5 observations (12 mois > 5)
+      basket971.forEach(product => {
+        expect(product.observations).toBeGreaterThanOrEqual(5);
+        expect(product.cheapestRate).toBeGreaterThanOrEqual(70);
+        expect(product.avgDeltaVsSecond).toBeGreaterThan(0);
+      });
+    });
+
+    test('ne devrait jamais comparer les prix inter-territoires', () => {
+      const baskets = ['971', '972', '973', '974'].map(t => 
+        service.getAntiCrisisBasket(t, priceObservationsLarge)
+      );
+
+      // Chaque territoire doit avoir son propre panier
+      baskets.forEach(basket => {
+        expect(basket.length).toBeGreaterThan(0);
+      });
+
+      // Les prix doivent refléter les écarts logistiques
+      // Guyane (973) doit être le plus cher pour un même produit
+      const riceProducts = baskets.map((b, idx) => ({
+        territory: ['971', '972', '973', '974'][idx],
+        rice: b.find(p => p.productId === 'p_rice_1kg'),
+      })).filter(x => x.rice !== undefined);
+
+      // Vérifier que Guyane est effectivement plus cher
+      const guyaneRice = riceProducts.find(x => x.territory === '973')?.rice;
+      const guadeloupeRice = riceProducts.find(x => x.territory === '971')?.rice;
+      
+      if (guyaneRice && guadeloupeRice) {
+        expect(guyaneRice.avgPrice).toBeGreaterThan(guadeloupeRice.avgPrice);
+      }
+    });
+
+    test('devrait performer correctement avec un dataset volumineux', () => {
+      const start = performance.now();
+      
+      // Exécuter pour tous les territoires
+      const results = ['971', '972', '973', '974'].map(t => 
+        service.getAntiCrisisBasket(t, priceObservationsLarge)
+      );
+      
+      const duration = performance.now() - start;
+      
+      // L'exécution doit être rapide (< 100ms pour 192 observations)
+      expect(duration).toBeLessThan(100);
+      
+      // Tous les résultats doivent être cohérents
+      results.forEach(basket => {
+        expect(basket.length).toBeGreaterThan(0);
+        expect(basket.every(p => p.observations >= 5)).toBe(true);
+      });
+    });
+
+    test('devrait analyser la stabilité sur une longue période (12 mois)', () => {
+      const basket = service.getAntiCrisisBasket('971', priceObservationsLarge);
+      
+      // Avec 12 mois de données, les critères de stabilité doivent être très stricts
+      basket.forEach(product => {
+        // Tous les produits dans le panier doivent être vraiment stables
+        // (pas l'huile qui varie de 2.15 à 2.90)
+        expect(product.productId).not.toBe('p_oil_1l');
+        
+        // Les observations doivent être régulières (12 mois)
+        expect(product.observations).toBe(12);
+      });
+    });
+
+    test('devrait identifier correctement les enseignes les moins chères par territoire', () => {
+      const territories = ['971', '972', '973', '974'];
+
+      territories.forEach(code => {
+        const basket = service.getAntiCrisisBasket(code, priceObservationsLarge);
+        
+        // Vérifier que les produits sélectionnés proviennent de l'enseigne locale
+        basket.forEach(product => {
+          expect(product.storeId).toContain(code);
+        });
+      });
     });
   });
 });

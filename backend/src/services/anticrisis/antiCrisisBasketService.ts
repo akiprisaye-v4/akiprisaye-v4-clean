@@ -46,6 +46,8 @@ export interface PriceObservation {
   category: string;
   /** Source de l'observation */
   source: string;
+  /** Territoire (optionnel, pour comparaisons multi-territoires) */
+  territory?: string;
 }
 
 /**
@@ -130,13 +132,13 @@ export class AntiCrisisBasketService {
   /**
    * Récupère le Panier Anti-Crise pour un territoire donné
    * 
-   * @param _territory - Territoire géographique (ex: "GUADELOUPE", "MARTINIQUE")
+   * @param territory - Territoire géographique (ex: "971", "972", "GUADELOUPE", "MARTINIQUE")
    * @param priceHistory - Historique complet des observations de prix
    * @param options - Options de configuration (optionnelles)
    * @returns Liste des produits éligibles au Panier Anti-Crise
    */
   public getAntiCrisisBasket(
-    _territory: string,
+    territory: string,
     priceHistory: PriceObservation[],
     options?: AntiCrisisBasketOptions
   ): AntiCrisisProduct[] {
@@ -149,8 +151,17 @@ export class AntiCrisisBasketService {
       minDeltaVsSecondPercent: options?.minDeltaVsSecondPercent ?? 5,
     };
 
+    // FILTRE CRITIQUE: Ne garder QUE les observations du territoire demandé
+    // Principe fondamental: ❌ JAMAIS de comparaison inter-territoires
+    const territoryObservations = priceHistory.filter(obs => {
+      // Si territory n'est pas défini dans l'observation, on la garde (compatibilité)
+      if (!obs.territory) return true;
+      // Sinon, on ne garde que si le territoire correspond
+      return obs.territory === territory;
+    });
+
     // 1. Grouper les observations par produit
-    const productGroups = this.groupObservationsByProduct(priceHistory);
+    const productGroups = this.groupObservationsByProduct(territoryObservations);
 
     // 2. Calculer les statistiques pour chaque produit
     const productStats = this.calculateProductStatistics(productGroups);
