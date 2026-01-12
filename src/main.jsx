@@ -96,6 +96,7 @@ const ProductPhotoAnalysis = lazyWithRetry(() => import('./pages/ProductPhotoAna
 
 // OCR Hub - Unified entry point for all OCR features
 const OCRHub = lazyWithRetry(() => import('./pages/ocr/OCRHub'));
+const OCRHistory = lazyWithRetry(() => import('./pages/ocr/OCRHistory'));
 
 // Store Detail Page with company info, graphs, and history
 const StoreDetail = lazyWithRetry(() => import('./pages/StoreDetail'));
@@ -240,6 +241,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route index element={<Home />} />
                   <Route path='chat' element={<ChatIALocal />} />
                   <Route path='ocr' element={<OCRHub />} />
+                  <Route path='ocr/history' element={<OCRHistory />} />
                   <Route path='scan' element={<ScanOCR />} />
                   <Route path='scan-ean' element={<ScanEAN />} />
                   <Route path='scanner-produit' element={<ScanFlow />} />

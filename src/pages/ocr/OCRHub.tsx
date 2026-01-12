@@ -235,6 +235,58 @@ export default function OCRHub() {
             </div>
           </div>
         </section>
+        {/* Quick Links */}
+        <section className="py-12 px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-center">Fonctionnalités avancées</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link
+                to="/ocr/history"
+                className="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:border-slate-600/50 transition-all hover:scale-105"
+              >
+                <div className="text-3xl mb-3">📜</div>
+                <div className="font-bold mb-2">Historique OCR</div>
+                <div className="text-sm text-gray-400">
+                  Consultez vos scans récents (stockage local uniquement)
+                </div>
+              </Link>
+
+              <div className="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div className="text-3xl mb-3">📊</div>
+                <div className="font-bold mb-2">Score qualité</div>
+                <div className="text-sm text-gray-400">
+                  Indicateur technique de lisibilité (automatique sur chaque scan)
+                </div>
+              </div>
+
+              <div className="p-6 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div className="text-3xl mb-3">🔬</div>
+                <div className="font-bold mb-2">Mode Expert</div>
+                <div className="text-sm text-gray-400">
+                  Analyse avancée avec métriques techniques détaillées
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <Link
+                to="/methodologie"
+                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                En savoir plus sur notre méthodologie OCR
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );
