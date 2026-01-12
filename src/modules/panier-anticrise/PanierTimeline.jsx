@@ -28,7 +28,8 @@ export function PanierTimeline({ history = [] }) {
   const values = history.map((h) => h.value);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
-  const valueRange = maxValue - minValue || 1;
+  // Use 10% of value as minimum range to avoid flat lines when values are identical
+  const valueRange = maxValue - minValue || Math.max(maxValue * 0.1, 1);
 
   const width = 600;
   const height = 200;

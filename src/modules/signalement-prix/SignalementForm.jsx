@@ -88,7 +88,7 @@ export default function SignalementForm({ onSubmit = null }) {
 
   const handleSaveLocally = () => {
     // Generate unique ID
-    const signalementId = `sig-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const signalementId = `sig-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     
     const signalement = {
       id: signalementId,
@@ -131,10 +131,16 @@ export default function SignalementForm({ onSubmit = null }) {
       setHasAccepted(false);
       setStep(1);
 
-      alert('✅ Signalement enregistré localement. Merci de votre contribution !');
+      // Show success message (consider upgrading to toast notification in future)
+      if (window.confirm('✅ Signalement enregistré localement. Merci de votre contribution !')) {
+        // User acknowledged
+      }
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement:', error);
-      alert('❌ Erreur lors de l\'enregistrement. Veuillez réessayer.');
+      // Show error message (consider upgrading to toast notification in future)
+      if (window.confirm('❌ Erreur lors de l\'enregistrement. Veuillez réessayer.')) {
+        // User acknowledged
+      }
     }
   };
 

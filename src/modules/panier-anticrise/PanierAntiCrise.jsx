@@ -65,8 +65,10 @@ export default function PanierAntiCrise({ territory = 'guadeloupe', mode = 'esse
   const score = territoryData.score;
 
   // Calculate total and potential economy
+  // Average market markup estimation: 15% based on price comparison analysis
+  const AVERAGE_MARKET_MARKUP = 1.15;
   const totalMinPrice = basket.reduce((sum, item) => sum + item.price_min, 0);
-  const averageMarketPrice = totalMinPrice * 1.15; // Estimation: 15% higher on average
+  const averageMarketPrice = totalMinPrice * AVERAGE_MARKET_MARKUP;
   const potentialEconomy = averageMarketPrice - totalMinPrice;
   const economyPercentage = ((potentialEconomy / averageMarketPrice) * 100).toFixed(1);
 
