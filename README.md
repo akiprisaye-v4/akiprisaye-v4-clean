@@ -39,6 +39,11 @@ L'application ne vend aucun produit et ne réalise aucune transaction commercial
 - Historique des prix par produit et par territoire
 - Sources visibles (enseignes, dates, zones)
 - Prédiction des prix explicable (basée sur données historiques réelles)
+- **🛒 Panier Anti-Crise** — Identification des produits structurellement les moins chers sur la durée
+  - Analyse de stabilité des prix (exclusion des promotions ponctuelles)
+  - Calculs transparents et auditables
+  - Analyse indépendante par territoire (971, 972, 973, 974)
+  - [Méthodologie complète](backend/docs/ANTICRISIS_METHODOLOGY.md)
 
 ### 📷 Scanner intelligent
 
