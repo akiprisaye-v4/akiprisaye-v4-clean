@@ -10,6 +10,12 @@
  * Future enhancement: OpenCV.js for perspective correction and contour detection
  */
 
+// Constants for image processing
+const SIMPLE_BINARIZATION_THRESHOLD = 140; // Threshold for simple black/white conversion
+const LUMINANCE_RED_WEIGHT = 0.299;
+const LUMINANCE_GREEN_WEIGHT = 0.587;
+const LUMINANCE_BLUE_WEIGHT = 0.114;
+
 /**
  * Auto-crop and enhance a receipt image for better OCR results
  * @param image - HTMLImageElement to process
@@ -34,11 +40,13 @@ export async function autoCropReceipt(image: HTMLImageElement): Promise<HTMLCanv
   // Step 2: Convert to grayscale and enhance contrast
   for (let i = 0; i < data.length; i += 4) {
     // Grayscale conversion using luminance formula
-    const avg = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+    const avg = data[i] * LUMINANCE_RED_WEIGHT + 
+                data[i + 1] * LUMINANCE_GREEN_WEIGHT + 
+                data[i + 2] * LUMINANCE_BLUE_WEIGHT;
     
     // Adaptive binarization with threshold
     // This helps separate text from background
-    const val = avg > 140 ? 255 : 0;
+    const val = avg > SIMPLE_BINARIZATION_THRESHOLD ? 255 : 0;
     
     data[i] = val;     // R
     data[i + 1] = val; // G
@@ -74,7 +82,9 @@ export async function autoCropReceiptEnhanced(image: HTMLImageElement): Promise<
   // Step 1: Convert to grayscale
   const grayData = new Uint8ClampedArray(data.length / 4);
   for (let i = 0, j = 0; i < data.length; i += 4, j++) {
-    grayData[j] = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+    grayData[j] = data[i] * LUMINANCE_RED_WEIGHT + 
+                  data[i + 1] * LUMINANCE_GREEN_WEIGHT + 
+                  data[i + 2] * LUMINANCE_BLUE_WEIGHT;
   }
 
   // Step 2: Calculate adaptive threshold using local mean

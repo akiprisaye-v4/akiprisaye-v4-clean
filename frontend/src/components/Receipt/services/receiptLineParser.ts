@@ -37,7 +37,7 @@ function extractPrice(line: string): number | undefined {
       // Clean and parse: remove spaces, replace comma with dot
       const priceStr = match[1].replace(/\s/g, '').replace(',', '.');
       const price = parseFloat(priceStr);
-      if (!isNaN(price) && price > 0 && price < 10000) {
+      if (!isNaN(price) && price > MIN_VALID_PRICE && price < MAX_VALID_PRICE) {
         return price;
       }
     }

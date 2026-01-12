@@ -1,6 +1,16 @@
 import { OCRAnomaly, OCRAnomalyType, OCRTotals } from '../../../types/ocrAnomaly';
 import { ReceiptLine } from '../../../types/receiptLine';
 
+// Constants for anomaly detection
+const PRICE_OUTLIER_THRESHOLD = 1000; // Prices above this are flagged as unusually high
+const VERY_LOW_PRICE_THRESHOLD = 0.01; // Prices below this are flagged as suspiciously low
+const SUSPICIOUS_QUANTITY_THRESHOLD = 50; // Quantities above this are flagged
+const TEXT_QUALITY_THRESHOLD = 0.6; // Text quality score below this is flagged
+const SPECIAL_CHAR_RATIO_THRESHOLD = 0.4; // Ratio of special chars above this is flagged
+const TOTAL_MISMATCH_THRESHOLD_PERCENT = 10; // Percentage difference for total mismatch
+const DUPLICATE_SIMILARITY_THRESHOLD = 0.7; // Similarity score for potential duplicates
+const DUPLICATE_PRICE_DIFFERENCE_THRESHOLD = 0.1; // Max price difference ratio for duplicates
+
 /**
  * Module M - OCR Anomaly Detector
  * 
