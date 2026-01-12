@@ -54,7 +54,7 @@ export function detectOCRAnomalies(
     }
 
     // Check for price outliers (unusually high)
-    if (line.price !== undefined && line.price > 1000) {
+    if (line.price !== undefined && line.price > PRICE_OUTLIER_THRESHOLD) {
       anomalies.push({
         type: 'PRICE_OUTLIER',
         lineIndex: index,
@@ -65,7 +65,7 @@ export function detectOCRAnomalies(
     }
 
     // Check for very low prices (potential OCR error)
-    if (line.price !== undefined && line.price < 0.01 && line.price > 0) {
+    if (line.price !== undefined && line.price < VERY_LOW_PRICE_THRESHOLD && line.price > 0) {
       anomalies.push({
         type: 'PRICE_OUTLIER',
         lineIndex: index,
@@ -76,7 +76,7 @@ export function detectOCRAnomalies(
     }
 
     // Check for suspicious quantities
-    if (line.quantity !== undefined && line.quantity > 50) {
+    if (line.quantity !== undefined && line.quantity > SUSPICIOUS_QUANTITY_THRESHOLD) {
       anomalies.push({
         type: 'SUSPICIOUS_QUANTITY',
         lineIndex: index,
@@ -88,7 +88,7 @@ export function detectOCRAnomalies(
 
     // Check for low text confidence (degraded OCR)
     const textQuality = assessTextQuality(line.raw);
-    if (textQuality < 0.6) {
+    if (textQuality < TEXT_QUALITY_THRESHOLD) {
       anomalies.push({
         type: 'LOW_TEXT_CONFIDENCE',
         lineIndex: index,
@@ -124,8 +124,8 @@ function assessTextQuality(text: string): number {
   const ratio = alphanumericCount / text.length;
 
   // Too many special characters = low quality
-  if (specialCharCount > text.length * 0.4) {
-    return 0.4;
+  if (specialCharCount > text.length * SPECIAL_CHAR_RATIO_THRESHOLD) {
+    return SPECIAL_CHAR_RATIO_THRESHOLD;
   }
 
   return ratio;
@@ -173,8 +173,8 @@ function detectTotalAnomalies(
     const difference = Math.abs(lineSum - totals.ttc);
     const percentDiff = (difference / totals.ttc) * 100;
 
-    // Significant mismatch (more than 10%)
-    if (percentDiff > 10) {
+    // Significant mismatch (more than threshold percent)
+    if (percentDiff > TOTAL_MISMATCH_THRESHOLD_PERCENT) {
       anomalies.push({
         type: 'TOTAL_MISMATCH',
         message: 'Écart significatif entre somme des lignes et total',

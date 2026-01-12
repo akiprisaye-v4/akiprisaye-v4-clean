@@ -1,5 +1,9 @@
 import { ReceiptLine } from '../../types/receiptLine';
 
+// Constants for price validation
+const MIN_VALID_PRICE = 0;
+const MAX_VALID_PRICE = 10000;
+
 /**
  * Parse receipt OCR text into individual lines with extracted information
  * @param text - Raw OCR text from receipt
