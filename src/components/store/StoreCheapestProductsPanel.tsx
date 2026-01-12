@@ -11,12 +11,10 @@
  * - Based on observed data only
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import type { CheapestByStore } from '../../services/storeCheapestProductsService';
 import { formatObservationDate } from '../../services/storeCheapestProductsService';
-import { computePriceStability, getStabilityBadge } from '../../services/priceStabilityService';
-import type { StabilityStats } from '../../services/priceStabilityService';
 
 interface StoreCheapestProductsPanelProps {
   data: CheapestByStore;
@@ -28,21 +26,6 @@ export default function StoreCheapestProductsPanel({
   onClose 
 }: StoreCheapestProductsPanelProps) {
   const { store, cheapestProducts, lastObservation } = data;
-
-  // Compute stability stats for all products
-  const stabilityMap = useMemo(() => {
-    const map = new Map<string, StabilityStats>();
-    
-    cheapestProducts.forEach(product => {
-      const stats = computePriceStability(product.id, store.territory);
-      const storeStats = stats.find(s => s.storeId === store.id);
-      if (storeStats) {
-        map.set(product.id, storeStats);
-      }
-    });
-    
-    return map;
-  }, [cheapestProducts, store.id, store.territory]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -108,11 +91,7 @@ export default function StoreCheapestProductsPanel({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {cheapestProducts.map((product) => {
-                    const stabilityStats = stabilityMap.get(product.id);
-                    const badge = stabilityStats ? getStabilityBadge(stabilityStats) : null;
-                    
-                    return (
+                  {cheapestProducts.map((product) => (
                     <tr key={product.id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="py-3">
                         <div>
@@ -120,18 +99,6 @@ export default function StoreCheapestProductsPanel({
                             {product.brand} {product.name}
                           </div>
                           <div className="text-sm text-gray-400">{product.size}</div>
-                          {badge && stabilityStats && (
-                            <div className="mt-2 inline-flex items-center gap-2 text-xs">
-                              <span className={`font-medium ${badge.color}`}>
-                                {badge.emoji} {badge.label}
-                              </span>
-                              {stabilityStats.observations >= 3 && (
-                                <span className="text-gray-500">
-                                  ({stabilityStats.cheapestRate}% du temps)
-                                </span>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </td>
                       <td className="py-3">
@@ -150,8 +117,7 @@ export default function StoreCheapestProductsPanel({
                         )}
                       </td>
                     </tr>
-                  )}
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
