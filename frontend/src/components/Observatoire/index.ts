@@ -4,5 +4,7 @@ export { default as InterpretationAutomatique } from './InterpretationAutomatiqu
 export { default as ObservationGuard, SimpleObservationGuard } from './ObservationGuard';
 export { default as NeutralStoreList, CompactStoreList } from './NeutralStoreList';
 export { default as FramedInterpretation } from './FramedInterpretation';
+export { ObservationReliability } from './ObservationReliability';
 export type { ObservationCoverageProps } from './ObservationCoverage';
 export type { InterpretationAutomatiqueProps } from './InterpretationAutomatique';
+export type { ObservationReliabilityProps } from './ObservationReliability';
