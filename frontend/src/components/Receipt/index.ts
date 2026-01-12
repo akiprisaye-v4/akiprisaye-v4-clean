@@ -8,4 +8,5 @@ export { ReceiptScannerWithMode } from './ReceiptScannerWithMode';
 export { EnhancedReceiptWorkflow } from './EnhancedReceiptWorkflow';
 export { TicketQualityDisplay } from './TicketQualityDisplay';
 export { RecurringProductBadge, ProductHistoryInfo } from './RecurringProductBadge';
+export { OCRAnomalyPanel, OCRAnomalySummary } from './OCRAnomalyPanel';
 export * from './types';

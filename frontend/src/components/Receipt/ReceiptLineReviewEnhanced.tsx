@@ -5,6 +5,8 @@ import { RecurringProductBadge, ProductHistoryInfo } from './RecurringProductBad
 import { TicketQualityDisplay } from './TicketQualityDisplay';
 import { computeTicketQuality } from './services/ticketQualityScore';
 import { productFingerprint, recordProductSeen } from './services/productFingerprint';
+import { detectOCRAnomalies } from './services/ocrAnomalyDetector';
+import { OCRAnomalyPanel } from './OCRAnomalyPanel';
 
 type ReceiptLineReviewEnhancedProps = {
   lines: ReceiptLine[];
@@ -14,12 +16,13 @@ type ReceiptLineReviewEnhancedProps = {
 };
 
 /**
- * Enhanced Receipt Line Review with Modules I, J, K, and L
+ * Enhanced Receipt Line Review with Modules I, J, K, L, and M
  * 
  * Module I: Visual pre-validation of OCR lines
  * Module J: Similar line fusion for multi-photo receipts
  * Module K: Local recurring product recognition
  * Module L: Receipt quality score (informative)
+ * Module M: OCR inconsistency detection
  */
 export const ReceiptLineReviewEnhanced: React.FC<ReceiptLineReviewEnhancedProps> = ({
   lines: initialLines,
@@ -101,6 +104,21 @@ export const ReceiptLineReviewEnhanced: React.FC<ReceiptLineReviewEnhancedProps>
     hasStore: false, // Could be enhanced to detect store in lines
   });
 
+  // Detect OCR anomalies (Module M)
+  const ocrAnomalies = detectOCRAnomalies(lines);
+
+  const handleAnomalyLineClick = (lineIndex: number) => {
+    // Scroll to the line or highlight it
+    const lineElement = document.getElementById(`line-${lineIndex}`);
+    if (lineElement) {
+      lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      lineElement.classList.add('ring-4', 'ring-yellow-300');
+      setTimeout(() => {
+        lineElement.classList.remove('ring-4', 'ring-yellow-300');
+      }, 2000);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
       <div className="mb-6">
@@ -119,8 +137,13 @@ export const ReceiptLineReviewEnhanced: React.FC<ReceiptLineReviewEnhancedProps>
           <br />
           Vous voyez exactement ce que le système a compris.
           <br />
-          Modules actifs : Pré-validation (I), Fusion (J), Produits récurrents (K), Qualité (L)
+          Modules actifs : Pré-validation (I), Fusion (J), Produits récurrents (K), Qualité (L), Incohérences (M)
         </p>
+      </div>
+
+      {/* Module M - OCR Anomaly Detection */}
+      <div className="mb-4">
+        <OCRAnomalyPanel anomalies={ocrAnomalies} onLineClick={handleAnomalyLineClick} />
       </div>
 
       {/* Module J - Fusion controls */}
@@ -174,6 +197,7 @@ export const ReceiptLineReviewEnhanced: React.FC<ReceiptLineReviewEnhancedProps>
         {lines.map((line, index) => (
           <div
             key={line.id}
+            id={`line-${index}`}
             className={`p-4 rounded-lg border-2 transition-all ${
               line.enabled
                 ? 'border-blue-300 bg-blue-50'
@@ -298,6 +322,7 @@ export const ReceiptLineReviewEnhanced: React.FC<ReceiptLineReviewEnhancedProps>
           <strong>💡 Aide :</strong>
         </p>
         <ul className="list-disc list-inside mt-2 space-y-1">
+          <li>Les incohérences OCR sont détectées automatiquement (Module M) - aucune correction auto</li>
           <li>Les lignes similaires sont automatiquement fusionnées (Module J)</li>
           <li>Les produits déjà observés sont marqués localement (Module K)</li>
           <li>Le score de qualité évalue la fiabilité des données, pas les prix (Module L)</li>
