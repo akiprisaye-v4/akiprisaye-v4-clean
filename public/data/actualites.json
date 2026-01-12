@@ -16,7 +16,7 @@
       "icon": "🚢",
       "date": "2026-01-10",
       "content": "Les compagnies maritimes annoncent une augmentation de 15% des tarifs de fret vers la Guadeloupe, la Martinique et la Réunion. Cette hausse s'explique par l'augmentation du prix du carburant et les tensions géopolitiques. Impact attendu sur les prix des produits importés d'ici février 2026.",
-      "link": "",
+      "link": "https://www.ecologie.gouv.fr/politiques-publiques/transport-maritime",
       "category": "logistique",
       "territory": "all"
     },
@@ -26,7 +26,7 @@
       "icon": "🛡️",
       "date": "2026-01-08",
       "content": "Le dispositif Bouclier qualité-prix dans les DOM est étendu à 6 000 références de produits. Les enseignes s'engagent à limiter les écarts de prix avec la métropole à +30% maximum. Contrôles renforcés par la DGCCRF dans les semaines à venir.",
-      "link": "",
+      "link": "https://www.economie.gouv.fr/dgccrf/bouclier-qualite-prix-outre-mer",
       "category": "réglementation",
       "territory": "all"
     },
@@ -36,7 +36,7 @@
       "icon": "⛽",
       "date": "2026-01-05",
       "content": "Bonne nouvelle pour les automobilistes guadeloupéens: le prix à la pompe baisse de 12 centimes en moyenne en janvier 2026. Le gazole passe à 1,68€/L et le sans-plomb 95 à 1,74€/L. Première baisse depuis 6 mois.",
-      "link": "",
+      "link": "https://www.guadeloupe.gouv.fr/Politiques-publiques/Economie-et-finances/Prix-des-carburants",
       "category": "énergie",
       "territory": "guadeloupe"
     },
@@ -46,7 +46,7 @@
       "icon": "🏪",
       "date": "2026-01-03",
       "content": "Ouverture prévue en mars 2026 d'un nouveau centre E.Leclerc à Saint-Denis, Réunion. 3 500 m² de surface de vente, avec engagement de prix -20% par rapport à la concurrence locale. 120 emplois créés.",
-      "link": "",
+      "link": "https://www.e-leclerc.com/magasins",
       "category": "distribution",
       "territory": "reunion"
     },
@@ -56,7 +56,7 @@
       "icon": "🛒",
       "date": "2025-12-28",
       "content": "Étude comparative de 50 produits de consommation courante: le panier moyen dans les DOM s'établit à 127€ contre 89€ en métropole (+43%). L'écart le plus important concerne les produits laitiers (+68%) et les fruits (+54%).",
-      "link": "",
+      "link": "https://www.insee.fr/fr/statistiques?theme=18&amp;geo=DROM-1",
       "category": "étude",
       "territory": "all"
     },
@@ -66,7 +66,7 @@
       "icon": "🤝",
       "date": "2025-12-22",
       "content": "Les associations d'aide alimentaire en Martinique accompagnent désormais 18 000 personnes (+22% en un an). Face à la cherté de la vie, les dispositifs Ti Panié Solidaire se multiplient dans les communes.",
-      "link": "",
+      "link": "https://www.martinique.gouv.fr/Politiques-publiques/Solidarite-et-cohesion-sociale",
       "category": "social",
       "territory": "martinique"
     },
@@ -76,7 +76,7 @@
       "icon": "💶",
       "date": "2025-12-18",
       "content": "La réforme de l'octroi de mer entre en vigueur en janvier 2026. Baisse attendue de 3 à 5% sur certains produits manufacturés importés. Les produits alimentaires restent exemptés de cette taxe régionale.",
-      "link": "",
+      "link": "https://www.douane.gouv.fr/fiche/loctroi-de-mer",
       "category": "fiscalité",
       "territory": "all"
     },
@@ -96,12 +96,12 @@
       "icon": "🌱",
       "date": "2025-12-10",
       "content": "La production locale de fruits et légumes bio progresse fortement dans les DOM: +35% en 2025. Les circuits courts se développent, permettant des prix 20% moins chers que les produits bio importés.",
-      "link": "",
+      "link": "https://agriculture.gouv.fr/lagriculture-biologique-en-outre-mer",
       "category": "agriculture",
       "territory": "all"
     }
   ],
-  "lastUpdated": "2026-01-12T13:35:00Z",
+  "lastUpdated": "2026-01-12T13:44:00Z",
   "version": "1.0",
   "sources": [
     "INSEE - Institut national de la statistique et des études économiques",
