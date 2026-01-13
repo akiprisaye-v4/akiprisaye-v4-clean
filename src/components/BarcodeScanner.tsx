@@ -422,6 +422,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
       // Step 4: Handle result
       if (ean) {
         // SUCCESS CASE
+        // TODO: Externalize detection method names to constants or i18n for better maintainability
         const methodName = 
           detectionMethod === 'native' ? 'détecteur natif' :
           detectionMethod === 'zxing' ? 'bibliothèque ZXing' :
@@ -454,6 +455,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
         }
       } else {
         // FAILURE CASE - Honest message with helpful tips
+        // TODO: Externalize user-facing error messages to constants or i18n for better maintainability
         setError('❌ Aucun code détecté automatiquement');
         setUserMessage({ 
           type: 'warning', 
