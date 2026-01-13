@@ -9,6 +9,9 @@ import { OfflineIndicator } from './OfflineIndicator';
 export default function Layout() {
   const [open, setOpen] = React.useState(false);
 
+  // Navigation principale
+  // Note: /ocr est le hub unifié qui remplace le point d'entrée /scan dans le menu
+  // Les routes individuelles /scan, /scan-ean, etc. restent accessibles via le hub OCR
   const navItems = [
     { path: '/', label: 'Accueil' },
     { path: '/comparateur', label: 'Comparateur' },
