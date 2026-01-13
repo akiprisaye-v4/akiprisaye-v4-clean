@@ -196,6 +196,7 @@ export async function importStoresFromCSV(
   const validRecords: Array<{ record: StoreCSVRecord; row: number }> = [];
   
   records.forEach((record, index) => {
+    // Calculate row number accounting for 0-based index and header row
     const row = index + 2; // +2 because index is 0-based and row 1 is headers
     const storeRecord = record as StoreCSVRecord;
     const validationErrors = validateStoreRecord(storeRecord, row);

@@ -320,27 +320,6 @@ router.delete('/:ean', (req: Request, res: Response) => {
 });
 
 /**
- * Export products to CSV
- * GET /api/products/export/csv
- */
-router.get('/export/csv', (req: Request, res: Response) => {
-  try {
-    const csv = exportProductsToCSV(products);
-    
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=products.csv');
-    
-    return res.send(csv);
-  } catch (error) {
-    console.error('Error exporting products:', error);
-    return res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
-    });
-  }
-});
-
-/**
  * Import products from CSV
  * POST /api/products/import/csv
  * 
@@ -434,6 +413,27 @@ router.post('/import/csv', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error importing products:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+    });
+  }
+});
+
+/**
+ * Export products to CSV
+ * GET /api/products/export/csv
+ */
+router.get('/export/csv', (req: Request, res: Response) => {
+  try {
+    const csv = exportProductsToCSV(products);
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=products.csv');
+    
+    return res.send(csv);
+  } catch (error) {
+    console.error('Error exporting products:', error);
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',

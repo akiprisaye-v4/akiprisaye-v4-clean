@@ -244,11 +244,6 @@ router.post('/batch', async (req: Request, res: Response) => {
         continue;
       }
 
-      // Wait 1 second between requests to respect Nominatim rate limit
-      if (results.length > 0) {
-        await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS));
-      }
-
       try {
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           address
@@ -295,6 +290,13 @@ router.post('/batch', async (req: Request, res: Response) => {
           error: error instanceof Error ? error.message : 'Geocoding failed',
         });
         failed++;
+      }
+
+      // Wait 1 second between requests to respect Nominatim rate limit
+      // Note: For batch operations, consider implementing a queue-based approach
+      // for better performance with large batches
+      if (results.length < addresses.length) {
+        await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS));
       }
     }
 

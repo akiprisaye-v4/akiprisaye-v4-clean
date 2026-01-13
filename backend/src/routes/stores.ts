@@ -269,27 +269,6 @@ router.delete('/:id', (req: Request, res: Response) => {
 });
 
 /**
- * Export stores to CSV
- * GET /api/stores/export/csv
- */
-router.get('/export/csv', (req: Request, res: Response) => {
-  try {
-    const csv = exportStoresToCSV(stores);
-    
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=stores.csv');
-    
-    return res.send(csv);
-  } catch (error) {
-    console.error('Error exporting stores:', error);
-    return res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Internal server error',
-    });
-  }
-});
-
-/**
  * Import stores from CSV
  * POST /api/stores/import/csv
  * 
@@ -380,6 +359,27 @@ router.post('/import/csv', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error importing stores:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+    });
+  }
+});
+
+/**
+ * Export stores to CSV
+ * GET /api/stores/export/csv
+ */
+router.get('/export/csv', (req: Request, res: Response) => {
+  try {
+    const csv = exportStoresToCSV(stores);
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=stores.csv');
+    
+    return res.send(csv);
+  } catch (error) {
+    console.error('Error exporting stores:', error);
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',
