@@ -20,8 +20,8 @@ const formatPrice = (price: number): string => {
  */
 const escapeCSV = (field: string | number | boolean): string => {
   const str = String(field);
-  // If field contains comma, quote, or newline, wrap in quotes and escape existing quotes
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+  // If field contains comma, quote, newline, carriage return, or tab, wrap in quotes and escape existing quotes
+  if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r') || str.includes('\t')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
