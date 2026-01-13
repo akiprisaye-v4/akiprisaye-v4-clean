@@ -146,6 +146,22 @@ After this fix:
 
 ## Architecture Notes
 
+### Two Distinct Function Platforms
+
+This repository contains functions for **two different platforms**:
+
+1. **Cloudflare Pages Functions** (`/functions/*.js`, `/functions/api/**`)
+   - Edge functions for the static site hosted on Cloudflare Pages
+   - **Runtime:** Cloudflare Workers (V8 isolates)
+   - **Constraints:** Strict global scope limitations (this fix applies here)
+   - **Files:** All files in `/functions` except Firebase-specific ones
+
+2. **Firebase Cloud Functions** (distinct from Cloudflare)
+   - Backend serverless functions for Firebase services
+   - **Runtime:** Node.js on Google Cloud
+   - **Files:** `aiDynamicPricing.js`, `aiMarketInsights.js`, `partnerWebhook.js`, `roles.js`
+   - **Note:** These files are NOT deployed to Cloudflare and are unaffected by this fix
+
 ### Rate Limiting Strategy
 - **Before:** Background cleanup using `setInterval()` (not allowed in Cloudflare Workers)
 - **After:** On-demand cleanup during each rate limit check (fully compliant)
