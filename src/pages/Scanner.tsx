@@ -18,8 +18,8 @@ export default function Scanner() {
   const [settings, setSettings] = useState<ScannerOptions>({
     timeout: 15000,
     notFoundBehavior: 'manual_search',
-    enableDebugLogging: false,
-    enableOcrFallback: false,
+    enableDebugLogging: import.meta.env.DEV, // Enable debug logging in development
+    enableOcrFallback: true, // Enable OCR fallback by default
   });
 
   const handleScan = async (code: string) => {
