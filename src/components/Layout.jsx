@@ -9,25 +9,16 @@ import { OfflineIndicator } from './OfflineIndicator';
 export default function Layout() {
   const [open, setOpen] = React.useState(false);
 
-  // Navigation principale
-  // Note: /ocr est le hub unifié qui remplace le point d'entrée /scan dans le menu
-  // Les routes individuelles /scan, /scan-ean, etc. restent accessibles via le hub OCR
+  // Navigation principale optimisée - 7 entrées principales
+  // Chaque hub regroupe plusieurs fonctionnalités connexes
   const navItems = [
-    { path: '/', label: 'Accueil' },
-    { path: '/comparateur', label: 'Comparateur' },
-    { path: '/ocr', label: 'OCR & Scan' },
-    { path: '/carte', label: 'Carte' },
-    { path: '/observatoire', label: 'Observatoire' },
-    { path: '/observatoire-vivant', label: 'Observatoire vivant' },
-    { path: '/contribuer', label: 'Contribuer' },
-    { path: '/civic-modules', label: 'Modules' },
-    { path: '/liste-courses', label: 'Liste de courses' },
-    { path: '/evaluation-cosmetique', label: 'Cosmétiques' },
-    { path: '/actualites', label: 'Actualités' },
-    { path: '/pricing', label: 'Tarifs' },
-    { path: '/presse', label: 'Presse' },
-    { path: '/mon-espace', label: 'Mon espace' },
-    { path: '/contact', label: 'Contact' },
+    { path: '/', label: '🏠 Accueil', emoji: '🏠' },
+    { path: '/comparateurs', label: '📊 Comparateurs', emoji: '📊' },
+    { path: '/carte', label: '🗺️ Carte & Itinéraires', emoji: '🗺️' },
+    { path: '/scanner', label: '📷 Scanner', emoji: '📷' },
+    { path: '/assistant-ia', label: '🤖 Assistant IA', emoji: '🤖' },
+    { path: '/observatoire', label: '📈 Observatoire', emoji: '📈' },
+    { path: '/solidarite', label: '🤝 Solidarité', emoji: '🤝' },
   ];
 
   const publicNavItems = [
