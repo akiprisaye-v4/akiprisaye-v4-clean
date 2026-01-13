@@ -33,7 +33,6 @@ interface NutritionalAnalysisProps {
 }
 
 export function NutritionalAnalysis({ 
-  productName, 
   nutritionalData, 
   additives = [],
   ingredients = []
