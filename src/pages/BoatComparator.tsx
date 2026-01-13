@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Ship, TrendingUp, TrendingDown, AlertCircle, Info, Calendar, DollarSign, Clock, Car } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Ship, AlertCircle, Info, Car, BarChart3, Download, FileText } from 'lucide-react';
 import type {
   BoatPricePoint,
   BoatComparisonResult,
@@ -8,9 +8,9 @@ import type {
 } from '../types/boatComparison';
 import {
   compareBoatPricesByRoute,
-  filterBoatPrices,
-  calculatePotentialSavings,
 } from '../services/boatComparisonService';
+import PriceChart from '../components/comparateur/PriceChart';
+import { exportBoatComparisonToCSV, exportBoatComparisonToText } from '../utils/exportComparison';
 
 const BoatComparator: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,6 @@ const BoatComparator: React.FC = () => {
   const [selectedOrigin, setSelectedOrigin] = useState<string>('PTP-PORT');
   const [selectedDestination, setSelectedDestination] = useState<string>('FDF-PORT');
   const [comparisonResult, setComparisonResult] = useState<BoatComparisonResult | null>(null);
-  const [showVehicleTransport, setShowVehicleTransport] = useState(false);
 
   useEffect(() => {
     loadBoatData();
@@ -122,6 +121,62 @@ const BoatComparator: React.FC = () => {
         return category;
     }
   };
+
+  // Prepare chart data for passenger price comparison
+  const passengerPriceChartData = useMemo(() => {
+    if (!comparisonResult) return null;
+
+    const labels = comparisonResult.operators.map(r => r.boatPrice.operator);
+    const prices = comparisonResult.operators.map(r => r.boatPrice.pricing.passengerPrice);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Prix passager adulte',
+          data: prices,
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [comparisonResult]);
+
+  // Prepare chart data for vehicle price comparison
+  const vehiclePriceChartData = useMemo(() => {
+    if (!comparisonResult) return null;
+
+    const operatorsWithVehicles = comparisonResult.operators.filter(
+      r => r.boatPrice.pricing.vehiclePrice
+    );
+
+    if (operatorsWithVehicles.length === 0) return null;
+
+    const labels = operatorsWithVehicles.map(r => r.boatPrice.operator);
+    const carPrices = operatorsWithVehicles.map(r => r.boatPrice.pricing.vehiclePrice?.car || 0);
+    const motorcyclePrices = operatorsWithVehicles.map(r => r.boatPrice.pricing.vehiclePrice?.motorcycle || 0);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Voiture',
+          data: carPrices,
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Moto',
+          data: motorcyclePrices,
+          backgroundColor: 'rgba(168, 85, 247, 0.6)',
+          borderColor: 'rgba(168, 85, 247, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [comparisonResult]);
 
   if (loading) {
     return (
@@ -324,6 +379,32 @@ const BoatComparator: React.FC = () => {
                 )}
               </section>
 
+              {/* Export Options */}
+              <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
+                <h2 className="text-lg font-semibold text-gray-100 mb-4">
+                  📥 Exporter les résultats
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => exportBoatComparisonToCSV(comparisonResult)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exporter CSV
+                  </button>
+                  <button
+                    onClick={() => exportBoatComparisonToText(comparisonResult)}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Exporter Texte
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  Téléchargez les résultats de la comparaison pour une utilisation hors ligne ou pour les partager.
+                </p>
+              </section>
+
               {/* Operators Comparison */}
               <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
                 <h2 className="text-lg font-semibold text-gray-100 mb-4">
@@ -442,6 +523,38 @@ const BoatComparator: React.FC = () => {
                   ))}
                 </div>
               </section>
+
+              {/* Passenger Price Comparison Chart */}
+              {passengerPriceChartData && (
+                <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
+                  <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Comparaison visuelle des prix passagers
+                  </h2>
+                  <PriceChart
+                    data={passengerPriceChartData}
+                    type="bar"
+                    title="Prix passager adulte par opérateur"
+                    height={300}
+                  />
+                </section>
+              )}
+
+              {/* Vehicle Price Comparison Chart */}
+              {vehiclePriceChartData && (
+                <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
+                  <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+                    <Car className="w-5 h-5" />
+                    Comparaison des prix véhicules
+                  </h2>
+                  <PriceChart
+                    data={vehiclePriceChartData}
+                    type="bar"
+                    title="Prix transport véhicules par opérateur"
+                    height={300}
+                  />
+                </section>
+              )}
 
               {/* Vehicle Transport Analysis */}
               {comparisonResult.vehicleTransportAnalysis && (

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plane, TrendingUp, TrendingDown, AlertCircle, Info, Calendar, DollarSign, Clock } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plane, AlertCircle, Info, Clock, BarChart3, Download, FileText } from 'lucide-react';
 import type {
   FlightPricePoint,
   FlightComparisonResult,
@@ -9,8 +9,9 @@ import type {
 import {
   compareFlightPricesByRoute,
   filterFlightPrices,
-  calculatePotentialSavings,
 } from '../services/flightComparisonService';
+import PriceChart from '../components/comparateur/PriceChart';
+import { exportFlightComparisonToCSV, exportFlightComparisonToText } from '../utils/exportComparison';
 
 const FlightComparator: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -133,6 +134,73 @@ const FlightComparator: React.FC = () => {
         return category;
     }
   };
+
+  // Prepare chart data for price comparison
+  const priceComparisonChartData = useMemo(() => {
+    if (!comparisonResult) return null;
+
+    const labels = comparisonResult.airlines.map(r => r.flightPrice.airline);
+    const prices = comparisonResult.airlines.map(r => r.flightPrice.price);
+    const additionalFees = comparisonResult.airlines.map(r => r.flightPrice.additionalFees?.total || 0);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Prix de base',
+          data: prices,
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+        },
+        {
+          label: 'Frais supplémentaires',
+          data: additionalFees,
+          backgroundColor: 'rgba(249, 115, 22, 0.6)',
+          borderColor: 'rgba(249, 115, 22, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [comparisonResult]);
+
+  // Prepare chart data for timing analysis
+  const timingAnalysisChartData = useMemo(() => {
+    if (!comparisonResult?.purchaseTimingAnalysis) return null;
+
+    const buckets = comparisonResult.purchaseTimingAnalysis.timingBuckets.filter(b => b.observationCount > 0);
+    const labels = buckets.map(b => b.label);
+    const avgPrices = buckets.map(b => b.averagePrice);
+    const minPrices = buckets.map(b => b.minPrice);
+    const maxPrices = buckets.map(b => b.maxPrice);
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Prix moyen',
+          data: avgPrices,
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 2,
+        },
+        {
+          label: 'Prix minimum',
+          data: minPrices,
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: 'rgba(34, 197, 94, 1)',
+          borderWidth: 2,
+        },
+        {
+          label: 'Prix maximum',
+          data: maxPrices,
+          backgroundColor: 'rgba(239, 68, 68, 0.6)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [comparisonResult]);
 
   if (loading) {
     return (
@@ -338,6 +406,32 @@ const FlightComparator: React.FC = () => {
                 )}
               </section>
 
+              {/* Export Options */}
+              <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
+                <h2 className="text-lg font-semibold text-gray-100 mb-4">
+                  📥 Exporter les résultats
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => exportFlightComparisonToCSV(comparisonResult)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exporter CSV
+                  </button>
+                  <button
+                    onClick={() => exportFlightComparisonToText(comparisonResult)}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Exporter Texte
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-3">
+                  Téléchargez les résultats de la comparaison pour une utilisation hors ligne ou pour les partager.
+                </p>
+              </section>
+
               {/* Airlines Comparison */}
               <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
                 <h2 className="text-lg font-semibold text-gray-100 mb-4">
@@ -430,6 +524,22 @@ const FlightComparator: React.FC = () => {
                 </div>
               </section>
 
+              {/* Price Comparison Chart */}
+              {priceComparisonChartData && (
+                <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
+                  <h2 className="text-lg font-semibold text-gray-100 mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Comparaison visuelle des prix
+                  </h2>
+                  <PriceChart
+                    data={priceComparisonChartData}
+                    type="bar"
+                    title="Prix par compagnie (avec frais supplémentaires)"
+                    height={350}
+                  />
+                </section>
+              )}
+
               {/* Purchase Timing Analysis */}
               {comparisonResult.purchaseTimingAnalysis && (
                 <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
@@ -490,6 +600,18 @@ const FlightComparator: React.FC = () => {
                         Économie potentielle :{' '}
                         {comparisonResult.purchaseTimingAnalysis.optimalPurchaseWindow.savingsPercentage.toFixed(1)}%
                       </p>
+                    </div>
+                  )}
+
+                  {/* Timing Chart */}
+                  {timingAnalysisChartData && (
+                    <div className="mt-4">
+                      <PriceChart
+                        data={timingAnalysisChartData}
+                        type="bar"
+                        title="Évolution des prix selon le moment d'achat"
+                        height={300}
+                      />
                     </div>
                   )}
                 </section>
