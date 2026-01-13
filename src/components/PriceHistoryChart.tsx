@@ -4,6 +4,7 @@
  */
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Info } from 'lucide-react';
 import type { PriceHistoryPoint } from '../types/priceHistory';
 
 interface PriceHistoryChartProps {
@@ -47,73 +48,104 @@ export function PriceHistoryChart({ data, showTrendLine = false, showAverage = f
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
-      <h3 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
-        Évolution des Prix
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+          Évolution des Prix
+        </h3>
+        <div className="text-xs text-slate-500 dark:text-slate-400">
+          {data.length} observations
+        </div>
+      </div>
 
       {data.length === 0 ? (
-        <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-          Aucune donnée d'historique disponible
+        <div className="text-center py-12">
+          <div className="text-slate-500 dark:text-slate-400 mb-2">
+            Aucune observation de prix disponible pour cette période
+          </div>
+          <p className="text-sm text-slate-400 dark:text-slate-500">
+            Les données seront affichées dès qu'elles seront collectées
+          </p>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
-            <XAxis 
-              dataKey="date" 
-              stroke="#64748b"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis 
-              stroke="#64748b"
-              style={{ fontSize: '12px' }}
-              tickFormatter={(value) => `${value.toFixed(2)}€`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                border: 'none',
-                borderRadius: '8px',
-                color: '#fff'
-              }}
-              formatter={(value: number) => [`${value.toFixed(2)}€`, '']}
-              labelFormatter={(label) => `Date: ${label}`}
-            />
-            <Legend />
-            
-            {stores.map((store, i) => (
-              <Line
-                key={store}
-                type="monotone"
-                dataKey={store}
-                stroke={colors[i % colors.length]}
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+        <>
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+              <XAxis 
+                dataKey="date" 
+                stroke="#64748b"
+                style={{ fontSize: '12px' }}
+                label={{ value: 'Date', position: 'insideBottom', offset: -5, fill: '#64748b' }}
               />
-            ))}
+              <YAxis 
+                stroke="#64748b"
+                style={{ fontSize: '12px' }}
+                tickFormatter={(value) => `${value.toFixed(2)}€`}
+                label={{ value: 'Prix (€)', angle: -90, position: 'insideLeft', fill: '#64748b' }}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '12px'
+                }}
+                formatter={(value: number, name: string) => [
+                  `${value.toFixed(2)}€`,
+                  name === 'average' ? 'Prix moyen' : name
+                ]}
+                labelFormatter={(label) => `Date: ${label}`}
+              />
+              <Legend 
+                wrapperStyle={{ fontSize: '12px' }}
+                formatter={(value) => value === 'average' ? 'Prix moyen' : value}
+              />
+              
+              {stores.map((store, i) => (
+                <Line
+                  key={store}
+                  type="monotone"
+                  dataKey={store}
+                  stroke={colors[i % colors.length]}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  name={store}
+                />
+              ))}
 
-            {showAverage && (
-              <Line
-                type="monotone"
-                dataKey="average"
-                stroke="#94a3b8"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-                name="Moyenne"
-              />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
+              {showAverage && (
+                <Line
+                  type="monotone"
+                  dataKey="average"
+                  stroke="#94a3b8"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                  name="average"
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+
+          {/* Légende et contexte */}
+          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="mb-1">
+                  <strong>Sources:</strong> Contributions citoyennes vérifiées, données officielles et partenaires commerciaux.
+                </p>
+                <p>
+                  <strong>Mise à jour:</strong> Les prix affichés correspondent aux dernières observations enregistrées.
+                  Chaque point représente une observation réelle à une date donnée.
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
       )}
-
-      <div className="mt-4 text-xs text-slate-600 dark:text-slate-400">
-        <p>
-          Les données affichées proviennent de sources multiples: contributions citoyennes, données officielles et partenaires.
-          La fiabilité de chaque point est indiquée par son opacité.
-        </p>
-      </div>
     </div>
   );
 }
