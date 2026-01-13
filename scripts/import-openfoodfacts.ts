@@ -108,10 +108,23 @@ async function importProductsFromOpenFoodFacts(
         
         console.log(`Would import: ${offProduct.code} - ${offProduct.product_name || 'Unknown'}`);
         
-        /* Uncomment when brands are properly set up:
+        /* TODO: Uncomment when database and brands are properly configured.
+         * Requirements before enabling:
+         * 1. Ensure Brand entities exist in the database
+         * 2. Either create a default brand or associate products with existing brands
+         * 3. Update brandId below to reference a valid Brand.id
+         * 
+         * Note: The Product model requires a brandId foreign key.
+         * You can either:
+         * - Create a generic "Open Food Facts" brand for imported products
+         * - Map products to specific brands based on offProduct.brands
+         * - Skip products without matching brands
+         */
+        
+        /* Example database insert (uncomment and configure):
         await prisma.product.create({
           data: {
-            brandId: 'YOUR_BRAND_ID', // Need to specify a valid brand
+            brandId: 'YOUR_BRAND_ID', // Replace with valid brand ID
             name: offProduct.product_name || 'Produit sans nom',
             category: offProduct.categories?.split(',')[0]?.trim() || 'Autre',
             barcode: offProduct.code,

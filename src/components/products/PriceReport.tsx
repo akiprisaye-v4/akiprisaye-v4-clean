@@ -17,6 +17,9 @@
 
 import { useState, useEffect } from 'react';
 
+// Configuration constants
+const MAX_PRICE_LIMIT = 10000; // Maximum reasonable price in euros
+
 interface PriceReportProps {
   productEan: string;
   productName: string;
@@ -84,7 +87,7 @@ export default function PriceReport({
     }
     
     const priceNum = parseFloat(value.replace(',', '.'));
-    return !isNaN(priceNum) && priceNum > 0 && priceNum < 10000;
+    return !isNaN(priceNum) && priceNum > 0 && priceNum < MAX_PRICE_LIMIT;
   };
 
   /**

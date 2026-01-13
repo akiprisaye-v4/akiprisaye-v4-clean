@@ -22,6 +22,7 @@ export default function ProductDetails({ product, onClose, onReportError }: Prod
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
   const [displayImageUrl, setDisplayImageUrl] = useState<string>('');
+  const [imageFallbackAttempted, setImageFallbackAttempted] = useState(false);
 
   // Get image with fallback on mount and when product changes
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function ProductDetails({ product, onClose, onReportError }: Prod
       productName: product.nom
     });
     setDisplayImageUrl(imageUrl);
+    setImageFallbackAttempted(false); // Reset fallback flag when product changes
   }, [product.imageUrl, product.categorie, product.nom]);
 
   // Status badge styling
@@ -67,12 +69,13 @@ export default function ProductDetails({ product, onClose, onReportError }: Prod
               alt={product.nom}
               className="w-full h-full object-contain"
               onError={(e) => {
-                // Fallback if image fails to load
-                const fallbackUrl = getProductImageOrFallback(null, {
-                  category: product.categorie,
-                  productName: product.nom
-                });
-                if (e.currentTarget.src !== fallbackUrl) {
+                // Fallback if image fails to load - but only attempt once to prevent infinite loops
+                if (!imageFallbackAttempted) {
+                  setImageFallbackAttempted(true);
+                  const fallbackUrl = getProductImageOrFallback(null, {
+                    category: product.categorie,
+                    productName: product.nom
+                  });
                   e.currentTarget.src = fallbackUrl;
                 }
               }}

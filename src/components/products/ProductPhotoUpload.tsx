@@ -17,11 +17,17 @@
 
 import { useState, useRef, ChangeEvent } from 'react';
 
+// Configuration constants
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
 interface ProductPhotoUploadProps {
   productEan: string;
   productName: string;
   onUploadSuccess?: (photoId: string) => void;
   onCancel?: () => void;
+  maxFileSizeMB?: number; // Allow override of default max file size
 }
 
 export default function ProductPhotoUpload({
@@ -29,6 +35,7 @@ export default function ProductPhotoUpload({
   productName,
   onUploadSuccess,
   onCancel,
+  maxFileSizeMB = MAX_FILE_SIZE_MB,
 }: ProductPhotoUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -38,6 +45,7 @@ export default function ProductPhotoUpload({
   const [success, setSuccess] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
 
   /**
    * Handle file selection
@@ -50,15 +58,14 @@ export default function ProductPhotoUpload({
     }
     
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Veuillez sélectionner une image valide (JPG, PNG, etc.)');
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      setError('Veuillez sélectionner une image valide (JPG, PNG, WebP)');
       return;
     }
     
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
-      setError('La taille de l\'image ne doit pas dépasser 10 Mo');
+    // Validate file size
+    if (file.size > maxFileSizeBytes) {
+      setError(`La taille de l'image ne doit pas dépasser ${maxFileSizeMB} Mo`);
       return;
     }
     

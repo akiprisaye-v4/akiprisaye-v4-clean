@@ -185,11 +185,21 @@ export async function lookupProductByEan(
 async function enrichProductWithImages(ean: string): Promise<ProductImages> {
   try {
     const response = await fetch(
-      `https://world.openfoodfacts.org/api/v0/product/${ean}.json`
+      `https://world.openfoodfacts.org/api/v0/product/${ean}.json`,
+      {
+        headers: {
+          'User-Agent': 'AKiPriSaYe/2.1.0 (Contact: app@akiprisaye.fr)'
+        }
+      }
     );
     
     if (!response.ok) {
-      console.warn(`[IMAGES] Open Food Facts API error for EAN ${ean}: ${response.status}`);
+      // Handle rate limiting (429) specifically
+      if (response.status === 429) {
+        console.warn(`[IMAGES] Open Food Facts rate limit reached for EAN ${ean}. Please retry later.`);
+      } else {
+        console.warn(`[IMAGES] Open Food Facts API error for EAN ${ean}: ${response.status}`);
+      }
       return {
         imageUrl: null,
         imageThumbnail: null,

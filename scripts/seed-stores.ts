@@ -296,7 +296,19 @@ async function seedStores(): Promise<void> {
       
       console.log(`Would create: ${storeData.name} (${storeData.territory})`);
       
-      /* Uncomment when brands are properly set up:
+      /* TODO: Uncomment when brands are properly set up in the database.
+       * Requirements before enabling:
+       * 1. Create at least one Brand entity with valid legalEntityId
+       * 2. Update the brandId reference below to point to your created brand
+       * 3. Ensure Brand entity includes the chain name (e.g., "Carrefour", "Leader Price")
+       * 
+       * Example setup:
+       * - Create LegalEntity for each retail chain
+       * - Create Brand linking to LegalEntity
+       * - Use Brand.id in the store creation below
+       */
+      
+      /* Example database insert (uncomment and configure):
       // Check if store already exists
       const existing = await prisma.store.findUnique({
         where: { id: storeData.store_id },
