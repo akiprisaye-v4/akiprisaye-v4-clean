@@ -30,6 +30,12 @@ describe('Layout Component', () => {
     expect(comparateurLinks.length).toBeGreaterThan(0);
   });
 
+  it('should render OCR & Scan navigation link', () => {
+    renderLayout();
+    const ocrLinks = screen.getAllByText('OCR & Scan');
+    expect(ocrLinks.length).toBeGreaterThan(0);
+  });
+
   it('should render mobile menu button', () => {
     renderLayout();
     expect(screen.getByLabelText('Toggle menu')).toBeInTheDocument();
