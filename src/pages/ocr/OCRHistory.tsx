@@ -24,6 +24,11 @@ import {
 } from '../../services/ocr/ocrHistoryService';
 
 export default function OCRHistory() {
+  // Production proof: Log when component mounts
+  if (import.meta.env.MODE === 'production') {
+    console.info('[OCR] OCRHistory mounted', import.meta.env.MODE);
+  }
+
   const [consent, setConsent] = useState(hasHistoryConsent());
   const [history, setHistory] = useState<OCRHistoryEntry[]>([]);
   const [stats, setStats] = useState(getHistoryStats());

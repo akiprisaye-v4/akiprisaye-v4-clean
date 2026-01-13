@@ -95,8 +95,9 @@ const ScanFlow = lazyWithRetry(() => import('./pages/ScanFlow'));
 const ProductPhotoAnalysis = lazyWithRetry(() => import('./pages/ProductPhotoAnalysis'));
 
 // OCR Hub - Unified entry point for all OCR features
-const OCRHub = lazyWithRetry(() => import('./pages/ocr/OCRHub'));
-const OCRHistory = lazyWithRetry(() => import('./pages/ocr/OCRHistory'));
+// Direct imports (NO lazy loading) to prevent tree-shaking
+import OCRHub from './pages/ocr/OCRHub';
+import OCRHistory from './pages/ocr/OCRHistory';
 
 // Store Detail Page with company info, graphs, and history
 const StoreDetail = lazyWithRetry(() => import('./pages/StoreDetail'));
@@ -240,8 +241,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                     <Route path='/' element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path='chat' element={<ChatIALocal />} />
+                  
+                  {/* OCR ROUTES - Direct imports (no lazy loading) */}
                   <Route path='ocr' element={<OCRHub />} />
                   <Route path='ocr/history' element={<OCRHistory />} />
+                  
                   <Route path='scan' element={<ScanOCR />} />
                   <Route path='scan-ean' element={<ScanEAN />} />
                   <Route path='scanner-produit' element={<ScanFlow />} />

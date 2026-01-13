@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import OCRCard from '../../components/ocr/OCRCard';
 
@@ -94,6 +94,11 @@ const GOVERNANCE_PRINCIPLES = [
 
 export default function OCRHub() {
   const navigate = useNavigate();
+
+  // Production proof: Log when component mounts
+  if (import.meta.env.MODE === 'production') {
+    console.info('[OCR] OCRHub mounted', import.meta.env.MODE);
+  }
 
   const handleNavigate = (route: string) => {
     navigate(route);
