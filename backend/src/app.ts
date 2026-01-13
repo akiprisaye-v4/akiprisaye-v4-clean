@@ -27,6 +27,8 @@ import opendataRoutes from './api/routes/opendata.routes.js';
 import geocodingRoutes from './routes/geocoding.js';
 import storesRoutes from './routes/stores.js';
 import productsRoutes from './routes/products.js';
+// Phase 8: Basket comparison routes
+import basketRoutes from './routes/basket.js';
 
 // Import middlewares
 import { apiLimiter } from './api/middlewares/rateLimit.middleware.js';
@@ -136,6 +138,7 @@ app.get('/', (_req: Request, res: Response) => {
       geocoding: '/api/geocoding', // Phase 7
       stores: '/api/stores', // Phase 7
       products: '/api/products', // Phase 7
+      basket: '/api/basket', // Phase 8
     },
     legal: {
       rgpd: 'Conforme RGPD (EU) 2016/679',
@@ -179,6 +182,9 @@ app.use('/api/opendata', opendataRoutes);
 app.use('/api/geocoding', geocodingRoutes);
 app.use('/api/stores', storesRoutes);
 app.use('/api/products', productsRoutes);
+
+// Phase 8: Basket comparison API routes (publiques avec rate limiting)
+app.use('/api/basket', basketRoutes);
 
 // ========================================
 // Gestion des erreurs
