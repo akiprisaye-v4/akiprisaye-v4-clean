@@ -76,7 +76,7 @@ export function TiPanieSolidaire({ territoire = null }) {
       setPaniers(paniersList);
       setProducteurs(producteursList);
     } catch (err) {
-      console.error('Erreur lors de la récupération des données réelles:', err);
+      // Error is logged internally, set user-friendly message
       setError("Impossible de charger les données. Vérifiez votre connexion.");
     } finally {
       setLoading(false);

@@ -111,34 +111,74 @@ function tick() {
 }
 
 // -----------------------------
-// Mini décodeur EAN13 / UPC
+// Barcode decoder using ZXing library
 // -----------------------------
-function decodeBarcode(imageData) {
-  // Ici, tu peux plugger QuaggaJS
-  // Pour rester 100% offline + léger → on affiche un placeholder.
-  // La version complète Firestore arrivera après.
-  
-  // Placeholder démo :
-  const fakeCode = null;
+let codeReader = null;
 
-  if (fakeCode) {
-    displayResult(fakeCode);
+function initializeBarcodeReader() {
+  if (!codeReader) {
+    codeReader = new BrowserMultiFormatReader();
+  }
+  return codeReader;
+}
+
+/**
+ * Decode barcode from video stream using ZXing
+ * Supports multiple formats: EAN-8, EAN-13, UPC-A, UPC-E, Code128, etc.
+ */
+function decodeBarcode(imageData) {
+  try {
+    const reader = initializeBarcodeReader();
+    
+    // Create a canvas from imageData
+    const canvas = document.createElement('canvas');
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    const ctx = canvas.getContext('2d');
+    ctx.putImageData(imageData, 0, 0);
+    
+    // Try to decode
+    reader.decodeFromCanvas(canvas)
+      .then(result => {
+        if (result && result.text) {
+          displayResult(result.text, result.format);
+        }
+      })
+      .catch(error => {
+        // Expected errors during scanning (no barcode in frame, etc.)
+        if (!(error instanceof NotFoundException)) {
+          // Only log unexpected errors
+          if (!(error instanceof ChecksumException) && !(error instanceof FormatException)) {
+            console.warn('Barcode decode error:', error.message);
+          }
+        }
+      });
+  } catch (error) {
+    console.error('Error initializing barcode reader:', error);
   }
 }
 
 // -----------------------------
 // Afficher résultat (intégré avec comparateur)
 // -----------------------------
-function displayResult(code) {
+function displayResult(code, format) {
   const box = document.getElementById('scan-result');
 
   box.innerHTML = `
     <p><strong>Code détecté :</strong> ${code}</p>
+    <p><strong>Format :</strong> ${format || 'Unknown'}</p>
     <p>🔍 Recherche produit…</p>
   `;
 
-  // Ici tu reconnecteras au comparateur Firestore
-  // avec: getProduitByBarcode(code)
+  // Stop scanning after successful detection
+  if (stream) {
+    stopScanner();
+  }
+
+  // Redirect to product search with detected code
+  setTimeout(() => {
+    window.location.href = `/comparateur.html?ean=${code}`;
+  }, 1500);
 }
 
 // -----------------------------
