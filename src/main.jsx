@@ -95,7 +95,7 @@ const ScanFlow = lazyWithRetry(() => import('./pages/ScanFlow'));
 const ProductPhotoAnalysis = lazyWithRetry(() => import('./pages/ProductPhotoAnalysis'));
 
 // OCR Hub - Unified entry point for all OCR features
-// CRITICAL: Direct imports (NO lazy loading) to prevent tree-shaking
+// Direct imports (NO lazy loading) to prevent tree-shaking
 import OCRHub from './pages/ocr/OCRHub';
 import OCRHistory from './pages/ocr/OCRHistory';
 
@@ -228,14 +228,6 @@ window.addEventListener('unhandledrejection', (event) => {
   }
 });
 
-// PROOF: OCR routes are loaded in bundle (ALWAYS - production included)
-console.log('[OCR Routes] ✅ OCR Hub and OCR History routes are registered and included in bundle');
-console.log('[OCR Routes] Routes: /ocr and /ocr/history');
-console.log('[OCR Routes] Components imported directly (no lazy load):', {
-  OCRHub: typeof OCRHub,
-  OCRHistory: typeof OCRHistory
-});
-
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -250,20 +242,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route index element={<Home />} />
                   <Route path='chat' element={<ChatIALocal />} />
                   
-                  {/* OCR ROUTES - DIRECT IMPORT (NO LAZY) - PROOF ACTIVE */}
+                  {/* OCR ROUTES - Direct imports (no lazy loading) */}
                   <Route path='ocr' element={<OCRHub />} />
                   <Route path='ocr/history' element={<OCRHistory />} />
-                  
-                  {/* DEBUG ROUTE - Proof OCR router is active */}
-                  <Route path='ocr-debug' element={
-                    <div style={{padding: '40px', textAlign: 'center', backgroundColor: '#10b981', color: 'white', fontSize: '24px', fontWeight: 'bold'}}>
-                      ✅ OCR ROUTER ACTIVE - Routes /ocr and /ocr/history are registered
-                      <br/><br/>
-                      <a href="/ocr" style={{color: 'white', textDecoration: 'underline'}}>Go to /ocr</a>
-                      {' | '}
-                      <a href="/ocr/history" style={{color: 'white', textDecoration: 'underline'}}>Go to /ocr/history</a>
-                    </div>
-                  } />
                   
                   <Route path='scan' element={<ScanOCR />} />
                   <Route path='scan-ean' element={<ScanEAN />} />
