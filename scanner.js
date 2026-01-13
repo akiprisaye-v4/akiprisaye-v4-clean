@@ -171,11 +171,14 @@ function decodeBarcode(imageData) {
       .catch(error => {
         // Expected errors during scanning (no barcode in frame, etc.)
         // NotFoundException, ChecksumException, FormatException are expected
+        // Only log unexpected errors to avoid console noise
         if (error && error.name && !['NotFoundException', 'ChecksumException', 'FormatException'].includes(error.name)) {
+          // Keep console.warn for client-side debugging (this is a browser script)
           console.warn('Barcode decode error:', error.message);
         }
       });
   } catch (error) {
+    // Keep console.error for critical initialization errors (browser script)
     console.error('Error initializing barcode reader:', error);
   }
 }

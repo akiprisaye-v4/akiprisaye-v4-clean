@@ -1,20 +1,30 @@
 /**
  * Simple in-memory rate limiter for Cloudflare Functions
- * Note: In production, use Durable Objects or KV for distributed rate limiting
+ * 
+ * NOTE: This is a simple implementation suitable for development and low-traffic scenarios.
+ * For production with high traffic or multiple instances, consider:
+ * - Cloudflare Durable Objects for distributed rate limiting
+ * - Cloudflare KV for persistent rate limit storage
+ * - Redis for shared rate limit state across instances
  */
 
 // Store: IP -> { count, resetTime }
 const rateLimitStore = new Map();
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of rateLimitStore.entries()) {
-    if (data.resetTime < now) {
-      rateLimitStore.delete(ip);
+// Cleanup old entries periodically
+// Note: In serverless environments, this may not run consistently
+// Consider using KV with TTL or Durable Objects for production
+let cleanupInterval;
+if (typeof setInterval !== 'undefined') {
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [ip, data] of rateLimitStore.entries()) {
+      if (data.resetTime < now) {
+        rateLimitStore.delete(ip);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  }, 5 * 60 * 1000);
+}
 
 /**
  * Check if an IP has exceeded the rate limit
