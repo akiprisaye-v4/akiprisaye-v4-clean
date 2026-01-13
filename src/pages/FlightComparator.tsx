@@ -11,6 +11,7 @@ import {
   filterFlightPrices,
 } from '../services/flightComparisonService';
 import PriceChart from '../components/comparateur/PriceChart';
+import ComparisonSummary from '../components/comparateur/ComparisonSummary';
 import { exportFlightComparisonToCSV, exportFlightComparisonToText } from '../utils/exportComparison';
 
 const FlightComparator: React.FC = () => {
@@ -345,6 +346,24 @@ const FlightComparator: React.FC = () => {
           {/* Comparison Results */}
           {comparisonResult ? (
             <>
+              {/* Quick Summary */}
+              <ComparisonSummary
+                bestPrice={comparisonResult.aggregation.minPrice}
+                worstPrice={comparisonResult.aggregation.maxPrice}
+                averagePrice={comparisonResult.aggregation.averagePrice}
+                savingsPercentage={comparisonResult.aggregation.priceRangePercentage}
+                bestProvider={comparisonResult.airlines[0].flightPrice.airline}
+                totalObservations={comparisonResult.aggregation.totalObservations}
+                bestTiming={
+                  comparisonResult.purchaseTimingAnalysis?.optimalPurchaseWindow
+                    ? {
+                        label: 'Fenêtre optimale',
+                        daysRange: `${comparisonResult.purchaseTimingAnalysis.optimalPurchaseWindow.daysBeforeDeparture.min}-${comparisonResult.purchaseTimingAnalysis.optimalPurchaseWindow.daysBeforeDeparture.max} jours avant`,
+                      }
+                    : undefined
+                }
+              />
+
               {/* Aggregation Stats */}
               <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
                 <h2 className="text-lg font-semibold text-gray-100 mb-4">Statistiques</h2>

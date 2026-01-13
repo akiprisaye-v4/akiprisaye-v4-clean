@@ -1,11 +1,18 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "lastUpdated": "2026-01-13T23:22:34.394Z",
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-13T23:28:00.816Z",
     "description": "Comparateur de prix des bateaux/ferries - Inter-îles, Transport véhicules",
     "disclaimer": "A KI PRI SA YÉ observe les prix, ne vend pas. Transparence sur les écarts, pas d'affiliation opaque.",
     "methodology": "v1.0.0",
-    "updateFrequency": "weekly"
+    "updateFrequency": "weekly",
+    "features": [
+      "Visualisations graphiques des prix",
+      "Export CSV et texte",
+      "8 observations de prix",
+      "Comparaison prix passagers et véhicules",
+      "Routes inter-îles Antilles"
+    ]
   },
   "ports": [
     {

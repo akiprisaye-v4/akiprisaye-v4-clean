@@ -1,11 +1,18 @@
 {
   "metadata": {
-    "version": "1.0.0",
-    "lastUpdated": "2026-01-13T23:22:34.393Z",
+    "version": "1.1.0",
+    "lastUpdated": "2026-01-13T23:28:00.815Z",
     "description": "Comparateur de prix des vols - DOM ↔ Métropole ↔ Régional",
     "disclaimer": "A KI PRI SA YÉ observe les prix, ne vend pas. Transparence sur les écarts, pas d'affiliation opaque.",
     "methodology": "v1.0.0",
-    "updateFrequency": "weekly"
+    "updateFrequency": "weekly",
+    "features": [
+      "Visualisations graphiques interactives",
+      "Export CSV et texte",
+      "15 observations de prix",
+      "Analyse temporelle avancée",
+      "Couverture Guadeloupe, Martinique, Guyane, Réunion"
+    ]
   },
   "airports": [
     {

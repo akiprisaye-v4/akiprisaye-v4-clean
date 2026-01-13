@@ -10,6 +10,7 @@ import {
   compareBoatPricesByRoute,
 } from '../services/boatComparisonService';
 import PriceChart from '../components/comparateur/PriceChart';
+import ComparisonSummary from '../components/comparateur/ComparisonSummary';
 import { exportBoatComparisonToCSV, exportBoatComparisonToText } from '../utils/exportComparison';
 
 const BoatComparator: React.FC = () => {
@@ -316,6 +317,19 @@ const BoatComparator: React.FC = () => {
           {/* Comparison Results */}
           {comparisonResult ? (
             <>
+              {/* Quick Summary */}
+              <ComparisonSummary
+                bestPrice={comparisonResult.aggregation.passengerPricing.minPrice}
+                worstPrice={comparisonResult.aggregation.passengerPricing.maxPrice}
+                averagePrice={comparisonResult.aggregation.passengerPricing.averagePrice}
+                savingsPercentage={
+                  ((comparisonResult.aggregation.passengerPricing.maxPrice - comparisonResult.aggregation.passengerPricing.minPrice) / 
+                  comparisonResult.aggregation.passengerPricing.maxPrice) * 100
+                }
+                bestProvider={comparisonResult.operators[0].boatPrice.operator}
+                totalObservations={comparisonResult.aggregation.totalObservations}
+              />
+
               {/* Aggregation Stats */}
               <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
                 <h2 className="text-lg font-semibold text-gray-100 mb-4">Statistiques</h2>
