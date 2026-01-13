@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, ShoppingCart, Trash2, Edit2, TrendingDown } from 'lucide-react';
-import { shoppingListService } from '../services/shoppingListService';
+import { shoppingListService } from '../services/smartShoppingListService';
 import type { ShoppingList } from '../types/shoppingList';
 
 export function ShoppingListManager() {
