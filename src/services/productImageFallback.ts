@@ -13,20 +13,10 @@
  * @module productImageFallback
  */
 
-export type ProductCategory = 
-  | 'alimentaire'
-  | 'boissons'
-  | 'hygiene'
-  | 'entretien'
-  | 'bebe'
-  | 'viande'
-  | 'poisson'
-  | 'fruits-legumes'
-  | 'pain-patisserie'
-  | 'produits-laitiers'
-  | 'epicerie'
-  | 'surgeles'
-  | 'autre';
+import type { ProductCategory as BaseProductCategory } from '../types/product';
+
+// Extend with additional fallback-specific categories if needed
+export type ProductCategory = BaseProductCategory;
 
 export interface FallbackIcon {
   category: ProductCategory;

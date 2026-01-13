@@ -27,7 +27,10 @@ import {
   where, 
   getDocs,
   orderBy,
-  limit
+  limit,
+  getDoc,
+  updateDoc,
+  doc
 } from 'firebase/firestore';
 import type { TerritoryCode } from '../types/extensions';
 import type { PhotoContribution } from '../components/PhotoContributionModal';
@@ -176,10 +179,12 @@ export async function submitPhotoContribution(
   const photoUrl = await uploadContributionPhoto(contribution, docRef.id);
   
   // Update contribution with photo URL
-  await addDoc(contributionsRef, {
-    id: docRef.id,
-    photoUrl
-  });
+  const docSnapshot = await getDoc(docRef);
+  if (docSnapshot.exists()) {
+    await updateDoc(docRef, {
+      photoUrl
+    });
+  }
   
   // Log contribution for audit trail
   await logContribution({
@@ -380,11 +385,10 @@ export async function moderateContribution(
   moderatorId?: string
 ): Promise<void> {
   const db = getFirestore();
-  const contributionsRef = collection(db, 'contributions');
+  const contributionRef = doc(db, 'contributions', contributionId);
   
   // Update contribution status
-  await addDoc(contributionsRef, {
-    id: contributionId,
+  await updateDoc(contributionRef, {
     status: decision,
     moderatedAt: serverTimestamp(),
     moderatedBy: moderatorId || 'system',

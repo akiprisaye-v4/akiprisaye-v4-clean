@@ -150,6 +150,11 @@ export default function PhotoContributionModal({
     setError(null);
 
     try {
+      // Trim values once
+      const trimmedProductName = productName.trim();
+      const trimmedBarcode = barcode.trim();
+      const trimmedStoreName = storeName.trim();
+
       // Get geolocation if requested
       let location: { latitude: number; longitude: number } | undefined;
       if (useGeolocation && navigator.geolocation) {
@@ -169,10 +174,10 @@ export default function PhotoContributionModal({
       const contribution: PhotoContribution = {
         image: compressionResult.blob,
         imageDataUrl: compressionResult.dataUrl,
-        productName: productName.trim(),
-        barcode: barcode.trim() || undefined,
+        productName: trimmedProductName,
+        barcode: trimmedBarcode || undefined,
         territory,
-        storeName: storeName.trim() || undefined,
+        storeName: trimmedStoreName || undefined,
         consentGiven: true,
         location,
         metadata: {

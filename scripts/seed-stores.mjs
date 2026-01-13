@@ -171,7 +171,7 @@ const STORES_DATA = {
     },
     {
       name: 'Carrefour Market Lamentin',
-      address: 'Place dArmes',
+      address: 'Place d\'Armes',
       postalCode: '97232',
       city: 'Le Lamentin',
       territory: 'DOM',
@@ -273,7 +273,7 @@ const STORES_DATA = {
     },
     {
       name: 'Super U Kourou',
-      address: 'Avenue de lEspace',
+      address: 'Avenue de l\'Espace',
       postalCode: '97310',
       city: 'Kourou',
       territory: 'DOM',
