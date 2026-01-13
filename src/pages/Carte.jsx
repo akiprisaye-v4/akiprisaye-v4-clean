@@ -112,6 +112,9 @@ export default function Carte() {
   const [sortByDistance, setSortByDistance] = useState(false);
   const [nearMeRadius, setNearMeRadius] = useState(10); // km
   const [showNearMeOnly, setShowNearMeOnly] = useState(false);
+  
+  // Phase 5: Clustering state
+  const [enableClustering, setEnableClustering] = useState(true);
 
   // Constants
   const NAVIGATION_TIMEOUT = 1000; // Timeout for resetting navigation state
@@ -795,6 +798,27 @@ export default function Carte() {
           </div>
         )}
 
+        {/* Phase 5: Map Options */}
+        <div className="mb-4 flex items-center justify-between bg-slate-800/50 border border-slate-700 rounded-lg p-3">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-slate-300">🗺️ Options de la carte</span>
+            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-blue-400 transition">
+              <input
+                type="checkbox"
+                checked={enableClustering}
+                onChange={(e) => setEnableClustering(e.target.checked)}
+                className="rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-800"
+              />
+              <span className="flex items-center gap-1">
+                {enableClustering ? '✓ Regroupement actif' : 'Regroupement désactivé'}
+              </span>
+            </label>
+          </div>
+          <span className="text-xs text-slate-500">
+            {enableClustering ? 'Les marqueurs proches sont regroupés' : 'Tous les marqueurs sont visibles'}
+          </span>
+        </div>
+
         {/* Map Container */}
         <div className="rounded-lg overflow-hidden border border-slate-700 shadow-xl h-[600px] bg-slate-800">
           <MapContainer
@@ -809,7 +833,19 @@ export default function Carte() {
             />
             <MapUpdater position={territoryPositions[territory]} />
             
-            {filteredStores.map((store, index) => {
+            {/* Phase 5: Conditional rendering - Clustering or Individual Markers */}
+            {enableClustering ? (
+              <MarkerClusterGroup 
+                stores={filteredStores}
+                isNavigating={isNavigating}
+                handleGPS={handleGPS}
+                currentTerritory={currentTerritory}
+                formatDistance={formatDistance}
+                estimateTravelTime={estimateTravelTime}
+                formatTravelTime={formatTravelTime}
+              />
+            ) : (
+              filteredStores.map((store, index) => {
               const storeKey = `${store.lat},${store.lon}`;
               const isStoreNavigating = isNavigating[storeKey] || false;
               
@@ -902,7 +938,8 @@ export default function Carte() {
                 </Popup>
               </Marker>
             );
-            })}
+            })
+            )}
 
             {userPosition && (
               <Marker
