@@ -9,7 +9,6 @@
  * - AI-powered shopping assistant
  */
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Brain, MessageCircle, TrendingUp, Sparkles, ShoppingBag, HelpCircle } from 'lucide-react';

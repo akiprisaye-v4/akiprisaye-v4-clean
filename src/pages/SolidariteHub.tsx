@@ -8,7 +8,6 @@
  * - Civic modules
  */
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Heart, ShoppingBasket, Users, Handshake, Leaf, Building2 } from 'lucide-react';

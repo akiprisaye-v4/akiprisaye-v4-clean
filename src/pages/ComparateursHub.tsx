@@ -11,7 +11,6 @@
  * - Services (flights, boats, telecoms)
  */
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { 
@@ -131,8 +130,6 @@ const COMPARATOR_TABS: ComparatorTab[] = [
 ];
 
 export default function ComparateursHub() {
-  const [activeTab, setActiveTab] = useState('classic');
-
   const getColorClasses = (color: string, type: 'bg' | 'text' | 'border' | 'hover') => {
     const colorMap: Record<string, Record<string, string>> = {
       blue: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30', hover: 'hover:border-blue-500/50' },

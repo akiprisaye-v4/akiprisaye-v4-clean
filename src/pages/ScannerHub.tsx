@@ -8,7 +8,6 @@
  * - Photo analysis (identify product by image)
  */
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Barcode, FileText, ShoppingBag, Camera, History, Info } from 'lucide-react';
