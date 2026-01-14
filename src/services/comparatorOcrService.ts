@@ -51,6 +51,10 @@ export async function extractTextFromImageFile(
       language,
       structured: undefined,
     };
+  } catch (error) {
+    // Clean up on error
+    URL.revokeObjectURL(imageUrl);
+    throw error;
   } finally {
     // Clean up the object URL
     URL.revokeObjectURL(imageUrl);

@@ -116,7 +116,25 @@ export async function getUserAlerts(userId: string): Promise<Alert[]> {
  * @returns Array of alerts
  * 
  * Note: This query requires Firestore composite indexes.
- * Create indexes for: (comparatorType, active), (comparatorType, active, territory)
+ * 
+ * To create the required indexes:
+ * 1. Via Firebase Console: Go to Firestore > Indexes and create composite indexes for:
+ *    - Collection: alerts, Fields: comparatorType (Ascending), active (Ascending)
+ *    - Collection: alerts, Fields: comparatorType (Ascending), active (Ascending), territory (Ascending)
+ * 
+ * 2. Via Firebase CLI (firestore.indexes.json):
+ *    {
+ *      "indexes": [
+ *        {
+ *          "collectionGroup": "alerts",
+ *          "queryScope": "COLLECTION",
+ *          "fields": [
+ *            { "fieldPath": "comparatorType", "order": "ASCENDING" },
+ *            { "fieldPath": "active", "order": "ASCENDING" }
+ *          ]
+ *        }
+ *      ]
+ *    }
  */
 export async function getAlertsByComparator(
   comparatorType: string,

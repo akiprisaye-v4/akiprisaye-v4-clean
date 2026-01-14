@@ -40,6 +40,9 @@ export function useContribution(comparatorType?: string): UseContributionReturn 
 
   /**
    * Submit a generic contribution
+   * 
+   * @deprecated This is a placeholder for future unified contribution API.
+   * For now, use the specific methods: submitPhoto, submitPrice, submitMissing
    */
   const submitContribution = async (data: ContributionData): Promise<string> => {
     setLoading(true);
@@ -52,7 +55,7 @@ export function useContribution(comparatorType?: string): UseContributionReturn 
       
       // This is a placeholder - actual implementation would depend on 
       // how generic contributions are stored
-      throw new Error('Generic contribution submission not yet implemented');
+      throw new Error('Generic contribution submission not yet implemented. Use submitPhoto, submitPrice, or submitMissing.');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erreur lors de la soumission';
       setError(message);
