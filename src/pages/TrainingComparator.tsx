@@ -18,6 +18,8 @@ import type { Territory } from '../types/priceAlerts';
 import type { 
   TrainingProgram, 
   TrainingFilters,
+  TrainingLevel,
+  TrainingMode,
   JobMarket,
   UserProfile,
   JobMatch
@@ -364,7 +366,13 @@ const TrainingComparator: React.FC = () => {
 
                     <select
                       value={filters.level || ''}
-                      onChange={(e) => setFilters({ ...filters, level: e.target.value as any || undefined })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFilters({ 
+                          ...filters, 
+                          level: value ? value as TrainingLevel : undefined 
+                        });
+                      }}
                       className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
                     >
                       <option value="">Tous les niveaux</option>
@@ -378,7 +386,13 @@ const TrainingComparator: React.FC = () => {
 
                     <select
                       value={filters.mode || ''}
-                      onChange={(e) => setFilters({ ...filters, mode: e.target.value as any || undefined })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFilters({ 
+                          ...filters, 
+                          mode: value ? value as TrainingMode : undefined 
+                        });
+                      }}
                       className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
                     >
                       <option value="">Tous les modes</option>

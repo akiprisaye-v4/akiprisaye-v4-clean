@@ -43,7 +43,7 @@ export async function submitFeedback(
   // In production, this would POST to an API
   const newFeedback: TrainingFeedback = {
     ...feedback,
-    id: `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    id: `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     createdAt: new Date().toISOString(),
     verified: false, // Would require admin verification
   };
