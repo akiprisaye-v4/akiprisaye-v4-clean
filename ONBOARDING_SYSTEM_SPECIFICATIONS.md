@@ -1076,13 +1076,14 @@ Le système d'onboarding doit fonctionner:
 
 ### Stack Technologique
 
-- **Frontend:** React 18 + TypeScript
+- **Frontend:** React 18.3.1 + TypeScript 5.9.3
+- **Build:** Vite 7.2.2
 - **State Management:** Context API + Hooks
-- **Styling:** Tailwind CSS + CSS Modules
+- **Styling:** Tailwind CSS 4.1.17 + CSS Modules
 - **Animations:** CSS Transitions + Framer Motion (optionnel)
 - **Storage:** localStorage (+ sessionStorage fallback)
-- **Testing:** Vitest + Testing Library
-- **Accessibility:** axe-core
+- **Testing:** Vitest 4.0.8 + Testing Library
+- **Accessibility:** axe-core 4.11.1
 
 ### Structure des Fichiers
 
