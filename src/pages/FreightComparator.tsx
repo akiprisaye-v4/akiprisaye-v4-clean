@@ -44,6 +44,10 @@ import {
   simulateFreightQuote,
   calculateOctroiDeMer,
 } from '../services/freightComparisonService';
+import {
+  exportFreightComparisonToCSV,
+  exportFreightComparisonToText,
+} from '../utils/exportComparison';
 
 const FreightComparator: React.FC = () => {
   // State
@@ -458,17 +462,38 @@ const FreightComparator: React.FC = () => {
                       <TrendingUp className="w-5 h-5 text-blue-400" />
                       Résultats de la comparaison
                     </h2>
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-400">Trier par:</label>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-gray-100"
+                    <div className="flex items-center gap-3">
+                      {/* Export Buttons */}
+                      <button
+                        onClick={() => exportFreightComparisonToCSV(comparisonResult)}
+                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1.5"
+                        title="Exporter en CSV"
                       >
-                        <option value="price">Prix</option>
-                        <option value="reliability">Fiabilité</option>
-                        <option value="delay">Délai</option>
-                      </select>
+                        <Download className="w-4 h-4" />
+                        <span>CSV</span>
+                      </button>
+                      <button
+                        onClick={() => exportFreightComparisonToText(comparisonResult)}
+                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center gap-1.5"
+                        title="Exporter en TXT"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>TXT</span>
+                      </button>
+                      
+                      {/* Sort Control */}
+                      <div className="flex items-center gap-2 ml-2 pl-2 border-l border-slate-600">
+                        <label className="text-sm text-gray-400">Trier par:</label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value as any)}
+                          className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-gray-100"
+                        >
+                          <option value="price">Prix</option>
+                          <option value="reliability">Fiabilité</option>
+                          <option value="delay">Délai</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
 
