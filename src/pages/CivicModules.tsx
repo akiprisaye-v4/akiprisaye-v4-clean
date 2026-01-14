@@ -114,12 +114,12 @@ export default function CivicModules() {
               
               {/* Secondary CTAs Grid */}
               <div className="grid md:grid-cols-2 gap-3">
-                <Link
-                  to="/liste-courses"
+                <a
+                  href="#gps-shopping"
                   onClick={(e) => {
+                    e.preventDefault();
                     const element = document.getElementById('gps-shopping');
                     if (element) {
-                      e.preventDefault();
                       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                       element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
                     }
@@ -130,7 +130,7 @@ export default function CivicModules() {
                   <p className="text-xs text-gray-400 leading-relaxed">
                     Trouvez les meilleurs magasins près de chez vous
                   </p>
-                </Link>
+                </a>
                 <Link
                   to="/evaluation-cosmetique"
                   className="block p-3 bg-slate-800/50 border border-green-700/50 rounded-lg hover:bg-slate-800/70 transition-colors"
