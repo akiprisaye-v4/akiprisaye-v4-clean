@@ -132,6 +132,15 @@ export default function CivicModules() {
                   </p>
                 </a>
                 <a
+                  href="/evaluation-cosmetique"
+                  className="block p-3 bg-slate-800/50 border border-green-700/50 rounded-lg hover:bg-slate-800/70 transition-colors"
+                >
+                  <h3 className="font-medium text-green-200 mb-1 text-sm">🧴 Évaluation Cosmétiques</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Analysez la composition de vos produits cosmétiques
+                  </p>
+                </a>
+                <a
                   href="/contribuer-prix"
                   className="block p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg hover:bg-slate-800/70 transition-colors"
                 >
