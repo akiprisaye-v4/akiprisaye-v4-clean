@@ -236,13 +236,21 @@ export class CreditsService {
         },
       });
       
-      // Bloquer crédits
-      await this.spendCredits(
-        userId,
-        amount,
-        `Redemption: ${method}`,
-        { redemptionId: redemption.id }
-      );
+      // Bloquer crédits (créer transaction directement sans appeler spendCredits)
+      const transaction = await tx.creditTransaction.create({
+        data: {
+          userId,
+          type: 'SPEND',
+          amount: -amount,
+          source: JSON.stringify({ type: 'marketplace' }),
+          description: `Redemption: ${method}`,
+          metadata: JSON.stringify({ redemptionId: redemption.id }),
+          balance: 0,
+        },
+      });
+      
+      // Mettre à jour balance
+      await this.updateBalance(userId, tx);
       
       return {
         ...redemption,

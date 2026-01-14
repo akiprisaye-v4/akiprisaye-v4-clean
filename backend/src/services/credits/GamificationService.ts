@@ -133,9 +133,22 @@ export class GamificationService {
     
     // Vérifier parrainages
     if (requirements.referrals) {
-      // Note: Système de parrainage à implémenter séparément
-      // Pour l'instant, on retourne false
-      return false;
+      // Note: Système de parrainage nécessite une table Referrals
+      // TODO: Implémenter vérification quand table Referrals sera ajoutée
+      // Pour l'instant, on vérifie via metadata dans les transactions
+      const referralCredits = await this.prisma.creditTransaction.count({
+        where: {
+          userId,
+          type: 'EARN',
+          source: {
+            contains: '"contributionType":"referral_signup"',
+          },
+        },
+      });
+      
+      if (referralCredits < requirements.referrals) {
+        return false;
+      }
     }
     
     // Vérifier contributions vérifiées
@@ -157,9 +170,22 @@ export class GamificationService {
     
     // Vérifier territoire
     if (requirements.territory) {
-      // Note: Il faudrait vérifier les contributions par territoire
-      // Pour l'instant, on suppose que c'est vérifié ailleurs
-      // return false;
+      // Note: Vérifier contributions par territoire nécessite enrichissement données
+      // TODO: Ajouter territoryCode dans les métadonnées des contributions
+      // Pour l'instant, on vérifie via source dans les transactions
+      const territoryContributions = await this.prisma.creditTransaction.count({
+        where: {
+          userId,
+          type: 'EARN',
+          metadata: {
+            contains: `"territory":"${requirements.territory}"`,
+          },
+        },
+      });
+      
+      if (requirements.contributions && territoryContributions < requirements.contributions) {
+        return false;
+      }
     }
     
     return true;
