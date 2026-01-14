@@ -4,6 +4,7 @@
 
 import type { FlightComparisonResult } from '../types/flightComparison';
 import type { BoatComparisonResult } from '../types/boatComparison';
+import type { FuelComparisonResult } from '../types/fuelComparison';
 
 /**
  * Format price as EUR currency
@@ -259,4 +260,84 @@ const downloadText = (content: string, filename: string): void => {
   
   // Revoke the URL to free up memory
   URL.revokeObjectURL(url);
+};
+
+/**
+ * Export fuel comparison to CSV
+ */
+export const exportFuelComparisonToCSV = (result: FuelComparisonResult): void => {
+  const headers = [
+    'Rang',
+    'Station',
+    'Ville',
+    'Carburant',
+    'Prix (€/L)',
+    'Différence vs moins cher (€)',
+    'Différence vs moins cher (%)',
+    'Catégorie',
+    'Prix plafonné'
+  ];
+
+  const rows = result.rankedPrices.map(ranking => [
+    escapeCSV(ranking.rank),
+    escapeCSV(ranking.fuelPrice.station.name),
+    escapeCSV(ranking.fuelPrice.station.city),
+    escapeCSV(ranking.fuelPrice.fuelType),
+    escapeCSV(ranking.fuelPrice.pricePerLiter.toFixed(3)),
+    escapeCSV(ranking.absoluteDifferenceFromCheapest.toFixed(3)),
+    escapeCSV(ranking.percentageDifferenceFromCheapest.toFixed(2)),
+    escapeCSV(ranking.priceCategory),
+    escapeCSV(ranking.fuelPrice.isPriceCapPlafonne ? 'Oui' : 'Non')
+  ]);
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.join(','))
+  ].join('\n');
+
+  downloadCSV(csvContent, `comparaison-carburants-${result.territory}-${result.fuelType}-${Date.now()}.csv`);
+};
+
+/**
+ * Export fuel comparison to text
+ */
+export const exportFuelComparisonToText = (result: FuelComparisonResult): void => {
+  let text = `COMPARAISON DES PRIX DES CARBURANTS\n`;
+  text += `====================================\n\n`;
+  text += `Territoire: ${result.territory}\n`;
+  text += `Type de carburant: ${result.fuelType}\n`;
+  text += `Date: ${new Date(result.comparisonDate).toLocaleDateString('fr-FR')}\n`;
+  text += `Nombre de stations: ${result.metadata.totalStations}\n\n`;
+
+  text += `STATISTIQUES\n`;
+  text += `------------\n`;
+  text += `Prix minimum: ${formatPrice(result.aggregation.minPrice)}/L\n`;
+  text += `Prix moyen: ${formatPrice(result.aggregation.averagePrice)}/L\n`;
+  text += `Prix maximum: ${formatPrice(result.aggregation.maxPrice)}/L\n`;
+  text += `Écart de prix: ${formatPrice(result.aggregation.priceRange)}/L (${result.aggregation.priceRangePercentage.toFixed(1)}%)\n`;
+  if (result.aggregation.priceCapOfficiel) {
+    text += `Prix plafonné officiel: ${formatPrice(result.aggregation.priceCapOfficiel)}/L\n`;
+  }
+  text += `\n`;
+
+  text += `CLASSEMENT DES STATIONS\n`;
+  text += `-----------------------\n`;
+  result.rankedPrices.forEach((ranking, index) => {
+    text += `\n${index + 1}. ${ranking.fuelPrice.station.name} - ${ranking.fuelPrice.station.city}\n`;
+    text += `  Prix: ${formatPrice(ranking.fuelPrice.pricePerLiter)}/L\n`;
+    if (ranking.fuelPrice.isPriceCapPlafonne) {
+      text += `  ⭐ Prix plafonné officiel\n`;
+    }
+    text += `  Différence vs moins cher: ${ranking.percentageDifferenceFromCheapest > 0 ? '+' : ''}${ranking.percentageDifferenceFromCheapest.toFixed(1)}%\n`;
+    if (ranking.fuelPrice.station.brand) {
+      text += `  Enseigne: ${ranking.fuelPrice.station.brand}\n`;
+    }
+  });
+
+  text += `\n\nSOURCE\n`;
+  text += `------\n`;
+  text += `${result.metadata.dataSource}\n`;
+  text += `Méthodologie: ${result.metadata.methodology}\n`;
+
+  downloadText(text, `comparaison-carburants-${result.territory}-${result.fuelType}-${Date.now()}.txt`);
 };
