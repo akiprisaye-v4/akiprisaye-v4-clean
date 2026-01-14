@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 export class StripeWebhookHandler {
   async handleWebhook(event: Stripe.Event): Promise<void> {
-    console.log(\`Stripe webhook received: \${event.type}\`);
+    console.log(`Stripe webhook received: ${event.type}`);
     
     switch (event.type) {
       case 'customer.subscription.created':
@@ -38,32 +38,32 @@ export class StripeWebhookHandler {
         break;
         
       default:
-        console.log(\`Unhandled event type: \${event.type}\`);
+        console.log(`Unhandled event type: ${event.type}`);
     }
   }
   
   private async handleSubscriptionCreated(subscription: Stripe.Subscription): Promise<void> {
-    console.log(\`Subscription created: \${subscription.id}\`);
+    console.log(`Subscription created: ${subscription.id}`);
   }
   
   private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
-    console.log(\`Subscription updated: \${subscription.id}\`);
+    console.log(`Subscription updated: ${subscription.id}`);
   }
   
   private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
-    console.log(\`Subscription deleted: \${subscription.id}\`);
+    console.log(`Subscription deleted: ${subscription.id}`);
   }
   
   private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
-    console.log(\`Invoice payment succeeded: \${invoice.id}\`);
+    console.log(`Invoice payment succeeded: ${invoice.id}`);
   }
   
   private async handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-    console.log(\`Invoice payment failed: \${invoice.id}\`);
+    console.log(`Invoice payment failed: ${invoice.id}`);
   }
   
   private async handleTrialWillEnd(subscription: Stripe.Subscription): Promise<void> {
-    console.log(\`Trial will end: \${subscription.id}\`);
+    console.log(`Trial will end: ${subscription.id}`);
   }
 }
 

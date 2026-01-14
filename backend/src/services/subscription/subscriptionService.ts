@@ -22,7 +22,7 @@ export class SubscriptionService {
     const { userId, planId, paymentMethodId, interval } = params;
     
     const plan = getSubscriptionPlan(planId);
-    if (!plan) throw new Error(\`Plan not found: \${planId}\`);
+    if (!plan) throw new Error(`Plan not found: ${planId}`);
     
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User not found');
