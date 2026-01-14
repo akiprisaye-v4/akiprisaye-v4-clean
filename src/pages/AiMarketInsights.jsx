@@ -34,6 +34,7 @@ export default function AiMarketInsights() {
 
   useEffect(() => {
     checkAdminAccess();
+  // checkAdminAccess is stable and doesn't need to be in deps - it's a function that depends only on user
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -41,6 +42,7 @@ export default function AiMarketInsights() {
     if (isAdmin) {
       loadData();
     }
+  // loadData is stable and doesn't need to be in deps - it's a function that depends only on territory
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 

@@ -229,14 +229,9 @@ function transformProduct(offProduct, defaultBrandId) {
   const category = mapCategory(offProduct.categories_tags?.[0]);
   
   // Extract quantity and unit (variables for future use)
-  const _contenance = offProduct.quantity ? (() => {
-    const quantityMatch = offProduct.quantity.match(/(\d+(?:\.\d+)?)\s*([a-zA-Z]+)/);
-    return quantityMatch ? parseFloat(quantityMatch[1]) : 100;
-  })() : 100;
-  const _unite = offProduct.quantity ? (() => {
-    const quantityMatch = offProduct.quantity.match(/(\d+(?:\.\d+)?)\s*([a-zA-Z]+)/);
-    return quantityMatch ? quantityMatch[2].toLowerCase() : 'g';
-  })() : 'g';
+  const quantityMatch = offProduct.quantity?.match(/(\d+(?:\.\d+)?)\s*([a-zA-Z]+)/);
+  const _contenance = quantityMatch ? parseFloat(quantityMatch[1]) : 100;
+  const _unite = quantityMatch ? quantityMatch[2].toLowerCase() : 'g';
 
   return {
     brandId: defaultBrandId,

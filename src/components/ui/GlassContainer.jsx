@@ -8,11 +8,11 @@ import { cn } from '@/lib/utils';
 export function GlassContainer({ 
   children, 
   className = '',
-  as: _Component = 'div',
+  as: Component = 'div',
   ...props 
 }) {
   return (
-    <div
+    <Component
       className={cn(
         'glass-container',
         'bg-white/[0.08] backdrop-blur-[14px]',
@@ -25,7 +25,7 @@ export function GlassContainer({
       {...props}
     >
       {children}
-    </div>
+    </Component>
   );
 }
 
