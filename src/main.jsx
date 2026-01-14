@@ -97,6 +97,9 @@ const EnhancedComparator = lazyWithRetry(() => import('./pages/EnhancedComparato
 // Service Comparator (flights, boats, internet, mobile, water, electricity)
 const ServiceComparator = lazyWithRetry(() => import('./pages/ServiceComparator'));
 
+// Training Comparator - Professional training and employment guidance for DOM-TOM
+const TrainingComparator = lazyWithRetry(() => import('./pages/TrainingComparator'));
+
 // Strategic Comparators - Priority 1
 const FlightComparator = lazyWithRetry(() => import('./pages/FlightComparator'));
 const BoatComparator = lazyWithRetry(() => import('./pages/BoatComparator'));
@@ -344,6 +347,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   {/* Service Comparator (flights, boats, telecoms, utilities) */}
                   <Route path='comparateur-services' element={<ServiceComparator />} />
                   <Route path='services' element={<ServiceComparator />} />
+                  <Route path='formations' element={<TrainingComparator />} />
+                  <Route path='comparateur-formations' element={<TrainingComparator />} />
                   
                   {/* Strategic Comparators - Priority 1: Vital Transport */}
                   <Route path='comparateur-vols' element={<FlightComparator />} />
