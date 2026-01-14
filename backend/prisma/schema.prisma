@@ -1603,6 +1603,7 @@ model StructuralIndicator {
   
   /// Relations
   insights ExplanatoryInsight[]
+  explanations ExplanationResult[]
   
   @@index([indicatorType])
   @@index([territory])
@@ -1876,8 +1877,7 @@ model ExplanationResult {
   computationTrace   ComputationTrace? @relation(fields: [computationTraceId], references: [id], onDelete: SetNull)
   
   /// Revue humaine associée
-  humanReviewId String? @map("human_review_id")
-  humanReview   HumanReview? @relation(fields: [humanReviewId], references: [id], onDelete: SetNull)
+  humanReviews HumanReview[]
   
   /// Statut publication
   isPublished Boolean @default(false) @map("is_published")
@@ -1961,7 +1961,7 @@ model HumanReview {
   framework   AIResearchFramework? @relation(fields: [frameworkId], references: [id], onDelete: SetNull)
   
   /// Explication revue (optionnel)
-  explanationId String? @map("explanation_id")
+  explanationId String? @unique @map("explanation_id")
   explanation   ExplanationResult? @relation(fields: [explanationId], references: [id], onDelete: SetNull)
   
   /// Nom/ID du reviewer
