@@ -241,17 +241,25 @@ export default function Carte() {
     // Check if Web Share API is supported
     if (navigator.share) {
       navigator.share(shareData)
-        .then(() => console.log('Shared successfully'))
-        .catch((error) => console.log('Error sharing:', error));
+        .then(() => {
+          if (import.meta.env.DEV) {
+            console.warn('Shared successfully');
+          }
+        })
+        .catch((error) => console.error('Error sharing:', error));
     } else {
       // Fallback: copy to clipboard
       const text = `${store.name} - ${store.category}\nCoordonnées GPS: ${store.lat}, ${store.lon}\nLien: https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lon}`;
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text)
-          .then(() => console.log('Coordonnées copiées dans le presse-papier !'))
+          .then(() => {
+            if (import.meta.env.DEV) {
+              console.warn('Coordonnées copiées dans le presse-papier !');
+            }
+          })
           .catch((error) => {
             console.error('Erreur lors de la copie dans le presse-papier :', error);
-            console.log(
+            console.warn(
               `Impossible de copier automatiquement dans le presse-papier.\n\n` +
               `Cela peut être dû aux restrictions de votre navigateur ` +
               `(contexte non sécurisé HTTP ou autorisation refusée).\n\n` +
@@ -262,7 +270,7 @@ export default function Carte() {
             );
           });
       } else {
-        console.log(
+        console.warn(
           `Le partage automatique du lien n'est pas disponible dans ce navigateur ` +
           `ou dans ce contexte (par exemple, page non sécurisée HTTP).\n\n` +
           `Vous pouvez copier manuellement ces informations :\n\n` +

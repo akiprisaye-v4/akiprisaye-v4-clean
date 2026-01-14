@@ -32,19 +32,19 @@ const CACHE_BLACKLIST = [
 
 // Événement d'installation : mise en cache des ressources statiques
 self.addEventListener('install', (e) => {
-  console.log('[SW] Installing Service Worker v1.2...');
+  console.warn('[SW] Installing Service Worker v1.2...');
   
   e.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Caching static assets');
+        console.warn('[SW] Caching static assets');
         return cache.addAll([OFFLINE_URL]);
       })
       .catch((err) => {
         console.error('[SW] Cache addAll failed:', err);
       })
       .then(() => {
-        console.log('[SW] Service Worker installed successfully');
+        console.warn('[SW] Service Worker installed successfully');
         return self.skipWaiting();
       }),
   );
@@ -52,7 +52,7 @@ self.addEventListener('install', (e) => {
 
 // Événement d'activation : nettoyage des anciens caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker v1.2...');
+  console.warn('[SW] Activating Service Worker v1.2...');
   
   event.waitUntil(
     caches.keys()
@@ -63,13 +63,13 @@ self.addEventListener('activate', (event) => {
               return cacheName !== CACHE_NAME && cacheName !== DYNAMIC_CACHE;
             })
             .map((cacheName) => {
-              console.log('[SW] Deleting old cache:', cacheName);
+              console.warn('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }),
         );
       })
       .then(() => {
-        console.log('[SW] Service Worker activated');
+        console.warn('[SW] Service Worker activated');
         return self.clients.claim();
       }),
   );
@@ -97,7 +97,7 @@ async function _networkFirst(request) {
     const cachedResponse = await caches.match(request);
     
     if (cachedResponse) {
-      console.log('[SW] Serving from cache (network failed):', request.url);
+      console.warn('[SW] Serving from cache (network failed):', request.url);
       return cachedResponse;
     }
     
@@ -117,7 +117,7 @@ async function _cacheFirst(request) {
   const cachedResponse = await caches.match(request);
   
   if (cachedResponse) {
-    console.log('[SW] Serving from cache:', request.url);
+    console.warn('[SW] Serving from cache:', request.url);
     return cachedResponse;
   }
   
@@ -181,10 +181,10 @@ self.addEventListener('sync', (event) => {
 async function syncPrices() {
   try {
     // Future: Synchroniser les données de prix en arrière-plan
-    console.log('[SW] Background sync: prices');
+    console.warn('[SW] Background sync: prices');
   } catch (error) {
     console.error('[SW] Background sync failed:', error);
   }
 }
 
-console.log('[SW] Service Worker v1.2 Glass Pro Edition loaded');
+console.warn('[SW] Service Worker v1.2 Glass Pro Edition loaded');

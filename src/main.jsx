@@ -225,7 +225,7 @@ if ('serviceWorker' in navigator) {
       .register('/service-worker.js')
       .then(() => {
         if (import.meta.env.DEV) {
-          console.log('Service Worker enregistré');
+          console.warn('Service Worker enregistré');
         }
       })
       .catch((err) => {

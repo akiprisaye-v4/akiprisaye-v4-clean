@@ -220,4 +220,6 @@ export function flashMessage(msg) {
   }, 2500);
 }
 
-console.log('✔ scanner.js chargé.');
+if (typeof console !== 'undefined' && console.warn) {
+  console.warn('✔ scanner.js chargé.');
+}

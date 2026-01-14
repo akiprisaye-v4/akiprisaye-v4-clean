@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils';
 export function GlassContainer({ 
   children, 
   className = '',
-  as: Component = 'div',
+  as = 'div',
   ...props 
 }) {
+  const Component = as;
   return (
     <Component
       className={cn(

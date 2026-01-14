@@ -40,7 +40,7 @@ export default function ListeCourses({ territoire = '971' }) {
         }
       } catch (_error) {
         if (import.meta.env.DEV) {
-          console.log('Données magasins non disponibles pour ce territoire');
+          console.warn('Données magasins non disponibles pour ce territoire');
         }
         setMagasins([]);
       }

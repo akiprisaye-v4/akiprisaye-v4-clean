@@ -43,7 +43,7 @@ export default function ProductSearch({ territory = 'Guadeloupe', onPickEAN }) {
           }
         } catch (_apiErr) {
           if (import.meta.env.DEV) {
-            console.log('API not available, using seed data');
+            console.warn('API not available, using seed data');
           }
         }
         
