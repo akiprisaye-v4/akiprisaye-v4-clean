@@ -3,7 +3,7 @@
 ## Problème identifié
 Le PR #714 (`copilot/create-maritime-freight-comparator`) ne peut pas être fusionné car il a des **histoires non liées** (unrelated histories) avec la branche `main`. 
 
-Le commit sur cette branche est "grafted" (gre ffé), ce qui signifie qu'il n'a pas d'ancêtre commun avec `main`.
+Le commit sur cette branche est "grafted" (greffé), ce qui signifie qu'il n'a pas d'ancêtre commun avec `main`.
 
 ## Solution
 Un nouveau commit **2770070** a été créé sur la branche `main` avec tous les fichiers du comparateur de fret:
