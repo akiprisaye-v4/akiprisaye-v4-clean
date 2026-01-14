@@ -61,13 +61,14 @@ export interface FuelFilters extends Omit<ServiceFilters, 'specificFilters'> {
 
 /**
  * Mapping DOM-TOM departments
+ * Uses same territory codes as frontend for consistency
  */
 const TERRITORY_TO_DEPARTMENT: Record<string, string> = {
-  GUADELOUPE: '971',
-  MARTINIQUE: '972',
-  GUYANE: '973',
-  LA_REUNION: '974',
-  MAYOTTE: '976',
+  GP: '971', // Guadeloupe
+  MQ: '972', // Martinique  
+  GY: '973', // Guyane
+  RE: '974', // La Réunion
+  YT: '976', // Mayotte
 };
 
 /**

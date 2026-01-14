@@ -36,6 +36,9 @@ const FUEL_COMPARISON_CONFIG = {
   AVERAGE_PRICE_TOLERANCE_PERCENT: 5,
   MIN_COVERAGE_WARNING_PERCENT: 50,
   MAX_PRICE_AGE_WARNING_DAYS: 7,
+  // Price category thresholds
+  BELOW_AVERAGE_THRESHOLD: 0.98, // 2% below average
+  ABOVE_AVERAGE_THRESHOLD: 1.02, // 2% above average
 } as const;
 
 /**
@@ -204,9 +207,9 @@ function rankFuelPrices(
       category = 'cheapest';
     } else if (index === sortedPrices.length - 1) {
       category = 'most_expensive';
-    } else if (priceValue < averagePrice * 0.98) {
+    } else if (priceValue < averagePrice * FUEL_COMPARISON_CONFIG.BELOW_AVERAGE_THRESHOLD) {
       category = 'below_average';
-    } else if (priceValue > averagePrice * 1.02) {
+    } else if (priceValue > averagePrice * FUEL_COMPARISON_CONFIG.ABOVE_AVERAGE_THRESHOLD) {
       category = 'above_average';
     } else {
       category = 'average';

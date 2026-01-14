@@ -3,12 +3,16 @@
  * Client for prix-carburants.gouv.fr API
  * 
  * Documentation: https://www.prix-carburants.gouv.fr/
+ * 
+ * This is the official French government API for fuel prices.
+ * Note: In production, may require CORS handling or a backend proxy.
+ * Rate limiting: To be determined based on API documentation.
  */
 
 import type { FuelType, FuelPricePoint, FuelStation, Territory } from '../types/fuelComparison';
 
 /**
- * API Base URL
+ * API Base URL - Official French Government Fuel Price API
  */
 const API_BASE_URL = 'https://www.prix-carburants.gouv.fr';
 

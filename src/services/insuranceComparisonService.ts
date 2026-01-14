@@ -30,6 +30,9 @@ import type {
 const INSURANCE_COMPARISON_CONFIG = {
   AVERAGE_PRICE_TOLERANCE_PERCENT: 5,
   MIN_COVERAGE_WARNING_PERCENT: 50,
+  // Price category thresholds (5% tolerance for insurance due to higher price variability)
+  BELOW_AVERAGE_THRESHOLD: 0.95, // 5% below average
+  ABOVE_AVERAGE_THRESHOLD: 1.05, // 5% above average
 } as const;
 
 /**
@@ -183,9 +186,9 @@ function rankInsurances(
       category = 'cheapest';
     } else if (index === sortedInsurances.length - 1) {
       category = 'most_expensive';
-    } else if (price < averagePrice * 0.95) {
+    } else if (price < averagePrice * INSURANCE_COMPARISON_CONFIG.BELOW_AVERAGE_THRESHOLD) {
       category = 'below_average';
-    } else if (price > averagePrice * 1.05) {
+    } else if (price > averagePrice * INSURANCE_COMPARISON_CONFIG.ABOVE_AVERAGE_THRESHOLD) {
       category = 'above_average';
     } else {
       category = 'average';
