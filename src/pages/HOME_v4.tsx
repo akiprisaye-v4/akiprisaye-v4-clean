@@ -1,5 +1,5 @@
 /**
- * Home Page v4.0 - Modern & Minimalist
+ * Home Page v4.1 - Modern & Minimalist (Enhanced)
  * 
  * Complete redesign following Apple/Airbnb minimalist principles
  * - Clean hero with single CTA
@@ -7,18 +7,31 @@
  * - Generous spacing
  * - Smooth animations
  * - Mobile-first responsive
+ * - Enhanced UX features
  */
 
-import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 
 export default function HomeV4() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     scans: 0,
     products: 0,
     territories: 12
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+  const [showMobileCTA, setShowMobileCTA] = useState(false);
+  const [displayStats, setDisplayStats] = useState({ scans: 0, products: 0, territories: 0 });
+  
+  const statsRef = useRef(null);
+  const isStatsInView = useInView(statsRef, { once: true });
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll();
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
 
   useEffect(() => {
     // Load real stats from localStorage
@@ -26,44 +39,156 @@ export default function HomeV4() {
     if (savedStats) {
       setStats(JSON.parse(savedStats));
     }
+
+    // Hide scroll indicator after scrolling
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowScrollIndicator(false);
+      }
+      
+      // Show mobile sticky CTA after scrolling past hero
+      if (window.innerWidth <= 768) {
+        setShowMobileCTA(window.scrollY > window.innerHeight * 0.8);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Animated counter effect
+  useEffect(() => {
+    if (isStatsInView && (stats.scans > 0 || stats.products > 0)) {
+      const duration = 2000; // 2 seconds
+      const steps = 60;
+      const stepDuration = duration / steps;
+      
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / steps;
+        
+        setDisplayStats({
+          scans: Math.floor(stats.scans * progress),
+          products: Math.floor(stats.products * progress),
+          territories: Math.floor(stats.territories * progress)
+        });
+        
+        if (currentStep >= steps) {
+          clearInterval(interval);
+          setDisplayStats(stats);
+        }
+      }, stepDuration);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isStatsInView, stats]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/comparateur?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
     <div className="home-v4">
+      {/* Skip to main content for accessibility */}
+      <a href="#main-content" className="skip-link">
+        Aller au contenu principal
+      </a>
       
-      {/* 🏆 HERO SECTION */}
-      <section className="hero">
+      {/* 🏆 HERO SECTION WITH PARALLAX */}
+      <section className="hero" ref={heroRef}>
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          style={{ opacity: heroOpacity, scale: heroScale }}
           className="hero-content"
         >
-          <h1 className="hero-title">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="hero-title"
+          >
             Comprendre et comparer les prix<br />
             des territoires d'outre-mer
-          </h1>
+          </motion.h1>
           
-          <p className="hero-subtitle">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="hero-subtitle"
+          >
             Données publiques • Sans publicité • Indépendant
-          </p>
+          </motion.p>
           
-          {/* CTA UNIQUE ET CLAIR */}
-          <Link 
-            to="/comparateur" 
-            className="cta-primary"
+          {/* Quick Search Preview */}
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            onSubmit={handleSearch}
+            className="hero-search"
           >
-            🔍 Rechercher un produit
-          </Link>
+            <input
+              type="text"
+              placeholder="Rechercher un produit..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="hero-search-input"
+              aria-label="Rechercher un produit"
+            />
+            <button type="submit" className="hero-search-btn" aria-label="Rechercher">
+              🔍
+            </button>
+          </motion.form>
           
-          <Link 
-            to="/scan" 
-            className="cta-secondary"
+          {/* CTA BUTTONS */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="hero-cta-group"
           >
-            ou scanner un ticket
-          </Link>
+            <Link 
+              to="/comparateur" 
+              className="cta-primary"
+            >
+              🔍 Rechercher un produit
+            </Link>
+            
+            <Link 
+              to="/scan" 
+              className="cta-secondary"
+            >
+              ou scanner un ticket
+            </Link>
+          </motion.div>
         </motion.div>
+        
+        {/* Scroll Indicator */}
+        {showScrollIndicator && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.5 }}
+            className="scroll-indicator"
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="scroll-arrow"
+            >
+              ↓
+            </motion.div>
+            <span className="scroll-text">Découvrir</span>
+          </motion.div>
+        )}
       </section>
+
+      <main id="main-content">
 
       {/* 📊 3 ÉTAPES SIMPLES */}
       <section className="steps">
@@ -90,9 +215,16 @@ export default function HomeV4() {
         </div>
       </section>
 
-      {/* 🌍 TERRITOIRES */}
+      {/* 🌍 TERRITOIRES WITH ENHANCED HOVER */}
       <section className="territories">
-        <h2 className="section-title">12 territoires d'outre-mer</h2>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="section-title"
+        >
+          12 territoires d'outre-mer
+        </motion.h2>
         <div className="territories-grid">
           {[
             { code: 'GP', name: 'Guadeloupe', flag: '🇬🇵' },
@@ -107,68 +239,164 @@ export default function HomeV4() {
             { code: 'BL', name: 'Saint-Barthélemy', flag: '🇧🇱' },
             { code: 'MF', name: 'Saint-Martin', flag: '🇲🇫' },
             { code: 'TF', name: 'TAAF', flag: '🇹🇫' }
-          ].map(t => (
-            <div key={t.code} className="territory-item" title={t.name}>
+          ].map((t, i) => (
+            <motion.div
+              key={t.code}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.05 }}
+              viewport={{ once: true }}
+              className="territory-item"
+              title={t.name}
+              aria-label={t.name}
+            >
               <span className="territory-flag">{t.flag}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* 🎯 FONCTIONNALITÉS CLÉS */}
       <section className="features">
-        <h2 className="section-title">Ce que vous pouvez faire</h2>
-        <ul className="features-list">
-          <li>✓ Comparer les prix entre enseignes</li>
-          <li>✓ Suivre l'évolution des prix</li>
-          <li>✓ Localiser les magasins sur carte</li>
-          <li>✓ Exporter les données ouvertes</li>
-        </ul>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="section-title"
+        >
+          Ce que vous pouvez faire
+        </motion.h2>
+        <motion.ul
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="features-list"
+        >
+          {[
+            'Comparer les prix entre enseignes',
+            'Suivre l\'évolution des prix',
+            'Localiser les magasins sur carte',
+            'Exporter les données ouvertes'
+          ].map((feature, i) => (
+            <motion.li
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              viewport={{ once: true }}
+            >
+              ✓ {feature}
+            </motion.li>
+          ))}
+        </motion.ul>
       </section>
 
-      {/* 📈 COMPTEURS PUBLICS */}
+      {/* 📈 COMPTEURS PUBLICS WITH COUNT-UP ANIMATION */}
       {(stats.scans > 0 || stats.products > 0) && (
-        <section className="stats">
-          <h2 className="section-title">Plateforme citoyenne</h2>
+        <section className="stats" ref={statsRef}>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="section-title"
+          >
+            Plateforme citoyenne
+          </motion.h2>
           <div className="stats-grid">
-            <div className="stat-item">
-              <div className="stat-value">{stats.scans.toLocaleString()}</div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              viewport={{ once: true }}
+              className="stat-item"
+            >
+              <div className="stat-value">{displayStats.scans.toLocaleString()}</div>
               <div className="stat-label">Scans</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">{stats.products.toLocaleString()}</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              viewport={{ once: true }}
+              className="stat-item"
+            >
+              <div className="stat-value">{displayStats.products.toLocaleString()}</div>
               <div className="stat-label">Produits</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">{stats.territories}</div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              viewport={{ once: true }}
+              className="stat-item"
+            >
+              <div className="stat-value">{displayStats.territories}</div>
               <div className="stat-label">Territoires</div>
-            </div>
+            </motion.div>
           </div>
         </section>
       )}
 
-      {/* 🏛️ OBSERVATOIRE */}
+      {/* 🏛️ OBSERVATOIRE WITH STAGGER ANIMATION */}
       <section className="observatory">
-        <div className="observatory-content">
-          <span className="observatory-icon">🏛️</span>
-          <h3 className="observatory-title">Observatoire citoyen indépendant</h3>
-          <p className="observatory-desc">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="observatory-content"
+        >
+          <motion.span
+            initial={{ opacity: 0, scale: 0 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            viewport={{ once: true }}
+            className="observatory-icon"
+          >
+            🏛️
+          </motion.span>
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            viewport={{ once: true }}
+            className="observatory-title"
+          >
+            Observatoire citoyen indépendant
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            viewport={{ once: true }}
+            className="observatory-desc"
+          >
             Toutes nos données sont ouvertes et vérifiables<br />
             Licence Etalab 2.0
-          </p>
-          <div className="observatory-actions">
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            viewport={{ once: true }}
+            className="observatory-actions"
+          >
             <Link to="/observatoire" className="btn-observatory">
               Accéder à l'observatoire
             </Link>
             <Link to="/methodologie" className="btn-docs">
               Documentation
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
-      {/* 📞 FOOTER MINIMAL */}
-      <footer className="footer-minimal">
+      {/* 📞 FOOTER MINIMAL WITH STAGGER */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="footer-minimal"
+      >
         <Link to="/faq">FAQ</Link>
         <span>•</span>
         <Link to="/methodologie">Méthodologie</Link>
@@ -176,8 +404,22 @@ export default function HomeV4() {
         <Link to="/contact">Contact</Link>
         <span>•</span>
         <Link to="/mentions-legales">Mentions légales</Link>
-      </footer>
+      </motion.footer>
+      </main>
 
+      {/* Mobile Sticky CTA */}
+      {showMobileCTA && (
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          exit={{ y: 100 }}
+          className="mobile-sticky-cta"
+        >
+          <Link to="/comparateur" className="mobile-cta-btn">
+            🔍 Rechercher un produit
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 }

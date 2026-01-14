@@ -1,5 +1,5 @@
 /* ============================================
-   HOME V4 - MODERN & MINIMALIST
+   HOME V4 - MODERN & MINIMALIST (Enhanced)
    ============================================ */
 
 .home-v4 {
@@ -10,7 +10,38 @@
 }
 
 /* ============================================
-   HERO SECTION
+   ACCESSIBILITY
+   ============================================ */
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* Enhanced focus indicators */
+.home-v4 a:focus,
+.home-v4 button:focus,
+.home-v4 input:focus {
+  outline: 3px solid #3b82f6;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   HERO SECTION WITH PARALLAX
    ============================================ */
 
 .hero {
@@ -20,10 +51,25 @@
   min-height: 90vh;
   padding: 2rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .hero-content {
   max-width: 700px;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-title {
@@ -40,8 +86,59 @@
 .hero-subtitle {
   font-size: 1.125rem;
   color: #cbd5e1;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   font-weight: 400;
+}
+
+/* Quick Search Preview */
+.hero-search {
+  display: flex;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.hero-search:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.hero-search-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #f1f5f9;
+  font-size: 1rem;
+  outline: none;
+}
+
+.hero-search-input::placeholder {
+  color: #64748b;
+}
+
+.hero-search-btn {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.hero-search-btn:hover {
+  transform: scale(1.1);
+}
+
+.hero-cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .cta-primary {
@@ -73,6 +170,37 @@
 
 .cta-secondary:hover {
   color: #cbd5e1;
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.scroll-indicator:hover {
+  opacity: 1;
+}
+
+.scroll-arrow {
+  font-size: 2rem;
+  color: #3b82f6;
+}
+
+.scroll-text {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 /* ============================================
@@ -127,7 +255,7 @@
 }
 
 /* ============================================
-   TERRITORIES SECTION
+   TERRITORIES SECTION - ENHANCED
    ============================================ */
 
 .territories {
@@ -160,17 +288,25 @@
   background: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 12px;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
+  position: relative;
 }
 
 .territory-item:hover {
-  transform: scale(1.1);
-  border-color: rgba(59, 130, 246, 0.4);
+  transform: scale(1.15);
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  background: rgba(30, 41, 59, 0.8);
 }
 
 .territory-flag {
   font-size: 2rem;
+  transition: transform 0.3s;
+}
+
+.territory-item:hover .territory-flag {
+  transform: scale(1.1);
 }
 
 /* ============================================
@@ -199,7 +335,7 @@
 }
 
 /* ============================================
-   STATS SECTION
+   STATS SECTION - COUNT-UP ANIMATION
    ============================================ */
 
 .stats {
@@ -221,6 +357,13 @@
   background: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 16px;
+  transition: all 0.3s;
+}
+
+.stat-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .stat-value {
@@ -228,6 +371,7 @@
   font-weight: 700;
   color: #3b82f6;
   margin-bottom: 0.5rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
@@ -253,6 +397,12 @@
   background: rgba(16, 185, 129, 0.05);
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.observatory-content:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.1);
 }
 
 .observatory-icon {
@@ -299,6 +449,7 @@
 .btn-observatory:hover {
   background: #059669;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-docs {
@@ -343,12 +494,45 @@
 }
 
 /* ============================================
+   MOBILE STICKY CTA
+   ============================================ */
+
+.mobile-sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.95) 20%);
+  backdrop-filter: blur(10px);
+  z-index: 50;
+  display: none;
+}
+
+.mobile-cta-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  text-align: center;
+  font-weight: 600;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.5rem;
+  }
+
+  .hero-search {
+    max-width: 100%;
   }
 
   .steps {
@@ -361,5 +545,34 @@
 
   .observatory-content {
     padding: 2rem 1.5rem;
+  }
+
+  .mobile-sticky-cta {
+    display: block;
+  }
+
+  .territories-grid {
+    gap: 0.75rem;
+  }
+
+  .territory-item {
+    width: 50px;
+    height: 50px;
+  }
+
+  .territory-flag {
+    font-size: 1.75rem;
+  }
+
+  .scroll-indicator {
+    bottom: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
