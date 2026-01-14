@@ -1,3 +1,6 @@
+import { getTerritoryDisplayName } from '../constants/territories';
+import { formatCurrency } from '../utils/formatters';
+
 /**
  * BasketTerritoryComparison - Display price comparison across territories
  * 

@@ -4,6 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { saveBasketToHistory } from '../services/tiPanieService';
 import { compareBasketAcrossTerritories } from '../utils/priceAnalysis';
 import { saveBasketSnapshot, getTrend } from '../utils/priceHistory';
+// eslint-disable-next-line no-unused-vars
+import PriceBadge from './PriceBadge';
+// eslint-disable-next-line no-unused-vars
+import BasketTerritoryComparison from './BasketTerritoryComparison';
+// eslint-disable-next-line no-unused-vars
+import TrendIndicator from './TrendIndicator';
 
 export default function BasketCard({ basket, selectedTerritories }) {
   const navigate = useNavigate();

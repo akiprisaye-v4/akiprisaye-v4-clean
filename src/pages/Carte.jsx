@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import L from 'leaflet';
+import { useMap } from 'react-leaflet';
 import 'leaflet.markercluster';
 import { getStoresByTerritory } from '../services/mapService';
 import { getActiveTerritories, TERRITORIES } from '../constants/territories';
