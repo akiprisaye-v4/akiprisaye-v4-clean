@@ -100,7 +100,7 @@ export const getBaskets = async (filters = {}) => {
       baskets = baskets.filter(b => b.store.toLowerCase().includes(filters.store.toLowerCase()));
     }
 
-    if (filters.stockOnly === true) {
+    if (filters.stockOnly) {
       baskets = baskets.filter(b => b.stock === true);
     }
 
@@ -123,7 +123,8 @@ export const getBaskets = async (filters = {}) => {
     return validBaskets;
   } catch (error) {
     console.error('Error in getBaskets:', error);
-    throw new Error('Impossible de charger les paniers. Veuillez réessayer.');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Impossible de charger les paniers. Veuillez réessayer. Détails: ${errorMessage}`);
   }
 };
 

@@ -33,7 +33,7 @@ export default function TiPanie() {
       
       // Validate data format
       if (!Array.isArray(data)) {
-        throw new Error('Format de données invalide');
+        throw new Error(`Format de données invalide: attendu un tableau, reçu ${typeof data}`);
       }
       
       setBaskets(data);
