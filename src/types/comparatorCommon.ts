@@ -5,6 +5,8 @@
  * to ensure consistency and reusability.
  */
 
+import type { ReactNode } from 'react';
+
 /**
  * Territory codes for French overseas territories
  */
@@ -130,7 +132,7 @@ export interface AlertType {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   fields: AlertField[];
 }
 
@@ -157,7 +159,7 @@ export interface MapMarker {
   data: unknown;
   icon?: string;
   color?: string;
-  popupContent?: React.ReactNode;
+  popupContent?: ReactNode;
 }
 
 /**

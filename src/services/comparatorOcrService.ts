@@ -10,7 +10,7 @@
  * - Generic documents
  */
 
-import { extractTextFromImage } from './ocrService';
+import { runOCR } from './ocrService';
 import type { OCRResult as BaseOCRResult } from './ocrService';
 import type { 
   OCRResult, 
@@ -39,14 +39,22 @@ export async function extractTextFromImageFile(
   file: File,
   language: string = 'fra'
 ): Promise<OCRResult> {
-  const result = await extractTextFromImage(file, language);
+  // Convert File to URL for the existing OCR service
+  const imageUrl = URL.createObjectURL(file);
   
-  return {
-    text: result.rawText,
-    confidence: result.confidence,
-    language,
-    structured: undefined,
-  };
+  try {
+    const result = await runOCR(imageUrl, language);
+    
+    return {
+      text: result.rawText,
+      confidence: result.confidence,
+      language,
+      structured: undefined,
+    };
+  } finally {
+    // Clean up the object URL
+    URL.revokeObjectURL(imageUrl);
+  }
 }
 
 /**

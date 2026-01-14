@@ -114,6 +114,9 @@ export async function getUserAlerts(userId: string): Promise<Alert[]> {
  * @param comparatorType - Comparator type
  * @param territory - Optional territory filter
  * @returns Array of alerts
+ * 
+ * Note: This query requires Firestore composite indexes.
+ * Create indexes for: (comparatorType, active), (comparatorType, active, territory)
  */
 export async function getAlertsByComparator(
   comparatorType: string,

@@ -266,6 +266,7 @@ export function validatePostalCode(postalCode: string): boolean {
 
 /**
  * Validate SIRET number (French business identifier)
+ * Uses the Luhn algorithm adapted for SIRET (alternating 2 and 1 from right to left)
  * 
  * @param siret - SIRET to validate
  * @returns true if SIRET is valid
@@ -274,11 +275,14 @@ export function validateSiret(siret: string): boolean {
   const cleaned = siret.replace(/\s/g, '');
   if (!/^\d{14}$/.test(cleaned)) return false;
 
-  // Luhn algorithm
+  // Luhn algorithm for SIRET: multiply by 2 or 1 alternating from right to left
   let sum = 0;
   for (let i = 0; i < 14; i++) {
     let digit = parseInt(cleaned[i], 10);
-    if (i % 2 === 0) {
+    // For SIRET: multiply by 2 for even positions (from right), by 1 for odd positions
+    // Position from right: 14-i-1
+    const positionFromRight = 14 - i - 1;
+    if (positionFromRight % 2 === 0) {
       digit *= 2;
       if (digit > 9) digit -= 9;
     }
