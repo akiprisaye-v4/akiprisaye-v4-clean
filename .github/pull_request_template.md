@@ -1,123 +1,58 @@
-# ✅ Checklist de conformité – Pull Request (API & Observatoire)
+## 📋 Pre-merge Checklist
 
-Merci de **valider chaque point** avant soumission.
-Toute non-conformité peut entraîner le rejet automatique de la PR par la CI.
+- [ ] ✅ Branch synced with `main` (no conflicts)
+- [ ] ✅ CI checks passing
+- [ ] ✅ Code reviewed
 
----
+## 🔄 Sync with main before requesting merge
 
-## 🏛️ 1. Conformité institutionnelle (OBLIGATOIRE)
+```bash
+git fetch origin main
+git merge origin/main
+# Resolve conflicts if any
+git push
 
-- [ ] API strictement **en lecture seule**
-- [ ] Données d'intérêt général uniquement
-- [ ] Aucune promesse trompeuse (temps réel, exhaustivité, valeur contractuelle)
-- [ ] Périmètre géographique clairement défini
-- [ ] Mention d'avertissement public (outil d'information)
+# 3. Commit les changements
+git add scripts/smart-merge.sh . github/pull_request_template. md
+git commit -m "chore: add merge tools to prevent conflicts
 
----
+- Smart merge script with conflict detection
+- PR template with sync checklist"
+git push
+# Workflow pour notifier les PRs en retard
+cat > . github/workflows/pr-sync-reminder.yml << 'EOF'
+name: PR Sync Reminder
 
-## 📐 2. Versioning & gouvernance API
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Tous les lundis à 9h
+  workflow_dispatch:     # Manuel
 
-- [ ] Version explicite dans l'URL (`/api/v1/...`)
-- [ ] `openapi.yaml` mis à jour :
-  - [ ] `info.version`
-  - [ ] description de la version
-- [ ] Aucun breaking change sans nouvelle version majeure
-- [ ] Page **API Gouvernance** accessible publiquement
-- [ ] Politique de dépréciation documentée
+jobs:
+  check-prs:
+    runs-on:  ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      
+      - name: Check outdated PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "🔍 Checking open PRs..."
+          
+          gh pr list --state open --json number,title,headRefName,updatedAt | \
+          jq -r '.[] | select(.updatedAt < (now - 259200)) | "\(.number) \(.headRefName)"' | \
+          while read pr branch; do
+            echo "⚠️ PR #$pr is behind main"
+            
+            gh pr comment "$pr" --body "👋 **Reminder:** This PR may be behind \`main\`. 
 
----
+Please sync to avoid merge conflicts: 
+\`\`\`bash
+git fetch origin main
+git merge origin/main
+git push
+\`\`\`
 
-## ⚖️ 3. Fair use & rate limiting
-
-- [ ] Rate limit actif (Cloudflare Workers)
-- [ ] HTTP `429` correctement géré
-- [ ] Headers présents :
-  - [ ] `X-RateLimit-Limit`
-  - [ ] `X-RateLimit-Remaining`
-  - [ ] `X-RateLimit-Reset`
-- [ ] Page **Fair Use API** publique
-- [ ] Aucun tracking utilisateur (RGPD OK)
-
----
-
-## 📊 4. Données & crédibilité
-
-- [ ] Sources de données explicitement indiquées
-- [ ] Date de dernière mise à jour visible
-- [ ] Méthodologie accessible publiquement
-- [ ] Données manquantes gérées explicitement
-- [ ] Aucun chiffre "placeholder"
-
----
-
-## 📈 5. Fonctionnalités observatoire
-
-- [ ] Comparaison de territoires fonctionnelle
-- [ ] Courbes d'évolution des prix affichées
-- [ ] Historique cohérent (pas de trous silencieux)
-- [ ] Détection d'anomalies documentée
-- [ ] Alertes citoyennes non intrusives
-
----
-
-## 🔐 6. Sécurité & robustesse
-
-- [ ] Aucune clé secrète exposée
-- [ ] Aucun endpoint d'écriture publique
-- [ ] CORS maîtrisé
-- [ ] Gestion d'erreurs JSON standardisée
-- [ ] Protection minimale contre abus
-
----
-
-## 🔌 7. Open-data & API publique
-
-- [ ] Export JSON fonctionnel
-- [ ] Export CSV fonctionnel
-- [ ] Licence open-data visible
-- [ ] Mention obligatoire de la source
-- [ ] API publique lecture seule confirmée
-
----
-
-## 📘 8. Documentation & UX
-
-- [ ] Swagger UI accessible publiquement
-- [ ] OpenAPI valide
-- [ ] Page **Comment utiliser l'API**
-- [ ] Exemples simples fournis
-- [ ] Navigation claire depuis le site
-
----
-
-## ⚙️ 9. CI / Build / Déploiement
-
-- [ ] `npm ci` OK
-- [ ] `npm run build` OK
-- [ ] Déploiement Cloudflare Pages OK
-- [ ] Aucun warning critique ignoré
-- [ ] Pas de boucle de redirection Cloudflare
-
----
-
-## 🧪 10. Vérification finale manuelle
-
-- [ ] Tous les boutons API sont branchés
-- [ ] Aucun module "fantôme"
-- [ ] Mobile + desktop testés
-- [ ] Observatoire compréhensible sans explication orale
-- [ ] Prêt pour usage public / presse / collectivités
-
----
-
-## 🏁 Statut PR
-
-- [ ] CI verte
-- [ ] Checklist complète
-- [ ] PR prête pour merge
-
----
-
-> ⚠️ Rappel :  
-> Ce projet est un **outil d'intérêt général**.  
-> La stabilité, la clarté et la confiance priment sur la vitesse.
+Or use:  \`./scripts/smart-merge.sh $pr\`"
+          done
