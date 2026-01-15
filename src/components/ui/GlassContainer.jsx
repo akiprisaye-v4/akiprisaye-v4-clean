@@ -11,7 +11,7 @@ export function GlassContainer({
   as = 'div',
   ...props 
 }) {
-  const Component = as;
+  const _Component = as;
   return (
     <Component
       className={cn(

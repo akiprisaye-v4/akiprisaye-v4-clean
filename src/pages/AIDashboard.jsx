@@ -30,7 +30,7 @@ export default function AIDashboard() {
   const [isAdmin, setIsAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [territory, setTerritory] = useState('');
-  const [baskets, setBaskets] = useState([]);
+  const [_baskets, setBaskets] = useState([]);
   const [forecast, setForecast] = useState([]);
   const [kpis, setKpis] = useState({});
   const [recommendations, setRecommendations] = useState([]);
