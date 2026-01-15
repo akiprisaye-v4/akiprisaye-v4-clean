@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-// All imports and lazy-loaded components in this file ARE used in the Routes JSX below
-// ESLint cannot detect JSX usage of lazy-loaded components
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -9,7 +6,6 @@ import './styles/globals.css';
 import './styles/civic-glass.css';
 import './styles/glass.css';
 import './styles/mobile-fixes.css';
-import './styles/home-v4.css';
 import Home from './pages/Home';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -22,7 +18,9 @@ import NotFound from './pages/NotFound';
 import ComparateursHub from './pages/ComparateursHub';
 import ScannerHub from './pages/ScannerHub';
 import AssistantIAHub from './pages/AssistantIAHub';
+import CarteItinerairesHub from './pages/CarteItinerairesHub';
 import SolidariteHub from './pages/SolidariteHub';
+import ObservatoireHub from './pages/ObservatoireHub';
 
 // Lazy load other pages for better performance with retry logic
 const ChatIALocal = lazyWithRetry(() => import('./components/ChatIALocal'));
@@ -71,6 +69,7 @@ const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
 const ObservatoireVivant = lazyWithRetry(() => import('./pages/ObservatoireVivant'));
 const ObservatoireTempsReel = lazyWithRetry(() => import('./pages/ObservatoireTempsReel'));
 const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
+const MonEspace = lazyWithRetry(() => import('./pages/MonEspace'));
 const Perimetre = lazyWithRetry(() => import('./pages/Perimetre'));
 const Versions = lazyWithRetry(() => import('./pages/Versions'));
 const Gouvernance = lazyWithRetry(() => import('./pages/Gouvernance'));
@@ -83,13 +82,6 @@ const NewsSimple = lazyWithRetry(() => import('./pages/News'));
 // PR #1 - Assistant + FAQ étendue (v1.6.0)
 const Faq = lazyWithRetry(() => import('./pages/Faq'));
 
-// v7.0.0 New Modules - Integrated Pages
-const InflationDashboardPage = lazyWithRetry(() => import('./pages/InflationDashboardPage'));
-const PriceAlertsPage = lazyWithRetry(() => import('./pages/PriceAlertsPage'));
-const PriceHistoryPage = lazyWithRetry(() => import('./pages/PriceHistoryPage'));
-const SmartShoppingListPage = lazyWithRetry(() => import('./pages/SmartShoppingListPage'));
-const LutteVieChereIndexPage = lazyWithRetry(() => import('./pages/LutteVieChereIndexPage'));
-
 // Comparateur Citoyen - Observatoire data
 const ComparateurCitoyen = lazyWithRetry(() => import('./pages/ComparateurCitoyen'));
 const ComparateurTerritoires = lazyWithRetry(() => import('./pages/ComparateurTerritoires'));
@@ -100,19 +92,9 @@ const EnhancedComparator = lazyWithRetry(() => import('./pages/EnhancedComparato
 // Service Comparator (flights, boats, internet, mobile, water, electricity)
 const ServiceComparator = lazyWithRetry(() => import('./pages/ServiceComparator'));
 
-// Training Comparator - Professional training and employment guidance for DOM-TOM
-const TrainingComparator = lazyWithRetry(() => import('./pages/TrainingComparator.tsx'));
-
 // Strategic Comparators - Priority 1
 const FlightComparator = lazyWithRetry(() => import('./pages/FlightComparator'));
 const BoatComparator = lazyWithRetry(() => import('./pages/BoatComparator'));
-const FreightComparator = lazyWithRetry(() => import('./pages/FreightComparator'));
-
-// Fuel Comparator - Priority 3
-const FuelComparator = lazyWithRetry(() => import('./pages/FuelComparator'));
-
-// Insurance Comparator - Priority 4
-const InsuranceComparator = lazyWithRetry(() => import('./pages/InsuranceComparator'));
 
 // Unified Scan Flow
 const ScanFlow = lazyWithRetry(() => import('./pages/ScanFlow'));
@@ -226,7 +208,7 @@ if ('serviceWorker' in navigator) {
       .register('/service-worker.js')
       .then(() => {
         if (import.meta.env.DEV) {
-          console.warn('Service Worker enregistré');
+          console.log('Service Worker enregistré');
         }
       })
       .catch((err) => {
@@ -270,10 +252,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   {/* HUB ROUTES - Main navigation entries (7 hubs) */}
                   <Route path='comparateurs' element={<ComparateursHub />} />
                   <Route path='scanner' element={<ScannerHub />} />
-                  <Route path='carte' element={<Carte />} /> {/* Carte already has all map/route features */}
+                  <Route path='carte-itineraires' element={<CarteItinerairesHub />} />
                   <Route path='assistant-ia' element={<AssistantIAHub />} />
                   <Route path='solidarite' element={<SolidariteHub />} />
-                  {/* Observatoire kept as-is */}
+                  <Route path='observatoire-hub' element={<ObservatoireHub />} />
+                  
+                  {/* Legacy Carte route kept for backward compatibility */}
+                  <Route path='carte' element={<Carte />} />
                   
                   <Route path='chat' element={<ChatIALocal />} />
                   
@@ -311,6 +296,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='licence-institution' element={<LicenceInstitution />} />
                   <Route path='contact-collectivites' element={<ContactCollectivites />} />
                   <Route path='contact' element={<Contact />} />
+                  <Route path='mon-espace' element={<MonEspace />} />
                   <Route path='ia-conseiller' element={<IaConseiller />} />
                   <Route path='ti-panie' element={<TiPanie />} />
                   <Route path='admin/dashboard' element={<AdminDashboard />} />
@@ -320,13 +306,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='dossier-media' element={<DossierMedia />} />
                   <Route path='historique-prix' element={<HistoriquePrix />} />
                   <Route path='alertes-prix' element={<AlertesPrix />} />
-                  
-                  {/* v7.0.0 New Integrated Routes */}
-                  <Route path='lutte-vie-chere' element={<LutteVieChereIndexPage />} />
-                  <Route path='inflation' element={<InflationDashboardPage />} />
-                  <Route path='alertes-prix-new' element={<PriceAlertsPage />} />
-                  <Route path='historique-prix-new' element={<PriceHistoryPage />} />
-                  <Route path='liste-courses-intelligente' element={<SmartShoppingListPage />} />
                   
                   <Route path='budget-vital' element={<BudgetVital />} />
                   <Route path='faux-bons-plans' element={<FauxBonsPlan />} />
@@ -350,8 +329,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   {/* Service Comparator (flights, boats, telecoms, utilities) */}
                   <Route path='comparateur-services' element={<ServiceComparator />} />
                   <Route path='services' element={<ServiceComparator />} />
-                  <Route path='formations' element={<TrainingComparator />} />
-                  <Route path='comparateur-formations' element={<TrainingComparator />} />
                   
                   {/* Strategic Comparators - Priority 1: Vital Transport */}
                   <Route path='comparateur-vols' element={<FlightComparator />} />
@@ -359,20 +336,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='comparateur-bateaux' element={<BoatComparator />} />
                   <Route path='bateaux' element={<BoatComparator />} />
                   <Route path='ferries' element={<BoatComparator />} />
-
-                  {/* Comparateur Carburants - Priority 3 */}
-                  <Route path='comparateur-carburants' element={<FuelComparator />} />
-                  <Route path='carburants' element={<FuelComparator />} />
-                  <Route path='essence' element={<FuelComparator />} />
-
-                  {/* Comparateur Assurances - Priority 4 */}
-                  <Route path='comparateur-assurances' element={<InsuranceComparator />} />
-                  <Route path='assurances' element={<InsuranceComparator />} />
-                  
-                  {/* Freight & Parcel Comparator - Priority 1: Maritime Freight */}
-                  <Route path='comparateur-fret' element={<FreightComparator />} />
-                  <Route path='fret' element={<FreightComparator />} />
-                  <Route path='colis' element={<FreightComparator />} />
                   
                   {/* Store Detail Page - Fiche enseigne avec graphs, filiales, etc. */}
                   <Route path='enseigne/:storeId' element={<StoreDetail />} />

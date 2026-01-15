@@ -1,109 +1,113 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { MessageCircle, TrendingUp, ShoppingCart } from 'lucide-react';
+import { Map as MapIcon, Navigation, Zap } from 'lucide-react';
 import { GlassCard } from '../components/ui/glass-card';
-import IaConseiller from './IaConseiller';
+import Carte from './Carte';
 
-type IASection = 'conseiller' | 'suivi' | 'rayon';
+type MapMode = 'carte' | 'itineraire' | 'optimisation';
 
-export default function AssistantIAHub() {
-  const [activeSection, setActiveSection] = useState<IASection>('conseiller');
+export default function CarteItinerairesHub() {
+  const [mode, setMode] = useState<MapMode>('carte');
   
   return (
     <>
       <Helmet>
-        <title>Assistant IA - A KI PRI SA YÉ</title>
-        <meta name="description" content="Assistant intelligent pour optimiser vos achats et votre budget" />
+        <title>Carte & Itinéraires - A KI PRI SA YÉ</title>
+        <meta name="description" content="Trouvez les magasins près de chez vous et optimisez vos trajets" />
       </Helmet>
       
       <div className="min-h-screen bg-slate-950 p-4 pt-24">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              🤖 Assistant IA
+              🗺️ Carte & Itinéraires
             </h1>
             <p className="text-gray-400 text-lg">
-              Votre conseiller intelligent pour économiser sur vos courses
+              Trouvez les meilleurs magasins et optimisez vos déplacements
             </p>
           </div>
           
-          {/* Section Selector */}
+          {/* Mode Selector */}
           <GlassCard className="mb-6 p-3">
             <div className="grid grid-cols-3 gap-2">
               <button
-                onClick={() => setActiveSection('conseiller')}
+                onClick={() => setMode('carte')}
                 className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl font-semibold transition-all ${
-                  activeSection === 'conseiller' 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' 
+                  mode === 'carte' 
+                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' 
                     : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700 hover:text-gray-300'
                 }`}
-                aria-label="Sélectionner la section conseiller"
-                aria-pressed={activeSection === 'conseiller'}
+                aria-label="Sélectionner le mode carte"
+                aria-pressed={mode === 'carte'}
               >
-                <MessageCircle className="w-6 h-6" />
-                <span className="text-sm">Conseiller</span>
+                <MapIcon className="w-6 h-6" />
+                <span className="text-sm">Carte</span>
               </button>
               <button
-                onClick={() => setActiveSection('suivi')}
+                onClick={() => setMode('itineraire')}
                 className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl font-semibold transition-all ${
-                  activeSection === 'suivi' 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' 
+                  mode === 'itineraire' 
+                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' 
                     : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700 hover:text-gray-300'
                 }`}
-                aria-label="Sélectionner la section suivi"
-                aria-pressed={activeSection === 'suivi'}
+                aria-label="Sélectionner le mode itinéraire"
+                aria-pressed={mode === 'itineraire'}
               >
-                <TrendingUp className="w-6 h-6" />
-                <span className="text-sm">Suivi</span>
+                <Navigation className="w-6 h-6" />
+                <span className="text-sm">Itinéraire</span>
               </button>
               <button
-                onClick={() => setActiveSection('rayon')}
+                onClick={() => setMode('optimisation')}
                 className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl font-semibold transition-all ${
-                  activeSection === 'rayon' 
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30' 
+                  mode === 'optimisation' 
+                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' 
                     : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700 hover:text-gray-300'
                 }`}
-                aria-label="Sélectionner la section rayon IA"
-                aria-pressed={activeSection === 'rayon'}
+                aria-label="Sélectionner le mode optimisation"
+                aria-pressed={mode === 'optimisation'}
               >
-                <ShoppingCart className="w-6 h-6" />
-                <span className="text-sm">Rayon IA</span>
+                <Zap className="w-6 h-6" />
+                <span className="text-sm">Optimisation</span>
               </button>
             </div>
           </GlassCard>
           
           {/* Dynamic Content */}
           <div>
-            {activeSection === 'conseiller' && <IaConseiller />}
+            {mode === 'carte' && (
+              <div className="-mt-6">
+                <Carte />
+              </div>
+            )}
             
-            {activeSection === 'suivi' && (
+            {mode === 'itineraire' && (
               <GlassCard>
                 <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
-                  <TrendingUp className="w-7 h-7 text-purple-400" />
-                  Suivi Intelligent
+                  <Navigation className="w-7 h-7 text-green-400" />
+                  Planificateur d'itinéraire
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  Suivez l'évolution de vos dépenses et recevez des alertes personnalisées
+                  Calculez le meilleur trajet pour vos courses
                 </p>
                 
                 <div className="grid md:grid-cols-2 gap-4 mb-6">
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                    <div className="text-3xl mb-3">📊</div>
+                    <div className="text-3xl mb-3">📍</div>
                     <h3 className="font-semibold text-lg mb-2 text-white">
-                      Analyse des dépenses
+                      Multi-destinations
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Visualisez vos habitudes d'achat et identifiez les opportunités d'économies
+                      Planifiez un trajet avec plusieurs arrêts magasins
                     </p>
                   </div>
                   
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                    <div className="text-3xl mb-3">🔔</div>
+                    <div className="text-3xl mb-3">⏱️</div>
                     <h3 className="font-semibold text-lg mb-2 text-white">
-                      Alertes prix
+                      Temps estimé
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Soyez notifié quand vos produits favoris sont en promotion
+                      Calculez la durée et la distance de votre parcours
                     </p>
                   </div>
                 </div>
@@ -116,44 +120,44 @@ export default function AssistantIAHub() {
               </GlassCard>
             )}
             
-            {activeSection === 'rayon' && (
+            {mode === 'optimisation' && (
               <GlassCard>
                 <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-3">
-                  <ShoppingCart className="w-7 h-7 text-purple-400" />
-                  Rayon IA
+                  <Zap className="w-7 h-7 text-green-400" />
+                  Optimisation de parcours
                 </h2>
                 <p className="text-gray-400 mb-6">
-                  Découvrez les meilleures offres du moment dans chaque rayon
+                  Trouvez le parcours le plus économique et rapide pour votre liste de courses
                 </p>
                 
                 <div className="grid md:grid-cols-3 gap-4 mb-6">
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                    <div className="text-3xl mb-3">🥖</div>
+                    <div className="text-3xl mb-3">💰</div>
                     <h3 className="font-semibold text-lg mb-2 text-white">
-                      Épicerie
+                      Économie maximale
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Produits de base et essentiels
+                      Privilégie les magasins les moins chers
                     </p>
                   </div>
                   
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                    <div className="text-3xl mb-3">🥩</div>
+                    <div className="text-3xl mb-3">🚗</div>
                     <h3 className="font-semibold text-lg mb-2 text-white">
-                      Viande & Poisson
+                      Distance minimale
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Produits frais et surgelés
+                      Réduit les kilomètres parcourus
                     </p>
                   </div>
                   
                   <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-800">
-                    <div className="text-3xl mb-3">🥬</div>
+                    <div className="text-3xl mb-3">⚖️</div>
                     <h3 className="font-semibold text-lg mb-2 text-white">
-                      Fruits & Légumes
+                      Équilibré
                     </h3>
                     <p className="text-gray-400 text-sm">
-                      Produits de saison locaux
+                      Balance prix et distance
                     </p>
                   </div>
                 </div>
@@ -167,29 +171,25 @@ export default function AssistantIAHub() {
             )}
           </div>
           
-          {/* Features Section */}
+          {/* Info Section */}
           <div className="mt-8">
-            <GlassCard className="bg-purple-900/20 border-purple-700/30">
-              <h3 className="text-lg font-semibold text-purple-300 mb-4 flex items-center gap-2">
-                <span>✨</span>
-                <span>Fonctionnalités de l'IA</span>
+            <GlassCard className="bg-green-900/20 border-green-700/30">
+              <h3 className="text-lg font-semibold text-green-300 mb-4 flex items-center gap-2">
+                <span>💡</span>
+                <span>Astuces de navigation</span>
               </h3>
               <ul className="space-y-3 text-gray-300 text-sm">
                 <li className="flex items-start gap-3">
-                  <span className="text-purple-400 mt-1">•</span>
-                  <span>Analyse personnalisée de vos habitudes d'achat</span>
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Activez la géolocalisation pour des résultats plus précis</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-purple-400 mt-1">•</span>
-                  <span>Recommandations basées sur votre historique et votre territoire</span>
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Planifiez vos courses aux heures creuses pour éviter les files d'attente</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-purple-400 mt-1">•</span>
-                  <span>Alertes intelligentes sur les promotions pertinentes</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-purple-400 mt-1">•</span>
-                  <span>Optimisation automatique de votre liste de courses</span>
+                  <span className="text-green-400 mt-1">•</span>
+                  <span>Regroupez vos achats dans le même secteur pour économiser du carburant</span>
                 </li>
               </ul>
             </GlassCard>
