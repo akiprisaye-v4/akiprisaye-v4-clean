@@ -7,20 +7,19 @@ import { visualizer } from 'rollup-plugin-visualizer';
 // Plugin to suppress Leaflet asset resolution warnings
 function suppressLeafletWarnings() {
   return {
-    name: 'suppress-leaflet-warnings',
+    name:  'suppress-leaflet-warnings',
     configResolved() {
       const originalWarn = console.warn;
-      console. warn = (...args) => {
-        const msg = args.join(' ');
-        // Suppress Leaflet image warnings that are resolved at runtime
+      console.warn = (...args) => {
+        const msg = args. join(' ');
         if (
           msg.includes('images/layers. png') ||
-          msg.includes('images/layers-2x. png') ||
+          msg.includes('images/layers-2x.png') ||
           msg.includes('images/marker-icon.png')
         ) {
           return;
         }
-        originalWarn.apply(console, args);
+        originalWarn. apply(console, args);
       };
     },
   };
@@ -35,7 +34,7 @@ export default defineConfig({
       targets: [
         {
           src: 'node_modules/leaflet/dist/images/*',
-          dest:  'images',
+          dest: 'images',
         },
       ],
     }),
@@ -48,16 +47,33 @@ export default defineConfig({
   ],
   
   resolve: {
-    alias:  {
+    alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   
   build: {
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
+      output: {
+        manualChunks: {
+          // Séparer React et ses dépendances
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          
+          // Séparer Leaflet (gros)
+          'vendor-leaflet':  ['leaflet', 'react-leaflet'],
+          
+          // Séparer Chart.js
+          'vendor-chart': ['chart.js', 'react-chartjs-2'],
+          
+          // Séparer lucide-icons
+          'vendor-icons': ['lucide-react'],
+          
+          // Séparer les utilitaires
+          'vendor-utils': ['date-fns', 'clsx'],
+        },
+      },
       onwarn(warning, warn) {
-        // Suppress warnings about Leaflet images that are resolved at runtime
         if (
           warning.code === 'UNRESOLVED_IMPORT' &&
           warning.message &&
