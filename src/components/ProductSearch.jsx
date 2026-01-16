@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Fuse from 'fuse.js';
 import { normalizeText } from '../utils/text';
-import { searchProductsByName, SEED_PRODUCTS } from '../data/seedProducts';
+import { searchProductsByName } from '../data/seedProducts';
+import { useToast } from '../hooks/useToast';
 
 const DEBOUNCE = 250;
 const MAX_RESULTS = 15;
@@ -13,6 +14,7 @@ export default function ProductSearch({ territory = 'Guadeloupe', onPickEAN }) {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const toast = useToast();
   
   const inputRef = useRef(null);
   const listboxRef = useRef(null);
@@ -41,9 +43,9 @@ export default function ProductSearch({ territory = 'Guadeloupe', onPickEAN }) {
           if (res.ok) {
             data = await res.json();
           }
-        } catch (apiErr) {
+        } catch (_apiErr) {
           if (import.meta.env.DEV) {
-            console.log('API not available, using seed data');
+            console.warn('API not available, using seed data');
           }
         }
         
@@ -90,6 +92,13 @@ export default function ProductSearch({ territory = 'Guadeloupe', onPickEAN }) {
         setResults(rankedResults.slice(0, MAX_RESULTS));
         setIsOpen(rankedResults.length > 0);
         setActiveIndex(-1);
+        
+        // Show toast if no results found
+        if (rankedResults.length === 0 && trimmedQuery.length >= 3) {
+          toast.info('Aucun résultat trouvé', {
+            duration: 3000,
+          });
+        }
       } catch (err) {
         console.error('Erreur recherche produit :', err);
         setResults([]);

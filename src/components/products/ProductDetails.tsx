@@ -7,9 +7,10 @@
  * Does NOT include: Scanning, OCR, camera features (reserved for PR #3)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ProductViewModel, UserPhoto } from '../types/productViewModel';
 import { getProductSubtitle, getTraceabilityText, hasCompleteInfo } from '../services/productViewModelService';
+import { getProductImageOrFallback } from '../utils/productImageFallback';
 
 interface ProductDetailsProps {
   product: ProductViewModel;
@@ -20,6 +21,18 @@ interface ProductDetailsProps {
 export default function ProductDetails({ product, onClose, onReportError }: ProductDetailsProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [displayImageUrl, setDisplayImageUrl] = useState<string>('');
+  const [imageFallbackAttempted, setImageFallbackAttempted] = useState(false);
+
+  // Get image with fallback on mount and when product changes
+  useEffect(() => {
+    const imageUrl = getProductImageOrFallback(product.imageUrl, {
+      category: product.categorie,
+      productName: product.nom
+    });
+    setDisplayImageUrl(imageUrl);
+    setImageFallbackAttempted(false); // Reset fallback flag when product changes
+  }, [product.imageUrl, product.categorie, product.nom]);
 
   // Status badge styling
   const statusBadgeClass = 
@@ -48,13 +61,41 @@ export default function ProductDetails({ product, onClose, onReportError }: Prod
       )}
 
       <div className="p-6 space-y-6">
+        {/* Disclaimer Banner */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="font-bold text-blue-900 dark:text-blue-200 mb-1">
+                Données observées et agrégées
+              </p>
+              <p className="text-sm text-blue-800 dark:text-blue-300">
+                Ces informations sont issues de données publiques et contributions citoyennes. Aucune interprétation, recommandation ou conseil n'est fourni. Vérifiez toujours les informations sur l'emballage du produit.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Product Image or Placeholder */}
         <div className="relative bg-gray-100 dark:bg-gray-900 rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-          {product.hasImage && product.imageUrl ? (
+          {displayImageUrl ? (
             <img
-              src={product.imageUrl}
+              src={displayImageUrl}
               alt={product.nom}
               className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fallback if image fails to load - but only attempt once to prevent infinite loops
+                if (!imageFallbackAttempted) {
+                  setImageFallbackAttempted(true);
+                  const fallbackUrl = getProductImageOrFallback(null, {
+                    category: product.categorie,
+                    productName: product.nom
+                  });
+                  e.currentTarget.src = fallbackUrl;
+                }
+              }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">

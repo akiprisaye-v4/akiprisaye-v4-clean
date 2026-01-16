@@ -1,110 +1,58 @@
-# ✅ CHECKLIST PR — A KI PRI SA YÉ
+## 📋 Pre-merge Checklist
 
-**Objectif : stabilité totale, mobile-first, zéro écran noir, CI verte**
+- [ ] ✅ Branch synced with `main` (no conflicts)
+- [ ] ✅ CI checks passing
+- [ ] ✅ Code reviewed
 
-Merci de cocher chaque point avant soumission.  
-⚠️ Toute non-conformité peut entraîner le rejet automatique de la PR.
+## 🔄 Sync with main before requesting merge
 
----
+```bash
+git fetch origin main
+git merge origin/main
+# Resolve conflicts if any
+git push
 
-## 1️⃣ Stabilité & sécurité globale
+# 3. Commit les changements
+git add scripts/smart-merge.sh . github/pull_request_template. md
+git commit -m "chore: add merge tools to prevent conflicts
 
-- [ ] Aucun écran noir possible (ErrorBoundary global actif)
-- [ ] Aucune exception JS non interceptée (try/catch sur modules sensibles)
-- [ ] Aucun crash bloquant sur mobile
-- [ ] Tous les modules sont fail-soft (fallback UI systématique)
+- Smart merge script with conflict detection
+- PR template with sync checklist"
+git push
+# Workflow pour notifier les PRs en retard
+cat > . github/workflows/pr-sync-reminder.yml << 'EOF'
+name: PR Sync Reminder
 
-## 2️⃣ UX mobile & superpositions
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Tous les lundis à 9h
+  workflow_dispatch:     # Manuel
 
-- [ ] Panier non superposé au chat en version mobile
-- [ ] Z-index harmonisés (chat < panier < modales)
-- [ ] Scroll verrouillé lors des modales
-- [ ] Navigation utilisable à une main (mobile-first)
+jobs:
+  check-prs:
+    runs-on:  ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      
+      - name: Check outdated PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "🔍 Checking open PRs..."
+          
+          gh pr list --state open --json number,title,headRefName,updatedAt | \
+          jq -r '.[] | select(.updatedAt < (now - 259200)) | "\(.number) \(.headRefName)"' | \
+          while read pr branch; do
+            echo "⚠️ PR #$pr is behind main"
+            
+            gh pr comment "$pr" --body "👋 **Reminder:** This PR may be behind \`main\`. 
 
-## 3️⃣ Caméra, image & fallback
+Please sync to avoid merge conflicts: 
+\`\`\`bash
+git fetch origin main
+git merge origin/main
+git push
+\`\`\`
 
-- [ ] Accès caméra optionnel, jamais bloquant
-- [ ] Fallback automatique Upload image fonctionnel
-- [ ] Timeout caméra géré proprement
-- [ ] Message utilisateur clair en cas d'échec caméra
-- [ ] Aucune dépendance CI à la caméra ou au hardware
-
-## 4️⃣ OCR & comparateur produit
-
-- [ ] Comparateur fonctionne avec EAN
-- [ ] Comparateur fonctionne sans EAN (OCR texte / estimation)
-- [ ] Message explicite si reconnaissance partielle
-- [ ] Aucune action utilisateur bloquée par l'OCR
-
-## 5️⃣ Données & logique métier
-
-- [ ] Produits locaux sans code-barres pris en charge
-- [ ] Recherche fuzzy / alternative active si EAN absent
-- [ ] Score de confiance visible (EAN / OCR / estimation)
-- [ ] Aucune donnée silencieusement inventée
-
-## 6️⃣ Tests & dette technique
-
-- [ ] Aucun test Jest résiduel (jest is not defined éliminé)
-- [ ] Stack test Vitest uniquement
-- [ ] Aucun test caméra / image dans la CI
-- [ ] Tests non bloquants pour les features hardware
-
-## 7️⃣ CI / Cloudflare Pages
-
-- [ ] Build Cloudflare Pages OK
-- [ ] Aucun warning bloquant
-- [ ] Redirections sans boucle infinie
-- [ ] Aucun fichier interdit (vidéo, zip, design source)
-- [ ] Dépôt sans Git LFS
-
-## 8️⃣ Documentation & transparence
-
-- [ ] README à jour (fallback caméra documenté)
-- [ ] Badge CI Camera-safe présent
-- [ ] Badge Offline-first / Mobile-first présent
-- [ ] Comportement OCR expliqué simplement
-
-## 9️⃣ Validation finale
-
-- [ ] Test réel effectué sur smartphone Android
-- [ ] Import image testé → comparateur fonctionnel
-- [ ] Chat, panier, comparateur testés ensemble
-- [ ] Aucun module manquant ou non branché
-
----
-
-## 🔍 PR D — Reconnaissance produit sans EAN
-
-### Périmètre & sécurité
-- [ ] Aucune modification CI / workflow
-- [ ] Aucun appel réseau externe
-- [ ] Fonctionnalité 100 % navigateur (offline)
-- [ ] Feature isolée (PR D uniquement)
-
-### OCR & extraction
-- [ ] OCR Tesseract.js offline fonctionnel
-- [ ] Timeout OCR géré proprement
-- [ ] Normalisation texte sécurisée
-- [ ] Aucune exécution automatique sans validation humaine
-
-### Recherche & comparaison
-- [ ] Recherche floue locale (Fuse.js)
-- [ ] Suggestions ≠ vérité (score visible)
-- [ ] Comparateur déclenché uniquement après confirmation
-
-### UX & accessibilité
-- [ ] Écran de validation obligatoire
-- [ ] Boutons : Confirmer / Corriger / Annuler
-- [ ] Mobile-first
-- [ ] Aucun écran bloquant
-
-### Tests
-- [ ] Tests unitaires Node-safe uniquement
-- [ ] Aucun test caméra / OCR réel en CI
-
----
-
-## 🔒 RÈGLE DE MERGE
-
-❌ **Aucun merge autorisé si une seule case n'est pas cochée.**
+Or use:  \`./scripts/smart-merge.sh $pr\`"
+          done
