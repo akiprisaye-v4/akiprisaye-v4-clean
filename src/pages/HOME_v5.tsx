@@ -148,7 +148,7 @@ export default function HomeV5() {
     if (detectedTerritory && detectedTerritory !== 'DOM-TOM') {
       return `Comparez les prix en ${detectedTerritory}`;
     }
-    return 'Comparez les prix des territoires d\'outre-mer';
+    return 'Comparez les prix dans les territoires ultramarins français';
   };
 
   return (
