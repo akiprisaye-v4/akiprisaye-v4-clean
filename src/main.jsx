@@ -1,7 +1,11 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
+=======
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+>>>>>>> 95a88e09 (feat: Add /comparaison route redirect to /comparateur)
 import './styles/globals.css';
 import './styles/civic-glass.css';
 import './styles/glass.css';
@@ -170,6 +174,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='scan-ean' element={<ScanEAN />} />
                   <Route path='comparaison-enseignes' element={<ComparaisonEnseignes />} />
                   <Route path='comparateur' element={<Comparateur />} />
+                  <Route path='comparaison' element={<Navigate to="/comparateur" replace />} />
                   <Route path='carte' element={<Carte />} />
                   <Route path='actualites' element={<NewsSimple />} />
                   <Route path='alertes' element={<Alertes />} />
