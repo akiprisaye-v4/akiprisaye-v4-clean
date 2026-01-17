@@ -4,6 +4,9 @@ type ErrorStateProps = {
   debugInfo?: string;
 };
 
+// Configuration constants
+const SUPPORT_EMAIL = 'support@akiprisaye.fr';
+
 export default function ErrorState({ error, onRetry, debugInfo }: ErrorStateProps) {
   const isDev = import.meta.env.DEV;
 
@@ -50,10 +53,10 @@ export default function ErrorState({ error, onRetry, debugInfo }: ErrorStateProp
           <p className="text-sm text-blue-700 dark:text-blue-400">
             Contactez notre équipe support à{' '}
             <a 
-              href="mailto:support@akiprisaye.fr" 
+              href={`mailto:${SUPPORT_EMAIL}`}
               className="font-semibold underline hover:text-blue-900 dark:hover:text-blue-200"
             >
-              support@akiprisaye.fr
+              {SUPPORT_EMAIL}
             </a>
             {' '}ou consultez notre{' '}
             <a 

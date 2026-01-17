@@ -14,7 +14,8 @@ export default function DataInfo({ territoire, dateSnapshot, source, qualite }: 
         month: 'long',
         year: 'numeric',
       });
-    } catch {
+    } catch (error) {
+      console.warn('Date formatting error:', error);
       return dateStr;
     }
   };
