@@ -23,6 +23,13 @@ type ObservatoireSnapshot = {
   donnees: ObservatoireData[];
 };
 
+// Liste de fichiers à essayer dans l'ordre (du plus récent au plus ancien)
+const DATA_FILES = [
+  '/data/observatoire/guadeloupe_2026-02.json',
+  '/data/observatoire/guadeloupe_2026-01.json',
+  '/data/observatoire/hexagone_2026-01.json',
+];
+
 export default function ComparateurCitoyen() {
   const [data, setData] = useState<ObservatoireData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,13 +38,6 @@ export default function ComparateurCitoyen() {
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedCommune, setSelectedCommune] = useState<string>('');
   const [snapshot, setSnapshot] = useState<ObservatoireSnapshot | null>(null);
-
-  // Liste de fichiers à essayer dans l'ordre (du plus récent au plus ancien)
-  const dataFiles = [
-    '/data/observatoire/guadeloupe_2026-02.json',
-    '/data/observatoire/guadeloupe_2026-01.json',
-    '/data/observatoire/hexagone_2026-01.json',
-  ];
 
   // Charger le snapshot le plus récent avec système de fallback
   const loadData = useCallback(async () => {
@@ -50,7 +50,7 @@ export default function ComparateurCitoyen() {
       let successfulFile: string | null = null;
 
       // Essayer chaque fichier dans l'ordre
-      for (const file of dataFiles) {
+      for (const file of DATA_FILES) {
         try {
           const response = await fetch(file);
           
@@ -99,7 +99,7 @@ export default function ComparateurCitoyen() {
       // Si aucun fichier n'a été chargé avec succès
       if (!successfulFile) {
         const errorMessage = 'Impossible de charger les données de l\'observatoire. Tous les fichiers de données sont indisponibles.';
-        const debugDetails = `Fichiers tentés: ${dataFiles.join(', ')}\nDernière erreur: ${lastError?.message || 'Inconnue'}`;
+        const debugDetails = `Fichiers tentés: ${DATA_FILES.join(', ')}\nDernière erreur: ${lastError?.message || 'Inconnue'}`;
         
         setError(errorMessage);
         setDebugInfo(debugDetails);
