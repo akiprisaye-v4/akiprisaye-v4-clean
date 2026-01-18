@@ -30,7 +30,7 @@ const TERRITORY_TO_DEPARTMENT: Record<string, string> = {
 /**
  * Mapping fuel types to API codes
  */
-const FUEL_TYPE_MAPPING: Record<FuelType, string> = {
+const _FUEL_TYPE_MAPPING: Record<FuelType, string> = {
   SP95: 'SP95',
   SP98: 'SP98',
   E10: 'E10',

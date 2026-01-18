@@ -1,10 +1,6 @@
 {
   "version": "1.0.0",
-<<<<<<< HEAD
-  "generatedAt": "2026-01-17T03:06:02.421Z",
-=======
-  "generatedAt": "2026-01-17T02:48:15.833Z",
->>>>>>> 95a88e09 (feat: Add /comparaison route redirect to /comparateur)
+  "generatedAt": "2026-01-18T07:58:35.831Z",
   "territories": [
     {
       "code": "GP",
