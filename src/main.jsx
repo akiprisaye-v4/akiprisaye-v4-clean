@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import './styles/globals.css';
 import './styles/civic-glass.css';
@@ -90,10 +90,7 @@ const CivicModules = lazyWithRetry(() => import('./pages/CivicModules'));
 const EvaluationCosmetique = lazyWithRetry(() => import('./pages/EvaluationCosmetique'));
 const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
 const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
-
-// Settings page - Ticket 4
-// ⚠️ CORRECTION ICI : Suppression de la déclaration en double (const Settings = lazy(...))
-const Settings = lazyWithRetry(() => import('./pages/Settings'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 // New simplified pages for automatic generation
 const HomeSimple = lazyWithRetry(() => import('./pages/Home.tsx'));
@@ -143,13 +140,11 @@ if ('serviceWorker' in navigator) {
 if (import.meta.env.PROD) {
   window.addEventListener('error', (event) => {
     console.error('Global error caught:', event.error);
-    // Prevent default behavior that might cause black screen
     event.preventDefault();
   });
 
   window.addEventListener('unhandledrejection', (event) => {
     console.error('Unhandled promise rejection:', event.reason);
-    // Prevent default behavior
     event.preventDefault();
   });
 }
@@ -171,6 +166,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='scan-ean' element={<ScanEAN />} />
                   <Route path='comparaison-enseignes' element={<ComparaisonEnseignes />} />
                   <Route path='comparateur' element={<Comparateur />} />
+                  <Route path='comparaison' element={<Navigate to="/comparateur" replace />} />
                   <Route path='carte' element={<Carte />} />
                   <Route path='actualites' element={<NewsSimple />} />
                   <Route path='alertes' element={<Alertes />} />
@@ -218,12 +214,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='tarifs' element={<Pricing />} />
                   {/* PR #1 - Assistant + FAQ étendue (v1.6.0) */}
                   <Route path='faq' element={<Faq />} />
+                  <Route path='*' element={<NotFound />} />
                 </Route>
               </Routes>
             </Suspense>
           </BrowserRouter>
         </AuthProvider>
+        <ToastProvider />
       </ThemeProvider>
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
