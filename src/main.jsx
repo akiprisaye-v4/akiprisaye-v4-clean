@@ -92,7 +92,8 @@ const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
 const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
 
 // Settings page - Ticket 4
-const Settings = lazy(() => import('./pages/Settings'));
+// ⚠️ CORRECTION ICI : Suppression de la déclaration en double (const Settings = lazy(...))
+const Settings = lazyWithRetry(() => import('./pages/Settings'));
 
 // New simplified pages for automatic generation
 const HomeSimple = lazyWithRetry(() => import('./pages/Home.tsx'));
@@ -217,5 +218,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='tarifs' element={<Pricing />} />
                   {/* PR #1 - Assistant + FAQ étendue (v1.6.0) */}
                   <Route path='faq' element={<Faq />} />
-*
-
+                </Route>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  </React.StrictMode>
+);
