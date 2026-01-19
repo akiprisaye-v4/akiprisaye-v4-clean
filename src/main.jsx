@@ -28,9 +28,9 @@ function lazyWithRetry(componentImport) {
           <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
             <div className="max-w-md bg-slate-900 rounded-xl p-6 text-center">
               <div className="text-5xl mb-4">⚠️</div>
-              <h2 className="text-xl font-semibold text-white mb-2">Module non disponible</h2>
+              <h2 className="text-xl font-semibold text-white mb-2">Bientôt disponible</h2>
               <p className="text-gray-300 mb-4">
-                Cette fonctionnalité n'a pas pu être chargée. Veuillez rafraîchir la page.
+                Cette fonctionnalité n'est pas encore disponible. Revenez bientôt.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -52,8 +52,8 @@ const ScanOCR = lazyWithRetry(() => import('./pages/ScanOCR'));
 const ScanEAN = lazyWithRetry(() => import('./pages/ScanEAN'));
 const ComparaisonEnseignes = lazyWithRetry(() => import('./pages/ComparaisonEnseignes'));
 const Comparateur = lazyWithRetry(() => import('./pages/Comparateur'));
+const Comparateurs = lazyWithRetry(() => import('./pages/Comparateurs'));
 const Carte = lazyWithRetry(() => import('./pages/Carte'));
-const Actualites = lazyWithRetry(() => import('./pages/Actualites'));
 const Alertes = lazyWithRetry(() => import('./pages/Alertes'));
 const APropos = lazyWithRetry(() => import('./pages/APropos'));
 const Methodologie = lazyWithRetry(() => import('./pages/Methodologie'));
@@ -65,7 +65,6 @@ const ResetPassword = lazyWithRetry(() => import('./pages/ResetPassword'));
 const ComprendrePrix = lazyWithRetry(() => import('./pages/ComprendrePrix'));
 const ContribuerPrix = lazyWithRetry(() => import('./pages/ContribuerPrix'));
 const SignalerAbus = lazyWithRetry(() => import('./pages/SignalerAbus'));
-const Pricing = lazyWithRetry(() => import('./pages/Pricing.tsx'));
 const PricingDetailed = lazyWithRetry(() => import('./pages/PricingDetailed'));
 const Subscribe = lazyWithRetry(() => import('./pages/Subscribe'));
 const LicenceInstitution = lazyWithRetry(() => import('./pages/LicenceInstitution'));
@@ -90,12 +89,15 @@ const CivicModules = lazyWithRetry(() => import('./pages/CivicModules'));
 const EvaluationCosmetique = lazyWithRetry(() => import('./pages/EvaluationCosmetique'));
 const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
 const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
+const TerritoryHub = lazyWithRetry(() => import('./pages/TerritoryHub'));
+const TerritoryScanner = lazyWithRetry(() => import('./pages/TerritoryScanner'));
+const TerritoryComparateurs = lazyWithRetry(() => import('./pages/TerritoryComparateurs'));
+const ComingSoon = lazyWithRetry(() => import('./pages/ComingSoon'));
 const Settings = lazy(() => import('./pages/Settings'));
 
 // New simplified pages for automatic generation
 const HomeSimple = lazyWithRetry(() => import('./pages/Home.tsx'));
 const CompareSimple = lazyWithRetry(() => import('./pages/Compare.tsx'));
-const NewsSimple = lazyWithRetry(() => import('./pages/News.tsx'));
 
 // PR #1 - Assistant + FAQ étendue (v1.6.0)
 const Faq = lazyWithRetry(() => import('./pages/Faq'));
@@ -163,12 +165,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route index element={<Home />} />
                   <Route path='chat' element={<ChatIALocal />} />
                   <Route path='scan' element={<ScanOCR />} />
+                  <Route path='scanner/*' element={<ScanOCR />} />
                   <Route path='scan-ean' element={<ScanEAN />} />
                   <Route path='comparaison-enseignes' element={<ComparaisonEnseignes />} />
                   <Route path='comparateur' element={<Comparateur />} />
+                  <Route path='comparateurs/*' element={<Comparateurs />} />
                   <Route path='comparaison' element={<Navigate to="/comparateur" replace />} />
                   <Route path='carte' element={<Carte />} />
-                  <Route path='actualites' element={<NewsSimple />} />
+                  <Route path='carte-itineraires/*' element={<Carte />} />
+                  <Route path='actualites' element={<ComingSoon title="Actualités" />} />
                   <Route path='alertes' element={<Alertes />} />
                   <Route path='a-propos' element={<APropos />} />
                   <Route path='methodologie' element={<Methodologie />} />
@@ -181,13 +186,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='comprendre-prix' element={<ComprendrePrix />} />
                   <Route path='contribuer-prix' element={<ContribuerPrix />} />
                   <Route path='signaler-abus' element={<SignalerAbus />} />
-                  <Route path='pricing' element={<Pricing />} />
+                  <Route path='pricing' element={<ComingSoon title="Tarifs" />} />
+                  <Route path='solidarite' element={<ComingSoon title="Solidarité" />} />
                   <Route path='pricing-detailed' element={<PricingDetailed />} />
                   <Route path='subscribe' element={<Subscribe />} />
                   <Route path='licence-institution' element={<LicenceInstitution />} />
                   <Route path='contact-collectivites' element={<ContactCollectivites />} />
                   <Route path='contact' element={<Contact />} />
                   <Route path='ia-conseiller' element={<IaConseiller />} />
+                  <Route path='assistant-ia/*' element={<IaConseiller />} />
                   <Route path='ti-panie' element={<TiPanie />} />
                   <Route path='admin/dashboard' element={<AdminDashboard />} />
                   <Route path='admin/ai-dashboard' element={<AIDashboard />} />
@@ -205,13 +212,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='civic-modules' element={<CivicModules />} />
                   <Route path='evaluation-cosmetique' element={<EvaluationCosmetique />} />
                   <Route path='observatoire' element={<Observatoire />} />
+                  <Route path='observatoire-hub' element={<ComingSoon title="Observatoire" />} />
                   <Route path='observatoire/methodologie' element={<ObservatoryMethodology />} />
                   <Route path='comparateur-citoyen' element={<ComparateurCitoyen />} />
+                  <Route path=':territory/scanner' element={<TerritoryScanner />} />
+                  <Route path=':territory/comparateurs' element={<TerritoryComparateurs />} />
+                  <Route path=':territory' element={<TerritoryHub />} />
                   {/* Mission M-B - Multi-territory comparison */}
                   <Route path='comparateur/comparer' element={<ComparaisonPage />} />
                   {/* New simplified pages for automatic generation */}
                   <Route path='comparer' element={<CompareSimple />} />
-                  <Route path='tarifs' element={<Pricing />} />
+                  <Route path='tarifs' element={<ComingSoon title="Tarifs" />} />
                   {/* PR #1 - Assistant + FAQ étendue (v1.6.0) */}
                   <Route path='faq' element={<Faq />} />
                   <Route path='*' element={<NotFound />} />
