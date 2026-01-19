@@ -6,10 +6,10 @@
  * - Conversion optimization
  * - Social proof immediately visible
  * - Clear user journey
- * - Territory personalization
+ * - Global territory coverage
  * 
  * Structure (9 sections):
- * 1. Hero Compact (70vh) with territory detection
+ * 1. Hero Compact (70vh) with global coverage messaging
  * 2. Proof Bar (stats + credibility)
  * 3. Benefits (concrete value proposition)
  * 4. Example Comparison (NEW - real data)
@@ -23,7 +23,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { detectTerritory } from '../utils/territoryDetection';
 import { getComparisonOfDay, type PriceComparison } from '../data/exampleComparisons';
 import '../styles/home-v5.css';
 
@@ -38,7 +37,6 @@ export default function HomeV5() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [showMobileCTA, setShowMobileCTA] = useState(false);
   const [displayStats, setDisplayStats] = useState({ scans: 0, products: 0, territories: 0 });
-  const [detectedTerritory, setDetectedTerritory] = useState<string>('');
   const [exampleComparison] = useState<PriceComparison>(getComparisonOfDay());
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   
@@ -48,13 +46,6 @@ export default function HomeV5() {
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
-
-  // Detect territory on mount
-  useEffect(() => {
-    detectTerritory().then(territory => {
-      setDetectedTerritory(territory);
-    });
-  }, []);
 
   useEffect(() => {
     // Load real stats from localStorage
@@ -145,10 +136,7 @@ export default function HomeV5() {
   };
 
   const getTerritoryTitle = () => {
-    if (detectedTerritory && detectedTerritory !== 'DOM-TOM') {
-      return `Comparez les prix en ${detectedTerritory}`;
-    }
-    return 'Comparez les prix dans les territoires ultramarins français';
+    return 'Comparer les prix dans les territoires ultramarins';
   };
 
   return (
@@ -158,7 +146,7 @@ export default function HomeV5() {
         Aller au contenu principal
       </a>
       
-      {/* 🏆 SECTION 1: HERO COMPACT with territory detection (70vh) */}
+      {/* 🏆 SECTION 1: HERO COMPACT with global coverage (70vh) */}
       <section className="hero-v5" ref={heroRef}>
         <motion.div
           style={{ opacity: heroOpacity, scale: heroScale }}
@@ -239,7 +227,32 @@ export default function HomeV5() {
 
       <main id="main-content">
 
-      {/* 📊 SECTION 2: PROOF BAR - Immediate credibility */}
+      {/* 🗺️ SECTION 2: TERRITOIRES */}
+      <section className="territories-section">
+        <div className="territories-header">
+          <h2>Territoires</h2>
+          <p>Choisissez votre territoire pour accéder au hub local.</p>
+        </div>
+        <div className="territories-grid">
+          <Link className="territory-card" to="/guadeloupe">
+            Guadeloupe
+          </Link>
+          <Link className="territory-card" to="/martinique">
+            Martinique
+          </Link>
+          <Link className="territory-card" to="/guyane">
+            Guyane
+          </Link>
+          <Link className="territory-card" to="/reunion">
+            La Réunion
+          </Link>
+          <Link className="territory-card" to="/mayotte">
+            Mayotte
+          </Link>
+        </div>
+      </section>
+
+      {/* 📊 SECTION 3: PROOF BAR - Immediate credibility */}
       <section className="proof-bar">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
