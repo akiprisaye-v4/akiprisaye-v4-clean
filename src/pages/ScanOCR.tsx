@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { runOCR, GENERIC_OCR_ERROR, type OCRResult } from '../services/ocrService';
 import OCRResultView from '../components/OCRResultView';
+import {
+  classifyScanText,
+  estimateNutriScore,
+  estimateNovaIndex,
+  extractAdditives,
+  extractPrices,
+  getScanHubTypeLabel,
+} from '../services/scanHubClassifier';
+import { buildPriceSearchInput } from '../services/scanHub/scanToPriceBridge';
 import type { ScanState, OcrOptions } from '../types/scan';
 
 const SAMPLE_IMAGE = '/images/ocr-example.png';
@@ -25,11 +34,22 @@ export default function ScanOCR() {
     language: 'fra',
     timeout: 30000,
   });
+  const [scanSummary, setScanSummary] = useState<{
+    typeLabel: string;
+    confidence: number;
+    signals: string[];
+    prices: number[];
+    additives: string[];
+    nutriScore: string;
+    novaIndex: string;
+    suggestedBarcode?: string;
+  } | null>(null);
 
   const executeOcr = (source: string, cleanup?: () => void) => {
     setLoading(true);
     setError(null);
     setOcrResult(null);
+    setScanSummary(null);
     setScanState('processing');
 
     void Promise.resolve().then(async () => {
@@ -47,6 +67,20 @@ export default function ScanOCR() {
         } else {
           setOcrResult(result);
           setScanState('success');
+          const classification = classifyScanText(trimmedText);
+          const prices = extractPrices(trimmedText);
+          const additives = extractAdditives(trimmedText);
+          const priceInput = buildPriceSearchInput({ text: trimmedText });
+          setScanSummary({
+            typeLabel: getScanHubTypeLabel(classification.type),
+            confidence: Math.round(classification.confidence),
+            signals: classification.signals,
+            prices,
+            additives,
+            nutriScore: estimateNutriScore(trimmedText),
+            novaIndex: estimateNovaIndex(additives.length),
+            suggestedBarcode: priceInput.barcode,
+          });
         }
       } catch (err: any) {
         console.error('OCR error:', err, err?.stack);
@@ -125,6 +159,7 @@ export default function ScanOCR() {
   const handleRetry = () => {
     setImage(null);
     setOcrResult(null);
+    setScanSummary(null);
     setError(null);
     setScanState('idle');
   };
@@ -389,12 +424,83 @@ export default function ScanOCR() {
 
           {/* Success State - Show Results */}
           {ocrResult && scanState === 'success' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="bg-green-900/20 border border-green-700 rounded-lg p-3 text-center">
                 <p className="text-green-200 text-sm">
                   ✅ Texte extrait avec succès!
                 </p>
               </div>
+              {scanSummary && (
+                <div className="rounded-2xl border border-slate-700 bg-slate-900/80 p-5 text-white shadow-lg">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-blue-300 font-semibold">ScanHub • Détection automatique</p>
+                      <h2 className="text-2xl font-bold mt-1">{scanSummary.typeLabel}</h2>
+                      <p className="text-sm text-slate-300 mt-1">
+                        Confiance OCR combinée : {scanSummary.confidence}%
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-xs">
+                      <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-200">
+                        {scanSummary.nutriScore}
+                      </span>
+                      <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-200">
+                        {scanSummary.novaIndex}
+                      </span>
+                      <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-200">
+                        Prix détectés: {scanSummary.prices.length}
+                      </span>
+                      <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-200">
+                        Additifs: {scanSummary.additives.length}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-200">
+                    <div className="rounded-xl bg-slate-800/70 p-4">
+                      <h3 className="font-semibold mb-2 text-blue-200">Signaux détectés</h3>
+                      {scanSummary.signals.length > 0 ? (
+                        <ul className="list-disc list-inside space-y-1 text-slate-300">
+                          {scanSummary.signals.map((signal) => (
+                            <li key={signal}>{signal}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-slate-400">Aucun signal fort détecté.</p>
+                      )}
+                    </div>
+                    <div className="rounded-xl bg-slate-800/70 p-4">
+                      <h3 className="font-semibold mb-2 text-blue-200">Prix & ingrédients</h3>
+                      <p className="text-slate-300">
+                        Prix détectés :{' '}
+                        {scanSummary.prices.length > 0
+                          ? scanSummary.prices.map((price) => `${price.toFixed(2)}€`).join(', ')
+                          : 'Aucun prix explicite'}
+                      </p>
+                      <p className="text-slate-300 mt-2">
+                        Additifs :{' '}
+                        {scanSummary.additives.length > 0
+                          ? scanSummary.additives.join(', ')
+                          : 'Aucun additif identifié'}
+                      </p>
+                      {scanSummary.suggestedBarcode && (
+                        <a
+                          href={`/recherche-produits?ean=${encodeURIComponent(
+                            scanSummary.suggestedBarcode
+                          )}`}
+                          className="inline-flex items-center gap-2 mt-3 text-xs text-blue-300 hover:text-blue-200"
+                        >
+                          🔎 Rechercher les prix observés pour {scanSummary.suggestedBarcode}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 text-xs text-slate-400">
+                    Résumé automatique. Vérifiez toujours sur l'emballage original.
+                  </div>
+                </div>
+              )}
               <OCRResultView 
                 result={ocrResult} 
                 onRetry={handleRetry}
