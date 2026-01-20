@@ -87,6 +87,7 @@ const CivicModules = lazyWithRetry(() => import('./pages/CivicModules'));
 const EvaluationCosmetique = lazyWithRetry(() => import('./pages/EvaluationCosmetique'));
 const Observatoire = lazyWithRetry(() => import('./pages/Observatoire'));
 const ObservatoryMethodology = lazyWithRetry(() => import('./pages/ObservatoryMethodology'));
+const RechercheProduits = lazyWithRetry(() => import('./pages/RechercheProduits'));
 const TerritoryHub = lazyWithRetry(() => import('./pages/TerritoryHub'));
 const TerritoryScanner = lazyWithRetry(() => import('./pages/TerritoryScanner'));
 const TerritoryComparateurs = lazyWithRetry(() => import('./pages/TerritoryComparateurs'));
@@ -173,6 +174,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   <Route path='comparateur' element={<Comparateur />} />
                   <Route path='comparateurs/*' element={<Comparateurs />} />
                   <Route path='comparaison' element={<Navigate to="/comparateur" replace />} />
+                  <Route path='recherche-produits' element={<RechercheProduits />} />
                   <Route path='carte' element={<Carte />} />
                   <Route path='carte-itineraires/*' element={<Carte />} />
                   <Route path='actualites' element={<ComingSoon title="Actualités" />} />
