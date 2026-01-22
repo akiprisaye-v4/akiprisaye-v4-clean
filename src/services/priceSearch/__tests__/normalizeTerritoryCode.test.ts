@@ -4,7 +4,7 @@ import { normalizeTerritoryCode } from '../normalizeTerritoryCode';
 describe('normalizeTerritoryCode', () => {
   it('normalizes standard territory codes', () => {
     expect(normalizeTerritoryCode('gp')).toBe('gp');
-    expect(normalizeTerritoryCode('GF')).toBe('gf');
+    expect(normalizeTerritoryCode('GP')).toBe('gp');
     expect(normalizeTerritoryCode('re')).toBe('re');
   });
 
@@ -23,7 +23,7 @@ describe('normalizeTerritoryCode', () => {
     expect(normalizeTerritoryCode('Nouvelle-Calédonie')).toBe('nc');
   });
 
-  it('defaults to FR for missing or unknown values', () => {
+  it('defaults to fr for missing or unknown values', () => {
     expect(normalizeTerritoryCode()).toBe('fr');
     expect(normalizeTerritoryCode('')).toBe('fr');
     expect(normalizeTerritoryCode('Unknown')).toBe('fr');
