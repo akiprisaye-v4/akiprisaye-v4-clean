@@ -10,22 +10,17 @@ class ErrorBoundary extends Component {
     };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
-    if (import.meta.env.DEV) {
-      console.error('[ErrorBoundary]', error, errorInfo);
-    }
+    console.error('[ErrorBoundary]', error, errorInfo);
 
     this.setState({
-      error,
-      errorInfo,
+      error: error?.message || String(error),
+      errorInfo: errorInfo?.componentStack || null,
     });
-
-    // Extension future possible :
-    // sendErrorToMonitoring(error, errorInfo);
   }
 
   handleReset = () => {
@@ -49,33 +44,25 @@ class ErrorBoundary extends Component {
               Une erreur temporaire est survenue. Le service reste accessible.
             </p>
 
-            {import.meta.env.DEV && this.state.error && (
-              <details className="mb-6 text-left">
-                <summary className="cursor-pointer text-red-400 font-semibold mb-2">
-                  Détails techniques (développement uniquement)
-                </summary>
-                <div className="bg-slate-800 p-4 rounded-lg overflow-auto">
-                  <p className="text-red-400 font-mono text-sm mb-2">
-                    {this.state.error.toString()}
-                  </p>
-                  {this.state.errorInfo && (
-                    <pre className="text-slate-400 text-xs overflow-auto whitespace-pre-wrap">
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  )}
-                </div>
-              </details>
-            )}
+            <pre
+              style={{
+                marginTop: '16px',
+                color: '#ff6b6b',
+                background: '#020617',
+                padding: '12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                textAlign: 'left',
+                whiteSpace: 'pre-wrap',
+                overflowX: 'auto',
+              }}
+            >
+              {this.state.error}
+              {"\n"}
+              {this.state.errorInfo}
+            </pre>
 
-            {!import.meta.env.DEV && (
-              <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 mb-6">
-                <p className="text-blue-200 text-sm">
-                  Si le problème persiste, veuillez nous contacter via la page contact.
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-4 justify-center mt-6">
               <button
                 onClick={this.handleReset}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
