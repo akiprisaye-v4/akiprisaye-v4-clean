@@ -29,7 +29,7 @@ if (!rootElement) {
           <AuthProvider>
             <Suspense
               fallback={
-                <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-200">
+                <div className="min-h-screen flex items-center justify-center">
                   <div className="animate-pulse text-lg">
                     Chargement…
                   </div>
