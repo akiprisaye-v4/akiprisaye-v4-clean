@@ -1,15 +1,14 @@
-// test/setup.ts
+// src/test/setup.ts
 
 /**
  * Global test setup for Vitest
- *
- * - Compatible with Vitest v4
- * - Compatible with React Testing Library
- * - Works with `globals: false`
- * - Shared between src/ and frontend/src/
+ * - Compatible Vitest v4
+ * - Compatible React Testing Library
+ * - No globals
+ * - No fake timers
  */
 
-import '@testing-library/jest-dom/vitest';
+import '@testing-library/jest-dom';
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
