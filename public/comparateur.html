@@ -102,7 +102,7 @@
     <input
       id="query"
       type="text"
-      placeholder="Ex: riz 1kg, lait, huile..."
+      placeholder="Ex : riz, lait, huile…"
     />
 
     <button id="btn">Comparer</button>
@@ -121,6 +121,25 @@
   const resultsDiv = document.getElementById('results');
   const errorDiv = document.getElementById('error');
 
+  async function fetchPrices(query) {
+    const response = await fetch('/data/prices.json');
+    if (!response.ok) {
+      throw new Error('Impossible de charger les données');
+    }
+
+    const data = await response.json();
+    const q = query.toLowerCase();
+
+    return data
+      .filter(item =>
+        item.productLabel.toLowerCase().includes(q)
+      )
+      .map(item => ({
+        storeName: item.source || 'Source terrain',
+        price: item.price
+      }));
+  }
+
   btn.addEventListener('click', async () => {
     const query = input.value.trim();
     resultsDiv.innerHTML = '';
@@ -135,37 +154,28 @@
     btn.textContent = 'Recherche…';
 
     try {
-      // 👉 ENDPOINT À AJUSTER SI BESOIN
-      const response = await fetch(
-        `/api/prices/search?query=${encodeURIComponent(query)}&territory=971`
-      );
+      const prices = await fetchPrices(query);
 
-      if (!response.ok) {
-        throw new Error('Erreur serveur');
-      }
-
-      const data = await response.json();
-
-      if (!data || !data.prices || data.prices.length === 0) {
+      if (prices.length === 0) {
         errorDiv.textContent = 'Aucun prix trouvé.';
         return;
       }
 
-      const prices = data.prices.sort((a, b) => a.price - b.price);
+      prices.sort((a, b) => a.price - b.price);
       const cheapestPrice = prices[0].price;
 
       prices.forEach(p => {
         const div = document.createElement('div');
         div.className = 'price' + (p.price === cheapestPrice ? ' cheapest' : '');
         div.innerHTML = `
-          <span>${p.storeName || 'Magasin'}</span>
+          <span>${p.storeName}</span>
           <span>${p.price.toFixed(2)} €</span>
         `;
         resultsDiv.appendChild(div);
       });
 
     } catch (err) {
-      errorDiv.textContent = 'Impossible de récupérer les données.';
+      errorDiv.textContent = 'Erreur lors du chargement des données.';
     } finally {
       btn.disabled = false;
       btn.textContent = 'Comparer';
