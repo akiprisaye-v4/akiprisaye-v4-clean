@@ -78,4 +78,48 @@ export async function ocrTicket(req: Request, res: Response) {
         : null;
 
     // ===============================
-    // 3️⃣ STRUCTURE OCR NORMALISÉ
+    // 3️⃣ STRUCTURE OCR NORMALISÉE
+    // ===============================
+    const ocrResult = {
+      rawText: fullText,
+      detected: {
+        store: detectedStore,
+        date: detectedDate,
+        total
+      },
+      extractedPrices: prices,
+      parsedAt: admin.firestore.FieldValue.serverTimestamp(),
+      confidence: 'auto',
+      status: 'ocr_done'
+    };
+
+    // ===============================
+    // 4️⃣ SAUVEGARDE FIRESTORE
+    // ===============================
+    await db.collection('tickets').doc(ticketId).update({
+      ocr: ocrResult,
+      status: 'processed',
+      processedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    // ===============================
+    // 5️⃣ RÉPONSE API
+    // ===============================
+    return res.json({
+      success: true,
+      ticketId,
+      ocr: {
+        store: detectedStore,
+        date: detectedDate,
+        total
+      }
+    });
+
+  } catch (error) {
+    console.error('OCR ERROR:', error);
+    return res.status(500).json({
+      error: 'Erreur OCR',
+      message: (error as any)?.message
+    });
+  }
+}
