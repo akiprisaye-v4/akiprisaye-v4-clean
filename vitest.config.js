@@ -1,20 +1,16 @@
 import { defineConfig } from "vitest/config";
-import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
-  },
-
   test: {
     environment: "jsdom",
     globals: false,
 
+    // ⛔ AUCUN setupFiles
+    // ⛔ AUCUN setup.ts
+    // ⛔ AUCUN frontend/
+
     include: [
-      "src/**/*.test.{ts,tsx,js,jsx}",
-      "frontend/src/**/*.test.{ts,tsx,js,jsx}",
+      "src/**/*.{test,spec}.{ts,tsx,js,jsx}"
     ],
   },
 });
