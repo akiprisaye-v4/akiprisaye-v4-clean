@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Panier anti-crise – A KI PRI SA YÉ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: #f7f7f7;
+  padding: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+}
+
+.store {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: #f1f1f1;
+}
+
+.cheapest {
+  background: #e6f7e6;
+  border-left: 4px solid #2e7d32;
+  font-weight: 700;
+}
+
+.total {
+  font-size: 1.1rem;
+}
+
+.products {
+  font-size: .9rem;
+  color: #555;
+}
+
+footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: .85rem;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Panier anti-crise</h1>
+  <div id="results"></div>
+</div>
+
+<footer>
+  Données indicatives – A KI PRI SA YÉ
+</footer>
+
+<script>
+const ANTI_CRISIS_PRODUCTS = [
+  'riz',
+  'lait',
+  'huile',
+  'pâtes',
+  'sucre'
+];
+
+async function loadBasket() {
+  const res = await fetch('/data/prices.json');
+  const prices = await res.json();
+
+  const basket = prices.filter(p =>
+    ANTI_CRISIS_PRODUCTS.some(k =>
+      p.productLabel.toLowerCase().includes(k)
+    )
+  );
+
+  const byStore = {};
+
+  basket.forEach(p => {
+    if (!byStore[p.storeName]) {
+      byStore[p.storeName] = {
+        total: 0,
+        products: []
+      };
+    }
+    byStore[p.storeName].total += p.price;
+    byStore[p.storeName].products.push(p.productLabel);
+  });
+
+  const stores = Object.entries(byStore)
+    .map(([store, data]) => ({ store, ...data }))
+    .sort((a, b) => a.total - b.total);
+
+  const min = stores[0]?.total ?? 0;
+  const container = document.getElementById('results');
+
+  stores.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'store' + (s.total === min ? ' cheapest' : '');
+
+    div.innerHTML = `
+      <div class="total">${s.store} — ${s.total.toFixed(2)} €</div>
+      <div class="products">${s.products.join(', ')}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+loadBasket();
+</script>
+
+</body>
+</html>
