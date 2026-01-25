@@ -3,10 +3,20 @@ import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { fileURLToPath, URL } from "node:url";
 
+/**
+ * ⚠️ IMPORTANT
+ * - AUCUNE configuration Vitest ici
+ * - Vitest doit être configuré UNIQUEMENT dans vitest.config.js (à la racine)
+ * - Ce fichier est STRICTEMENT pour le build frontend (Vite)
+ */
+
 export default defineConfig({
   base: "/",
+
   plugins: [
     react(),
+
+    // Copie des assets Leaflet nécessaires au runtime
     viteStaticCopy({
       targets: [
         {
@@ -29,6 +39,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Découpage vendor
           if (id.includes("node_modules")) {
             if (id.includes("react")) return "react";
             if (id.includes("leaflet")) return "map";
@@ -36,6 +47,7 @@ export default defineConfig({
             return "vendor";
           }
 
+          // Découpage pages
           if (id.includes("/pages/")) {
             if (id.includes("Home")) return "home";
             if (id.includes("Comparateur")) return "comparateur";
@@ -43,6 +55,8 @@ export default defineConfig({
             if (id.includes("Actualites")) return "actualites";
             return "pages";
           }
+
+          return undefined;
         },
       },
     },
