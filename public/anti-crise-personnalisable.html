@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Panier anti-crise – A KI PRI SA YÉ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f7f7f7;
+    padding: 16px;
+    margin: 0;
+    color: #222;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    max-width: 620px;
+    margin: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+  }
+
+  .products-select {
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+  }
+
+  .products-select label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .95rem;
+    margin-bottom: 6px;
+    cursor: pointer;
+  }
+
+  .store {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #f1f1f1;
+  }
+
+  .cheapest {
+    background: #e6f7e6;
+    border-left: 4px solid #2e7d32;
+    font-weight: 700;
+  }
+
+  .total {
+    font-size: 1.05rem;
+  }
+
+  .products {
+    font-size: .85rem;
+    color: #555;
+    margin-top: 4px;
+  }
+
+  .delta {
+    margin-top: 6px;
+    font-size: .85rem;
+  }
+
+  .delta strong {
+    color: #c62828;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 16px;
+    font-size: .85rem;
+    color: #666;
+  }
+
+  .error {
+    text-align: center;
+    color: #c62828;
+    margin-top: 12px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Panier anti-crise</h1>
+
+  <div class="products-select" id="selectors"></div>
+
+  <div id="results"></div>
+  <div id="error" class="error"></div>
+</div>
+
+<footer>
+  Données indicatives – A KI PRI SA YÉ
+</footer>
+
+<script>
+let ALL_PRICES = [];
+let SELECTED_PRODUCTS = new Set();
+
+/* Chargement initial */
+async function init() {
+  try {
+    const res = await fetch('/data/prices.json');
+    if (!res.ok) throw new Error();
+
+    ALL_PRICES = await res.json();
+
+    if (!Array.isArray(ALL_PRICES) || ALL_PRICES.length === 0) {
+      document.getElementById('error').textContent =
+        'Aucune donnée disponible.';
+      return;
+    }
+
+    buildSelectors();
+    recalcBasket();
+
+  } catch {
+    document.getElementById('error').textContent =
+      'Impossible de charger les données.';
+  }
+}
+
+/* Création des cases à cocher */
+function buildSelectors() {
+  const container = document.getElementById('selectors');
+  container.innerHTML = '<strong>Produits du panier :</strong><br>';
+
+  const labels = [...new Set(
+    ALL_PRICES.map(p => p.productLabel)
+  )];
+
+  labels.forEach(label => {
+    SELECTED_PRODUCTS.add(label);
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = true;
+
+    checkbox.addEventListener('change', () => {
+      checkbox.checked
+        ? SELECTED_PRODUCTS.add(label)
+        : SELECTED_PRODUCTS.delete(label);
+      recalcBasket();
+    });
+
+    const wrapper = document.createElement('label');
+    wrapper.appendChild(checkbox);
+    wrapper.append(label);
+
+    container.appendChild(wrapper);
+  });
+}
+
+/* Recalcul du panier */
+function recalcBasket() {
+  const container = document.getElementById('results');
+  container.innerHTML = '';
+
+  const filtered = ALL_PRICES.filter(p =>
+    SELECTED_PRODUCTS.has(p.productLabel)
+  );
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p>Aucun produit sélectionné.</p>';
+    return;
+  }
+
+  const byStore = {};
+
+  filtered.forEach(p => {
+    if (!byStore[p.storeName]) {
+      byStore[p.storeName] = { total: 0, products: [] };
+    }
+    byStore[p.storeName].total += p.price;
+    byStore[p.storeName].products.push(p.productLabel);
+  });
+
+  const stores = Object.entries(byStore)
+    .map(([store, data]) => ({ store, ...data }))
+    .sort((a, b) => a.total - b.total);
+
+  const min = stores[0].total;
+
+  stores.forEach(s => {
+    const diff = s.total - min;
+    const percent = min > 0 ? (diff / min) * 100 : 0;
+
+    const div = document.createElement('div');
+    div.className = 'store' + (s.total === min ? ' cheapest' : '');
+
+    div.innerHTML = `
+      <div class="total">${s.store} — ${s.total.toFixed(2)} €</div>
+      <div class="products">${s.products.join(', ')}</div>
+      <div class="delta">
+        ${
+          diff > 0
+            ? `<strong>+${diff.toFixed(2)} €</strong> (${percent.toFixed(1)} %)`
+            : 'Magasin le moins cher'
+        }
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+init();
+</script>
+
+</body>
+</html>
