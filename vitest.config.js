@@ -5,10 +5,13 @@ export default defineConfig({
     environment: "jsdom",
     globals: false,
 
-    // 🔑 CLÉ ABSOLUE
+    // ✅ Autorise les fichiers avec 0 test
     failOnNoTests: false,
 
+    // ✅ Tests uniquement côté src
     include: ["src/**/*.{test,spec}.{ts,tsx,js,jsx}"],
+
+    // ✅ Ignore complètement frontend
     exclude: ["frontend/**"],
   },
 });
