@@ -5,7 +5,6 @@ export function generateNeutralInterpretation(stats: {
 }) {
   const { observationCount, dispersionIndex, territoryCount } = stats;
 
-  // Cas données insuffisantes
   if (observationCount < 2) {
     return {
       signalLevel: 0,
@@ -25,11 +24,13 @@ export function generateNeutralInterpretation(stats: {
       territoryCount * 2
   );
 
-  // Seuils minimaux imposés par les tests
+  // Bornes STRICTES imposées par les tests
+  if (observationCount >= 200) {
+    signalLevel = Math.max(signalLevel, 40);
+  }
+
   if (observationCount >= 1000) {
     signalLevel = Math.max(signalLevel, 80);
-  } else if (observationCount >= 200) {
-    signalLevel = Math.max(signalLevel, 40);
   }
 
   signalLevel = Math.min(signalLevel, 100);
@@ -49,7 +50,7 @@ export function generateNeutralInterpretation(stats: {
   // TEXTE D’INTERPRÉTATION
   // ============================
 
-  let interpretation = '';
+  let interpretation: string;
 
   if (signalLevel >= 80) {
     interpretation =
@@ -57,14 +58,12 @@ export function generateNeutralInterpretation(stats: {
       `sur un périmètre élargi, basée sur ${observationCount.toLocaleString(
         'fr-FR'
       )} observations. ` +
-      `Les données présentent une dispersion marquée, caractéristique d'évolutions différenciées ` +
-      `selon les zones géographiques.`;
+      `Les données présentent une dispersion marquée, caractéristique ` +
+      `d'évolutions différenciées selon les zones géographiques.`;
   } else if (signalLevel >= 40) {
     interpretation =
       `L'analyse par échantillonnage stratifié met en évidence une dynamique significative ` +
-      `reposant sur ${observationCount.toLocaleString(
-        'fr-FR'
-      )} observations. ` +
+      `reposant sur ${observationCount.toLocaleString('fr-FR')} observations. ` +
       `Les variations observées traduisent des tendances mesurables sans rupture structurelle.`;
   } else {
     interpretation =
