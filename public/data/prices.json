@@ -1,10 +1,50 @@
 [
   {
     "productId": "riz-1kg",
-    "productLabel": "Riz blanc 1kg",
+    "productLabel": "Riz blanc long grain 1kg",
+    "category": "épicerie",
+    "brand": "Marque nationale",
     "territory": "GP",
+    "storeId": "carrefour-abymes",
+    "storeName": "Carrefour Abymes",
     "price": 2.45,
+    "currency": "EUR",
+    "unit": "kg",
+    "pricePerUnit": 2.45,
     "source": "Relevé terrain",
-    "observedAt": "2026-01-06T11:30:00Z"
+    "observedAt": "2026-01-06T11:30:00Z",
+    "confidence": "haute"
+  },
+  {
+    "productId": "riz-1kg",
+    "productLabel": "Riz blanc long grain 1kg",
+    "category": "épicerie",
+    "brand": "Marque nationale",
+    "territory": "GP",
+    "storeId": "superu-basse-terre",
+    "storeName": "Super U Basse-Terre",
+    "price": 2.65,
+    "currency": "EUR",
+    "unit": "kg",
+    "pricePerUnit": 2.65,
+    "source": "Relevé terrain",
+    "observedAt": "2026-01-06T11:45:00Z",
+    "confidence": "haute"
+  },
+  {
+    "productId": "riz-1kg",
+    "productLabel": "Riz blanc long grain 1kg",
+    "category": "épicerie",
+    "brand": "Marque nationale",
+    "territory": "GP",
+    "storeId": "leaderprice-pointe-a-pitre",
+    "storeName": "Leader Price Pointe-à-Pitre",
+    "price": 2.29,
+    "currency": "EUR",
+    "unit": "kg",
+    "pricePerUnit": 2.29,
+    "source": "Relevé terrain",
+    "observedAt": "2026-01-06T12:10:00Z",
+    "confidence": "moyenne"
   }
 ]
