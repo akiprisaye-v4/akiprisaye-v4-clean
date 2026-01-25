@@ -12,6 +12,7 @@ export function generateNeutralInterpretation(stats: {
       interpretation:
         'Données insuffisantes pour établir une analyse statistique fiable.'
     };
+
   }
 
   // ============================
