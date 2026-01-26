@@ -34,7 +34,7 @@ export default function OcrPage() {
         }
       });
 
-      const extractedText = result && result.text ? result.text : "";
+      const extractedText = result && (result as any).text ? (result as any).text.trim() : "";
       setText(extractedText);
 
       const extractedPrices = extractPrices(extractedText);
