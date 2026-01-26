@@ -3,223 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <title>A KI PRI SA YÉ — Panier anti-crise</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    :root {
-      --bg: #0f1115;
-      --card: #161a22;
-      --text: #eaeaf0;
-      --muted: #9aa0b3;
-      --accent: #4ade80;
-      --danger: #ef4444;
-    }
-
-    * { box-sizing: border-box; }
-
     body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #0f1115;
+      color: #eaeaea;
     }
 
     header {
       padding: 16px;
       text-align: center;
+      background: #161a22;
       border-bottom: 1px solid #222;
     }
 
-    header h1 {
+    h1 {
+      font-size: 1.3rem;
       margin: 0;
-      font-size: 1.4rem;
-    }
-
-    header p {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.9rem;
     }
 
     main {
       padding: 16px;
-      max-width: 900px;
+      max-width: 820px;
       margin: auto;
     }
 
     .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.1rem;
-    }
-
-    .product-list li {
-      margin: 6px 0;
-      font-size: 0.95rem;
+      background: #161a22;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid #222;
     }
 
     .store {
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      background: #1c2130;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
     }
 
-    .store.recommended {
-      border-left: 4px solid var(--accent);
-      background: #172a21;
+    .price {
+      font-weight: 700;
+      font-size: 1.1rem;
     }
 
-    .store-title {
+    .badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
       font-weight: 600;
-      margin-bottom: 6px;
+      white-space: nowrap;
     }
 
-    .total {
-      font-size: 1.05rem;
-      margin-top: 6px;
+    .best {
+      background: #1f7a1f;
+      color: #fff;
     }
 
     .muted {
-      color: var(--muted);
+      color: #aaa;
       font-size: 0.85rem;
     }
 
-    #error {
-      display: none;
-      background: #2a1616;
-      color: var(--danger);
-      padding: 12px;
-      border-radius: 8px;
-      margin: 16px;
+    .error {
+      color: #ff6b6b;
       text-align: center;
+      margin-top: 20px;
     }
 
     footer {
       text-align: center;
-      padding: 16px;
+      padding: 12px;
       font-size: 0.8rem;
-      color: var(--muted);
+      color: #777;
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <h1 id="project-name">A KI PRI SA YÉ</h1>
-    <p id="project-mission">Chargement…</p>
-  </header>
 
-  <div id="error"></div>
+<header>
+  <h1>Panier anti-crise — Guadeloupe</h1>
+</header>
 
-  <main id="app">
-    <div class="card">
-      Chargement des données…
-    </div>
-  </main>
+<main id="app">
+  <div class="muted">Chargement des données…</div>
+</main>
 
-  <footer>
-    Données indicatives — Initiative citoyenne
-  </footer>
+<footer>
+  Données citoyennes — A KI PRI SA YÉ
+</footer>
 
-  <script>
-    const DATA_URL = '/data/mega-panier-anti-crise.json';
+<script>
+(async function () {
+  const app = document.getElementById('app');
 
-    const app = document.getElementById('app');
-    const errorBox = document.getElementById('error');
-    const projectName = document.getElementById('project-name');
-    const projectMission = document.getElementById('project-mission');
+  try {
+    const res = await fetch('/data/mega-panier-anti-crise.json');
+    if (!res.ok) throw new Error('JSON non accessible');
 
-    function showError(message) {
-      errorBox.textContent = message;
-      errorBox.style.display = 'block';
+    const data = await res.json();
+
+    const basket =
+      Object.values(data.basketProfiles || {})[0];
+
+    if (!basket) {
+      throw new Error('Aucun panier trouvé');
     }
 
-    async function loadData() {
-      try {
-        const res = await fetch(DATA_URL);
-        if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+    const magasins = data.magasins || {};
+    const produits = basket.produits || {};
 
-        const data = await res.json();
+    // Calcul des totaux
+    const totals = Object.values(magasins).map(store => {
+      let total = 0;
 
-        if (!data.meta || !data.baskets || !data.stores) {
-          throw new Error('Structure JSON invalide');
+      Object.keys(produits).forEach(pid => {
+        const qte = produits[pid];
+        const price = store.prix?.[pid];
+        if (typeof price === 'number') {
+          total += price * qte;
         }
-
-        render(data);
-      } catch (err) {
-        console.error(err);
-        showError(
-          "Impossible de charger les données. Vérifiez votre connexion ou réessayez plus tard."
-        );
-        app.innerHTML = '';
-      }
-    }
-
-    function render(data) {
-      app.innerHTML = '';
-
-      // Meta
-      projectName.textContent = data.meta.project?.name || 'A KI PRI SA YÉ';
-      projectMission.textContent =
-        data.meta.project?.mission || '';
-
-      const basket = data.baskets[0];
-
-      // Panier
-      const basketCard = document.createElement('div');
-      basketCard.className = 'card';
-      basketCard.innerHTML = `
-        <h2>${basket.label}</h2>
-        <ul class="product-list">
-          ${basket.products.map(pid => {
-            const p = data.products.find(x => x.productId === pid);
-            return `<li>${p ? p.label : pid}</li>`;
-          }).join('')}
-        </ul>
-      `;
-      app.appendChild(basketCard);
-
-      // Totaux par magasin
-      const storesCard = document.createElement('div');
-      storesCard.className = 'card';
-      storesCard.innerHTML = `<h2>Comparaison des magasins</h2>`;
-
-      const recommendedId = basket.recommendedStore?.storeId;
-
-      basket.totalsByStore.forEach(entry => {
-        const store = data.stores.find(s => s.storeId === entry.storeId);
-
-        const div = document.createElement('div');
-        div.className = 'store' + (entry.storeId === recommendedId ? ' recommended' : '');
-
-        div.innerHTML = `
-          <div class="store-title">
-            ${store ? store.storeName : entry.storeId}
-          </div>
-          <div class="total">
-            Total panier : ${entry.total.toFixed(2)} €
-          </div>
-          ${
-            entry.storeId === recommendedId
-              ? `<div class="muted">Magasin recommandé</div>`
-              : ''
-          }
-        `;
-
-        storesCard.appendChild(div);
       });
 
-      app.appendChild(storesCard);
-    }
+      return {
+        ...store,
+        total: Number(total.toFixed(2))
+      };
+    });
 
-    loadData();
-  </script>
+    totals.sort((a, b) => a.total - b.total);
+    const minTotal = totals[0]?.total;
+
+    app.innerHTML = '';
+
+    totals.forEach(store => {
+      const div = document.createElement('div');
+      div.className = 'card';
+
+      div.innerHTML = `
+        <div class="store">
+          <div>
+            <strong>${store.nom}</strong><br />
+            <span class="muted">${store.lieu}</span>
+          </div>
+          <div>
+            <div class="price">${store.total.toFixed(2)} €</div>
+            ${
+              store.total === minTotal
+                ? '<div class="badge best">Moins cher</div>'
+                : ''
+            }
+          </div>
+        </div>
+      `;
+
+      app.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error(err);
+    app.innerHTML = `
+      <div class="error">
+        Impossible d’afficher le panier.<br />
+        Données indisponibles ou invalides.
+      </div>
+    `;
+  }
+})();
+</script>
+
 </body>
 </html>
