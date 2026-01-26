@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import Tesseract from "tesseract.js";
+import { extractPrices } from "../utils/extractPrices";
 
 export default function OcrPage() {
   const [image, setImage] = useState(null);
   const [text, setText] = useState("");
+  const [pricesData, setPricesData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -14,6 +16,7 @@ export default function OcrPage() {
 
     setImage(URL.createObjectURL(file));
     setText("");
+    setPricesData(null);
     setError(null);
   };
 
@@ -33,7 +36,11 @@ export default function OcrPage() {
         },
       });
 
-      setText(result.data.text || "");
+      const extractedText = result.data.text || "";
+      setText(extractedText);
+
+      const extractedPrices = extractPrices(extractedText);
+      setPricesData(extractedPrices);
     } catch (err) {
       console.error(err);
       setError("Erreur lors de l’analyse OCR");
@@ -46,7 +53,7 @@ export default function OcrPage() {
     <main style={styles.main}>
       <h1 style={styles.title}>Analyse de ticket / facture</h1>
       <p style={styles.subtitle}>
-        Prenez une photo ou importez un ticket pour extraire le texte.
+        Prenez une photo ou importez un ticket pour analyser automatiquement les prix.
       </p>
 
       <input
@@ -58,19 +65,11 @@ export default function OcrPage() {
       />
 
       {image && (
-        <img
-          src={image}
-          alt="Ticket"
-          style={styles.preview}
-        />
+        <img src={image} alt="Ticket" style={styles.preview} />
       )}
 
       {image && (
-        <button
-          onClick={runOcr}
-          disabled={loading}
-          style={styles.button}
-        >
+        <button onClick={runOcr} disabled={loading} style={styles.button}>
           {loading ? "Analyse en cours…" : "Lancer l’OCR"}
         </button>
       )}
@@ -87,6 +86,34 @@ export default function OcrPage() {
         <section style={styles.result}>
           <h2>Texte extrait</h2>
           <pre style={styles.pre}>{text}</pre>
+        </section>
+      )}
+
+      {pricesData && (
+        <section style={styles.result}>
+          <h2>Analyse des prix</h2>
+
+          {pricesData.prices.length === 0 && (
+            <p style={{ opacity: 0.8 }}>Aucun prix détecté automatiquement.</p>
+          )}
+
+          {pricesData.prices.map((p, i) => (
+            <div key={i} style={styles.row}>
+              <span>{p.label || "Article"}</span>
+              <strong>{p.value.toFixed(2)} €</strong>
+            </div>
+          ))}
+
+          <hr style={styles.hr} />
+
+          <div style={styles.row}>
+            <strong>Total détecté</strong>
+            <strong>
+              {pricesData.total
+                ? `${pricesData.total.toFixed(2)} €`
+                : "Non détecté"}
+            </strong>
+          </div>
         </section>
       )}
     </main>
@@ -151,5 +178,15 @@ const styles = {
     whiteSpace: "pre-wrap",
     fontSize: "0.85rem",
     lineHeight: 1.4,
+  },
+  row: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    fontSize: "0.95rem",
+  },
+  hr: {
+    margin: "12px 0",
+    opacity: 0.2,
   },
 };
