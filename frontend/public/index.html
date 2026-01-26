@@ -17,18 +17,22 @@
       min-height: 100vh;
       text-align: center;
     }
+
     .box {
       max-width: 520px;
       padding: 24px;
     }
+
     h1 {
       font-size: 1.8rem;
       margin-bottom: 12px;
     }
+
     p {
       opacity: 0.85;
       line-height: 1.5;
     }
+
     .badge {
       margin-top: 16px;
       display: inline-block;
@@ -39,18 +43,54 @@
       font-weight: 600;
       font-size: 0.85rem;
     }
+
+    /* React container (progressive) */
+    #react-root {
+      margin-top: 32px;
+      display: none;
+    }
   </style>
 </head>
 
 <body>
-  <div class="box">
+  <!-- Fallback statique (TOUJOURS visible) -->
+  <div class="box" id="fallback">
     <h1>🟢 A KI PRI SA YÉ</h1>
     <p>
       Le site est en ligne.<br />
       L’infrastructure fonctionne.<br />
-      Le chargement React sera activé à l’étape suivante.
+      Le chargement React est progressif et sécurisé.
     </p>
     <div class="badge">Cloudflare Pages OK</div>
+
+    <!-- Point d’ancrage React -->
+    <div id="react-root"></div>
   </div>
+
+  <!-- Activation logique React -->
+  <script>
+    window.__REACT_ENABLED__ = true;
+  </script>
+
+  <!-- Chargeur React NON BLOQUANT -->
+  <script type="module">
+    try {
+      const reactScript = document.createElement("script");
+      reactScript.type = "module";
+      reactScript.src = "/react-entry.js";
+      reactScript.onload = () => {
+        const root = document.getElementById("react-root");
+        if (root) {
+          root.style.display = "block";
+        }
+      };
+      reactScript.onerror = () => {
+        console.warn("React non chargé, fallback actif.");
+      };
+      document.body.appendChild(reactScript);
+    } catch (e) {
+      console.warn("Erreur React, fallback conservé.", e);
+    }
+  </script>
 </body>
 </html>
