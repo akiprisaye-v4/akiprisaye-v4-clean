@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Tesseract from "tesseract.js";
+import { recognizeImage } from "../ocr/loadTesseract";
 
 /* ===================== */
 /* Types                 */
@@ -22,22 +22,18 @@ function extractTicketData(rawText: string): ExtractedData {
     .toUpperCase();
 
   /* ---------- PRIX ---------- */
-  const priceRegex =
-    /(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})\s?€/g;
+  const priceRegex = /(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})\s?€/g;
 
   const prices: number[] = [];
   let match: RegExpExecArray | null;
 
   while ((match = priceRegex.exec(normalized)) !== null) {
-    const value = parseFloat(
-      match[1].replace(/\./g, "").replace(",", ".")
-    );
+    const value = parseFloat(match[1].replace(/\./g, "").replace(",", "."));
     if (!isNaN(value)) prices.push(value);
   }
 
   /* ---------- DATE ---------- */
-  const dateRegex =
-    /(\d{2}[\/.-]\d{2}[\/.-]\d{2,4})/;
+  const dateRegex = /(\d{2}[\/.-]\d{2}[\/.-]\d{2,4})/;
   const dateMatch = normalized.match(dateRegex);
   const date = dateMatch ? dateMatch[1] : null;
 
@@ -48,21 +44,11 @@ function extractTicketData(rawText: string): ExtractedData {
     .filter(Boolean)
     .slice(0, 6);
 
-  const blacklist = [
-    "MERCI",
-    "TOTAL",
-    "FACTURE",
-    "TICKET",
-    "CARTE",
-    "CB",
-    "TVA",
-  ];
+  const blacklist = ["MERCI", "TOTAL", "FACTURE", "TICKET", "CARTE", "CB", "TVA"];
 
   const store =
     lines.find(
-      (line) =>
-        line === line.toUpperCase() &&
-        !blacklist.some((b) => line.includes(b))
+      (line) => line === line.toUpperCase() && !blacklist.some((b) => line.includes(b))
     ) || null;
 
   return {
@@ -115,18 +101,15 @@ const OcrScanner: React.FC = () => {
     setError(null);
 
     try {
-      const result = await Tesseract.recognize(image, "fra", {
-        logger: (m) => {
-          if (
-            m.status === "recognizing text" &&
-            typeof m.progress === "number"
-          ) {
-            setProgress(Math.round(m.progress * 100));
-          }
-        },
+      // utilise le loader lazy (import dynamique) : recognizeImage téléchargera tesseract/wasm/traineddata à la demande
+      const result = await recognizeImage(image, "fra", (m) => {
+        if (m.status === "recognizing text" && typeof m.progress === "number") {
+          setProgress(Math.round(m.progress * 100));
+        }
       });
 
-      const ocrText = result.data.text?.trim() || "";
+      // recognizeImage retourne `data` (objet de tesseract) depuis le worker
+      const ocrText = (result && (result as any).text ? (result as any).text.trim() : "") || "";
       setText(ocrText);
 
       const data = extractTicketData(ocrText);
@@ -146,8 +129,7 @@ const OcrScanner: React.FC = () => {
       <h1 style={styles.title}>Analyse de ticket / facture</h1>
 
       <p style={styles.subtitle}>
-        Importez un ticket ou une facture pour extraire automatiquement
-        les informations clés.
+        Importez un ticket ou une facture pour extraire automatiquement les informations clés.
       </p>
 
       <input
@@ -159,28 +141,16 @@ const OcrScanner: React.FC = () => {
       />
 
       {image && (
-        <img
-          src={image}
-          alt="Aperçu du ticket"
-          style={styles.preview}
-        />
+        <img src={image} alt="Aperçu du ticket" style={styles.preview} />
       )}
 
       {image && (
-        <button
-          onClick={runOcr}
-          disabled={loading}
-          style={styles.button}
-        >
+        <button onClick={runOcr} disabled={loading} style={styles.button}>
           {loading ? "Analyse en cours…" : "Lancer l’OCR"}
         </button>
       )}
 
-      {loading && (
-        <p style={styles.progress}>
-          Analyse : {progress} %
-        </p>
-      )}
+      {loading && <p style={styles.progress}>Analyse : {progress} %</p>}
 
       {error && <p style={styles.error}>{error}</p>}
 
@@ -189,13 +159,11 @@ const OcrScanner: React.FC = () => {
           <h2>Données détectées</h2>
 
           <p>
-            <strong>Magasin :</strong>{" "}
-            {extracted.store || "Non détecté"}
+            <strong>Magasin :</strong> {extracted.store || "Non détecté"}
           </p>
 
           <p>
-            <strong>Date :</strong>{" "}
-            {extracted.date || "Non détectée"}
+            <strong>Date :</strong> {extracted.date || "Non détectée"}
           </p>
 
           <p>
