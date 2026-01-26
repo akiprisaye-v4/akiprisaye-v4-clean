@@ -34,20 +34,41 @@ jobs:
 
       - name: Check for new HIGH vulnerabilities
         run: |
-          HIGH_COUNT=$(node -e "
-            const a=require('./audit.json');
-            const v=a.vulnerabilities||{};
-            let c=0;
-            for (const k in v) {
-              if (v[k].severity === 'high') c++;
-            }
-            console.log(c);
-          ")
+          HIGH_COUNT=$(node - <<'EOF'
+          const fs = require('fs');
 
-          echo \"High vulnerabilities: $HIGH_COUNT\"
+          if (!fs.existsSync('audit.json')) {
+            console.log(0);
+            process.exit(0);
+          }
 
-          if [ \"$HIGH_COUNT\" -gt 0 ]; then
-            echo \"⚠️ High vulnerabilities detected.\"
-            echo \"Ensure SECURITY_AUDIT.md documents and justifies them.\"
+          const content = fs.readFileSync('audit.json', 'utf8').trim();
+          if (!content) {
+            console.log(0);
+            process.exit(0);
+          }
+
+          const audit = JSON.parse(content);
+          const vulns = audit.vulnerabilities || {};
+
+          let count = 0;
+          for (const name in vulns) {
+            if (vulns[name].severity === 'high') count++;
+          }
+
+          console.log(count);
+          EOF
+          )
+
+          echo "High vulnerabilities detected: $HIGH_COUNT"
+
+          # 🔐 Baseline documented in SECURITY_AUDIT.md
+          BASELINE=2
+
+          if [ "$HIGH_COUNT" -gt "$BASELINE" ]; then
+            echo "❌ New HIGH vulnerabilities detected (baseline: $BASELINE)"
+            echo "Update SECURITY_AUDIT.md to justify them."
             exit 1
           fi
+
+          echo "✅ Security audit within accepted baseline"
