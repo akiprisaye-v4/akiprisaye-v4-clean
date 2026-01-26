@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
-import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 import { existsSync } from 'fs'
+import { createRequire } from 'module'
+
+// Charge optionnelle de rollup-plugin-visualizer pour éviter l'échec en CI
+const require = createRequire(import.meta.url)
+let visualizerPlugin: any = null
+try {
+  const viz = require('rollup-plugin-visualizer')
+  visualizerPlugin = (viz && (viz.visualizer || viz.default || viz))
+} catch (err) {
+  // plugin absent -> on continue sans lui (utile en CI où devDeps peuvent être omis)
+  visualizerPlugin = null
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,12 +34,13 @@ export default defineConfig({
         }] : [])
       ]
     }),
-    visualizer({
+    // Ajout conditionnel du visualizer (ne casse pas le build si le package est absent)
+    ...(visualizerPlugin ? [visualizerPlugin({
       filename: './dist/stats.html',
       open: false,
       gzipSize: true,
       brotliSize: true
-    })
+    })] : [])
   ],
   resolve: {
     alias: {
