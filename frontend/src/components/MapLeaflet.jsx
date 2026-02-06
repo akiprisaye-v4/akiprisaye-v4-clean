@@ -1,12 +1,13 @@
 /**
- * MapLeaflet Component
+ * MapLeaflet Component - Performance Optimized
  * 
  * Interactive map showing stores across DOM-COM territories
- * Uses Leaflet.js for map rendering
+ * Uses Leaflet.js for map rendering with lazy loading and mobile optimizations
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { loadLeaflet } from '../utils/leafletClient';
+import { getOptimizedMapConfig } from '../utils/deviceDetection';
 
 // Territory coordinates (center points)
 const TERRITORY_COORDINATES = {
@@ -27,17 +28,61 @@ const TERRITORY_COORDINATES = {
 export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null }) {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const observerRef = useRef(null);
+  const markersRef = useRef([]);
+  
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  // Get device-optimized config
+  const mapConfig = useRef(getOptimizedMapConfig());
 
+  /**
+   * Intersection Observer for lazy loading
+   * Only load Leaflet when map becomes visible
+   */
   useEffect(() => {
-    // Load Leaflet from npm package (not CDN)
+    if (!mapRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+            setIsLoading(true);
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before visible
+        threshold: 0.1,
+      }
+    );
+
+    observerRef.current.observe(mapRef.current);
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [isVisible]);
+
+  /**
+   * Load Leaflet library when visible
+   */
+  useEffect(() => {
+    if (!isVisible) return;
+
     loadLeafletLibrary();
-  }, []);
+  }, [isVisible]);
 
+  /**
+   * Update map when territory or stores change
+   */
   useEffect(() => {
-    // Update map when territory or stores change
-    if (mapInstanceRef.current) {
+    if (mapInstanceRef.current && window.L) {
       updateMap();
     }
   }, [territory, stores]);
@@ -47,7 +92,6 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
    */
   async function loadLeafletLibrary() {
     try {
-      // Use the utility that imports from npm packages
       const L = await loadLeaflet();
       if (L) {
         window.L = L;
@@ -64,24 +108,31 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
   }
 
   /**
-   * Initialize Leaflet map
+   * Initialize Leaflet map with performance optimizations
    */
   function initializeMap() {
     if (!mapRef.current || !window.L) return;
 
     const coords = TERRITORY_COORDINATES[territory] || TERRITORY_COORDINATES.GP;
+    const config = mapConfig.current;
 
-    // Create map
-    const map = window.L.map(mapRef.current).setView(
-      [coords.lat, coords.lng],
-      coords.zoom,
-    );
+    // Create map with optimized settings
+    const map = window.L.map(mapRef.current, {
+      zoomAnimation: config.animate,
+      fadeAnimation: config.animate,
+      markerZoomAnimation: config.animate,
+      zoomAnimationThreshold: config.isMobile ? 2 : 4,
+      tap: config.isMobile, // Enable tap for mobile
+      tapTolerance: config.isMobile ? 30 : 15,
+    }).setView([coords.lat, coords.lng], coords.zoom);
 
     // Add dark CartoDB tiles
     window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 20,
+      updateWhenIdle: config.performanceTier === 'low', // Reduce tile loading on low-end
+      keepBuffer: config.isMobile ? 1 : 2, // Reduce buffer on mobile
     }).addTo(map);
 
     mapInstanceRef.current = map;
@@ -97,30 +148,43 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
     if (!mapInstanceRef.current) return;
 
     const coords = TERRITORY_COORDINATES[territory] || TERRITORY_COORDINATES.GP;
-    mapInstanceRef.current.setView([coords.lat, coords.lng], coords.zoom);
+    const config = mapConfig.current;
+    
+    mapInstanceRef.current.setView(
+      [coords.lat, coords.lng], 
+      coords.zoom,
+      { animate: config.animate, duration: config.zoomAnimationDuration / 1000 }
+    );
 
     // Clear existing markers and add new ones
     updateMarkers(mapInstanceRef.current);
   }
 
   /**
-   * Update markers on the map
+   * Update markers on the map with viewport-based rendering
    */
   function updateMarkers(map) {
     if (!window.L) return;
 
-    // Clear existing markers (except tile layer)
-    map.eachLayer((layer) => {
-      if (layer instanceof window.L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
+    const config = mapConfig.current;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => map.removeLayer(marker));
+    markersRef.current = [];
+
+    // Limit markers on mobile for performance
+    const visibleStores = config.isMobile 
+      ? stores.slice(0, config.maxVisibleMarkers)
+      : stores;
 
     // Add markers for each store
-    stores.forEach((store) => {
+    visibleStores.forEach((store) => {
       if (!store.lat || !store.lng) return;
 
-      const marker = window.L.marker([store.lat, store.lng]);
+      const marker = window.L.marker([store.lat, store.lng], {
+        // Disable marker animation on low-end devices
+        riseOnHover: config.performanceTier !== 'low',
+      });
 
       // Create popup content
       const popupContent = `
@@ -136,7 +200,11 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
         </div>
       `;
 
-      marker.bindPopup(popupContent);
+      marker.bindPopup(popupContent, {
+        // Optimize popup on mobile
+        maxWidth: config.isMobile ? 250 : 300,
+        autoPan: !config.isMobile, // Disable auto-pan on mobile
+      });
 
       // Add click event
       if (onStoreClick) {
@@ -146,7 +214,13 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
       }
 
       marker.addTo(map);
+      markersRef.current.push(marker);
     });
+
+    // Show warning if markers were limited
+    if (config.isMobile && stores.length > config.maxVisibleMarkers) {
+      console.info(`Showing ${config.maxVisibleMarkers} of ${stores.length} markers for performance`);
+    }
   }
 
   // Expose store click handler globally for popup buttons
@@ -168,6 +242,17 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Clear markers
+      if (mapInstanceRef.current && markersRef.current.length > 0) {
+        markersRef.current.forEach(marker => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.removeLayer(marker);
+          }
+        });
+        markersRef.current = [];
+      }
+      
+      // Remove map
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -175,9 +260,32 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
     };
   }, []);
 
+  // Show placeholder before map is visible
+  if (!isVisible) {
+    return (
+      <div 
+        ref={mapRef}
+        className="flex items-center justify-center p-8 bg-gray-100 dark:bg-gray-800 rounded-lg"
+        style={{ height: '500px', minHeight: '400px' }}
+      >
+        <div className="text-center">
+          <div className="mb-4 text-4xl">🗺️</div>
+          <p className="text-gray-600 dark:text-gray-400">Carte interactive</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+            Se charge au scroll
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8 bg-gray-100 dark:bg-gray-800 rounded-lg">
+      <div 
+        ref={mapRef}
+        className="flex items-center justify-center p-8 bg-gray-100 dark:bg-gray-800 rounded-lg"
+        style={{ height: '500px', minHeight: '400px' }}
+      >
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Chargement de la carte...</p>
@@ -214,6 +322,12 @@ export function MapLeaflet({ territory = 'GP', stores = [], onStoreClick = null 
               Sélectionnez un territoire pour voir les magasins disponibles
             </p>
           </div>
+        </div>
+      )}
+      
+      {mapConfig.current.isMobile && stores.length > mapConfig.current.maxVisibleMarkers && (
+        <div className="absolute bottom-4 left-4 right-4 bg-blue-500/90 text-white px-3 py-2 rounded-lg text-sm shadow-lg">
+          ℹ️ {mapConfig.current.maxVisibleMarkers} magasins affichés sur {stores.length} (optimisation mobile)
         </div>
       )}
     </div>
