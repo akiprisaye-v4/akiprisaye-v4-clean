@@ -85,7 +85,9 @@ export default [
         MutationObserver: 'readonly',
         ResizeObserver: 'readonly',
         requestAnimationFrame: 'readonly',
-        cancelAnimationFrame: 'readonly'
+        cancelAnimationFrame: 'readonly',
+        URLSearchParams: 'readonly',
+        FormData: 'readonly'
       }
     },
     plugins: {
