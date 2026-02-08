@@ -1,46 +1,115 @@
-// Type declarations for leaflet.heat
-declare module 'leaflet.heat' {
-  import * as L from 'leaflet';
+/**
+ * Type definitions for leaflet.heat
+ * https://github.com/Leaflet/Leaflet.heat
+ */
 
-  export interface HeatLatLngTuple extends Array<number> {
-    0: number; // latitude
-    1: number; // longitude
-    2?: number; // intensity (optional, 0-1)
-  }
+import * as L from 'leaflet';
 
-  export interface HeatLayerOptions {
+declare module 'leaflet' {
+  /**
+   * HeatLayer options interface
+   */
+  interface HeatLayerOptions {
+    /**
+     * Minimum opacity (0-1)
+     * @default 0.05
+     */
     minOpacity?: number;
+
+    /**
+     * Maximum zoom level at which the heat is most intense
+     * @default 18
+     */
     maxZoom?: number;
+
+    /**
+     * Maximum number of points to process at once
+     * @default Infinity
+     */
     max?: number;
+
+    /**
+     * Radius of each "point" in pixels
+     * @default 25
+     */
     radius?: number;
+
+    /**
+     * Amount of blur for each "point"
+     * @default 15
+     */
     blur?: number;
+
+    /**
+     * Color gradient configuration
+     * Object mapping position (0-1) to color
+     * @example { 0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red' }
+     */
     gradient?: { [key: number]: string };
   }
 
-  export interface HeatLayer extends L.Layer {
+  /**
+   * HeatLayer class for creating heatmap visualizations
+   */
+  class HeatLayer extends Layer {
+    /**
+     * Creates a new HeatLayer
+     * @param latlngs Array of [lat, lng, intensity] or [lat, lng] points
+     * @param options HeatLayer options
+     */
+    constructor(
+      latlngs: Array<[number, number, number?]>,
+      options?: HeatLayerOptions
+    );
+
+    /**
+     * Set the data for the heatmap
+     * @param latlngs Array of [lat, lng, intensity] or [lat, lng] points
+     */
+    setLatLngs(latlngs: Array<[number, number, number?]>): this;
+
+    /**
+     * Add a new point to the heatmap
+     * @param latlng [lat, lng, intensity] or [lat, lng]
+     */
+    addLatLng(latlng: [number, number, number?]): this;
+
+    /**
+     * Set the gradient colors
+     * @param gradient Object mapping position (0-1) to color
+     */
     setOptions(options: HeatLayerOptions): this;
-    addLatLng(latlng: L.LatLngExpression): this;
-    setLatLngs(latlngs: HeatLatLngTuple[]): this;
+
+    /**
+     * Redraw the heatmap layer
+     */
     redraw(): this;
   }
 
-  export function heatLayer(
-    latlngs: HeatLatLngTuple[],
-    options?: HeatLayerOptions
-  ): HeatLayer;
-
-  namespace L {
+  namespace heatLayer {
+    /**
+     * Factory function to create a HeatLayer
+     * @param latlngs Array of [lat, lng, intensity] or [lat, lng] points
+     * @param options HeatLayer options
+     */
     function heatLayer(
-      latlngs: HeatLatLngTuple[],
+      latlngs: Array<[number, number, number?]>,
       options?: HeatLayerOptions
     ): HeatLayer;
   }
+
+  /**
+   * Factory function to create a HeatLayer (lowercase)
+   * @param latlngs Array of [lat, lng, intensity] or [lat, lng] points
+   * @param options HeatLayer options
+   */
+  function heatLayer(
+    latlngs: Array<[number, number, number?]>,
+    options?: HeatLayerOptions
+  ): HeatLayer;
 }
 
-// Extend leaflet module to include heatLayer
-declare module 'leaflet' {
-  export function heatLayer(
-    latlngs: import('leaflet.heat').HeatLatLngTuple[],
-    options?: import('leaflet.heat').HeatLayerOptions
-  ): import('leaflet.heat').HeatLayer;
+declare module 'leaflet.heat' {
+  import * as L from 'leaflet';
+  export = L;
 }

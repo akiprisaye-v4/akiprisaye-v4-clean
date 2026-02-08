@@ -56,15 +56,22 @@ export function PriceHeatmap({
       point.intensity,
     ]);
 
-    // Create heat layer
-    const heatLayer = L.heatLayer(heatData, {
-      radius,
-      blur,
-      maxZoom,
-      max: 1.0,
-      minOpacity,
-      gradient,
-    });
+    // Default options
+    const heatmapOptions = {
+      radius: options?.radius || 25,
+      blur: options?.blur || 15,
+      maxZoom: options?.maxZoom || 12,
+      max: options?.max || 1.0,
+      gradient: options?.gradient || {
+        0.0: '#22c55e', // Green (cheap)
+        0.5: '#f59e0b', // Orange (medium)
+        1.0: '#ef4444', // Red (expensive)
+      },
+    };
+
+    // Create heatmap layer
+    // @ts-expect-error - leaflet.heat types not complete
+    const heatLayer = L.heatLayer(heatmapData, heatmapOptions);
 
     // Add to map
     heatLayer.addTo(map);
