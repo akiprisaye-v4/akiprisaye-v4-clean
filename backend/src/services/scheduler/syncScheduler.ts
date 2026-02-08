@@ -4,8 +4,7 @@
  * Manages scheduled synchronization jobs using node-cron
  */
 
-import nodeCron from 'node-cron';
-import type { ScheduledTask } from 'node-cron';
+import cron from 'node-cron';
 import { SYNC_CONFIG } from '../../config/syncConfig.js';
 import { syncOpenFoodFactsJob } from './jobs/syncOpenFoodFacts.js';
 import { syncOpenPricesJob } from './jobs/syncOpenPrices.js';
@@ -20,7 +19,7 @@ export interface ScheduledJob {
   lastRun?: Date;
   nextRun?: Date;
   status: 'idle' | 'running' | 'failed';
-  task?: ScheduledTask;
+  task?: cron.ScheduledTask;
 }
 
 export class SyncScheduler {
@@ -94,13 +93,14 @@ export class SyncScheduler {
     };
 
     if (config.enabled) {
-      // Schedule the job
-      job.task = nodeCron.schedule(
+      // Schedule the job with scheduled: false to prevent auto-start
+      job.task = cron.schedule(
         config.cron,
         async () => {
           await this.runJob(config.id, config.handler);
         },
         {
+          scheduled: false, // Don't auto-start, will start explicitly in start()
           timezone: SYNC_CONFIG.scheduler.timezone,
         }
       );
@@ -184,7 +184,7 @@ export class SyncScheduler {
   /**
    * Get next run time for a scheduled task
    */
-  private getNextRun(task: ScheduledTask): Date | undefined {
+  private getNextRun(task: cron.ScheduledTask): Date | undefined {
     // Note: node-cron doesn't provide a direct way to get next run time
     // This is a placeholder - in production, you might want to use a library like cron-parser
     return undefined;

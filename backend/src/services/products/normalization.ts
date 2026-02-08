@@ -137,5 +137,5 @@ export function generateSearchVariations(name: string): string[] {
   variations.push(...words);
 
   // Remove duplicates
-  return Array.from(new Set(variations));
+  return [...new Set(variations)];
 }

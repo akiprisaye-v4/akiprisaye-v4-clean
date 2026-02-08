@@ -2,6 +2,12 @@
  * Validation Routes
  * 
  * API endpoints for product validation queue management
+ * 
+ * TODO: Add authentication middleware before production deployment
+ * These endpoints mutate product data and should be restricted to:
+ * - Moderator/Admin users only (JWT + RBAC)
+ * - Proper permission checks (PRODUCT_APPROVE, PRODUCT_REJECT, PRODUCT_MERGE)
+ * See existing auth middleware pattern in backend/src/api/middlewares/auth.middleware.ts
  */
 
 import { Router, Request, Response } from 'express';
@@ -23,10 +29,34 @@ const router = Router();
  */
 router.get('/queue', async (req: Request, res: Response) => {
   try {
-    const status = (req.query.status as ProductStatus) || 'PENDING_REVIEW';
+    const statusParam = req.query.status as string | undefined;
     const source = req.query.source as string | undefined;
-    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
-    const offset = parseInt(req.query.offset as string) || 0;
+    const limitParam = req.query.limit as string | undefined;
+    const offsetParam = req.query.offset as string | undefined;
+
+    // Validate status parameter
+    const validStatuses: ProductStatus[] = ['PENDING_REVIEW', 'VALIDATED', 'REJECTED', 'MERGED'];
+    const status: ProductStatus = statusParam && validStatuses.includes(statusParam as ProductStatus)
+      ? (statusParam as ProductStatus)
+      : 'PENDING_REVIEW';
+
+    // Validate limit parameter
+    const limit = limitParam ? parseInt(limitParam, 10) : 50;
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid limit parameter. Must be between 1 and 100.',
+      });
+    }
+
+    // Validate offset parameter
+    const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
+    if (isNaN(offset) || offset < 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid offset parameter. Must be >= 0.',
+      });
+    }
 
     const queue = await getValidationQueue({
       status,
@@ -35,7 +65,7 @@ router.get('/queue', async (req: Request, res: Response) => {
       offset,
     });
 
-    res.json({
+    return res.json({
       success: true,
       queue,
       pagination: {
@@ -46,7 +76,7 @@ router.get('/queue', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error getting validation queue:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
@@ -97,7 +127,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Error getting product for validation:', error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
@@ -163,13 +193,22 @@ router.post('/:id/merge/:targetId', async (req: Request, res: Response) => {
 
     await mergeProduct(id, targetId, reviewedBy);
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Product merged',
     });
   } catch (error) {
     console.error('Error merging product:', error);
-    res.status(500).json({
+    
+    // Return 404 if product not found
+    if (error instanceof Error && error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        error: error.message,
+      });
+    }
+    
+    return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     });

@@ -15,7 +15,7 @@
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import prisma from './database/prisma.js';
 
 // Import routes
 import authRoutes from './api/routes/auth.routes.js';
@@ -34,11 +34,9 @@ import productsRoutes from './routes/products.js';
 import basketRoutes from './routes/basket.js';
 // Subscription & Payment routes
 import subscriptionRoutes from './api/routes/subscription.routes.js';
-// Price Alerts & Notifications routes
-import alertsRoutes from './api/routes/alerts.routes.js';
-import notificationsRoutes from './api/routes/notifications.routes.js';
-// Verified Pricing System routes
-import pricesRoutes from './api/routes/prices.routes.js';
+// Sync & Validation routes
+import syncRoutes from './api/routes/sync.routes.js';
+import validationRoutes from './api/routes/validation.routes.js';
 
 // Import middlewares
 import { apiLimiter } from './api/middlewares/rateLimit.middleware.js';
@@ -50,6 +48,9 @@ import {
 // Import Swagger
 import { setupSwagger } from './api/docs/swagger.js';
 
+// Import Scheduler
+import { syncScheduler } from './services/scheduler/syncScheduler.js';
+
 // Charger les variables d'environnement
 dotenv.config();
 
@@ -58,10 +59,8 @@ const app: Express = express();
 const port = process.env.PORT || 3001;
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-// Instance Prisma Client (singleton)
-export const prisma = new PrismaClient({
-  log: nodeEnv === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
-});
+// Re-export shared Prisma client for backwards compatibility
+export { default as prisma } from './database/prisma.js';
 
 // ========================================
 // Middlewares globaux
@@ -209,12 +208,9 @@ app.use('/api/basket', basketRoutes);
 // Subscription & Payment API routes
 app.use('/api/subscriptions', subscriptionRoutes);
 
-// Price Alerts & Notifications API routes (protected by JWT)
-app.use('/api/alerts', alertsRoutes);
-app.use('/api/notifications', notificationsRoutes);
-
-// Verified Pricing System API routes (public with rate limiting)
-app.use('/api/prices', pricesRoutes);
+// Sync & Validation API routes (publiques avec rate limiting)
+app.use('/api/sync', syncRoutes);
+app.use('/api/validation', validationRoutes);
 
 // ========================================
 // Gestion des erreurs
@@ -237,6 +233,14 @@ async function startServer() {
     await prisma.$connect();
     console.info('✅ Connexion à la base de données établie');
 
+    // Initialiser le scheduler (en production uniquement)
+    if (nodeEnv === 'production' || process.env.ENABLE_SCHEDULER === 'true') {
+      syncScheduler.start();
+      console.info('✅ Scheduler de synchronisation démarré');
+    } else {
+      console.info('ℹ️  Scheduler de synchronisation désactivé (dev mode)');
+    }
+
     // Démarrer le serveur
     app.listen(port, () => {
       console.info('========================================');
@@ -250,6 +254,7 @@ async function startServer() {
       console.info('✅ Validation stricte des identifiants');
       console.info('✅ Conformité RGPD');
       console.info('✅ API REST avec JWT');
+      console.info('✅ Synchronisation automatique (Open Food Facts, Open Prices)');
       console.info('');
       console.info('📚 Documentation: /api/docs');
       console.info('🔒 Sécurité: JWT + Rate limiting');
@@ -266,6 +271,10 @@ async function shutdown() {
   console.info('\n🛑 Arrêt du serveur en cours...');
 
   try {
+    // Arrêter le scheduler
+    syncScheduler.stop();
+    console.info('✅ Scheduler arrêté');
+
     await prisma.$disconnect();
     console.info('✅ Déconnexion de la base de données réussie');
     process.exit(0);
