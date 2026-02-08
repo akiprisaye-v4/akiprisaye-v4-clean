@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -38,19 +35,54 @@ enum UserRole {
   INSTITUTION
 }
 
-enum ProductSource {
-  MANUAL
-  OCR
-  OPENFOODFACTS
-  OPENPRICES
-  CITIZEN
+enum PriceSource {
+  OCR_TICKET
+  OFFICIAL_API
+  OPEN_PRICES
+  MANUAL_ENTRY
+  CROWDSOURCED
+  SCRAPING_AUTHORIZED
 }
 
-enum ProductStatus {
-  PENDING_REVIEW
-  VALIDATED
+enum VerificationStatus {
+  UNVERIFIED
+  VERIFIED
+  DISPUTED
+}
+
+enum VerificationAction {
+  CONFIRM
+  DISPUTE
+  UPDATE
+}
+
+enum AnomalyType {
+  SUDDEN_INCREASE
+  SUDDEN_DECREASE
+  OUTLIER_HIGH
+  OUTLIER_LOW
+  SHRINKFLATION
+  INCONSISTENT_REPORT
+  STALE_DATA
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AnomalyStatus {
+  PENDING
+  CONFIRMED
+  DISMISSED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
   REJECTED
-  MERGED
 }
 
 /// ===============================
@@ -64,12 +96,8 @@ model User {
   role         UserRole @default(USER)
   isActive     Boolean  @default(true)
 
-  subscription           Subscription?
-  priceAlerts            PriceAlert[]
-  notifications          Notification[]
-  pushSubscriptions      PushSubscription[]
-  notificationPreference NotificationPreference?
-  gamification           UserGamification?
+  subscription      Subscription?
+  priceVerifications PriceVerification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,65 +130,102 @@ model Price {
   @@unique([plan, interval])
 }
 
-/// ===============================
-/// PRODUCT SYNC MODELS
-/// ===============================
-model Product {
-  id              String        @id @default(cuid())
-  ean             String?       @unique
-  name            String
-  normalizedName  String
-  brand           String?
-  category        String?
-  quantity        String?
-  imageUrl        String?
-  nutriscoreGrade String?
-  ecoscoreGrade   String?
-  source          ProductSource
-  status          ProductStatus @default(PENDING_REVIEW)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  validatedAt     DateTime?
-  validatedBy     String?
-  
-  prices          ProductPrice[]
-  
-  @@index([normalizedName])
-  @@index([status])
-  @@index([ean])
-}
-
+/// Product Price Observation (Prix produit)
 model ProductPrice {
-  id              String   @id @default(cuid())
-  productId       String
-  productCode     String?
-  price           Float
-  currency        String   @default("EUR")
-  storeId         String?
-  locationOsmId   String?
-  territory       String?
-  date            DateTime
-  source          String
-  createdAt       DateTime @default(now())
+  id                  String              @id @default(cuid())
+  productId           String
+  storeId             String
+  price               Float
+  currency            String              @default("EUR")
   
-  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Traçabilité
+  source              PriceSource
+  observedAt          DateTime
+  reportedBy          String?
+  proofUrl            String?
+  
+  // Vérification
+  verificationStatus  VerificationStatus  @default(UNVERIFIED)
+  verificationCount   Int                 @default(0)
+  lastVerifiedAt      DateTime?
+  
+  // Confiance
+  confidenceScore     Int                 @default(0)
+  confidenceFactors   Json?
+  
+  // Métadonnées
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  isActive            Boolean             @default(true)
+  
+  verifications       PriceVerification[]
+  anomalies           PriceAnomaly[]
   
   @@index([productId])
-  @@index([date])
+  @@index([storeId])
+  @@index([observedAt])
+  @@index([confidenceScore])
+  @@index([verificationStatus])
 }
 
-model SyncLog {
-  id              String    @id @default(cuid())
-  source          String
-  startedAt       DateTime
-  completedAt     DateTime?
-  status          String
-  itemsProcessed  Int       @default(0)
-  itemsCreated    Int       @default(0)
-  itemsUpdated    Int       @default(0)
-  itemsSkipped    Int       @default(0)
-  errors          Json?
+model PriceVerification {
+  id          String              @id @default(cuid())
+  priceId     String
+  userId      String
+  action      VerificationAction
+  comment     String?
+  createdAt   DateTime            @default(now())
   
-  @@index([source])
-  @@index([startedAt])
+  price       ProductPrice        @relation(fields: [priceId], references: [id], onDelete: Cascade)
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([priceId])
+  @@index([userId])
+  @@unique([priceId, userId])
+}
+
+model PriceAnomaly {
+  id            String        @id @default(cuid())
+  priceId       String
+  productId     String
+  storeId       String
+  anomalyType   AnomalyType
+  severity      Severity
+  
+  reportedPrice Float
+  expectedPrice Float
+  deviation     Float
+  
+  status        AnomalyStatus @default(PENDING)
+  resolvedAt    DateTime?
+  resolvedBy    String?
+  resolution    String?
+  context       Json?
+  
+  createdAt     DateTime      @default(now())
+  
+  price         ProductPrice  @relation(fields: [priceId], references: [id], onDelete: Cascade)
+  
+  @@index([status])
+  @@index([severity])
+  @@index([productId])
+  @@index([storeId])
+}
+
+model ProductUpdate {
+  id            String        @id @default(cuid())
+  productId     String
+  field         String
+  oldValue      String?
+  newValue      String
+  source        String
+  autoApplied   Boolean       @default(false)
+  reviewStatus  ReviewStatus  @default(PENDING)
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  
+  @@index([productId])
+  @@index([reviewStatus])
+  @@index([createdAt])
 }

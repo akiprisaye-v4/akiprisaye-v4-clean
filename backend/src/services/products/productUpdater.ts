@@ -1,340 +1,142 @@
 /**
  * Product Updater Service
- * 
- * Handles community-submitted product updates with:
- * - Auto-apply for trusted fields
- * - Review queue for sensitive changes
+ * Manages automatic updates of product information
  */
 
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export interface ProductUpdateData {
+export interface ProductUpdateConfig {
+  // Fields that can be auto-updated without review
+  autoUpdateFields: string[];
+  // Fields that require manual review
+  reviewRequiredFields: string[];
+  // Source priority (higher = more trustworthy)
+  sourcePriority: Record<string, number>;
+}
+
+export const DEFAULT_CONFIG: ProductUpdateConfig = {
+  autoUpdateFields: ['imageUrl', 'nutriscore', 'ecoscore', 'ingredients'],
+  reviewRequiredFields: ['name', 'brand', 'category', 'quantity'],
+  sourcePriority: {
+    official_api: 100,
+    openfoodfacts: 80,
+    manual_verified: 70,
+    ocr_ticket: 50,
+    crowdsourced: 30,
+  },
+};
+
+export interface ProductUpdateRequest {
   productId: string;
-  submittedBy: string;
-  fieldName: string;
-  oldValue?: string;
+  field: string;
   newValue: string;
-  proofUrl?: string;
-  confidence?: number;
-}
-
-export interface UpdateSubmissionResult {
-  success: boolean;
-  updateId?: string;
-  autoApplied?: boolean;
-  requiresReview?: boolean;
-  error?: string;
+  source: string;
+  updatedBy?: string;
 }
 
 /**
- * Define which fields are considered trusted (can be auto-applied)
- * vs sensitive (require review)
- */
-const TRUSTED_FIELDS = [
-  'description',
-  'tags',
-  'ingredients',
-  'allergens',
-  'nutritionalInfo',
-];
-
-const SENSITIVE_FIELDS = [
-  'name',
-  'price',
-  'category',
-  'brand',
-  'ean',
-  'weight',
-  'volume',
-];
-
-/**
- * Check if a field is trusted for auto-application
- * @param fieldName - Field name to check
- * @returns True if field is trusted
- */
-function isTrustedField(fieldName: string): boolean {
-  return TRUSTED_FIELDS.includes(fieldName);
-}
-
-/**
- * Check if a field is sensitive and requires review
- * @param fieldName - Field name to check
- * @returns True if field is sensitive
- */
-function isSensitiveField(fieldName: string): boolean {
-  return SENSITIVE_FIELDS.includes(fieldName);
-}
-
-/**
- * Validate update data
- * @param data - Update data to validate
- * @returns Validation result
- */
-function validateUpdate(data: ProductUpdateData): {
-  valid: boolean;
-  error?: string;
-} {
-  if (!data.productId || !data.submittedBy) {
-    return { valid: false, error: 'Product ID and submitter ID are required' };
-  }
-
-  if (!data.fieldName || !data.newValue) {
-    return { valid: false, error: 'Field name and new value are required' };
-  }
-
-  if (data.newValue.length > 5000) {
-    return { valid: false, error: 'New value exceeds maximum length' };
-  }
-
-  return { valid: true };
-}
-
-/**
- * Submit a product update request
- * @param data - Update data
- * @returns Result of submission
+ * Submit a product update
  */
 export async function submitProductUpdate(
-  data: ProductUpdateData
-): Promise<UpdateSubmissionResult> {
-  try {
-    // Validate input
-    const validation = validateUpdate(data);
-    if (!validation.valid) {
-      return {
-        success: false,
-        error: validation.error,
-      };
-    }
+  request: ProductUpdateRequest,
+  config: ProductUpdateConfig = DEFAULT_CONFIG
+): Promise<{ success: boolean; message: string; autoApplied: boolean }> {
+  const { productId, field, newValue, source } = request;
 
-    // Determine if field is trusted or requires review
-    const isTrusted = isTrustedField(data.fieldName);
-    const requiresReview = !isTrusted || isSensitiveField(data.fieldName);
+  // Determine if auto-apply is allowed
+  const autoApply = config.autoUpdateFields.includes(field);
+  const sourcePriority = config.sourcePriority[source] || 0;
 
-    // Create update record
-    const update = await prisma.productUpdate.create({
-      data: {
-        productId: data.productId,
-        submittedBy: data.submittedBy,
-        fieldName: data.fieldName,
-        oldValue: data.oldValue,
-        newValue: data.newValue,
-        isTrustedField: isTrusted,
-        requiresReview,
-        status: isTrusted && !requiresReview ? 'APPROVED' : 'PENDING',
-        proofUrl: data.proofUrl,
-        confidence: data.confidence || 0,
-      },
-    });
+  // For high-priority sources, auto-apply even review-required fields
+  const shouldAutoApply = autoApply || sourcePriority >= 80;
 
-    // Auto-apply trusted fields
-    const autoApplied = isTrusted && !requiresReview;
+  // Get current value (would need actual product model)
+  // For now, we'll just create the update record
+  const oldValue = null; // Would fetch from product
 
-    return {
-      success: true,
-      updateId: update.id,
-      autoApplied,
-      requiresReview,
-    };
-  } catch (error) {
-    console.error('Error submitting product update:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
-}
-
-/**
- * Get pending updates for review
- * @param options - Query options
- * @returns Array of pending updates
- */
-export async function getPendingUpdates(options: {
-  productId?: string;
-  fieldName?: string;
-  limit?: number;
-  offset?: number;
-} = {}) {
-  const { productId, fieldName, limit = 50, offset = 0 } = options;
-
-  const updates = await prisma.productUpdate.findMany({
-    where: {
-      status: 'PENDING',
-      requiresReview: true,
-      ...(productId && { productId }),
-      ...(fieldName && { fieldName }),
-    },
-    orderBy: [
-      { confidence: 'desc' },
-      { createdAt: 'desc' },
-    ],
-    take: limit,
-    skip: offset,
-  });
-
-  return updates;
-}
-
-/**
- * Review and approve/reject an update
- * @param updateId - Update ID
- * @param reviewerId - Reviewer ID
- * @param approved - Whether to approve or reject
- * @param note - Review note
- * @returns Review result
- */
-export async function reviewUpdate(
-  updateId: string,
-  reviewerId: string,
-  approved: boolean,
-  note?: string
-) {
-  try {
-    const update = await prisma.productUpdate.update({
-      where: { id: updateId },
-      data: {
-        status: approved ? 'APPROVED' : 'REJECTED',
-        reviewedBy: reviewerId,
-        reviewedAt: new Date(),
-        reviewNote: note,
-      },
-    });
-
-    return {
-      success: true,
-      update,
-    };
-  } catch (error) {
-    console.error('Error reviewing update:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
-}
-
-/**
- * Get update history for a product
- * @param productId - Product ID
- * @param options - Query options
- * @returns Array of updates
- */
-export async function getProductUpdateHistory(
-  productId: string,
-  options: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  } = {}
-) {
-  const { status, limit = 50, offset = 0 } = options;
-
-  const updates = await prisma.productUpdate.findMany({
-    where: {
+  // Create update record
+  await prisma.productUpdate.create({
+    data: {
       productId,
-      ...(status && { status }),
+      field,
+      oldValue,
+      newValue,
+      source,
+      autoApplied: shouldAutoApply,
+      reviewStatus: shouldAutoApply ? 'APPROVED' : 'PENDING',
+      reviewedAt: shouldAutoApply ? new Date() : null,
+      reviewedBy: shouldAutoApply ? 'system' : null,
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: limit,
-    skip: offset,
   });
 
-  return updates;
-}
-
-/**
- * Get update statistics
- * @returns Statistics about updates
- */
-export async function getUpdateStats() {
-  const [
-    totalUpdates,
-    pendingUpdates,
-    approvedUpdates,
-    rejectedUpdates,
-    autoAppliedUpdates,
-  ] = await Promise.all([
-    prisma.productUpdate.count(),
-    prisma.productUpdate.count({ where: { status: 'PENDING' } }),
-    prisma.productUpdate.count({ where: { status: 'APPROVED' } }),
-    prisma.productUpdate.count({ where: { status: 'REJECTED' } }),
-    prisma.productUpdate.count({
-      where: {
-        isTrustedField: true,
-        requiresReview: false,
-        status: 'APPROVED',
-      },
-    }),
-  ]);
+  let message: string;
+  if (shouldAutoApply) {
+    message = 'Mise à jour appliquée automatiquement';
+  } else {
+    message = 'Mise à jour enregistrée, en attente de révision';
+  }
 
   return {
-    totalUpdates,
-    pendingUpdates,
-    approvedUpdates,
-    rejectedUpdates,
-    autoAppliedUpdates,
-    approvalRate: totalUpdates > 0 ? (approvedUpdates / totalUpdates) * 100 : 0,
+    success: true,
+    message,
+    autoApplied: shouldAutoApply,
   };
 }
 
 /**
- * Batch approve updates
- * @param updateIds - Array of update IDs
- * @param reviewerId - Reviewer ID
- * @returns Number of updates approved
+ * Get pending updates for review
  */
-export async function batchApproveUpdates(
-  updateIds: string[],
-  reviewerId: string
-): Promise<number> {
-  const result = await prisma.productUpdate.updateMany({
+export async function getPendingUpdates(limit: number = 50) {
+  return await prisma.productUpdate.findMany({
     where: {
-      id: { in: updateIds },
-      status: 'PENDING',
-    },
-    data: {
-      status: 'APPROVED',
-      reviewedBy: reviewerId,
-      reviewedAt: new Date(),
-    },
-  });
-
-  return result.count;
-}
-
-/**
- * Get updates by submitter
- * @param userId - User ID
- * @param options - Query options
- * @returns Array of updates
- */
-export async function getUserUpdates(
-  userId: string,
-  options: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  } = {}
-) {
-  const { status, limit = 50, offset = 0 } = options;
-
-  const updates = await prisma.productUpdate.findMany({
-    where: {
-      submittedBy: userId,
-      ...(status && { status }),
+      reviewStatus: 'PENDING',
     },
     orderBy: {
       createdAt: 'desc',
     },
     take: limit,
-    skip: offset,
   });
+}
 
-  return updates;
+/**
+ * Approve a product update
+ */
+export async function approveUpdate(updateId: string, reviewedBy: string) {
+  return await prisma.productUpdate.update({
+    where: { id: updateId },
+    data: {
+      reviewStatus: 'APPROVED',
+      reviewedBy,
+      reviewedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Reject a product update
+ */
+export async function rejectUpdate(updateId: string, reviewedBy: string) {
+  return await prisma.productUpdate.update({
+    where: { id: updateId },
+    data: {
+      reviewStatus: 'REJECTED',
+      reviewedBy,
+      reviewedAt: new Date(),
+    },
+  });
+}
+
+/**
+ * Get update history for a product
+ */
+export async function getProductUpdateHistory(productId: string, limit: number = 20) {
+  return await prisma.productUpdate.findMany({
+    where: { productId },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: limit,
+  });
 }
