@@ -11,6 +11,7 @@ import { PerformanceMonitor } from './components/PerformanceMonitor';
 import OnboardingTour from './components/OnboardingTour';
 import OnboardingAutoStart from './components/OnboardingAutoStart';
 import HelpButton from './components/HelpButton';
+import AnalyticsTracker from './components/analytics/AnalyticsTracker';
 
 // Lazy-loaded pages - Main routes
 const Home = React.lazy(() => import('./pages/Home'));
@@ -196,6 +197,7 @@ export default function App() {
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                   </Routes>
+                  <AnalyticsTracker />
                   <PerformanceMonitor />
                   <OnboardingAutoStart />
                   <OnboardingTour />
