@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 import uxMonitor from '../utils/uxMonitor';
-import type { ScanState, ScannerOptions, ScanStateTransition } from '../types/scan';
+import type { ScanState, ScannerOptions } from '../types/scan';
 import { SCANNER_MESSAGES, type ScannerMessage } from '../constants/scannerMessages';
 import { isAcceptedEanCode, normalizeDetectedCode } from '../utils/eanScan';
 
@@ -13,11 +13,12 @@ interface BarcodeScannerProps {
 }
 
 export default function BarcodeScanner({ onScan, onClose, options = {} }: BarcodeScannerProps) {
-  const isScanDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('scanDebug') === '1';
+  const isScanDebug =
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('scanDebug') === '1';
 
   // Scan state management
   const [scanState, setScanState] = useState<ScanState>('idle');
-  
+
   // Legacy states (kept for backward compatibility)
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,8 +28,8 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [scanMode, setScanMode] = useState<'camera' | 'upload'>('camera');
   const [userMessage, setUserMessage] = useState<ScannerMessage | null>(null);
-  
-  // OPTIMIZATION #2: Scan feedback state
+
+  // Scan feedback state
   const [scanFeedback, setScanFeedback] = useState<'searching' | 'focusing' | 'detecting' | null>(null);
   const [debugInfo, setDebugInfo] = useState({
     permission: 'unknown' as 'granted' | 'prompt' | 'denied' | 'unsupported' | 'unknown',
@@ -38,7 +39,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     playState: 'idle',
     framesReceived: 0,
   });
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -46,54 +47,43 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const timeoutRef = useRef<number | null>(null);
   const debugFrameCounterRef = useRef<number>(0);
   const debugIntervalRef = useRef<number | null>(null);
-  
+
+  // Helpers to avoid stale state in async callbacks
+  const scanStateRef = useRef<ScanState>('idle');
+  useEffect(() => {
+    scanStateRef.current = scanState;
+  }, [scanState]);
+
   // Configuration with defaults
-  const {
-    timeout = 15000,
-    enableDebugLogging = false,
-    enableOcrFallback = true, // OCR enabled by default for better detection
-  } = options;
+  const { timeout = 15000, enableDebugLogging = false, enableOcrFallback = true } = options;
   const debugEnabled = enableDebugLogging || isScanDebug;
 
   const updateDebugInfo = (patch: Partial<typeof debugInfo>) => {
-    if (!debugEnabled) {
-      return;
-    }
-
+    if (!debugEnabled) return;
     setDebugInfo((previous) => ({ ...previous, ...patch }));
   };
 
   const debugLog = (...args: unknown[]) => {
-    if (debugEnabled) {
-      console.log('[SCAN_DEBUG]', ...args);
-    }
+    if (debugEnabled) console.log('[SCAN_DEBUG]', ...args);
   };
 
   // State transition handler with logging
   const transitionState = (to: ScanState, reason?: string) => {
-    const from = scanState;
-    
+    const from = scanStateRef.current;
     setScanState(to);
-    
-    if (debugEnabled) {
-      console.log(`[SCAN] State transition: ${from} → ${to}`, reason || '');
-    }
+    if (debugEnabled) console.log(`[SCAN] State transition: ${from} → ${to}`, reason || '');
   };
 
   // Check camera permission state using Permissions API
   const checkCameraPermission = async (): Promise<'granted' | 'prompt' | 'denied' | 'unsupported'> => {
     try {
-      // Guard for non-browser environments (Node.js, SSR)
       if (typeof navigator === 'undefined' || !navigator.permissions || !navigator.permissions.query) {
         return 'unsupported';
       }
-      
-      const result = await navigator.permissions.query({ name: "camera" as PermissionName });
+      const result = await navigator.permissions.query({ name: 'camera' as PermissionName });
       return result.state as 'granted' | 'prompt' | 'denied';
-    } catch (error) {
-      if (debugEnabled) {
-        console.log('[SCAN] Permissions API not available or error:', error);
-      }
+    } catch (err) {
+      if (debugEnabled) console.log('[SCAN] Permissions API not available or error:', err);
       return 'unsupported';
     }
   };
@@ -102,24 +92,19 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const activateImageUploadFallback = () => {
     setScanMode('upload');
     setUserMessage(SCANNER_MESSAGES.CAMERA_UNAVAILABLE);
-    
-    if (debugEnabled) {
-      console.log('[SCAN] Fallback activated: Switching to image upload mode');
-    }
+    if (debugEnabled) console.log('[SCAN] Fallback activated: Switching to image upload mode');
   };
 
   useEffect(() => {
     readerRef.current = new BrowserMultiFormatReader();
     setScanState('idle');
-    
+
     return () => {
       const videoElement = videoRef.current;
 
       setIsScanning(false);
 
-      if (readerRef.current) {
-        readerRef.current.reset();
-      }
+      if (readerRef.current) readerRef.current.reset();
 
       if (timeoutRef.current !== null) {
         window.clearTimeout(timeoutRef.current);
@@ -145,249 +130,10 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     };
   }, []);
 
-  const startScanning = async () => {
-    stopScanning();
-    setError(null);
-    setUserMessage(null);
-    setIsScanning(true);
-    setHasPermission(null); // Reset permission state
-    setScanFeedback('searching'); // OPTIMIZATION #2: Set initial feedback
-    scanStartTimeRef.current = Date.now();
-    transitionState('scanning', 'User initiated scan');
-    
-    // PROMPT 4: Monitor scan start
-    uxMonitor.scanStarted('barcode');
-
-    // Check camera permission first
-    const permission = await checkCameraPermission();
-    
-    // PROMPT 4: Monitor permission request
-    uxMonitor.cameraPermissionRequested();
-    
-    updateDebugInfo({ framesReceived: 0, videoSize: '0x0', playState: 'requesting' });
-
-    if (debugEnabled) {
-      console.log('[SCAN] Camera permission state:', permission);
-    }
-    updateDebugInfo({ permission });
-
-    // Try camera if permission is granted, prompt, or unsupported (browsers without Permissions API)
-    if (permission === 'granted' || permission === 'prompt' || permission === 'unsupported') {
-      try {
-        // Guard for non-browser environments
-        if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          throw new Error('getUserMedia non disponible sur ce navigateur');
-        }
-
-        if (debugEnabled) {
-          console.log('[SCAN] 📷 Requesting camera access...');
-        }
-
-        const requestCameraStream = async () => {
-          const constraintSets: MediaStreamConstraints[] = [
-            {
-              video: {
-                facingMode: { ideal: 'environment' },
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-              },
-            },
-            { video: { facingMode: { ideal: 'environment' } } },
-            { video: true },
-          ];
-
-          let lastError: unknown = null;
-
-          for (const constraints of constraintSets) {
-            try {
-              if (debugEnabled) {
-                console.log('[SCAN] 📷 Trying constraints:', constraints);
-              }
-              const stream = await navigator.mediaDevices.getUserMedia(constraints);
-              updateDebugInfo({ constraints: JSON.stringify(constraints.video ?? constraints) });
-              return stream;
-            } catch (constraintError) {
-              lastError = constraintError;
-              if (debugEnabled) {
-                console.log('[SCAN] ⚠️ Constraint failed, trying fallback:', constraintError);
-              }
-            }
-          }
-
-          throw lastError ?? new Error('Aucune contrainte caméra compatible');
-        };
-
-        const stream = await requestCameraStream();
-        
-        if (debugEnabled) {
-          console.log('[SCAN] ✅ Camera access granted');
-        }
-        streamRef.current = stream;
-        setHasPermission(true);
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.setAttribute('playsinline', 'true');
-          videoRef.current.autoplay = true;
-          videoRef.current.muted = true;
-          
-          // Wait for video to be ready
-          await new Promise<void>((resolve, reject) => {
-            if (videoRef.current) {
-              videoRef.current.onloadedmetadata = () => {
-                if (debugEnabled) {
-                  console.log('[SCAN] 📹 Video metadata loaded');
-                }
-                updateDebugInfo({
-                  videoSize: `${videoRef.current?.videoWidth ?? 0}x${videoRef.current?.videoHeight ?? 0}`,
-                  playState: 'metadata-ready',
-                });
-                resolve();
-              };
-              videoRef.current.onerror = () => {
-                console.error('[SCAN] ❌ Video error');
-                updateDebugInfo({ playState: 'video-error' });
-                reject(new Error('Erreur de chargement vidéo'));
-              };
-            } else {
-              reject(new Error('Video ref not available'));
-            }
-          });
-          
-          await videoRef.current.play();
-          updateDebugInfo({
-            playState: videoRef.current.paused ? 'paused-after-play' : 'playing',
-            videoSize: `${videoRef.current.videoWidth}x${videoRef.current.videoHeight}`,
-          });
-          if (debugEnabled) {
-            console.log('[SCAN] ▶️ Video playing');
-          }
-          videoRef.current.onloadedmetadata = null;
-          videoRef.current.onerror = null;
-        }
-
-        // Check if torch is supported
-        const track = stream.getVideoTracks()[0];
-        if (track) {
-          const capabilities = track.getCapabilities() as any;
-          if (debugEnabled) {
-            console.log('[SCAN] 📱 Camera capabilities:', capabilities);
-          }
-
-          if ('torch' in capabilities) {
-            setTorchSupported(true);
-            if (debugEnabled) {
-              console.log('[SCAN] 🔦 Torch supported');
-            }
-          }
-          const settings = track.getSettings();
-          updateDebugInfo({
-            selectedDeviceId: settings.deviceId || 'unknown-device',
-          });
-          debugLog('Track settings', settings);
-        } else if (debugEnabled) {
-          console.log('[SCAN] ⚠️ No video track available to check torch support');
-        }
-
-        // Start decoding with timeout
-        if (timeoutRef.current !== null) {
-          window.clearTimeout(timeoutRef.current);
-        }
-
-        timeoutRef.current = window.setTimeout(() => {
-          console.warn('[SCAN] ⏱️ Scan timeout');
-          setError('⏱️ Timeout: Approchez le code-barres de la caméra (10-20 cm)');
-          transitionState('error', `Timeout after ${timeout}ms`);
-        }, timeout);
-
-        if (debugEnabled) {
-          console.log('[SCAN] 🔍 Starting barcode detection...');
-        }
-
-        if (debugEnabled) {
-          if (debugIntervalRef.current !== null) {
-            window.clearInterval(debugIntervalRef.current);
-          }
-          debugIntervalRef.current = window.setInterval(() => {
-            const video = videoRef.current;
-            updateDebugInfo({
-              framesReceived: debugFrameCounterRef.current,
-              videoSize: `${video?.videoWidth ?? 0}x${video?.videoHeight ?? 0}`,
-              playState: video
-                ? `${video.paused ? 'paused' : 'playing'} / ${video.readyState}`
-                : 'no-video',
-            });
-          }, 500);
-        }
-        
-        if (readerRef.current && videoRef.current) {
-          readerRef.current.decodeFromStream(stream, videoRef.current, (result, err) => {
-            debugFrameCounterRef.current += 1;
-            if (result) {
-              if (timeoutRef.current !== null) {
-                window.clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-              }
-              const code = normalizeDetectedCode(result.getText());
-              const duration = Date.now() - scanStartTimeRef.current;
-
-              if (!isAcceptedEanCode(code)) {
-                if (debugEnabled) {
-                  console.log('[SCAN] Ignored non-EAN code from camera:', code);
-                }
-                return;
-              }
-              
-              if (debugEnabled) {
-                console.log(`[SCAN] ✅ Barcode detected in ${duration}ms:`, code);
-              }
-              
-              transitionState('processing', `Barcode detected: ${code}`);
-              stopScanning();
-              onScan(code);
-            }
-            
-            if (err && !(err instanceof NotFoundException)) {
-              console.error('[SCAN] Scan error:', err);
-            }
-          });
-        }
-
-        return; // Success - camera is working
-      } catch (err: unknown) {
-        console.error('[SCAN] ❌ Camera error:', err);
-        const mediaError = err as { name?: string; message?: string };
-        if (mediaError?.name === 'NotAllowedError') {
-          setError('Accès caméra refusé. Autorisez la caméra puis réessayez.');
-        } else if (mediaError?.name === 'NotFoundError') {
-          setError('Aucune caméra détectée sur cet appareil.');
-        } else if (mediaError?.name === 'NotReadableError') {
-          setError('Caméra indisponible (déjà utilisée par une autre application).');
-        } else if (mediaError?.name === 'OverconstrainedError') {
-          setError('Contraintes caméra non compatibles. Nouvelle tentative avec réglages simplifiés.');
-        }
-        debugLog('Camera startup failure details', mediaError?.name, mediaError?.message);
-        // Camera technically inaccessible - fall through to fallback
-      }
-    }
-
-    // 🔴 FALLBACK AUTOMATIQUE - Camera denied, not supported, or failed
-    if (debugEnabled) {
-      console.log('[SCAN] 🔄 Activating automatic fallback to image upload');
-    }
-    
-    setHasPermission(false);
-    setIsScanning(false);
-    activateImageUploadFallback();
-    transitionState('idle', 'Camera unavailable - fallback to upload');
-  };
-
   const stopScanning = () => {
     setIsScanning(false);
-    
-    if (readerRef.current) {
-      readerRef.current.reset();
-    }
+
+    if (readerRef.current) readerRef.current.reset();
 
     if (timeoutRef.current !== null) {
       window.clearTimeout(timeoutRef.current);
@@ -398,12 +144,12 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
       window.clearInterval(debugIntervalRef.current);
       debugIntervalRef.current = null;
     }
-    
+
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    
+
     if (videoRef.current) {
       videoRef.current.onloadedmetadata = null;
       videoRef.current.onerror = null;
@@ -412,12 +158,248 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     }
 
     debugFrameCounterRef.current = 0;
-
     setTorchEnabled(false);
-    
-    if (scanState === 'scanning') {
-      transitionState('idle', 'Scanning stopped by user');
+    setScanFeedback(null);
+
+    if (scanStateRef.current === 'scanning') transitionState('idle', 'Scanning stopped by user');
+  };
+
+  const startScanning = async () => {
+    stopScanning();
+    setError(null);
+    setUserMessage(null);
+    setIsScanning(true);
+    setHasPermission(null);
+    setScanMode('camera');
+    setScanFeedback('searching');
+    scanStartTimeRef.current = Date.now();
+    transitionState('scanning', 'User initiated scan');
+
+    uxMonitor.scanStarted('barcode');
+
+    const permission = await checkCameraPermission();
+    uxMonitor.cameraPermissionRequested();
+
+    updateDebugInfo({ framesReceived: 0, videoSize: '0x0', playState: 'requesting' });
+    if (debugEnabled) console.log('[SCAN] Camera permission state:', permission);
+    updateDebugInfo({ permission });
+
+    if (permission === 'granted' || permission === 'prompt' || permission === 'unsupported') {
+      try {
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('getUserMedia non disponible sur ce navigateur');
+        }
+
+        if (debugEnabled) console.log('[SCAN] 📷 Requesting camera access...');
+
+        const requestCameraStream = async () => {
+          // IMPORTANT: last-resort constraints include ideal width/height removed (some devices fail on them)
+          const constraintSets: MediaStreamConstraints[] = [
+            {
+              video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+              },
+            },
+            { video: { facingMode: { ideal: 'environment' } } },
+            // some Android devices need this to avoid black preview
+            { video: { facingMode: 'environment' as any } },
+            { video: true },
+          ];
+
+          let lastError: unknown = null;
+
+          for (const constraints of constraintSets) {
+            try {
+              if (debugEnabled) console.log('[SCAN] 📷 Trying constraints:', constraints);
+              const stream = await navigator.mediaDevices.getUserMedia(constraints);
+              updateDebugInfo({ constraints: JSON.stringify((constraints as any).video ?? constraints) });
+              return stream;
+            } catch (constraintError) {
+              lastError = constraintError;
+              if (debugEnabled) console.log('[SCAN] ⚠️ Constraint failed, trying fallback:', constraintError);
+            }
+          }
+
+          throw lastError ?? new Error('Aucune contrainte caméra compatible');
+        };
+
+        const stream = await requestCameraStream();
+
+        if (debugEnabled) console.log('[SCAN] ✅ Camera access granted');
+        streamRef.current = stream;
+        setHasPermission(true);
+
+        // Attach stream to video
+        if (videoRef.current) {
+          const v = videoRef.current;
+
+          v.srcObject = stream;
+          v.setAttribute('playsinline', 'true');
+          v.autoplay = true;
+          v.muted = true;
+
+          // Wait metadata
+          await new Promise<void>((resolve, reject) => {
+            v.onloadedmetadata = () => {
+              if (debugEnabled) console.log('[SCAN] 📹 Video metadata loaded');
+              updateDebugInfo({
+                videoSize: `${v.videoWidth ?? 0}x${v.videoHeight ?? 0}`,
+                playState: 'metadata-ready',
+              });
+              resolve();
+            };
+            v.onerror = () => {
+              console.error('[SCAN] ❌ Video error');
+              updateDebugInfo({ playState: 'video-error' });
+              reject(new Error('Erreur de chargement vidéo'));
+            };
+          });
+
+          // Force play (mobile Safari/Chrome policies)
+          await v.play().catch((e) => {
+            debugLog('video.play() failed', e);
+            // continue; decoding may still work in some cases
+          });
+
+          // Anti-black-preview guard: if video has 0x0 after play, likely CSS/overlay or device issue
+          await new Promise((r) => setTimeout(r, 250));
+          updateDebugInfo({
+            playState: v.paused ? 'paused-after-play' : 'playing',
+            videoSize: `${v.videoWidth ?? 0}x${v.videoHeight ?? 0}`,
+          });
+
+          if ((!v.videoWidth || !v.videoHeight) && debugEnabled) {
+            console.warn('[SCAN] ⚠️ Video dimensions are 0x0 after play (possible black preview/CSS overlay).');
+          }
+
+          // clean handlers (we keep playback)
+          v.onloadedmetadata = null;
+          v.onerror = null;
+
+          if (debugEnabled) console.log('[SCAN] ▶️ Video playing');
+        }
+
+        // Torch capability
+        const track = stream.getVideoTracks()[0];
+        if (track) {
+          const capabilities = track.getCapabilities() as any;
+          if (debugEnabled) console.log('[SCAN] 📱 Camera capabilities:', capabilities);
+          if ('torch' in capabilities) {
+            setTorchSupported(true);
+            if (debugEnabled) console.log('[SCAN] 🔦 Torch supported');
+          }
+          const settings = track.getSettings();
+          updateDebugInfo({ selectedDeviceId: settings.deviceId || 'unknown-device' });
+          debugLog('Track settings', settings);
+        } else if (debugEnabled) {
+          console.log('[SCAN] ⚠️ No video track available to check torch support');
+        }
+
+        // Timeout
+        if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = window.setTimeout(() => {
+          console.warn('[SCAN] ⏱️ Scan timeout');
+          setError('⏱️ Timeout: Approchez le code-barres de la caméra (10-20 cm)');
+          transitionState('error', `Timeout after ${timeout}ms`);
+          uxMonitor.scanCompleted('barcode', false);
+        }, timeout);
+
+        if (debugEnabled) console.log('[SCAN] 🔍 Starting barcode detection...');
+
+        // Debug heartbeat
+        if (debugEnabled) {
+          if (debugIntervalRef.current !== null) window.clearInterval(debugIntervalRef.current);
+          debugIntervalRef.current = window.setInterval(() => {
+            const v = videoRef.current;
+            updateDebugInfo({
+              framesReceived: debugFrameCounterRef.current,
+              videoSize: `${v?.videoWidth ?? 0}x${v?.videoHeight ?? 0}`,
+              playState: v ? `${v.paused ? 'paused' : 'playing'} / ${v.readyState}` : 'no-video',
+            });
+          }, 500);
+        }
+
+        // Decode
+        if (readerRef.current && videoRef.current) {
+          // small UX improvement: after some frames, switch to focusing
+          let firstFramesAt: number | null = null;
+
+          readerRef.current.decodeFromStream(stream, videoRef.current, (result, err) => {
+            debugFrameCounterRef.current += 1;
+
+            if (firstFramesAt === null && debugFrameCounterRef.current > 10) {
+              firstFramesAt = Date.now();
+              setScanFeedback('focusing');
+            }
+
+            if (result) {
+              setScanFeedback('detecting');
+
+              if (timeoutRef.current !== null) {
+                window.clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+              }
+
+              const code = normalizeDetectedCode(result.getText());
+              const duration = Date.now() - scanStartTimeRef.current;
+
+              if (!isAcceptedEanCode(code)) {
+                if (debugEnabled) console.log('[SCAN] Ignored non-EAN code from camera:', code);
+                // keep searching
+                setScanFeedback('searching');
+                return;
+              }
+
+              if (debugEnabled) console.log(`[SCAN] ✅ Barcode detected in ${duration}ms:`, code);
+
+              transitionState('processing', `Barcode detected: ${code}`);
+              uxMonitor.scanCompleted('barcode', true);
+              stopScanning();
+              onScan(code);
+              return;
+            }
+
+            if (err && !(err instanceof NotFoundException)) {
+              console.error('[SCAN] Scan error:', err);
+            }
+
+            // if nothing found, keep searching state
+            if (!result) setScanFeedback('searching');
+          });
+        }
+
+        return; // Camera path success
+      } catch (err: unknown) {
+        console.error('[SCAN] ❌ Camera error:', err);
+        const mediaError = err as { name?: string; message?: string };
+
+        if (mediaError?.name === 'NotAllowedError') {
+          setError('Accès caméra refusé. Autorisez la caméra puis réessayez.');
+        } else if (mediaError?.name === 'NotFoundError') {
+          setError('Aucune caméra détectée sur cet appareil.');
+        } else if (mediaError?.name === 'NotReadableError') {
+          setError('Caméra indisponible (déjà utilisée par une autre application).');
+        } else if (mediaError?.name === 'OverconstrainedError') {
+          setError('Contraintes caméra non compatibles. Nouvelle tentative avec réglages simplifiés.');
+        } else {
+          setError('Caméra indisponible. Utilisez l’import d’image ou la saisie manuelle.');
+        }
+
+        debugLog('Camera startup failure details', mediaError?.name, mediaError?.message);
+        // fall through to fallback
+      }
     }
+
+    // Fallback
+    if (debugEnabled) console.log('[SCAN] 🔄 Activating automatic fallback to image upload');
+
+    setHasPermission(false);
+    setIsScanning(false);
+    setScanFeedback(null);
+    activateImageUploadFallback();
+    transitionState('idle', 'Camera unavailable - fallback to upload');
   };
 
   const retryCamera = () => {
@@ -430,7 +412,6 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
 
   const toggleTorch = async () => {
     if (!streamRef.current || !torchSupported) return;
-
     try {
       const track = streamRef.current.getVideoTracks()[0];
       await track.applyConstraints({
@@ -444,7 +425,6 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
 
   /**
    * Separate image pipeline with native barcode detection + OCR fallback
-   * This is completely independent from the camera pipeline
    */
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -452,10 +432,10 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
 
     setError(null);
     setIsScanning(true);
-    setUserMessage({ 
-      type: 'info', 
-      title: 'Traitement en cours', 
-      message: 'Analyse de l\'image...' 
+    setUserMessage({
+      type: 'info',
+      title: 'Traitement en cours',
+      message: "Analyse de l'image...",
     });
     transitionState('processing', 'Processing uploaded image');
 
@@ -463,131 +443,104 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     let detectionMethod: 'native' | 'zxing' | 'ocr' | null = null;
 
     try {
-      // Step 1: Load image properly
       const img = new Image();
       const imageUrl = URL.createObjectURL(file);
       img.src = imageUrl;
-      
+
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
         img.onerror = () => reject(new Error('Failed to load image'));
       });
-      
-      await img.decode();
-      
-      if (enableDebugLogging) {
-        console.log('[SCAN] 📷 Image loaded successfully');
-      }
 
-      // Step 2: Try native barcode detection first (if available)
+      await img.decode();
+
+      if (enableDebugLogging) console.log('[SCAN] 📷 Image loaded successfully');
+
+      // Native BarcodeDetector
       if ('BarcodeDetector' in window) {
         try {
-          if (enableDebugLogging) {
-            console.log('[SCAN] 🔍 Attempting native BarcodeDetector...');
-          }
-          
-          setUserMessage({ 
-            type: 'info', 
-            title: 'Détection native en cours', 
-            message: 'Utilisation du détecteur natif du navigateur...' 
+          if (enableDebugLogging) console.log('[SCAN] 🔍 Attempting native BarcodeDetector...');
+
+          setUserMessage({
+            type: 'info',
+            title: 'Détection native en cours',
+            message: 'Utilisation du détecteur natif du navigateur...',
           });
-          
-          const detector = new (window as any).BarcodeDetector({ 
-            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] 
+
+          const detector = new (window as any).BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'],
           });
           const codes = await detector.detect(img);
-          
+
           if (codes.length > 0) {
             ean = codes[0].rawValue;
             detectionMethod = 'native';
-            if (enableDebugLogging) {
-              console.log('[SCAN] ✅ Barcode detected with BarcodeDetector:', ean);
-            }
+            if (enableDebugLogging) console.log('[SCAN] ✅ Barcode detected with BarcodeDetector:', ean);
           } else if (enableDebugLogging) {
             console.log('[SCAN] ℹ️ BarcodeDetector found no codes, trying ZXing...');
           }
-        } catch (err) {
-          if (enableDebugLogging) {
-            console.log('[SCAN] BarcodeDetector failed, will try other methods:', err);
-          }
+        } catch (detErr) {
+          if (enableDebugLogging) console.log('[SCAN] BarcodeDetector failed, will try other methods:', detErr);
         }
       } else if (enableDebugLogging) {
         console.log('[SCAN] ℹ️ Native BarcodeDetector not available, using ZXing');
       }
 
-      // Step 2b: Try ZXing library if native BarcodeDetector not available or failed
+      // ZXing
       if (!ean && readerRef.current) {
         try {
-          if (enableDebugLogging) {
-            console.log('[SCAN] 🔍 Attempting ZXing barcode detection...');
-          }
-          
-          setUserMessage({ 
-            type: 'info', 
-            title: 'Détection ZXing en cours', 
-            message: 'Analyse avec bibliothèque ZXing...' 
+          if (enableDebugLogging) console.log('[SCAN] 🔍 Attempting ZXing barcode detection...');
+
+          setUserMessage({
+            type: 'info',
+            title: 'Détection ZXing en cours',
+            message: 'Analyse avec bibliothèque ZXing...',
           });
-          
+
           const result = await readerRef.current.decodeFromImageUrl(imageUrl);
           ean = result.getText();
           detectionMethod = 'zxing';
-          if (enableDebugLogging) {
-            console.log('[SCAN] ✅ Barcode detected with ZXing:', ean);
-          }
-        } catch (err) {
-          if (enableDebugLogging) {
-            console.log('[SCAN] ZXing detection failed, will try OCR:', err);
-          }
+          if (enableDebugLogging) console.log('[SCAN] ✅ Barcode detected with ZXing:', ean);
+        } catch (zErr) {
+          if (enableDebugLogging) console.log('[SCAN] ZXing detection failed, will try OCR:', zErr);
         }
       }
 
-      // Step 3: OCR Fallback (if enabled)
+      // OCR fallback
       if (!ean && enableOcrFallback) {
-        if (enableDebugLogging) {
-          console.log('[SCAN] 📝 Starting OCR fallback with Tesseract.js...');
-        }
-        
-        setUserMessage({ 
-          type: 'info', 
-          title: 'Détection OCR en cours', 
-          message: 'Recherche du code dans l\'image...' 
+        if (enableDebugLogging) console.log('[SCAN] 📝 Starting OCR fallback with Tesseract.js...');
+
+        setUserMessage({
+          type: 'info',
+          title: 'Détection OCR en cours',
+          message: "Recherche du code dans l'image...",
         });
 
         try {
-          // Dynamic import for code splitting - only load OCR when needed
           const Tesseract = await import('tesseract.js');
           const { data } = await Tesseract.recognize(img, 'eng');
 
-          if (enableDebugLogging) {
-            console.log('[SCAN] OCR raw text:', data.text);
-          }
+          if (enableDebugLogging) console.log('[SCAN] OCR raw text:', data.text);
 
-          // Look for EAN-13 (13 digits) or EAN-8 (8 digits)
           const match = data.text.match(/\b\d{13}\b|\b\d{8}\b/);
           if (match) {
             ean = match[0];
             detectionMethod = 'ocr';
-            if (enableDebugLogging) {
-              console.log('[SCAN] ✅ EAN detected via OCR:', ean);
-            }
+            if (enableDebugLogging) console.log('[SCAN] ✅ EAN detected via OCR:', ean);
           } else if (enableDebugLogging) {
             console.log('[SCAN] ⚠️ No EAN pattern found in OCR text');
           }
         } catch (ocrErr) {
           console.error('[SCAN] OCR error:', ocrErr);
-          if (enableDebugLogging) {
-            console.log('[SCAN] ⚠️ OCR fallback failed, will prompt for manual entry');
-          }
+          if (enableDebugLogging) console.log('[SCAN] ⚠️ OCR fallback failed, will prompt for manual entry');
         }
       } else if (!ean && !enableOcrFallback && enableDebugLogging) {
         console.log('[SCAN] ℹ️ OCR fallback is disabled - skipping OCR detection');
       }
 
-      // Cleanup
       URL.revokeObjectURL(imageUrl);
       setIsScanning(false);
 
-      // Step 4: Handle result
       if (ean) {
         const normalizedEan = normalizeDetectedCode(ean);
         if (!isAcceptedEanCode(normalizedEan)) {
@@ -597,72 +550,70 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             message: 'Le scan a détecté un code, mais ce n’est pas un EAN-8/EAN-13 valide.',
           });
           transitionState('idle', 'Unsupported barcode format from image');
+          uxMonitor.scanCompleted('barcode', false);
           return;
         }
 
-        // SUCCESS CASE
-        // TODO: Externalize detection method names to constants or i18n for better maintainability
-        const methodName = 
-          detectionMethod === 'native' ? 'détecteur natif' :
-          detectionMethod === 'zxing' ? 'bibliothèque ZXing' :
-          detectionMethod === 'ocr' ? 'OCR Tesseract' :
-          'méthode inconnue';
-          
-        setUserMessage({ 
-          type: 'info', 
-          title: 'Code détecté', 
-          message: `✅ Code détecté avec ${methodName}: ${normalizedEan}` 
+        const methodName =
+          detectionMethod === 'native'
+            ? 'détecteur natif'
+            : detectionMethod === 'zxing'
+              ? 'bibliothèque ZXing'
+              : detectionMethod === 'ocr'
+                ? 'OCR Tesseract'
+                : 'méthode inconnue';
+
+        setUserMessage({
+          type: 'info',
+          title: 'Code détecté',
+          message: `✅ Code détecté avec ${methodName}: ${normalizedEan}`,
         });
-        
-        if (enableDebugLogging) {
-          console.log('[SCAN] ✅ Final EAN to process:', ean, 'via', detectionMethod);
-        }
-        
+
+        if (enableDebugLogging) console.log('[SCAN] ✅ Final EAN to process:', ean, 'via', detectionMethod);
+
         transitionState('processing', `Barcode from image: ${ean}`);
-        
-        // Clear message after a short delay so user can see it
+
         setTimeout(() => setUserMessage(null), 2000);
-        
-        // PROMPT 4: Monitor scan success from image upload
+
         uxMonitor.scanCompleted('barcode', true);
-        
+
         try {
           onScan(normalizedEan);
-        } catch (err) {
-          console.error('[SCAN] Error in onScan callback:', err);
+        } catch (cbErr) {
+          console.error('[SCAN] Error in onScan callback:', cbErr);
           setError('Erreur lors du traitement du code détecté');
+          uxMonitor.scanCompleted('barcode', false);
         }
       } else {
-        // FAILURE CASE - Honest message with helpful tips
-        // TODO: Externalize user-facing error messages to constants or i18n for better maintainability
         setError('❌ Aucun code détecté automatiquement');
-        setUserMessage({ 
-          type: 'warning', 
-          title: 'Code non détecté', 
-          message: '❌ Aucun code détecté automatiquement. 💡 Conseils : assurez-vous que le code-barres est bien visible, net et bien éclairé. Vous pouvez aussi saisir le code manuellement ci-dessous.' 
+        setUserMessage({
+          type: 'warning',
+          title: 'Code non détecté',
+          message:
+            "❌ Aucun code détecté automatiquement. 💡 Conseils : assurez-vous que le code-barres est bien visible, net et bien éclairé. Vous pouvez aussi saisir le code manuellement ci-dessous.",
         });
         transitionState('error', 'No barcode found in image');
-        
+
         if (enableDebugLogging) {
           console.log('[SCAN] ⚠️ Detection summary:');
           console.log('  - Native BarcodeDetector:', 'BarcodeDetector' in window ? 'tried but no result' : 'not available');
           console.log('  - ZXing detection: tried but no result');
           console.log('  - OCR fallback:', enableOcrFallback ? 'tried but no EAN pattern found' : 'disabled');
         }
-        
-        // PROMPT 4: Monitor scan failure from image upload
+
         uxMonitor.scanCompleted('barcode', false);
       }
     } catch (err: any) {
       console.error('[SCAN] Image processing error:', err);
-      setError('❌ Erreur lors du traitement de l\'image');
-      setUserMessage({ 
-        type: 'error', 
-        title: 'Erreur', 
-        message: 'Une erreur est survenue lors du traitement de l\'image. Essayez la saisie manuelle.' 
+      setError("❌ Erreur lors du traitement de l'image");
+      setUserMessage({
+        type: 'error',
+        title: 'Erreur',
+        message: 'Une erreur est survenue lors du traitement de l’image. Essayez la saisie manuelle.',
       });
       setIsScanning(false);
       transitionState('error', 'Image processing failed');
+      uxMonitor.scanCompleted('barcode', false);
     }
   };
 
@@ -670,16 +621,15 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     e.preventDefault();
     const normalizedManualInput = normalizeDetectedCode(manualInput);
     if (isAcceptedEanCode(normalizedManualInput)) {
-      if (debugEnabled) {
-        console.log('[SCAN] Manual input submitted:', normalizedManualInput);
-      }
+      if (debugEnabled) console.log('[SCAN] Manual input submitted:', normalizedManualInput);
       transitionState('processing', `Manual input: ${normalizedManualInput}`);
+      uxMonitor.scanCompleted('barcode', true);
       onScan(normalizedManualInput);
       setManualInput('');
       return;
     }
-
     setError('Veuillez saisir un code EAN-8 ou EAN-13 valide.');
+    uxMonitor.scanCompleted('barcode', false);
   };
 
   return (
@@ -712,57 +662,84 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             </div>
           )}
 
-          {/* Video Preview */}
+          {/* Video Preview (FIXED: ensures video is actually visible; overlays cannot hide it) */}
           {isScanning && hasPermission && (
-            <div className="relative bg-black rounded-lg overflow-hidden">
+            <div className="relative w-full max-w-2xl mx-auto aspect-[4/3] rounded-lg overflow-hidden bg-black">
               <video
                 ref={videoRef}
-                className="relative z-10 block w-full h-64 object-cover bg-black"
+                className="absolute inset-0 w-full h-full object-cover"
                 playsInline
                 muted
                 autoPlay
               />
-              
-              {/* OPTIMIZATION #2: Enhanced scanning overlay with real-time feedback */}
-              <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                {/* Scan frame with dynamic border */}
-                <div className={`border-2 w-64 h-32 rounded-lg shadow-lg transition-all ${
-                  scanFeedback === 'searching' ? 'border-blue-500 animate-pulse' :
-                  scanFeedback === 'focusing' ? 'border-yellow-500' :
-                  scanFeedback === 'detecting' ? 'border-green-500 scale-105' :
-                  'border-green-500'
-                }`}>
-                  <div className={`absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg transition-colors ${
-                    scanFeedback === 'searching' ? 'border-blue-500' :
-                    scanFeedback === 'focusing' ? 'border-yellow-500' :
-                    'border-green-500'
-                  }`}></div>
-                  <div className={`absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg transition-colors ${
-                    scanFeedback === 'searching' ? 'border-blue-500' :
-                    scanFeedback === 'focusing' ? 'border-yellow-500' :
-                    'border-green-500'
-                  }`}></div>
-                  <div className={`absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg transition-colors ${
-                    scanFeedback === 'searching' ? 'border-blue-500' :
-                    scanFeedback === 'focusing' ? 'border-yellow-500' :
-                    'border-green-500'
-                  }`}></div>
-                  <div className={`absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-lg transition-colors ${
-                    scanFeedback === 'searching' ? 'border-blue-500' :
-                    scanFeedback === 'focusing' ? 'border-yellow-500' :
-                    'border-green-500'
-                  }`}></div>
+
+              {/* Overlay must be transparent and non-blocking */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Scan frame with dynamic border */}
+                  <div
+                    className={`relative border-2 w-64 h-32 rounded-lg shadow-lg transition-all ${
+                      scanFeedback === 'searching'
+                        ? 'border-blue-500 animate-pulse'
+                        : scanFeedback === 'focusing'
+                          ? 'border-yellow-500'
+                          : scanFeedback === 'detecting'
+                            ? 'border-green-500 scale-105'
+                            : 'border-green-500'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg transition-colors ${
+                        scanFeedback === 'searching'
+                          ? 'border-blue-500'
+                          : scanFeedback === 'focusing'
+                            ? 'border-yellow-500'
+                            : 'border-green-500'
+                      }`}
+                    />
+                    <div
+                      className={`absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg transition-colors ${
+                        scanFeedback === 'searching'
+                          ? 'border-blue-500'
+                          : scanFeedback === 'focusing'
+                            ? 'border-yellow-500'
+                            : 'border-green-500'
+                      }`}
+                    />
+                    <div
+                      className={`absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg transition-colors ${
+                        scanFeedback === 'searching'
+                          ? 'border-blue-500'
+                          : scanFeedback === 'focusing'
+                            ? 'border-yellow-500'
+                            : 'border-green-500'
+                      }`}
+                    />
+                    <div
+                      className={`absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-lg transition-colors ${
+                        scanFeedback === 'searching'
+                          ? 'border-blue-500'
+                          : scanFeedback === 'focusing'
+                            ? 'border-yellow-500'
+                            : 'border-green-500'
+                      }`}
+                    />
+                  </div>
                 </div>
-                
+
                 {/* Feedback message overlay */}
                 {scanFeedback && (
-                  <div className={`absolute top-4 left-0 right-0 text-center px-4 py-2 text-sm font-medium transition-all ${
-                    scanFeedback === 'searching' ? 'bg-blue-600/90 text-white' :
-                    scanFeedback === 'focusing' ? 'bg-yellow-600/90 text-white' :
-                    'bg-green-600/90 text-white'
-                  }`}>
+                  <div
+                    className={`absolute top-4 left-4 right-4 text-center px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      scanFeedback === 'searching'
+                        ? 'bg-blue-600/80 text-white'
+                        : scanFeedback === 'focusing'
+                          ? 'bg-yellow-600/80 text-white'
+                          : 'bg-green-600/80 text-white'
+                    }`}
+                  >
                     {scanFeedback === 'searching' && '📷 Recherche de code-barres...'}
-                    {scanFeedback === 'focusing' && '🎯 Code détecté ! Analyse...'}
+                    {scanFeedback === 'focusing' && '🎯 Cadre OK, stabilisez...'}
                     {scanFeedback === 'detecting' && '✓ Lecture en cours...'}
                   </div>
                 )}
@@ -802,11 +779,11 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
                 <li>Assurez-vous d'avoir un bon éclairage</li>
                 <li>Maintenez le téléphone stable pendant 1-2 secondes</li>
               </ul>
-              
+
               <div className="mt-3 pt-3 border-t border-blue-700/30">
                 <p className="text-xs text-blue-300">
-                  <strong>⚠️ Important :</strong> La caméra nécessite HTTPS ou localhost. 
-                  Si vous voyez "getUserMedia non disponible", utilisez l'import d'image.
+                  <strong>⚠️ Important :</strong> La caméra nécessite HTTPS ou localhost. Si vous voyez "getUserMedia non
+                  disponible", utilisez l'import d'image.
                 </p>
               </div>
             </div>
@@ -814,14 +791,18 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
 
           {/* User Message (Fallback Info) */}
           {userMessage && (
-            <div className={`rounded-lg p-4 text-sm ${
-              userMessage.type === 'info' ? 'bg-blue-900/20 border border-blue-700/30 text-blue-200' :
-              userMessage.type === 'warning' ? 'bg-yellow-900/20 border border-yellow-700/30 text-yellow-200' :
-              'bg-red-900/20 border border-red-700/30 text-red-200'
-            }`}>
+            <div
+              className={`rounded-lg p-4 text-sm ${
+                userMessage.type === 'info'
+                  ? 'bg-blue-900/20 border border-blue-700/30 text-blue-200'
+                  : userMessage.type === 'warning'
+                    ? 'bg-yellow-900/20 border border-yellow-700/30 text-yellow-200'
+                    : 'bg-red-900/20 border border-red-700/30 text-red-200'
+              }`}
+            >
               <p className="font-semibold mb-2">📷 {userMessage.title}</p>
               <p>{userMessage.message}</p>
-              
+
               <div className="mt-3 pt-3 border-t border-current/30">
                 <p className="text-xs opacity-80">
                   💡 <strong>Astuce :</strong> Vous pouvez également utiliser la saisie manuelle en bas de page.
@@ -835,20 +816,23 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-4 text-sm text-yellow-200">
               <p className="font-semibold mb-2">🔐 Comment autoriser l'accès à la caméra ?</p>
               <ul className="space-y-2 ml-4 list-disc">
-                <li><strong>Chrome/Edge :</strong> Cliquez sur l'icône 🔒 ou ℹ️ dans la barre d'adresse → Paramètres du site → Caméra → Autoriser</li>
-                <li><strong>Safari (iOS) :</strong> Réglages → Safari → Caméra → Autoriser</li>
-                <li><strong>Firefox :</strong> Cliquez sur l'icône 🔒 → Autorisations → Caméra → Autoriser</li>
+                <li>
+                  <strong>Chrome/Edge :</strong> Cliquez sur l'icône 🔒 ou ℹ️ dans la barre d'adresse → Paramètres du site
+                  → Caméra → Autoriser
+                </li>
+                <li>
+                  <strong>Safari (iOS) :</strong> Réglages → Safari → Caméra → Autoriser
+                </li>
+                <li>
+                  <strong>Firefox :</strong> Cliquez sur l'icône 🔒 → Autorisations → Caméra → Autoriser
+                </li>
               </ul>
               <p className="mt-3 text-xs">Une fois l'autorisation donnée, rechargez la page et réessayez.</p>
             </div>
           )}
 
           {/* Error message */}
-          {error && (
-            <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-4 text-red-200">
-              {error}
-            </div>
-          )}
+          {error && <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-4 text-red-200">{error}</div>}
 
           {/* Camera scan button */}
           {!isScanning && scanMode === 'camera' && !userMessage && (
@@ -863,20 +847,13 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
           {/* Fallback mode buttons */}
           {scanMode === 'upload' && userMessage && (
             <div className="space-y-3">
-              {/* Primary: Image upload */}
               <label className="block w-full">
                 <div className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-lg text-center cursor-pointer transition-colors">
                   🖼️ Importer une image
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
               </label>
-              
-              {/* Secondary: Retry camera */}
+
               <button
                 onClick={retryCamera}
                 className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold transition-colors"
@@ -886,19 +863,14 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             </div>
           )}
 
-          {/* Image upload (always available as alternative) */}
+          {/* Image upload (always available) */}
           {!userMessage && (
             <div>
               <label className="block w-full">
                 <div className="px-6 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold text-center cursor-pointer transition-colors">
                   🖼️ Importer une image
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
               </label>
             </div>
           )}
@@ -937,7 +909,8 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
                 <li>frames: {debugInfo.framesReceived}</li>
               </ul>
               <p className="text-slate-400">
-                Test rapide: autoriser la caméra, vérifier que video {'>'} 0x0, puis essayer aussi l’import d’image (ex: EAN 3292090000016).
+                Test rapide: autoriser la caméra, vérifier que video {'>'} 0x0, puis essayer aussi l’import d’image (ex:
+                EAN 3292090000016).
               </p>
             </div>
           )}
