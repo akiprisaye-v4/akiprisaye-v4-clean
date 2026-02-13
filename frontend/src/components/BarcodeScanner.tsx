@@ -919,3 +919,4 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     </div>
   );
 }
+
