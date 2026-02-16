@@ -185,11 +185,70 @@ jobs:
 
       - name: Log preview URL
         shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy_preview.outputs.url }}
         run: |
-          echo "Preview deployment URL: ${{ steps.deploy_preview.outputs.url }}"
+          CACHE_BUSTER="$(date -u +%Y%m%d%H%M)"
+          MOBILE_URL="${DEPLOY_URL}?v=${CACHE_BUSTER}"
+
+          version_payload="not found"
+          if [ -f frontend/dist/version.json ]; then
+            version_payload="$(cat frontend/dist/version.json)"
+          fi
+
+          index_status="❌"
+          [ -f frontend/dist/index.html ] && index_status="✅"
+          page404_status="❌"
+          [ -f frontend/dist/404.html ] && page404_status="✅"
+          redirects_status="❌"
+          [ -f frontend/dist/_redirects ] && redirects_status="✅"
+          headers_status="❌"
+          [ -f frontend/dist/_headers ] && headers_status="✅"
+          routes_status="❌"
+          [ -f frontend/dist/_routes.json ] && routes_status="✅"
+
+          echo "Preview deployment URL: ${DEPLOY_URL}"
           {
-            echo "## Preview deployment"
-            echo "- URL: ${{ steps.deploy_preview.outputs.url }}"
+            echo "## Release/Deploy summary"
+            echo "- Preview URL: ${DEPLOY_URL:-not available}"
+            echo "- Production URL: not available in preview job"
+            echo "- Mobile URL (cache-buster): ${MOBILE_URL:-not available}"
+            echo "- Cache-buster version: `${CACHE_BUSTER}`"
+            echo ""
+            echo "### version.json"
+            echo "```json"
+            echo "${version_payload}"
+            echo "```"
+            echo ""
+            echo "### Dist checklist"
+            echo "- index.html: ${index_status}"
+            echo "- 404.html: ${page404_status}"
+            echo "- _redirects: ${redirects_status}"
+            echo "- _headers: ${headers_status}"
+            echo "- _routes.json: ${routes_status}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke routes (preview)
+        continue-on-error: true
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy_preview.outputs.url }}
+        run: |
+          {
+            echo ""
+            echo "### Smoke routes"
+            if [ -z "${DEPLOY_URL}" ]; then
+              echo "- ⚠️ DEPLOY_URL unavailable, skipping smoke checks."
+            else
+              for route in / /comparateur /scanner-ean; do
+                http_code="$(curl -sS -o /dev/null -w "%{http_code}" "${DEPLOY_URL}${route}" || echo "curl_error")"
+                if [ "${http_code}" = "curl_error" ]; then
+                  echo "- ${DEPLOY_URL}${route} → ⚠️ curl error"
+                else
+                  echo "- ${DEPLOY_URL}${route} → HTTP ${http_code}"
+                fi
+              done
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment preview URL on PR
@@ -233,9 +292,68 @@ jobs:
 
       - name: Log production URL
         shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy_production.outputs.url }}
         run: |
-          echo "Production deployment URL: ${{ steps.deploy_production.outputs.url }}"
+          CACHE_BUSTER="$(date -u +%Y%m%d%H%M)"
+          MOBILE_URL="${DEPLOY_URL}?v=${CACHE_BUSTER}"
+
+          version_payload="not found"
+          if [ -f frontend/dist/version.json ]; then
+            version_payload="$(cat frontend/dist/version.json)"
+          fi
+
+          index_status="❌"
+          [ -f frontend/dist/index.html ] && index_status="✅"
+          page404_status="❌"
+          [ -f frontend/dist/404.html ] && page404_status="✅"
+          redirects_status="❌"
+          [ -f frontend/dist/_redirects ] && redirects_status="✅"
+          headers_status="❌"
+          [ -f frontend/dist/_headers ] && headers_status="✅"
+          routes_status="❌"
+          [ -f frontend/dist/_routes.json ] && routes_status="✅"
+
+          echo "Production deployment URL: ${DEPLOY_URL}"
           {
-            echo "## Production deployment"
-            echo "- URL: ${{ steps.deploy_production.outputs.url }}"
+            echo "## Release/Deploy summary"
+            echo "- Preview URL: not available in production job"
+            echo "- Production URL: ${DEPLOY_URL:-not available}"
+            echo "- Mobile URL (cache-buster): ${MOBILE_URL:-not available}"
+            echo "- Cache-buster version: `${CACHE_BUSTER}`"
+            echo ""
+            echo "### version.json"
+            echo "```json"
+            echo "${version_payload}"
+            echo "```"
+            echo ""
+            echo "### Dist checklist"
+            echo "- index.html: ${index_status}"
+            echo "- 404.html: ${page404_status}"
+            echo "- _redirects: ${redirects_status}"
+            echo "- _headers: ${headers_status}"
+            echo "- _routes.json: ${routes_status}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke routes (production)
+        continue-on-error: true
+        shell: bash
+        env:
+          DEPLOY_URL: ${{ steps.deploy_production.outputs.url }}
+        run: |
+          {
+            echo ""
+            echo "### Smoke routes"
+            if [ -z "${DEPLOY_URL}" ]; then
+              echo "- ⚠️ DEPLOY_URL unavailable, skipping smoke checks."
+            else
+              for route in / /comparateur /scanner-ean; do
+                http_code="$(curl -sS -o /dev/null -w "%{http_code}" "${DEPLOY_URL}${route}" || echo "curl_error")"
+                if [ "${http_code}" = "curl_error" ]; then
+                  echo "- ${DEPLOY_URL}${route} → ⚠️ curl error"
+                else
+                  echo "- ${DEPLOY_URL}${route} → HTTP ${http_code}"
+                fi
+              done
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
