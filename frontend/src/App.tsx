@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { Suspense, useState, useEffect } from 'react';
+import { lazyPage } from './router/lazy';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import Layout synchronously to prevent loading block
@@ -18,81 +19,81 @@ import { StoreSelectionProvider } from './context/StoreSelectionContext';
 import { logDebug } from './utils/logger';
 
 // Lazy-loaded pages - Main routes
-const Home = React.lazy(() => import('./pages/Home'));
-const Carte = React.lazy(() => import('./pages/Carte'));
-const MapPage = React.lazy(() => import('./pages/MapPage'));
-const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-const Comparateur = React.lazy(() => import('./pages/Comparateur'));
+const Home = lazyPage(() => import('./pages/Home'));
+const Carte = lazyPage(() => import('./pages/Carte'));
+const MapPage = lazyPage(() => import('./pages/MapPage'));
+const AdminDashboard = lazyPage(() => import('./pages/AdminDashboard'));
+const Comparateur = lazyPage(() => import('./pages/Comparateur'));
 
 // New Admin pages
-const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout'));
-const AdminDashboardNew = React.lazy(() => import('./pages/admin/AdminDashboard'));
-const StoreList = React.lazy(() => import('./pages/admin/stores/StoreList'));
-const StoreForm = React.lazy(() => import('./pages/admin/stores/StoreForm'));
-const StoreDetail = React.lazy(() => import('./pages/admin/stores/StoreDetail'));
-const ProductList = React.lazy(() => import('./pages/admin/products/ProductList').then(m => ({ default: m.ProductList })));
-const ProductForm = React.lazy(() => import('./pages/admin/products/ProductForm').then(m => ({ default: m.ProductForm })));
-const ProductDetail = React.lazy(() => import('./pages/admin/products/ProductDetail').then(m => ({ default: m.ProductDetail })));
-const ImportPage = React.lazy(() => import('./pages/admin/import/ImportPage'));
-const ObservatoireHub = React.lazy(() => import('./pages/ObservatoireHub'));
-const Methodologie = React.lazy(() => import('./pages/Methodologie'));
-const Faq = React.lazy(() => import('./pages/Faq'));
-const Contact = React.lazy(() => import('./pages/Contact'));
-const MentionsLegales = React.lazy(() => import('./pages/MentionsLegales'));
+const AdminLayout = lazyPage(() => import('./pages/admin/AdminLayout'));
+const AdminDashboardNew = lazyPage(() => import('./pages/admin/AdminDashboard'));
+const StoreList = lazyPage(() => import('./pages/admin/stores/StoreList'));
+const StoreForm = lazyPage(() => import('./pages/admin/stores/StoreForm'));
+const StoreDetail = lazyPage(() => import('./pages/admin/stores/StoreDetail'));
+const ProductList = lazyPage(() => import('./pages/admin/products/ProductList').then(m => ({ default: m.ProductList })));
+const ProductForm = lazyPage(() => import('./pages/admin/products/ProductForm').then(m => ({ default: m.ProductForm })));
+const ProductDetail = lazyPage(() => import('./pages/admin/products/ProductDetail').then(m => ({ default: m.ProductDetail })));
+const ImportPage = lazyPage(() => import('./pages/admin/import/ImportPage'));
+const ObservatoireHub = lazyPage(() => import('./pages/ObservatoireHub'));
+const Methodologie = lazyPage(() => import('./pages/Methodologie'));
+const Faq = lazyPage(() => import('./pages/Faq'));
+const Contact = lazyPage(() => import('./pages/Contact'));
+const MentionsLegales = lazyPage(() => import('./pages/MentionsLegales'));
 
 // Additional feature pages
-const DonneesPubliques = React.lazy(() => import('./pages/DonneesPubliques'));
-const Contribuer = React.lazy(() => import('./pages/Contribuer'));
-const ContribuerPrix = React.lazy(() => import('./pages/ContribuerPrix'));
-const Comparateurs = React.lazy(() => import('./pages/Comparateurs'));
-const CarteItinerairesHub = React.lazy(() => import('./pages/CarteItinerairesHub'));
-const ComparateurCitoyen = React.lazy(() => import('./pages/ComparateurCitoyen'));
-const LutteVieChere = React.lazy(() => import('./pages/LutteVieChereIndexPage'));
+const DonneesPubliques = lazyPage(() => import('./pages/DonneesPubliques'));
+const Contribuer = lazyPage(() => import('./pages/Contribuer'));
+const ContribuerPrix = lazyPage(() => import('./pages/ContribuerPrix'));
+const Comparateurs = lazyPage(() => import('./pages/Comparateurs'));
+const CarteItinerairesHub = lazyPage(() => import('./pages/CarteItinerairesHub'));
+const ComparateurCitoyen = lazyPage(() => import('./pages/ComparateurCitoyen'));
+const LutteVieChere = lazyPage(() => import('./pages/LutteVieChereIndexPage'));
 
 // Scanner & OCR pages
-const ScannerHub = React.lazy(() => import('./pages/ScannerHub'));
-const OCRHub = React.lazy(() => import('./pages/ocr/OCRHub'));
-const ScanEAN = React.lazy(() => import('./pages/ScanEAN'));
-const ProductPhotoAnalysis = React.lazy(() => import('./pages/ProductPhotoAnalysis'));
-const ComparaisonEnseignes = React.lazy(() => import('./pages/ComparaisonEnseignes'));
-const BasketComparison = React.lazy(() => import('./pages/BasketComparison'));
+const ScannerHub = lazyPage(() => import('./pages/ScannerHub'));
+const OCRHub = lazyPage(() => import('./pages/ocr/OCRHub'));
+const ScanEAN = lazyPage(() => import('./pages/ScanEAN'));
+const ProductPhotoAnalysis = lazyPage(() => import('./pages/ProductPhotoAnalysis'));
+const ComparaisonEnseignes = lazyPage(() => import('./pages/ComparaisonEnseignes'));
+const BasketComparison = lazyPage(() => import('./pages/BasketComparison'));
 
 // Settings & History
-const Settings = React.lazy(() => import('./pages/Settings'));
-const HistoriquePrix = React.lazy(() => import('./pages/HistoriquePrix'));
-const RecherchePrix = React.lazy(() => import('./pages/RecherchePrix'));
-const ProductDetailPage = React.lazy(() => import('./pages/ProductDetail'));
-const Alertes = React.lazy(() => import('./pages/Alertes'));
-const AlerteDetail = React.lazy(() => import('./pages/AlerteDetail'));
-const Promos = React.lazy(() => import('./pages/Promos'));
-const MesListes = React.lazy(() => import('./pages/MesListes'));
+const Settings = lazyPage(() => import('./pages/Settings'));
+const HistoriquePrix = lazyPage(() => import('./pages/HistoriquePrix'));
+const RecherchePrix = lazyPage(() => import('./pages/RecherchePrix'));
+const ProductDetailPage = lazyPage(() => import('./pages/ProductDetail'));
+const Alertes = lazyPage(() => import('./pages/Alertes'));
+const AlerteDetail = lazyPage(() => import('./pages/AlerteDetail'));
+const Promos = lazyPage(() => import('./pages/Promos'));
+const MesListes = lazyPage(() => import('./pages/MesListes'));
 
 // Savings Dashboard
-const MesEconomies = React.lazy(() => import('./pages/MesEconomies'));
+const MesEconomies = lazyPage(() => import('./pages/MesEconomies'));
 
 // Auth pages
-const Login = React.lazy(() => import('./pages/Login'));
-const Inscription = React.lazy(() => import('./pages/Inscription'));
-const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
-const MonCompte = React.lazy(() => import('./pages/MonCompte'));
-const AuthHub = React.lazy(() => import('./pages/AuthHub'));
+const Login = lazyPage(() => import('./pages/Login'));
+const Inscription = lazyPage(() => import('./pages/Inscription'));
+const ResetPassword = lazyPage(() => import('./pages/ResetPassword'));
+const MonCompte = lazyPage(() => import('./pages/MonCompte'));
+const AuthHub = lazyPage(() => import('./pages/AuthHub'));
 
 // Pricing & Subscription
-const Pricing = React.lazy(() => import('./pages/Pricing'));
-const Subscribe = React.lazy(() => import('./pages/Subscribe'));
+const Pricing = lazyPage(() => import('./pages/Pricing'));
+const Subscribe = lazyPage(() => import('./pages/Subscribe'));
 
 // Observatory real-time
-const ObservatoireTempsReel = React.lazy(() => import('./pages/ObservatoireTempsReel'));
+const ObservatoireTempsReel = lazyPage(() => import('./pages/ObservatoireTempsReel'));
 
 // Transparency & reporting
-const Transparence = React.lazy(() => import('./pages/Transparence'));
-const SignalerAbus = React.lazy(() => import('./pages/SignalerAbus'));
+const Transparence = lazyPage(() => import('./pages/Transparence'));
+const SignalerAbus = lazyPage(() => import('./pages/SignalerAbus'));
 
 // Admin Sync Dashboard
-const SyncDashboard = React.lazy(() => import('./pages/admin/sync/SyncDashboard'));
+const SyncDashboard = lazyPage(() => import('./pages/admin/sync/SyncDashboard'));
 
 // i18n Test page (for development/testing)
-const I18nTest = React.lazy(() => import('./pages/I18nTest'));
+const I18nTest = lazyPage(() => import('./pages/I18nTest'));
 
 function LoadingFallback() {
   const [showTimeout, setShowTimeout] = useState(false);
