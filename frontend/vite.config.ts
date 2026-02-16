@@ -63,6 +63,93 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: false,
     chunkSizeWarningLimit: 300,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return
+          }
+
+          if (id.includes('leaflet.markercluster')) {
+            return 'leaflet-cluster'
+          }
+
+          if (id.includes('leaflet')) {
+            return 'leaflet'
+          }
+
+          if (id.includes('zod')) {
+            return 'zod'
+          }
+
+          if (id.includes('/firebase/firestore') || id.includes('@firebase/firestore') || id.includes('firebase-firestore')) {
+            return 'firebase-firestore'
+          }
+
+          if (id.includes('/firebase/auth') || id.includes('@firebase/auth')) {
+            return 'firebase-auth'
+          }
+
+          if (id.includes('/firebase/analytics') || id.includes('@firebase/analytics')) {
+            return 'firebase-analytics'
+          }
+
+          if (id.includes('node_modules/recharts')) {
+            return 'recharts'
+          }
+
+          if (id.includes('node_modules/chart.js') || id.includes('node_modules/react-chartjs-2')) {
+            return 'chartjs'
+          }
+
+          if (id.includes('node_modules/d3-')) {
+            return 'd3'
+          }
+
+          if (id.includes('node_modules/victory')) {
+            return 'victory'
+          }
+
+          const modulePath = id.split('node_modules/')[1]
+          if (!modulePath) {
+            return 'vendor'
+          }
+
+          const parts = modulePath.split('/')
+          const packageName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0]
+
+          if (['react', 'react-dom', 'react-router', 'react-router-dom', 'scheduler'].includes(packageName)) {
+            return 'react-vendor'
+          }
+
+          if (packageName.startsWith('firebase') || packageName.startsWith('@firebase/')) {
+            return 'firebase-core'
+          }
+
+          if (packageName.startsWith('@tanstack/')) {
+            return 'tanstack'
+          }
+
+          if (['i18next', 'react-i18next', 'i18next-http-backend'].includes(packageName)) {
+            return 'i18n'
+          }
+
+          if (packageName === 'tesseract.js') {
+            return 'tesseract'
+          }
+
+          if (packageName === 'lucide-react') {
+            return 'icons'
+          }
+
+          if (['lodash', 'fuse.js', 'papaparse'].includes(packageName)) {
+            return 'data-utils'
+          }
+
+          return 'vendor'
+        }
+      }
+    }
   },
   server: {
     port: 3000,
