@@ -10,6 +10,9 @@
 /index.html
   Cache-Control: no-store, must-revalidate
 
+/service-worker.js
+  Cache-Control: no-store, must-revalidate
+
 # Optional: other html pages
 /*.html
   Cache-Control: no-store, must-revalidate
