@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_API_KEY?: string;
   readonly VITE_FIREBASE_AUTH_DOMAIN?: string;
   readonly VITE_FIREBASE_PROJECT_ID?: string;
+  readonly VITE_BUILD_SHA?: string;
+  readonly VITE_APP_BUILD_ID?: string;
   // Ajoute tes autres variables ici si besoin
 }
 
