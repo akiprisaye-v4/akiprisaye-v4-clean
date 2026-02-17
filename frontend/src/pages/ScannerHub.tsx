@@ -113,7 +113,7 @@ export default function ScannerHub() {
       return;
     }
 
-    const capabilities = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
+    const capabilities = track.getCapabilities() as { torch?: boolean };
     setTorchSupported(Boolean(capabilities.torch));
   }, []);
 
