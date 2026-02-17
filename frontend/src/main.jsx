@@ -13,10 +13,11 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { safeToText } from './utils/safeToText';
 import { installRuntimeCrashProbe } from './monitoring/runtimeCrashProbe';
 import { logDebug } from './utils/logger';
+import { enforceBuildVersionSync, registerAppServiceWorker } from './utils/buildVersionGuard';
 
-const BUILD_SHA = import.meta.env.VITE_BUILD_SHA || 'unknown';
-window.__BUILD_SHA__ = BUILD_SHA;
-logDebug(`[build] A KI PRI SA YÉ boot sha=${BUILD_SHA}`);
+const BUILD_ID = import.meta.env.VITE_APP_BUILD_ID || import.meta.env.VITE_BUILD_SHA || 'unknown';
+window.__BUILD_SHA__ = BUILD_ID;
+logDebug(`[build] A KI PRI SA YÉ boot id=${BUILD_ID}`);
 installRuntimeCrashProbe();
 
 // Load debug utilities in development
@@ -62,11 +63,21 @@ const globalLoadTimeout = setTimeout(() => {
   }
 }, 15000);
 
-const rootElement = document.getElementById('root');
+async function bootstrap() {
+  const versionChanged = await enforceBuildVersionSync(BUILD_ID);
+  if (versionChanged) {
+    return;
+  }
 
-if (!rootElement) {
-  console.error('❌ Root element #root not found');
-} else {
+  registerAppServiceWorker();
+
+  const rootElement = document.getElementById('root');
+
+  if (!rootElement) {
+    console.error('❌ Root element #root not found');
+    return;
+  }
+
   logDebug('✅ main.jsx: Starting React render');
 
   ReactDOM.createRoot(rootElement).render(
@@ -89,3 +100,5 @@ if (!rootElement) {
 
   logDebug('✅ main.jsx: React render initiated');
 }
+
+bootstrap();
