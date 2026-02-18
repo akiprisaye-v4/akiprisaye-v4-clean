@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException } from '@zxing/library';
@@ -68,6 +68,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const decodeStopRef = useRef<(() => void) | null>(null);
   const lastDetectedRef = useRef<{ code: string; timestamp: number } | null>(null);
   const lastDebugUpdateAtRef = useRef<number>(0);
+  const lastAttemptDebugAtRef = useRef<number>(0);
   const debugIntervalRef = useRef<number | null>(null);
 
   // Helpers to avoid stale state in async callbacks
@@ -253,6 +254,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
 
     updateDebugInfo({ framesReceived: 0, decodeAttempts: 0, videoSize: '0x0', playState: 'requesting' });
     lastDebugUpdateAtRef.current = 0;
+    lastAttemptDebugAtRef.current = 0;
     if (debugEnabled) console.log('[SCAN] Camera permission state:', permission);
     updateDebugInfo({ permission });
 
@@ -333,10 +335,9 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
           const diagnostics = readTrackDiagnostics(track);
           const capabilities = diagnostics.capabilities as any;
           if (debugEnabled) console.log('[SCAN] 📱 Camera capabilities:', capabilities);
-          if (capabilities && 'torch' in capabilities) {
-            setTorchSupported(true);
-            if (debugEnabled) console.log('[SCAN] 🔦 Torch supported');
-          }
+          const hasTorch = Boolean(capabilities && 'torch' in capabilities);
+          setTorchSupported(hasTorch);
+          if (hasTorch && debugEnabled) console.log('[SCAN] 🔦 Torch supported');
           updateDebugInfo({
             selectedDeviceId: diagnostics.settings.deviceId || 'unknown-device',
             cameraSettings: JSON.stringify(diagnostics.settings),
@@ -382,11 +383,16 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             reader: readerRef.current,
             video: videoRef.current,
             intervalMs: 100,
+            roi: { x: 0.15, y: 0.32, width: 0.7, height: 0.36 },
             onAttempt: ({ attempts, lastError }) => {
               debugFrameCounterRef.current += 1;
               if (debugFrameCounterRef.current > 10) setScanFeedback('focusing');
               if (debugEnabled) {
-                updateDebugInfo({ decodeAttempts: attempts, lastError });
+                const now = Date.now();
+                if (now - lastAttemptDebugAtRef.current > 250) {
+                  updateDebugInfo({ decodeAttempts: attempts, lastError });
+                  lastAttemptDebugAtRef.current = now;
+                }
               }
             },
             onError: (err) => {
@@ -849,7 +855,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
             <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4 text-sm text-blue-200">
               <p className="font-semibold mb-2">📋 Instructions :</p>
               <ul className="space-y-1 ml-4 list-disc">
-                <li>Cliquez sur "Scanner avec la caméra" pour activer la caméra</li>
+                <li>Cliquez sur "Activer la caméra" pour démarrer le scan</li>
                 <li>Autorisez l'accès à la caméra quand le navigateur le demande</li>
                 <li>Positionnez le code-barres à 10-20 cm de la caméra</li>
                 <li>Assurez-vous d'avoir un bon éclairage</li>

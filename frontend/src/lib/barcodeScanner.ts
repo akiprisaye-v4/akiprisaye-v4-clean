@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { BarcodeFormat, DecodeHintType, NotFoundException, type Result } from '@zxing/library';
 
@@ -11,12 +12,26 @@ export interface DecoderAttempt {
   lastError: string;
 }
 
+export interface DecoderRoi {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 const SUPPORTED_FORMATS: BarcodeFormat[] = [
   BarcodeFormat.EAN_13,
   BarcodeFormat.EAN_8,
   BarcodeFormat.UPC_A,
   BarcodeFormat.CODE_128,
 ];
+
+const DEFAULT_ROI: DecoderRoi = {
+  x: 0.15,
+  y: 0.32,
+  width: 0.7,
+  height: 0.36,
+};
 
 export function createBarcodeReader() {
   const hints = new Map();
@@ -60,8 +75,9 @@ export function startFrameDecodeLoop(params: {
   onAttempt?: (attempt: DecoderAttempt) => void;
   onError?: (error: unknown) => void;
   intervalMs?: number;
+  roi?: DecoderRoi;
 }) {
-  const { reader, video, onDetected, onAttempt, onError, intervalMs = 100 } = params;
+  const { reader, video, onDetected, onAttempt, onError, intervalMs = 100, roi = DEFAULT_ROI } = params;
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -84,22 +100,27 @@ export function startFrameDecodeLoop(params: {
       return;
     }
 
-    const vw = video.videoWidth;
-    const vh = video.videoHeight;
+    const sourceW = video.videoWidth;
+    const sourceH = video.videoHeight;
+    const sx = Math.floor(sourceW * roi.x);
+    const sy = Math.floor(sourceH * roi.y);
+    const sw = Math.max(1, Math.floor(sourceW * roi.width));
+    const sh = Math.max(1, Math.floor(sourceH * roi.height));
+
     const portrait = window.innerHeight > window.innerWidth;
 
-    if (portrait && vh > vw) {
-      canvas.width = vh;
-      canvas.height = vw;
+    if (portrait && sh > sw) {
+      canvas.width = sh;
+      canvas.height = sw;
       ctx.save();
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate(Math.PI / 2);
-      ctx.drawImage(video, -vw / 2, -vh / 2, vw, vh);
+      ctx.drawImage(video, sx, sy, sw, sh, -sw / 2, -sh / 2, sw, sh);
       ctx.restore();
     } else {
-      canvas.width = vw;
-      canvas.height = vh;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.width = sw;
+      canvas.height = sh;
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
     }
 
     attempts += 1;
