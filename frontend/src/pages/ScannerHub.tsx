@@ -21,6 +21,7 @@ type ScannerControls = {
 const EAN_REGEX = /^[0-9]{8,14}$/;
 const SCAN_TIMEOUT_MS = 10_000;
 const SUCCESS_LOCK_MS = 1_500;
+const UI_COOLDOWN_MS = 1_500;
 
 export default function ScannerHub() {
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ export default function ScannerHub() {
   const streamRef = useRef<MediaStream | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const successLockRef = useRef<number | null>(null);
+  const startingRef = useRef(false);
+  const lastUiEmitRef = useRef<{ code: string; at: number } | null>(null);
 
   const [status, setStatus] = useState<ScanStatus>('idle');
   const [lastDetectedCode, setLastDetectedCode] = useState<string | null>(null);
@@ -42,6 +45,7 @@ export default function ScannerHub() {
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [successOverlayVisible, setSuccessOverlayVisible] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   const stopCamera = useCallback(() => {
     controlsRef.current?.stop();
@@ -128,12 +132,21 @@ export default function ScannerHub() {
   }, [status]);
 
   const startCamera = useCallback(async () => {
+    if (startingRef.current || isScanning) {
+      return;
+    }
+
+    startingRef.current = true;
+    setIsStarting(true);
+
     stopCamera();
     resetForNewScan();
     setManualInputVisible(false);
 
     if (!videoRef.current || !navigator.mediaDevices?.getUserMedia) {
       setStatus('cameraNotFound');
+      startingRef.current = false;
+      setIsStarting(false);
       return;
     }
 
@@ -153,25 +166,36 @@ export default function ScannerHub() {
         videoRef.current,
         (result) => {
           const text = result?.getText()?.trim();
-          if (!text || !canFinalize()) {
+          if (!text) {
             return;
           }
 
+          const code = text.replace(/\D/g, '');
+          if (!EAN_REGEX.test(code)) {
+            return;
+          }
+
+          const now = Date.now();
+          const lastUiEmit = lastUiEmitRef.current;
+          if (lastUiEmit && lastUiEmit.code === code && now - lastUiEmit.at < UI_COOLDOWN_MS) {
+            return;
+          }
+
+          lastUiEmitRef.current = { code, at: now };
+
           setLastDetectedCode((previousCode) => {
-            if (previousCode === text) {
+            if (previousCode === code) {
               setStableCounter((previousCounter) => {
-                const nextCounter = previousCounter + 1;
-                if (nextCounter >= 2) {
-                  finalizeScan(text);
-                }
-                return nextCounter;
+                return previousCounter + 1;
               });
               return previousCode;
             }
 
             setStableCounter(1);
-            return text;
+            return code;
           });
+
+          setStatus('scanning');
         }
       );
 
@@ -185,7 +209,6 @@ export default function ScannerHub() {
 
       timeoutRef.current = window.setTimeout(() => {
         if (canFinalize()) {
-          stopCamera();
           setStatus('notDetectedTimeout');
           setManualInputVisible(true);
         }
@@ -208,8 +231,11 @@ export default function ScannerHub() {
 
       setStatus('errorNetwork');
       setManualInputVisible(true);
+    } finally {
+      startingRef.current = false;
+      setIsStarting(false);
     }
-  }, [detectTorchSupport, finalizeScan, resetForNewScan, stopCamera]);
+  }, [detectTorchSupport, isScanning, resetForNewScan, stopCamera]);
 
   const handleManualSearch = useCallback(() => {
     const normalized = manualEAN.replace(/\D/g, '');
@@ -292,9 +318,18 @@ export default function ScannerHub() {
             <button
               type="button"
               onClick={() => void startCamera()}
-              className="rounded-lg bg-blue-600 px-5 py-3 text-base font-semibold hover:bg-blue-700"
+              disabled={isScanning || isStarting}
+              className={`rounded-lg px-5 py-3 text-base font-semibold text-white ${isScanning || isStarting ? 'bg-slate-600' : 'bg-blue-600 hover:bg-blue-700'}`}
             >
               Activer la caméra
+            </button>
+
+            <button
+              type="button"
+              onClick={stopCamera}
+              className="rounded-lg border border-red-500 px-5 py-3 text-base font-semibold text-red-100"
+            >
+              Stop caméra
             </button>
 
             <button
