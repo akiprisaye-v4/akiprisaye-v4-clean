@@ -55,6 +55,7 @@ export async function startScan(
             if (value) {
               lastDetectedAt = Date.now();
               onResult(value);
+              // Continuous scan: do not return early, keep the RAF loop running.
             }
           }
         }
