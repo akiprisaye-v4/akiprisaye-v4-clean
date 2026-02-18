@@ -1,301 +1,139 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { BrowserMultiFormatReader } from '@zxing/browser';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import {
+  DEFAULT_LOOKUP_TERRITORY,
+  useContinuousBarcodeScanner,
+  type ScanStatus,
+} from '../hooks/useContinuousBarcodeScanner';
+import type { Territoire } from '../types/ean';
 
-type ScanStatus =
-  | 'idle'
-  | 'permissionDenied'
-  | 'cameraNotFound'
-  | 'scanning'
-  | 'notDetectedTimeout'
-  | 'success'
-  | 'errorNetwork'
-  | 'notFound';
+const TERRITORIES: Territoire[] = [
+  'guadeloupe',
+  'martinique',
+  'guyane',
+  'reunion',
+  'mayotte',
+  'polynesie',
+  'nouvelle_caledonie',
+  'wallis_et_futuna',
+  'saint_martin',
+  'saint_barthelemy',
+  'saint_pierre_et_miquelon',
+];
 
-type ScannerControls = {
-  stop: () => void;
-  switchTorch?: (on: boolean) => Promise<void>;
-};
+function getTerritoire(value: string | null): Territoire {
+  if (value && TERRITORIES.includes(value as Territoire)) {
+    return value as Territoire;
+  }
 
-const EAN_REGEX = /^[0-9]{8,14}$/;
-const SCAN_TIMEOUT_MS = 10_000;
-const SUCCESS_LOCK_MS = 1_500;
-const UI_COOLDOWN_MS = 1_500;
+  return DEFAULT_LOOKUP_TERRITORY;
+}
+
+function StatusBadge({ status }: { status: ScanStatus }) {
+  const tone =
+    status === 'ok'
+      ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-200'
+      : status === 'loading'
+        ? 'bg-blue-500/20 border-blue-400/50 text-blue-200'
+        : status === 'not_found'
+          ? 'bg-amber-500/20 border-amber-400/50 text-amber-200'
+          : 'bg-rose-500/20 border-rose-400/50 text-rose-200';
+
+  const label = status === 'loading' ? '…' : status === 'ok' ? 'OK' : status === 'not_found' ? 'VIDE' : 'ERR';
+
+  return (
+    <span className={`inline-flex h-6 min-w-11 items-center justify-center rounded-full border px-2 text-xs font-semibold ${tone}`}>
+      {label}
+    </span>
+  );
+}
 
 export default function ScannerHub() {
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const debugEnabled = searchParams.get('debug') === '1';
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
-  const controlsRef = useRef<ScannerControls | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const timeoutRef = useRef<number | null>(null);
-  const successLockRef = useRef<number | null>(null);
-  const startingRef = useRef(false);
-  const lastUiEmitRef = useRef<{ code: string; at: number } | null>(null);
-
-  const [status, setStatus] = useState<ScanStatus>('idle');
-  const [lastDetectedCode, setLastDetectedCode] = useState<string | null>(null);
-  const [stableCounter, setStableCounter] = useState(0);
-  const [manualInputVisible, setManualInputVisible] = useState(false);
-  const [manualEAN, setManualEAN] = useState('');
-  const [manualError, setManualError] = useState<string | null>(null);
-  const [torchSupported, setTorchSupported] = useState(false);
-  const [torchEnabled, setTorchEnabled] = useState(false);
-  const [successOverlayVisible, setSuccessOverlayVisible] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
-
-  const stopCamera = useCallback(() => {
-    controlsRef.current?.stop();
-    controlsRef.current = null;
-
-    if (timeoutRef.current !== null) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
-    const stream = streamRef.current ?? (videoRef.current?.srcObject instanceof MediaStream ? videoRef.current.srcObject : null);
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-
-    setIsScanning(false);
-    setTorchEnabled(false);
-    setTorchSupported(false);
-  }, []);
-
-  const canFinalize = () => successLockRef.current === null;
-
-  const finalizeScan = useCallback(
-    (rawCode: string) => {
-      if (!canFinalize()) {
-        return;
-      }
-
-      const code = rawCode.replace(/\D/g, '');
-      if (!EAN_REGEX.test(code)) {
-        setStatus('notFound');
-        return;
-      }
-
-      successLockRef.current = window.setTimeout(() => {
-        successLockRef.current = null;
-      }, SUCCESS_LOCK_MS);
-
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(200);
-      }
-
-      setStatus('success');
-      setSuccessOverlayVisible(true);
-      stopCamera();
-
-      window.setTimeout(() => {
-        navigate(`/product/${code}`);
-      }, SUCCESS_LOCK_MS);
-    },
-    [navigate, stopCamera]
+  const territoire = useMemo(
+    () => getTerritoire(searchParams.get('territoire')),
+    [searchParams],
   );
 
-  const detectTorchSupport = useCallback(() => {
-    const stream = streamRef.current;
-    if (!stream) {
-      setTorchSupported(false);
-      return;
-    }
-
-    const [track] = stream.getVideoTracks();
-    if (!track || typeof track.getCapabilities !== 'function') {
-      setTorchSupported(false);
-      return;
-    }
-
-    const capabilities = track.getCapabilities() as { torch?: boolean };
-    setTorchSupported(Boolean(capabilities.torch));
-  }, []);
-
-  const resetForNewScan = useCallback(() => {
-    setLastDetectedCode(null);
-    setStableCounter(0);
-    setManualError(null);
-    setSuccessOverlayVisible(false);
-    if (status !== 'permissionDenied' && status !== 'cameraNotFound') {
-      setStatus('idle');
-    }
-  }, [status]);
-
-  const startCamera = useCallback(async () => {
-    if (startingRef.current || isScanning) {
-      return;
-    }
-
-    startingRef.current = true;
-    setIsStarting(true);
-
-    stopCamera();
-    resetForNewScan();
-    setManualInputVisible(false);
-
-    if (!videoRef.current || !navigator.mediaDevices?.getUserMedia) {
-      setStatus('cameraNotFound');
-      startingRef.current = false;
-      setIsStarting(false);
-      return;
-    }
-
-    try {
-      if (!readerRef.current) {
-        readerRef.current = new BrowserMultiFormatReader();
-      }
-
-      setStatus('scanning');
-      setIsScanning(true);
-
-      const controls = await readerRef.current.decodeFromConstraints(
-        {
-          video: { facingMode: { ideal: 'environment' } },
-          audio: false,
-        },
-        videoRef.current,
-        (result) => {
-          const text = result?.getText()?.trim();
-          if (!text) {
-            return;
-          }
-
-          const code = text.replace(/\D/g, '');
-          if (!EAN_REGEX.test(code)) {
-            return;
-          }
-
-          const now = Date.now();
-          const lastUiEmit = lastUiEmitRef.current;
-          if (lastUiEmit && lastUiEmit.code === code && now - lastUiEmit.at < UI_COOLDOWN_MS) {
-            return;
-          }
-
-          lastUiEmitRef.current = { code, at: now };
-
-          setLastDetectedCode((previousCode) => {
-            if (previousCode === code) {
-              setStableCounter((previousCounter) => {
-                return previousCounter + 1;
-              });
-              return previousCode;
-            }
-
-            setStableCounter(1);
-            return code;
-          });
-
-          setStatus('scanning');
-        }
-      );
-
-      controlsRef.current = controls as ScannerControls;
-
-      const media = videoRef.current.srcObject;
-      if (media instanceof MediaStream) {
-        streamRef.current = media;
-        detectTorchSupport();
-      }
-
-      timeoutRef.current = window.setTimeout(() => {
-        if (canFinalize()) {
-          setStatus('notDetectedTimeout');
-          setManualInputVisible(true);
-        }
-      }, SCAN_TIMEOUT_MS);
-    } catch (error) {
-      stopCamera();
-      const message = error instanceof Error ? error.message : '';
-
-      if (/permission|denied|notallowed/i.test(message)) {
-        setStatus('permissionDenied');
-        setManualInputVisible(true);
-        return;
-      }
-
-      if (/notfound|overconstrained|devices/i.test(message)) {
-        setStatus('cameraNotFound');
-        setManualInputVisible(true);
-        return;
-      }
-
-      setStatus('errorNetwork');
-      setManualInputVisible(true);
-    } finally {
-      startingRef.current = false;
-      setIsStarting(false);
-    }
-  }, [detectTorchSupport, isScanning, resetForNewScan, stopCamera]);
-
-  const handleManualSearch = useCallback(() => {
-    const normalized = manualEAN.replace(/\D/g, '');
-
-    if (!EAN_REGEX.test(normalized)) {
-      setManualError('Code EAN invalide. Entrez 8 à 14 chiffres.');
-      return;
-    }
-
-    setManualError(null);
-    finalizeScan(normalized);
-  }, [finalizeScan, manualEAN]);
-
-  const toggleTorch = useCallback(async () => {
-    const controls = controlsRef.current;
-    if (!controls || typeof controls.switchTorch !== 'function' || !torchSupported) {
-      return;
-    }
-
-    const nextState = !torchEnabled;
-    await controls.switchTorch(nextState);
-    setTorchEnabled(nextState);
-  }, [torchEnabled, torchSupported]);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        stopCamera();
-      }
-    };
-
-    const handlePageHide = () => {
-      stopCamera();
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('pagehide', handlePageHide);
-
-    return () => {
-      stopCamera();
-
-      if (successLockRef.current !== null) {
-        window.clearTimeout(successLockRef.current);
-        successLockRef.current = null;
-      }
-
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('pagehide', handlePageHide);
-    };
-  }, [stopCamera]);
+  const {
+    videoRef,
+    cameraError,
+    barcodeSupport,
+    scanActive,
+    setScanActive,
+    results,
+    clear,
+    removeItem,
+    addAllOk,
+    addItemToCart,
+    okItems,
+    autoAddToCart,
+    setAutoAddToCart,
+    debugInfo,
+  } = useContinuousBarcodeScanner({
+    territoire,
+    debug: debugEnabled,
+    stabilityThreshold: 2,
+  });
 
   return (
     <>
       <Helmet>
         <title>Scanner - A KI PRI SA YÉ</title>
+        <meta name="description" content="Scanner continu: code-barres avec historique et ajout rapide au panier" />
       </Helmet>
 
       <main className="min-h-screen bg-slate-950 p-4 pt-24 text-white">
-        <section className="mx-auto w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-4">
+        <section className="mx-auto w-full max-w-4xl rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <h1 className="mb-3 text-2xl font-semibold">Scanner un code-barres</h1>
+          <p className="mb-4 text-sm text-slate-300">
+            Scan continu actif: caméra en boucle, anti-doublon et ajout rapide au panier.
+          </p>
+
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setScanActive((value) => !value)}
+              className="rounded-lg bg-blue-600 px-5 py-3 text-base font-semibold text-white hover:bg-blue-700"
+              aria-pressed={scanActive}
+              aria-label={scanActive ? 'Mettre le scan en pause' : 'Démarrer le scan'}
+            >
+              {scanActive ? 'Pause scan' : 'Start scan'}
+            </button>
+
+            <label className="inline-flex items-center gap-2 rounded-lg border border-slate-500 px-4 py-3 text-sm font-semibold">
+              <input
+                type="checkbox"
+                checked={autoAddToCart}
+                onChange={(event) => setAutoAddToCart(event.target.checked)}
+                aria-label="Activer l’ajout automatique au panier pour les résultats OK"
+              />
+              Ajout auto au panier (OK)
+            </label>
+
+            <button
+              type="button"
+              onClick={addAllOk}
+              disabled={okItems.length === 0}
+              className="rounded-lg border border-emerald-500/60 px-4 py-3 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={`Ajouter tous les produits valides au panier (${okItems.length})`}
+            >
+              Ajouter tous les OK ({okItems.length})
+            </button>
+
+            <button
+              type="button"
+              onClick={clear}
+              disabled={results.length === 0}
+              className="rounded-lg border border-rose-500/60 px-4 py-3 text-sm font-semibold text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={`Vider la liste des résultats (${results.length})`}
+            >
+              Vider ({results.length})
+            </button>
+          </div>
 
           <div className="relative overflow-hidden rounded-xl border border-slate-700 bg-black">
             <video
@@ -303,115 +141,96 @@ export default function ScannerHub() {
               playsInline
               muted
               autoPlay
-              className="aspect-video w-full"
+              className="aspect-video w-full object-cover"
               aria-label="Caméra de scan"
             />
-
-            {successOverlayVisible && (
-              <div className="absolute inset-0 flex items-center justify-center bg-emerald-600/80 text-xl font-semibold">
-                Succès
-              </div>
-            )}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="h-[45%] w-[70%] rounded-xl border-2 border-white/60" />
+            </div>
+            <div className="absolute left-3 top-3 rounded-full bg-black/50 px-3 py-1 text-xs text-white">
+              Caméra: {scanActive ? 'ACTIVE' : 'PAUSE'}
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void startCamera()}
-              disabled={isScanning || isStarting}
-              className={`rounded-lg px-5 py-3 text-base font-semibold text-white ${isScanning || isStarting ? 'bg-slate-600' : 'bg-blue-600 hover:bg-blue-700'}`}
-            >
-              Activer la caméra
-            </button>
-
-            <button
-              type="button"
-              onClick={stopCamera}
-              className="rounded-lg border border-red-500 px-5 py-3 text-base font-semibold text-red-100"
-            >
-              Stop caméra
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                stopCamera();
-                setManualInputVisible(true);
-              }}
-              className="rounded-lg border border-slate-500 px-5 py-3 text-base font-semibold"
-            >
-              Saisir manuellement
-            </button>
-
-            {torchSupported && isScanning && (
-              <button
-                type="button"
-                onClick={() => void toggleTorch()}
-                className="rounded-lg border border-amber-400 px-5 py-3 text-base font-semibold text-amber-100"
-              >
-                {torchEnabled ? 'Lampe: ON' : 'Lampe'}
-              </button>
-            )}
+          <div className="mt-3 text-sm text-slate-300">
+            {!barcodeSupport && 'BarcodeDetector non disponible sur ce navigateur.'}
+            {cameraError && <div className="text-rose-300">{cameraError}</div>}
+            {!cameraError && barcodeSupport && 'Astuce: gardez le code au centre 1-2 secondes pour stabiliser la détection.'}
           </div>
 
-          <div className="mt-4 space-y-1 text-sm text-slate-300">
-            <p>État: {status}</p>
-            <p>Dernier code: {lastDetectedCode ?? '—'}</p>
-            <p>Validation stable: {stableCounter}/2</p>
-          </div>
-
-          {status === 'permissionDenied' && (
-            <p className="mt-3 rounded-lg border border-red-700 bg-red-500/10 p-3 text-sm text-red-200">
-              Permission caméra refusée. Utilisez la saisie manuelle.
-            </p>
-          )}
-
-          {status === 'cameraNotFound' && (
-            <p className="mt-3 rounded-lg border border-red-700 bg-red-500/10 p-3 text-sm text-red-200">
-              Caméra introuvable ou indisponible.
-            </p>
-          )}
-
-          {status === 'notDetectedTimeout' && (
-            <p className="mt-3 rounded-lg border border-amber-700 bg-amber-500/10 p-3 text-sm text-amber-200">
-              Aucun code détecté après 10 secondes. Vous pouvez saisir le code EAN.
-            </p>
-          )}
-
-          {(status === 'errorNetwork' || status === 'notFound') && (
-            <p className="mt-3 rounded-lg border border-red-700 bg-red-500/10 p-3 text-sm text-red-200">
-              Erreur pendant le scan. Passez par la saisie manuelle.
-            </p>
-          )}
-
-          {manualInputVisible && (
-            <div className="mt-4 rounded-xl border border-slate-700 p-3">
-              <label htmlFor="manual-ean" className="mb-2 block text-sm font-medium">
-                Code EAN (8 à 14 chiffres)
-              </label>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <input
-                  id="manual-ean"
-                  value={manualEAN}
-                  onChange={(event) => {
-                    setManualEAN(event.target.value.replace(/\D/g, ''));
-                    setManualError(null);
-                  }}
-                  inputMode="numeric"
-                  className="flex-1 rounded-lg border border-slate-600 bg-slate-950 px-3 py-3"
-                  placeholder="3017620422003"
-                />
-                <button
-                  type="button"
-                  onClick={handleManualSearch}
-                  className="rounded-lg bg-emerald-600 px-5 py-3 text-base font-semibold hover:bg-emerald-700"
-                >
-                  Rechercher
-                </button>
-              </div>
-              {manualError && <p className="mt-2 text-sm text-red-300">{manualError}</p>}
+          {debugEnabled && (
+            <div className="mt-4 rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-100">
+              <p><strong>Mode debug</strong> (debug=1)</p>
+              <p>État: {debugInfo.status}</p>
+              <p>Dernier code: {debugInfo.lastCode ?? '—'}</p>
+              <p>Validation stable: {debugInfo.stableCounter}/2</p>
+              <p>
+                Aucun code détecté depuis:{' '}
+                {debugInfo.secondsSinceLastDetection === null
+                  ? '—'
+                  : `${debugInfo.secondsSinceLastDetection} s`}
+              </p>
             </div>
           )}
+
+          <div className="mt-6">
+            <div className="mb-3 text-lg font-semibold text-white">Résultats (scan continu)</div>
+
+            {results.length === 0 ? (
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 text-sm text-gray-400">
+                Aucun scan pour l'instant.
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {results.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/50 p-4 md:flex-row md:items-center"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-sm text-white">{item.barcode}</span>
+                        <StatusBadge status={item.status} />
+                        <span className="text-xs text-gray-500">{new Date(item.detectedAt).toLocaleString()}</span>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-300">
+                        {item.status === 'loading' && 'Recherche…'}
+                        {item.status === 'not_found' && 'Produit non référencé.'}
+                        {item.status === 'error' && (item.errorMessage || 'Erreur inconnue.')}
+                        {item.status === 'ok' && item.product && (
+                          <>
+                            <span className="font-semibold text-white">{item.product.name}</span>
+                            {item.product.brand ? <span> — {item.product.brand}</span> : null}
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => addItemToCart(item.id)}
+                        disabled={item.status !== 'ok' || !item.product}
+                        className="rounded-lg border border-emerald-500/60 px-3 py-2 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={`Ajouter ${item.barcode} au panier`}
+                      >
+                        Ajouter au panier
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        className="rounded-lg border border-slate-600 px-3 py-2 text-sm font-semibold text-slate-200"
+                        aria-label={`Supprimer la ligne ${item.barcode}`}
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </main>
     </>
