@@ -14,6 +14,8 @@ interface BarcodeScannerProps {
   options?: ScannerOptions;
 }
 
+const UI_COOLDOWN_MS = 1500;
+
 export default function BarcodeScanner({ onScan, onClose, options = {} }: BarcodeScannerProps) {
   const isScanDebug = typeof window !== 'undefined' && ['scanDebug', 'debug'].some(
     (param) => new URLSearchParams(window.location.search).get(param) === '1',
@@ -65,7 +67,9 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const scanStartTimeRef = useRef<number>(0);
   const timeoutRef = useRef<number | null>(null);
   const lastDetectedRef = useRef<{ code: string; timestamp: number } | null>(null);
+  const lastUiEmitRef = useRef<{ code: string; at: number } | null>(null);
   const lastDebugUpdateAtRef = useRef<number>(0);
+  const startingRef = useRef(false);
 
   // Helpers to avoid stale state in async callbacks
   const scanStateRef = useRef<ScanState>('idle');
@@ -207,6 +211,9 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   };
 
   const startScanning = async () => {
+    if (startingRef.current || isScanning) return;
+
+    startingRef.current = true;
     stopScanning();
     setError(null);
     setUserMessage(null);
@@ -357,6 +364,14 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
               }
               lastDetectedRef.current = { code: validation.ean, timestamp: now };
 
+              const lastUiEmit = lastUiEmitRef.current;
+              if (lastUiEmit && lastUiEmit.code === validation.ean && now - lastUiEmit.at < UI_COOLDOWN_MS) {
+                setScanFeedback('searching');
+                return;
+              }
+
+              lastUiEmitRef.current = { code: validation.ean, at: now };
+
               updateDebugInfo({
                 lastResult: validation.ean,
                 lastError: 'none',
@@ -364,10 +379,10 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
               });
 
               setShowNoResultFallback(false);
-              transitionState('processing', `Barcode detected: ${validation.ean}`);
+              transitionState('scanning', `Barcode detected: ${validation.ean}`);
               uxMonitor.scanCompleted('barcode', true);
-              stopScanning();
               onScan(validation.ean);
+              setScanFeedback('searching');
             },
             (debug) => {
               const now = Date.now();
@@ -389,6 +404,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
           );
         }
 
+        startingRef.current = false;
         return;
       } catch (err: unknown) {
         console.error('[SCAN] ❌ Camera error:', err);
@@ -415,6 +431,7 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
     setScanFeedback(null);
     activateImageUploadFallback();
     transitionState('idle', 'Camera unavailable - fallback to upload');
+    startingRef.current = false;
   };
 
   const retryCamera = () => {
