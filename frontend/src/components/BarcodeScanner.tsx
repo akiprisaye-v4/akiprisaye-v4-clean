@@ -14,6 +14,8 @@ interface BarcodeScannerProps {
   options?: ScannerOptions;
 }
 
+const UI_COOLDOWN_MS = 1500;
+
 export default function BarcodeScanner({ onScan, onClose, options = {} }: BarcodeScannerProps) {
   const isScanDebug = typeof window !== 'undefined' && ['scanDebug', 'debug'].some(
     (param) => new URLSearchParams(window.location.search).get(param) === '1',
@@ -68,8 +70,6 @@ export default function BarcodeScanner({ onScan, onClose, options = {} }: Barcod
   const lastUiEmitRef = useRef<{ code: string; at: number } | null>(null);
   const lastDebugUpdateAtRef = useRef<number>(0);
   const startingRef = useRef(false);
-
-  const UI_COOLDOWN_MS = 1500;
 
   // Helpers to avoid stale state in async callbacks
   const scanStateRef = useRef<ScanState>('idle');
