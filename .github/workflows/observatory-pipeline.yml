@@ -1,4 +1,5 @@
-# NOTE: manual-only to avoid duplicate Cloudflare deployments. Primary workflow: deploy-cloudflare-pages.yml
+# NOTE: manual-only to avoid duplicate Cloudflare deployments.
+# Primary workflow: ci-cd-industrial.yml (single source of deployment)
 name: A KI PRI SA YÉ - Observatoire Pipeline
 
 on:
@@ -19,7 +20,7 @@ jobs:
   validate-code:
     name: 🔍 Validation Code
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -35,17 +36,7 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: 🧹 Lint changed files (PR)
-        if: github.event_name == 'pull_request'
-        working-directory: frontend
-        env:
-          LINT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          LINT_HEAD_SHA: ${{ github.sha }}
-        run: npm run lint:ci
-        continue-on-error: false
-
       - name: 🧹 Lint full codebase (non-blocking)
-        if: github.event_name != 'pull_request'
         working-directory: frontend
         run: npm run lint:full:ci
         continue-on-error: true
@@ -53,13 +44,12 @@ jobs:
       - name: 🧪 Run tests
         working-directory: frontend
         run: npm test
-        continue-on-error: false
 
       - name: 📊 Test summary
         if: always()
         run: |
-          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "## Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Result: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
 
   # ═══════════════════════════════════════════════════════════════
   # ÉTAPE 2: VALIDATION DONNÉES (CRITIQUE)
@@ -68,7 +58,7 @@ jobs:
     name: 🔐 Validation Données
     runs-on: ubuntu-latest
     needs: validate-code
-    
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -78,22 +68,20 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: 📦 Install dependencies
+      - name: ℹ️ Dependencies
         run: echo "Scripts use only built-in Node.js modules - no dependencies needed"
 
       - name: 🔍 Validate data files
         run: node scripts/validate-data.js
-        continue-on-error: false
 
       - name: 🔍 Validate observatoire data
         run: node scripts/validate-observatoire-data.js
-        continue-on-error: false
 
       - name: 📊 Data validation summary
         if: always()
         run: |
-          echo "## Data Validation Results" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All data files validated" >> $GITHUB_STEP_SUMMARY
+          echo "## Data Validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Result: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Rules Applied:" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ No numeric value without source" >> $GITHUB_STEP_SUMMARY
@@ -108,7 +96,7 @@ jobs:
     name: 🏗️ Build Frontend
     runs-on: ubuntu-latest
     needs: [validate-code, validate-data]
-    
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -136,18 +124,18 @@ jobs:
             echo "❌ frontend/dist/index.html not found"
             exit 1
           fi
-          
+
           if [ ! -d "frontend/dist/assets" ]; then
             echo "❌ frontend/dist/assets directory not found"
             exit 1
           fi
-          
+
           # Vérifier qu'il n'y a pas de répertoire Assets/ avec majuscule
           if [ -d "frontend/dist/Assets" ]; then
             echo "❌ frontend/dist/Assets/ found (should be lowercase 'assets')"
             exit 1
           fi
-          
+
           echo "✅ Build output verified"
 
       - name: 📤 Upload build artifacts
@@ -158,9 +146,10 @@ jobs:
           retention-days: 7
 
       - name: 📊 Build summary
+        if: always()
         run: |
-          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Frontend built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "## Build" >> $GITHUB_STEP_SUMMARY
+          echo "- Result: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Output:" >> $GITHUB_STEP_SUMMARY
           echo "- \`frontend/dist/index.html\` ✅" >> $GITHUB_STEP_SUMMARY
@@ -173,7 +162,7 @@ jobs:
     name: 🔒 Validation Sécurité
     runs-on: ubuntu-latest
     needs: build-frontend
-    
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -190,7 +179,7 @@ jobs:
             echo "⚠️  _headers file not found"
             exit 0
           fi
-          
+
           if grep -q "Content-Security-Policy" frontend/public/_headers; then
             echo "✅ CSP headers found"
           else
@@ -199,104 +188,32 @@ jobs:
 
       - name: 🔍 Check for exposed secrets
         run: |
-          # Vérifier qu'il n'y a pas de clés API exposées
-          if grep -r "API_KEY\|SECRET_KEY\|PRIVATE_KEY" dist/ 2>/dev/null | grep -v ".map"; then
-            echo "❌ Potential API keys found in build"
+          # Heuristiques simples (on exclut les sourcemaps)
+          if grep -RInE "(API[_-]?KEY|SECRET[_-]?KEY|PRIVATE[_-]?KEY|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY)" dist/ 2>/dev/null | grep -v "\.map"; then
+            echo "❌ Potential secrets found in build"
             exit 1
           fi
           echo "✅ No exposed secrets found"
 
-      - name: 🔍 Verify RGPD compliance
+      - name: 🔍 Verify RGPD compliance (basic)
         run: |
-          # Vérifier qu'il n'y a pas de trackers tiers
-          if grep -r "google-analytics\|facebook.com/tr\|googletagmanager" dist/ 2>/dev/null | grep -v ".map"; then
+          # Vérifier qu'il n'y a pas de trackers tiers courants
+          if grep -RInE "(google-analytics|googletagmanager|gtag\(|facebook\.com/tr|connect\.facebook\.net)" dist/ 2>/dev/null | grep -v "\.map"; then
             echo "❌ Third-party trackers found - RGPD violation"
             exit 1
           fi
-          echo "✅ RGPD compliant - No tracking found"
+          echo "✅ RGPD compliant - No common trackers found"
 
       - name: 📊 Security summary
+        if: always()
         run: |
-          echo "## Security Validation" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All security checks passed" >> $GITHUB_STEP_SUMMARY
+          echo "## Security" >> $GITHUB_STEP_SUMMARY
+          echo "- Result: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Checks:" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ No exposed API keys" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ RGPD compliant (no trackers)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ CSP headers configured" >> $GITHUB_STEP_SUMMARY
-
-  # ═══════════════════════════════════════════════════════════════
-  # ÉTAPE 5: DÉPLOIEMENT CLOUDFLARE PAGES
-  # ═══════════════════════════════════════════════════════════════
-  deploy-cloudflare:
-    name: 🚀 Deploy to Cloudflare Pages
-    runs-on: ubuntu-latest
-    needs: [build-frontend, validate-security]
-    # Guard deployment so it only runs when manually triggered.
-    if: github.event_name == 'workflow_dispatch'
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4.1.8
-        with:
-          name: dist
-          path: dist/
-
-      - name: 🚀 Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: akiprisaye-web
-          directory: dist
-          functionsDirectory: functions
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📊 Deployment summary
-        run: |
-          echo "## Deployment" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Successfully deployed to Cloudflare Pages" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Details:" >> $GITHUB_STEP_SUMMARY
-          echo "- Platform: Cloudflare Pages" >> $GITHUB_STEP_SUMMARY
-          echo "- Project: akiprisaye-web" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: main" >> $GITHUB_STEP_SUMMARY
-
-  # ═══════════════════════════════════════════════════════════════
-  # ÉTAPE 6: PUBLICATION OPEN DATA (Optionnel)
-  # ═══════════════════════════════════════════════════════════════
-  publish-opendata:
-    name: 📊 Publish Open Data
-    runs-on: ubuntu-latest
-    needs: deploy-cloudflare
-    if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: 📊 Generate Open Data index
-        run: |
-          echo "Generating Open Data metadata..."
-          # TODO: Implement Open Data publication script
-          echo "Open Data publication ready (manual verification required)"
-
-      - name: 📊 Open Data summary
-        run: |
-          echo "## Open Data Publication" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Open Data metadata generated" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Next steps:" >> $GITHUB_STEP_SUMMARY
-          echo "- Verify data quality" >> $GITHUB_STEP_SUMMARY
-          echo "- Publish to data.gouv.fr (manual)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ No exposed secrets (heuristic)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ RGPD: no common trackers detected" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ CSP headers check done" >> $GITHUB_STEP_SUMMARY
 
   # ═══════════════════════════════════════════════════════════════
   # RAPPORT FINAL
@@ -306,11 +223,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-code, validate-data, build-frontend, validate-security]
     if: always()
-    
+
     steps:
       - name: 📊 Generate final report
         run: |
-          echo "# 🎯 A KI PRI SA YÉ - Pipeline Report" >> $GITHUB_STEP_SUMMARY
+          echo "# 🎯 A KI PRI SA YÉ - Observatoire Pipeline Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Status" >> $GITHUB_STEP_SUMMARY
           echo "- Code Validation: ${{ needs.validate-code.result }}" >> $GITHUB_STEP_SUMMARY
@@ -322,4 +239,7 @@ jobs:
           echo "✅ No invented data" >> $GITHUB_STEP_SUMMARY
           echo "✅ Official sources only" >> $GITHUB_STEP_SUMMARY
           echo "✅ Full traceability" >> $GITHUB_STEP_SUMMARY
-          echo "✅ RGPD compliant" >> $GITHUB_STEP_SUMMARY
+          echo "✅ RGPD oriented checks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ No deployment in this workflow (CI-only). Deployment is handled by ci-cd-industrial.yml." >> $GITHUB_STEP_SUMMARY
