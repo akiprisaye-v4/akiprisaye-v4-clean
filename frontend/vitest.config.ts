@@ -1,33 +1,29 @@
 import { defineConfig } from 'vitest/config';
+import { resolve } from 'node:path';
 
 export default defineConfig({
+  // IMPORTANT: fixe explicitement la racine sur frontend
+  root: resolve(process.cwd()),
+
   test: {
     environment: 'jsdom',
     globals: true,
 
-    // On est déjà dans /frontend, donc chemin relatif simple
-    setupFiles: ['./src/test/setup.ts'],
+    // Chemin absolu depuis frontend (process.cwd() quand tu lances dans frontend)
+    setupFiles: [resolve(process.cwd(), 'src/test/setup.ts')],
 
-    // Prend tous les tests du frontend + functions/scripts si tu en as ici
+    environmentOptions: {
+      jsdom: { url: 'http://localhost/' },
+    },
+
+    // (optionnel) garde ton include si tu veux
     include: [
-      'src/**/*.test.{ts,tsx,js,jsx}',
-      'functions/**/*.test.{ts,tsx,js,jsx}',
-      'scripts/**/*.test.{ts,tsx,js,jsx}',
+      'src/services/openFoodFacts.test.ts',
+      'src/services/alertProductImageService.test.ts',
+      'functions/**/*.test.ts',
+      'src/test/**/*.test.ts',
+      'scripts/**/*.test.ts',
+      'src/test/**/*.test.jsx',
     ],
-
-    exclude: [
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/dist/**',
-      '**/build/**',
-    ],
-
-    clearMocks: true,
-    restoreMocks: true,
-    unstubGlobals: false,
-    unstubEnvs: true,
-
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
   },
 });
