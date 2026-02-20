@@ -1,42 +1,67 @@
-import { defineConfig } from 'vitest/config';
+// src/test/setup.ts
+import { vi } from 'vitest';
 
-export default defineConfig({
-  test: {
-    environment: 'jsdom',
-    globals: true,
+/**
+ * Polyfill localStorage "dur" (au cas où un package l’écrase par un faux objet).
+ * Objectif: garantir clear/setItem/getItem/removeItem/length.
+ */
+class MemoryStorage implements Storage {
+  private store = new Map<string, string>();
 
-    // Chemin robuste (compatible ESM + Termux)
-    setupFiles: [new URL('./src/test/setup.ts', import.meta.url).pathname],
+  get length(): number {
+    return this.store.size;
+  }
 
-    environmentOptions: {
-      jsdom: { url: 'http://localhost/' },
-    },
+  clear(): void {
+    this.store.clear();
+  }
 
-    include: [
-      'src/services/openFoodFacts.test.ts',
-      'src/services/alertProductImageService.test.ts',
-      'functions/**/*.test.ts',
-      'src/test/alerts.filterActive.test.ts',
-      'src/test/alerts.searchSort.test.ts',
-      'src/test/alerts.serviceFallback.test.ts',
-      'src/test/sanitaryAlerts.normalizer.test.ts',
-      'src/test/observations.normalize.test.ts',
-      'src/test/storeSelection.test.ts',
-      'src/test/promosService.test.ts',
-      'src/test/freemium.test.ts',
-      'src/test/cloudflareRouting.test.ts',
-      'src/test/actualites.page.test.jsx',
-      'src/test/serviceWorkerCacheStrategy.test.ts',
-      'scripts/verify-pages-api.test.ts',
-    ],
+  getItem(key: string): string | null {
+    return this.store.has(key) ? this.store.get(key)! : null;
+  }
 
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
+  key(index: number): string | null {
+    return Array.from(this.store.keys())[index] ?? null;
+  }
 
-    // Nettoyage et mocks stables
-    clearMocks: true,
-    restoreMocks: true,
-    unstubGlobals: true,
-    unstubEnvs: true,
-  },
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+
+  setItem(key: string, value: string): void {
+    this.store.set(String(key), String(value));
+  }
+}
+
+function forceLocalStorage(): void {
+  const ls = new MemoryStorage();
+
+  // window.localStorage
+  if (typeof window !== 'undefined') {
+    Object.defineProperty(window, 'localStorage', {
+      value: ls,
+      configurable: true,
+      enumerable: true,
+      writable: false,
+    });
+  }
+
+  // globalThis.localStorage (certains tests appellent localStorage direct)
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: ls,
+    configurable: true,
+    enumerable: true,
+    writable: false,
+  });
+}
+
+forceLocalStorage();
+
+// Optionnel: limiter le bruit de warnings React act() dans tes logs
+// (ne casse pas les tests, mais rend la sortie plus lisible)
+const originalWarn = console.warn;
+vi.spyOn(console, 'warn').mockImplementation((...args) => {
+  const msg = String(args[0] ?? '');
+  if (msg.includes('not configured to support act')) return;
+  originalWarn(...args);
 });
