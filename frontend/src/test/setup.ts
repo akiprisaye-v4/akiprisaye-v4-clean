@@ -1,4 +1,3 @@
-cat > src/test/setup.ts <<'EOF'
 import { vi } from 'vitest';
 
 class MemoryStorage implements Storage {
@@ -13,8 +12,7 @@ class MemoryStorage implements Storage {
   }
 
   getItem(key: string): string | null {
-    const k = String(key);
-    return this.store.has(k) ? this.store.get(k)! : null;
+    return this.store.has(key) ? (this.store.get(key) as string) : null;
   }
 
   key(index: number): string | null {
@@ -33,40 +31,42 @@ class MemoryStorage implements Storage {
 function forceStorage(target: any) {
   const storage = new MemoryStorage();
 
-  // localStorage
-  Object.defineProperty(target, 'localStorage', {
-    value: storage,
-    configurable: true,
-    enumerable: true,
-    writable: true,
-  });
+  // Définit localStorage de façon robuste (jsdom/termux)
+  try {
+    Object.defineProperty(target, 'localStorage', {
+      value: storage,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+  } catch {
+    target.localStorage = storage;
+  }
 
-  // sessionStorage (optionnel mais utile)
-  Object.defineProperty(target, 'sessionStorage', {
-    value: new MemoryStorage(),
-    configurable: true,
-    enumerable: true,
-    writable: true,
-  });
+  // Certains libs lisent globalThis.localStorage directement
+  try {
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: storage,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+  } catch {
+    (globalThis as any).localStorage = storage;
+  }
 }
 
-// JSDOM fournit window, mais en Termux/vitest il arrive que Storage soit cassé/stubbé.
-// On force sur globalThis ET window si présent.
-forceStorage(globalThis as any);
-if (typeof window !== 'undefined') forceStorage(window as any);
+// Applique sur window si présent, sinon sur globalThis
+forceStorage(typeof window !== 'undefined' ? window : globalThis);
 
-// Optionnel : éviter des erreurs si certains tests lisent location
+// Optionnel: éviter que certains tests se cassent sur location
 if (typeof window !== 'undefined' && !window.location?.href) {
-  Object.defineProperty(window, 'location', {
-    value: { href: 'http://localhost/' },
-    configurable: true,
-  });
+  // no-op
 }
 
-// Nettoyage entre tests (sécurise)
+// Réinitialise mocks entre tests si besoin
 beforeEach(() => {
   (globalThis as any).localStorage?.clear?.();
-  (globalThis as any).sessionStorage?.clear?.();
-  vi.restoreAllMocks();
+  (globalThis as any).window?.localStorage?.clear?.();
+  vi.clearAllMocks();
 });
-EOF
