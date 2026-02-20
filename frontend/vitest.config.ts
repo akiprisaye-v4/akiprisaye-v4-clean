@@ -1,23 +1,17 @@
-// vitest.config.ts
+// frontend/vitest.config.ts
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = fileURLToPath(new URL('.', import.meta.url)); // => .../frontend/
-const SETUP = fileURLToPath(new URL('./src/test/setup.ts', import.meta.url)); // => .../frontend/src/test/setup.ts
+const ROOT = fileURLToPath(new URL('.', import.meta.url)); // .../frontend/
+const SETUP = fileURLToPath(new URL('./src/test/setup.ts', import.meta.url)); // .../frontend/src/test/setup.ts
 
 export default defineConfig({
   root: ROOT,
-
   test: {
     environment: 'jsdom',
     globals: true,
-
-    // IMPORTANT: chemin absolu (évite /@fs/.../akiprisaye-web/src/...)
     setupFiles: [SETUP],
-
-    environmentOptions: {
-      jsdom: { url: 'http://localhost/' },
-    },
+    environmentOptions: { jsdom: { url: 'http://localhost/' } },
 
     include: [
       'src/services/openFoodFacts.test.ts',
@@ -39,10 +33,8 @@ export default defineConfig({
 
     testTimeout: 10_000,
     hookTimeout: 10_000,
-
     clearMocks: true,
     restoreMocks: true,
-
     unstubGlobals: false,
     unstubEnvs: true,
   },
