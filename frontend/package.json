@@ -10,15 +10,33 @@
 
     "lint": "eslint src --ext .ts,.tsx,.js,.jsx --cache --cache-location .eslintcache",
     "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
+    "lint:changed": "node scripts/lint-changed.mjs",
+    "lint:ci": "node scripts/lint-changed.mjs --max-warnings=0",
+    "lint:full": "npm run lint -- --no-cache",
+    "lint:full:ci": "npm run lint:full",
 
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "typecheck:ci": "tsc -p tsconfig.json --noEmit",
+    "typecheck:ci": "node scripts/typecheck-changed.mjs",
 
-    "test": "vitest run",
-    "test:ci": "vitest run",
+    "test": "vitest run --config vitest.config.ts",
+    "test:ci": "npm run test",
+    "test:spa": "npm run build && node scripts/test-spa.mjs",
+
+    "build:ci": "npm run build",
+    "smoke:preview": "npm run build && node scripts/smoke-preview.mjs",
+
+    "verify:pages-api": "node scripts/verify-pages-api.mjs",
+    "verify:placeholder-routing": "npm run build && node scripts/verify-placeholder-routing.mjs",
+    "verify:redirects-order": "node scripts/verify-redirects-order.mjs",
 
     "audit": "npm audit --omit=dev --audit-level=high",
-    "audit:ci": "npm audit --omit=dev --audit-level=high"
+    "audit:ci": "npm audit --omit=dev --audit-level=high",
+
+    "axe:ci": "echo \"axe check placeholder: no dedicated suite configured\"",
+    "lhci": "echo \"lhci placeholder: no dedicated config found\"",
+
+    "e2e": "playwright test",
+    "e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
