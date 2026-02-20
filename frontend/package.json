@@ -3,25 +3,21 @@
   "private": true,
   "version": "3.0.1",
   "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
 
-    "lint": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --cache --cache-location .eslintcache",
-    "lint:fix": "eslint \"src/**/*.{ts,tsx,js,jsx}\" --fix --cache --cache-location .eslintcache",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx --cache --cache-location .eslintcache",
+    "lint:fix": "eslint src --ext .ts,.tsx,.js,.jsx --fix",
 
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck:ci": "tsc -p tsconfig.json --noEmit",
 
     "test": "vitest run",
-    "test:watch": "vitest",
+    "test:ci": "vitest run",
 
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build && npm run audit:ci",
-    "build:ci": "npm run build",
-    "test:ci": "npm run test",
+    "audit": "npm audit --omit=dev --audit-level=high",
     "audit:ci": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
