@@ -1,12 +1,14 @@
-// vitest.config.ts
 import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,
 
-    // Chargé dans jsdom : installe localStorage/sessionStorage (et reset entre tests)
+    // IMPORTANT: chemin RELATIF depuis /frontend
+    // (évite le /@fs/... qui te casse sous Termux)
     setupFiles: ['./src/test/setup.ts'],
 
     environmentOptions: {
@@ -14,21 +16,9 @@ export default defineConfig({
     },
 
     include: [
-      'src/services/openFoodFacts.test.ts',
-      'src/services/alertProductImageService.test.ts',
-      'functions/**/*.test.ts',
-      'src/test/alerts.filterActive.test.ts',
-      'src/test/alerts.searchSort.test.ts',
-      'src/test/alerts.serviceFallback.test.ts',
-      'src/test/sanitaryAlerts.normalizer.test.ts',
-      'src/test/observations.normalize.test.ts',
-      'src/test/storeSelection.test.ts',
-      'src/test/promosService.test.ts',
-      'src/test/freemium.test.ts',
-      'src/test/cloudflareRouting.test.ts',
-      'src/test/actualites.page.test.jsx',
-      'src/test/serviceWorkerCacheStrategy.test.ts',
-      'scripts/verify-pages-api.test.ts',
+      'src/**/*.test.{ts,tsx,js,jsx}',
+      'functions/**/*.test.{ts,tsx,js,jsx}',
+      'scripts/**/*.test.{ts,tsx,js,jsx}',
     ],
 
     testTimeout: 10_000,
@@ -36,8 +26,6 @@ export default defineConfig({
 
     clearMocks: true,
     restoreMocks: true,
-
-    // Important : sinon Vitest peut “unstub” et casser nos storages
     unstubGlobals: false,
     unstubEnvs: true,
   },
