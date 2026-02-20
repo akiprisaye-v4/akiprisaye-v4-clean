@@ -40,39 +40,24 @@ function defineOn(obj: AnyObj, name: string, value: any) {
   });
 }
 
-// Un seul storage partagé pour localStorage (cohérence entre globalThis et window)
-const local = new MemoryStorage();
+const ls = new MemoryStorage();
+const ss = new MemoryStorage();
 
-// SessionStorage séparé (comportement proche navigateur)
-const session = new MemoryStorage();
-
-// On force sur globalThis + window (jsdom)
-defineOn(globalThis as AnyObj, 'localStorage', local);
-defineOn(globalThis as AnyObj, 'sessionStorage', session);
+// Force sur globalThis + window (jsdom)
+defineOn(globalThis as AnyObj, 'localStorage', ls);
+defineOn(globalThis as AnyObj, 'sessionStorage', ss);
 
 if (typeof window !== 'undefined') {
-  defineOn(window as AnyObj, 'localStorage', local);
-  defineOn(window as AnyObj, 'sessionStorage', session);
+  defineOn(window as AnyObj, 'localStorage', ls);
+  defineOn(window as AnyObj, 'sessionStorage', ss);
 }
 
-// Nettoyage entre tests (utile et stable)
+// Reset propre entre tests
 beforeEach(() => {
   (globalThis as AnyObj).localStorage?.clear?.();
   (globalThis as AnyObj).sessionStorage?.clear?.();
 });
 
-// Partir propre côté mocks (fetch, timers, spies, etc.)
 afterEach(() => {
   vi.restoreAllMocks();
 });
-
-// Optionnel: réduire le bruit "act(...)" (ne change pas les tests)
-// Décommente si tu veux une sortie CI silencieuse.
-/*
-const originalError = console.error;
-console.error = (...args: any[]) => {
-  const msg = String(args?.[0] ?? '');
-  if (msg.includes('not configured to support act')) return;
-  originalError(...args);
-};
-*/
