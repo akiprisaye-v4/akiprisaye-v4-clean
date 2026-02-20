@@ -1,4 +1,7 @@
+// src/test/setup.ts
 import { vi } from 'vitest';
+
+type AnyObj = Record<string, any>;
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -20,7 +23,7 @@ class MemoryStorage implements Storage {
   }
 
   removeItem(key: string): void {
-    this.store.delete(String(key));
+    this.store.delete(key);
   }
 
   setItem(key: string, value: string): void {
@@ -28,45 +31,36 @@ class MemoryStorage implements Storage {
   }
 }
 
-function forceStorage(target: any) {
-  const storage = new MemoryStorage();
-
-  // Définit localStorage de façon robuste (jsdom/termux)
-  try {
-    Object.defineProperty(target, 'localStorage', {
-      value: storage,
-      configurable: true,
-      enumerable: true,
-      writable: true,
-    });
-  } catch {
-    target.localStorage = storage;
-  }
-
-  // Certains libs lisent globalThis.localStorage directement
-  try {
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: storage,
-      configurable: true,
-      enumerable: true,
-      writable: true,
-    });
-  } catch {
-    (globalThis as any).localStorage = storage;
-  }
+function defineOn(obj: AnyObj, name: string, value: any) {
+  Object.defineProperty(obj, name, {
+    value,
+    configurable: true,
+    enumerable: true,
+    writable: true,
+  });
 }
 
-// Applique sur window si présent, sinon sur globalThis
-forceStorage(typeof window !== 'undefined' ? window : globalThis);
+const storage = new MemoryStorage();
 
-// Optionnel: éviter que certains tests se cassent sur location
-if (typeof window !== 'undefined' && !window.location?.href) {
-  // no-op
+// On force sur globalThis + window (jsdom)
+defineOn(globalThis as AnyObj, 'localStorage', storage);
+if (typeof window !== 'undefined') {
+  defineOn(window as AnyObj, 'localStorage', storage);
 }
 
-// Réinitialise mocks entre tests si besoin
+// Bonus: certains tests utilisent sessionStorage
+defineOn(globalThis as AnyObj, 'sessionStorage', new MemoryStorage());
+if (typeof window !== 'undefined') {
+  defineOn(window as AnyObj, 'sessionStorage', (globalThis as AnyObj).sessionStorage);
+}
+
+// Nettoyage entre tests (optionnel mais utile)
 beforeEach(() => {
-  (globalThis as any).localStorage?.clear?.();
-  (globalThis as any).window?.localStorage?.clear?.();
-  vi.clearAllMocks();
+  (globalThis as AnyObj).localStorage?.clear?.();
+  (globalThis as AnyObj).sessionStorage?.clear?.();
+});
+
+// Si tu mocks fetch dans des tests, mieux vaut partir propre
+afterEach(() => {
+  vi.restoreAllMocks();
 });
