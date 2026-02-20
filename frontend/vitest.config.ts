@@ -1,14 +1,20 @@
 // vitest.config.ts
 import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = fileURLToPath(new URL('.', import.meta.url));
+const SETUP = fileURLToPath(new URL('./src/test/setup.ts', import.meta.url));
 
 export default defineConfig({
+  // Force la racine Vite/Vitest sur le dossier frontend (pas le repo root)
+  root: ROOT,
+
   test: {
     environment: 'jsdom',
     globals: true,
 
-    // IMPORTANT: pas de "/" au début, pas de "./"
-    // Sinon Vitest peut chercher hors du dossier "frontend" (ou générer une URL file:/...)
-    setupFiles: ['src/test/setup.ts'],
+    // Chemin ABSOLU => Termux/Vite n’essaie plus de résoudre depuis /akiprisaye-web/
+    setupFiles: [SETUP],
 
     environmentOptions: {
       jsdom: { url: 'http://localhost/' },
@@ -38,7 +44,7 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
 
-    // Important : sinon Vitest peut "unstub" et casser nos storages
+    // Important: sinon Vitest peut “unstub” et casser les storages
     unstubGlobals: false,
     unstubEnvs: true,
   },
