@@ -1,6 +1,5 @@
+cat > src/test/setup.ts <<'EOF'
 import { vi } from 'vitest';
-
-type AnyObj = Record<string, any>;
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -14,7 +13,8 @@ class MemoryStorage implements Storage {
   }
 
   getItem(key: string): string | null {
-    return this.store.has(key) ? this.store.get(key)! : null;
+    const k = String(key);
+    return this.store.has(k) ? this.store.get(k)! : null;
   }
 
   key(index: number): string | null {
@@ -22,7 +22,7 @@ class MemoryStorage implements Storage {
   }
 
   removeItem(key: string): void {
-    this.store.delete(key);
+    this.store.delete(String(key));
   }
 
   setItem(key: string, value: string): void {
@@ -30,38 +30,43 @@ class MemoryStorage implements Storage {
   }
 }
 
-function attachStorage(target: AnyObj) {
-  if (!target) return;
-
+function forceStorage(target: any) {
   const storage = new MemoryStorage();
 
+  // localStorage
   Object.defineProperty(target, 'localStorage', {
     value: storage,
     configurable: true,
+    enumerable: true,
     writable: true,
   });
 
+  // sessionStorage (optionnel mais utile)
   Object.defineProperty(target, 'sessionStorage', {
     value: new MemoryStorage(),
     configurable: true,
+    enumerable: true,
     writable: true,
   });
 }
 
-// Force partout
-attachStorage(globalThis as AnyObj);
+// JSDOM fournit window, mais en Termux/vitest il arrive que Storage soit cassé/stubbé.
+// On force sur globalThis ET window si présent.
+forceStorage(globalThis as any);
+if (typeof window !== 'undefined') forceStorage(window as any);
 
-if (typeof window !== 'undefined') {
-  attachStorage(window as AnyObj);
+// Optionnel : éviter des erreurs si certains tests lisent location
+if (typeof window !== 'undefined' && !window.location?.href) {
+  Object.defineProperty(window, 'location', {
+    value: { href: 'http://localhost/' },
+    configurable: true,
+  });
 }
 
-if (typeof self !== 'undefined') {
-  attachStorage(self as AnyObj);
-}
-
-// Nettoyage automatique entre tests
+// Nettoyage entre tests (sécurise)
 beforeEach(() => {
-  if (globalThis.localStorage?.clear) {
-    globalThis.localStorage.clear();
-  }
+  (globalThis as any).localStorage?.clear?.();
+  (globalThis as any).sessionStorage?.clear?.();
+  vi.restoreAllMocks();
 });
+EOF
