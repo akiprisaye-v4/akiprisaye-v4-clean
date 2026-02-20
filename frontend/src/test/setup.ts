@@ -31,40 +31,41 @@ class MemoryStorage implements Storage {
   }
 }
 
-/**
- * Sous Termux/Node, on peut avoir un "localStorage" injecté mais incomplet
- * (ex: warning --localstorage-file). Donc:
- * 1) si localStorage n'existe pas -> on injecte
- * 2) si localStorage existe mais méthodes manquantes -> on patch les méthodes
- * 3) si remplacement impossible (non configurable) -> patch sur l'objet existant
- */
 function ensureWorkingLocalStorage(target: AnyObj) {
   const mem = new MemoryStorage();
-
   const existing = target.localStorage;
+
   const isValid =
     existing &&
     typeof existing.getItem === 'function' &&
     typeof existing.setItem === 'function' &&
     typeof existing.removeItem === 'function' &&
-    typeof existing.clear === 'function';
+    typeof existing.clear === 'function' &&
+    typeof existing.key === 'function';
 
   if (isValid) return;
 
-  // Si on a déjà un objet mais cassé : on le "patch"
+  // Si l'objet existe mais est incomplet, on patch directement l'objet existant
   if (existing && typeof existing === 'object') {
     if (typeof existing.getItem !== 'function') existing.getItem = mem.getItem.bind(mem);
     if (typeof existing.setItem !== 'function') existing.setItem = mem.setItem.bind(mem);
     if (typeof existing.removeItem !== 'function') existing.removeItem = mem.removeItem.bind(mem);
     if (typeof existing.clear !== 'function') existing.clear = mem.clear.bind(mem);
     if (typeof existing.key !== 'function') existing.key = mem.key.bind(mem);
-    if (typeof existing.length !== 'number') {
-      Object.defineProperty(existing, 'length', { get: () => mem.length });
+
+    // length est souvent en getter dans les implémentations browser;
+    // si absent, on le définit en getter.
+    try {
+      if (typeof existing.length !== 'number') {
+        Object.defineProperty(existing, 'length', { get: () => mem.length });
+      }
+    } catch {
+      // ignore
     }
     return;
   }
 
-  // Sinon, on tente de définir proprement
+  // Sinon, on définit localStorage
   try {
     Object.defineProperty(target, 'localStorage', {
       value: mem,
@@ -73,16 +74,16 @@ function ensureWorkingLocalStorage(target: AnyObj) {
       writable: true,
     });
   } catch {
-    // Dernier recours: assignation directe
     target.localStorage = mem;
   }
 }
 
+// Patch global + window
 ensureWorkingLocalStorage(globalThis as AnyObj);
 if (typeof window !== 'undefined') ensureWorkingLocalStorage(window as AnyObj);
 
-// (optionnel) réduire le bruit "act(...)"
-const originalWarn = console.warn;
+// Optionnel: réduire le bruit React act(...)
+const originalWarn = console.warn.bind(console);
 vi.spyOn(console, 'warn').mockImplementation((...args) => {
   const msg = String(args[0] ?? '');
   if (msg.includes('not configured to support act')) return;
