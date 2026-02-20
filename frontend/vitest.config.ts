@@ -4,6 +4,21 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+
+    // ✅ Fix localStorage/sessionStorage + timers clean state for every test file
+    setupFiles: ['src/test/setup.ts'],
+
+    // ✅ Better stability in CI/Termux (avoids flaky parallel side effects)
+    pool: 'threads',
+    maxThreads: 1,
+    minThreads: 1,
+
+    // ✅ Keep tests deterministic
+    clearMocks: true,
+    restoreMocks: true,
+    mockReset: true,
+
+    // ✅ Your targeted suite
     include: [
       'src/services/openFoodFacts.test.ts',
       'src/services/alertProductImageService.test.ts',
@@ -21,5 +36,9 @@ export default defineConfig({
       'src/test/serviceWorkerCacheStrategy.test.ts',
       'scripts/verify-pages-api.test.ts',
     ],
+
+    // ✅ Optional: reduce noise without hiding real failures
+    // (Uncomment if you want less console spam)
+    // silent: true,
   },
 });
