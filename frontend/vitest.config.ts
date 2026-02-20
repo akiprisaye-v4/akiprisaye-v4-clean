@@ -5,14 +5,11 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
 
-    // IMPORTANT: applique un vrai localStorage + fetch mocks si besoin
-    setupFiles: ['src/test/setup.ts'],
+    // Chemin robuste (Vitest accepte URL vers fichier)
+    setupFiles: [new URL('./src/test/setup.ts', import.meta.url).pathname],
 
-    // évite certains comportements bizarres de jsdom sur mobile/termux
     environmentOptions: {
-      jsdom: {
-        url: 'http://localhost/',
-      },
+      jsdom: { url: 'http://localhost/' },
     },
 
     include: [
@@ -33,7 +30,6 @@ export default defineConfig({
       'scripts/verify-pages-api.test.ts',
     ],
 
-    // stabilité (utile sur Android/Termux)
     testTimeout: 10_000,
     hookTimeout: 10_000,
     clearMocks: true,
