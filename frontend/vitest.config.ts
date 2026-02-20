@@ -1,38 +1,54 @@
 // frontend/vitest.config.ts
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 
-const HERE = dirname(fileURLToPath(import.meta.url)); // => .../akiprisaye-web/frontend
-const setupPath = resolve(HERE, 'src/test/setup.ts');
+const here = fileURLToPath(new URL('.', import.meta.url));
+const abs = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
-  // Force Vitest/Vite à considérer "frontend" comme racine, quoi qu'il arrive
-  root: HERE,
+  // Force Vitest/Vite à considérer "frontend/" comme racine,
+  // même si tu lances la commande depuis la racine du repo.
+  root: here,
 
   test: {
     environment: 'jsdom',
     globals: true,
 
-    // Chemin absolu, donc plus aucun risque de résolution sur le repo root
-    setupFiles: [setupPath],
+    // IMPORTANT : chemin ABSOLU => plus d'erreur "/@fs/.../akiprisaye-web/src/test/setup.ts"
+    setupFiles: [abs('./src/test/setup.ts')],
 
     environmentOptions: {
       jsdom: { url: 'http://localhost/' },
     },
 
-    // Tu peux garder ta liste si tu veux. Sinon, la version simple: ['**/*.{test,spec}.{ts,tsx,js,jsx}']
+    // Tes fichiers de tests ciblés (chemins ABSOLUS => OK quel que soit le cwd)
     include: [
-      'src/services/openFoodFacts.test.ts',
-      'src/services/alertProductImageService.test.ts',
-      'functions/**/*.test.ts',
-      'src/test/**/*.test.ts',
-      'src/test/**/*.test.jsx',
-      'scripts/**/*.test.ts',
+      abs('./src/services/openFoodFacts.test.ts'),
+      abs('./src/services/alertProductImageService.test.ts'),
+      abs('./functions/**/__tests__/*.test.ts'),
+      abs('./src/test/alerts.filterActive.test.ts'),
+      abs('./src/test/alerts.searchSort.test.ts'),
+      abs('./src/test/alerts.serviceFallback.test.ts'),
+      abs('./src/test/sanitaryAlerts.normalizer.test.ts'),
+      abs('./src/test/observations.normalize.test.ts'),
+      abs('./src/test/storeSelection.test.ts'),
+      abs('./src/test/promosService.test.ts'),
+      abs('./src/test/freemium.test.ts'),
+      abs('./src/test/cloudflareRouting.test.ts'),
+      abs('./src/test/actualites.page.test.jsx'),
+      abs('./src/test/serviceWorkerCacheStrategy.test.ts'),
+      abs('./scripts/verify-pages-api.test.ts'),
     ],
+
+    exclude: ['**/node_modules/**', '**/.git/**'],
+
+    testTimeout: 10_000,
+    hookTimeout: 10_000,
 
     clearMocks: true,
     restoreMocks: true,
+
+    // Important pour éviter des effets de bord (storages / env) :
     unstubGlobals: false,
     unstubEnvs: true,
   },
