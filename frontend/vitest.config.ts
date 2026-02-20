@@ -1,9 +1,5 @@
 // vitest.config.ts
 import { defineConfig } from 'vitest/config';
-import { fileURLToPath } from 'node:url';
-
-const setupPath = fileURLToPath(new URL('./src/test/setup.ts', import.meta.url));
-const globalSetupPath = fileURLToPath(new URL('./src/test/globalSetup.ts', import.meta.url));
 
 export default defineConfig({
   test: {
@@ -11,10 +7,10 @@ export default defineConfig({
     globals: true,
 
     // 1) Exécuté AVANT la création de l'env de test (côté Node)
-    globalSetup: [globalSetupPath],
+    globalSetup: ['./src/test/globalSetup.ts'],
 
     // 2) Exécuté DANS l'env jsdom (window/globalThis disponibles)
-    setupFiles: [setupPath],
+    setupFiles: ['./src/test/setup.ts'],
 
     environmentOptions: {
       jsdom: { url: 'http://localhost/' },
@@ -43,7 +39,10 @@ export default defineConfig({
 
     clearMocks: true,
     restoreMocks: true,
-    unstubGlobals: true,
+
+    // IMPORTANT: ne pas “unstub” les globals si setup.ts stub localStorage/fetch/etc.
+    unstubGlobals: false,
+
     unstubEnvs: true,
   },
 });
