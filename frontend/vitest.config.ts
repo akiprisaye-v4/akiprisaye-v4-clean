@@ -2,13 +2,19 @@
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 
+const setupPath = fileURLToPath(new URL('./src/test/setup.ts', import.meta.url));
+const globalSetupPath = fileURLToPath(new URL('./src/test/globalSetup.ts', import.meta.url));
+
 export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
 
-    // IMPORTANT: utiliser fileURLToPath (plus fiable que .pathname)
-    setupFiles: [fileURLToPath(new URL('./src/test/setup.ts', import.meta.url))],
+    // 1) Exécuté AVANT la création de l'env de test (côté Node)
+    globalSetup: [globalSetupPath],
+
+    // 2) Exécuté DANS l'env jsdom (window/globalThis disponibles)
+    setupFiles: [setupPath],
 
     environmentOptions: {
       jsdom: { url: 'http://localhost/' },
