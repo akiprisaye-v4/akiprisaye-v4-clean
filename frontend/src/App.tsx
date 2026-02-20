@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { lazyPage } from './router/lazy';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -142,14 +142,14 @@ function LoadingFallback() {
 
   useEffect(() => {
     logDebug('⏳ LoadingFallback: Displayed');
-    const timer = setTimeout(() => {
+    const timer = window.setTimeout(() => {
       console.error('⚠️ Application timeout - Loading blocked for 10+ seconds');
       setShowTimeout(true);
     }, 10000);
 
     return () => {
       logDebug('✅ LoadingFallback: Hidden (component loaded successfully)');
-      clearTimeout(timer);
+      window.clearTimeout(timer);
     };
   }, []);
 
