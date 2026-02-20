@@ -1,51 +1,40 @@
-import { vi } from 'vitest';
+import { defineConfig } from 'vitest/config';
 
-type LSMap = Record<string, string>;
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
 
-function createLocalStorageMock() {
-  let store: LSMap = {};
+    // Chemin robuste (Vitest accepte URL vers fichier)
+    setupFiles: [new URL('./src/test/setup.ts', import.meta.url).pathname],
 
-  return {
-    get length() {
-      return Object.keys(store).length;
+    environmentOptions: {
+      jsdom: { url: 'http://localhost/' },
     },
-    key(i: number) {
-      const keys = Object.keys(store);
-      return keys[i] ?? null;
-    },
-    getItem(key: string) {
-      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
-    },
-    setItem(key: string, value: string) {
-      store[key] = String(value);
-    },
-    removeItem(key: string) {
-      delete store[key];
-    },
-    clear() {
-      store = {};
-    },
-  };
-}
 
-// jsdom sous Termux peut donner un localStorage incomplet → on force un mock complet
-const ls = createLocalStorageMock();
+    include: [
+      'src/services/openFoodFacts.test.ts',
+      'src/services/alertProductImageService.test.ts',
+      'functions/**/*.test.ts',
+      'src/test/alerts.filterActive.test.ts',
+      'src/test/alerts.searchSort.test.ts',
+      'src/test/alerts.serviceFallback.test.ts',
+      'src/test/sanitaryAlerts.normalizer.test.ts',
+      'src/test/observations.normalize.test.ts',
+      'src/test/storeSelection.test.ts',
+      'src/test/promosService.test.ts',
+      'src/test/freemium.test.ts',
+      'src/test/cloudflareRouting.test.ts',
+      'src/test/actualites.page.test.jsx',
+      'src/test/serviceWorkerCacheStrategy.test.ts',
+      'scripts/verify-pages-api.test.ts',
+    ],
 
-// @ts-expect-error - vitest global
-globalThis.localStorage = ls;
-// @ts-expect-error - vitest global
-globalThis.window = globalThis.window ?? ({} as any);
-// @ts-expect-error - vitest global
-globalThis.window.localStorage = ls;
-
-// Certains tests utilisent fetch
-if (!('fetch' in globalThis)) {
-  // @ts-expect-error - vitest global
-  globalThis.fetch = vi.fn();
-}
-
-// Nettoyage automatique entre tests
-beforeEach(() => {
-  ls.clear();
-  vi.clearAllMocks();
+    testTimeout: 10_000,
+    hookTimeout: 10_000,
+    clearMocks: true,
+    restoreMocks: true,
+    unstubGlobals: true,
+    unstubEnvs: true,
+  },
 });
