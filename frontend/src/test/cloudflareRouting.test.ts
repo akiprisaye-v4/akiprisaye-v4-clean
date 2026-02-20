@@ -33,6 +33,7 @@ describe('Cloudflare SPA routing config', () => {
     const appPath = path.resolve('src/App.tsx');
     const appSource = readFileSync(appPath, 'utf8');
 
+    // Comme on génère les alias, on valide la table ALIASES
     const expectedAliases = [
       ['Login', '/login'],
       ['auth/login', '/login'],
@@ -46,7 +47,7 @@ describe('Cloudflare SPA routing config', () => {
     ];
 
     for (const [alias, canonicalPath] of expectedAliases) {
-      expect(appSource).toContain(`<Route path="${alias}" element={<Navigate to="${canonicalPath}" replace />} />`);
+      expect(appSource).toContain(`{ from: '${alias}', to: '${canonicalPath}'`);
     }
   });
 });
