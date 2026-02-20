@@ -33,10 +33,10 @@ const AdminDashboardNew = lazyPage(() => import('./pages/admin/AdminDashboard'))
 const StoreList = lazyPage(() => import('./pages/admin/stores/StoreList'));
 const StoreForm = lazyPage(() => import('./pages/admin/stores/StoreForm'));
 const StoreDetail = lazyPage(() => import('./pages/admin/stores/StoreDetail'));
-const ProductList = lazyPage(() => import('./pages/admin/products/ProductList').then(m => ({ default: m.ProductList })));
-const ProductForm = lazyPage(() => import('./pages/admin/products/ProductForm').then(m => ({ default: m.ProductForm })));
-const ProductDetail = lazyPage(() => import('./pages/admin/products/ProductDetail').then(m => ({ default: m.ProductDetail })));
-const ImportPage = lazyPage(() => import('./pages/admin/import/ImportPage').then(m => ({ default: m.ImportPage })));
+const ProductList = lazyPage(() => import('./pages/admin/products/ProductList').then((m) => ({ default: m.ProductList })));
+const ProductForm = lazyPage(() => import('./pages/admin/products/ProductForm').then((m) => ({ default: m.ProductForm })));
+const ProductDetail = lazyPage(() => import('./pages/admin/products/ProductDetail').then((m) => ({ default: m.ProductDetail })));
+const ImportPage = lazyPage(() => import('./pages/admin/import/ImportPage').then((m) => ({ default: m.ImportPage })));
 const ObservatoireHub = lazyPage(() => import('./pages/ObservatoireHub'));
 const Methodologie = lazyPage(() => import('./pages/Methodologie'));
 const Faq = lazyPage(() => import('./pages/Faq'));
@@ -99,9 +99,59 @@ const SyncDashboard = lazyPage(() => import('./pages/admin/sync/SyncDashboard'))
 // i18n Test page (for development/testing)
 const I18nTest = lazyPage(() => import('./pages/I18nTest'));
 
+/**
+ * Centralisation des aliases “legacy deep-links”
+ * → tu ajoutes une ligne ici, terminé. Plus besoin de copier/coller des <Route ... Navigate ...>
+ */
+type AliasEntry = { from: string; to: string; replace?: boolean };
+const ALIASES: AliasEntry[] = [
+  // Actualités
+  { from: 'actus', to: '/actualites' },
+  { from: 'news', to: '/actualites' },
+
+  // Scanner
+  { from: 'scan', to: '/scanner' },
+
+  // Auth: login
+  { from: 'Login', to: '/login' }, // casse legacy
+  { from: 'auth/login', to: '/login' },
+  { from: 'signin', to: '/login' },
+
+  // Auth: register
+  { from: 'auth/register', to: '/inscription' },
+  { from: 'signup', to: '/inscription' },
+
+  // Auth: reset
+  { from: 'auth/reset-password', to: '/reset-password' },
+  { from: 'forgot-password', to: '/reset-password' },
+
+  // Account
+  { from: 'moncompte', to: '/mon-compte' },
+  { from: 'account', to: '/mon-compte' },
+];
+
+function renderAliasRoutes(entries: AliasEntry[]) {
+  const seen = new Set<string>();
+  return entries
+    .map((e) => ({
+      from: e.from.startsWith('/') ? e.from.slice(1) : e.from,
+      to: e.to,
+      replace: e.replace ?? true,
+    }))
+    .filter((e) => {
+      const key = `${e.from}->${e.to}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((e) => (
+      <Route key={`alias:${e.from}`} path={e.from} element={<Navigate to={e.to} replace={e.replace} />} />
+    ));
+}
+
 function LoadingFallback() {
   const [showTimeout, setShowTimeout] = useState(false);
-  
+
   useEffect(() => {
     logDebug('⏳ LoadingFallback: Displayed');
     const timer = setTimeout(() => {
@@ -120,24 +170,17 @@ function LoadingFallback() {
         <img src="/logo-akiprisaye.svg" alt="Logo" className="h-16 mb-4" />
         <h1 className="text-xl font-bold mb-2">Chargement bloqué</h1>
         <p className="text-slate-400 mb-4">L'application met trop de temps à charger.</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
+        <button onClick={() => window.location.reload()} className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700">
           Recharger la page
         </button>
-        <p className="text-xs text-slate-500 mt-4">
-          Si le problème persiste, videz le cache du navigateur.
-        </p>
+        <p className="text-xs text-slate-500 mt-4">Si le problème persiste, videz le cache du navigateur.</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="animate-pulse text-lg text-white">
-        Chargement…
-      </div>
+      <div className="animate-pulse text-lg text-white">Chargement…</div>
     </div>
   );
 }
@@ -162,10 +205,7 @@ export default function App() {
         <img src="/logo-akiprisaye.svg" alt="Logo" className="h-16 mb-4" />
         <h1 className="text-xl font-bold mb-2">Erreur d'initialisation</h1>
         <p className="text-red-400 mb-4">{providerError.message}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
+        <button onClick={() => window.location.reload()} className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700">
           Recharger
         </button>
       </div>
@@ -179,129 +219,117 @@ export default function App() {
           <AuthProvider>
             <OnboardingProvider>
               <StoreSelectionProvider>
-              <BrowserRouter>
-                <Suspense fallback={<LoadingFallback />}>
-                  <Routes>
-                    {/* Admin routes with dedicated layout */}
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<AdminDashboardNew />} />
-                      <Route path="stores" element={<StoreList />} />
-                      <Route path="stores/new" element={<StoreForm />} />
-                      <Route path="stores/:id" element={<StoreDetail />} />
-                      <Route path="stores/:id/edit" element={<StoreForm />} />
-                      <Route path="products" element={<ProductList />} />
-                      <Route path="products/new" element={<ProductForm />} />
-                      <Route path="products/:id" element={<ProductDetail />} />
-                      <Route path="products/:id/edit" element={<ProductForm />} />
-                      <Route path="import" element={<ImportPage />} />
-                      <Route path="sync" element={<SyncDashboard />} />
-                    </Route>
-                    
-                    {/* Main site routes with Layout */}
-                    <Route path="/" element={<Layout />}>
-                      <Route index element={<Home />} />
-                      <Route path="carte" element={<Carte />} />
-                      <Route path="carte-interactive" element={<MapPage />} />
-                      <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="home" element={<Home />} />
-                      <Route path="comparateur" element={<Comparateur />} />
-                      <Route path="search" element={<SearchPage />} />
-                      <Route path="observatoire" element={<ObservatoireHub />} />
-                      <Route path="vie-chere" element={<LutteVieChere />} />
-                      <Route path="methodologie" element={<Methodologie />} />
-                      <Route path="faq" element={<Faq />} />
-                      <Route path="contact" element={<Contact />} />
-                      <Route path="actualites" element={<Actualites />} />
-                      <Route path="actus" element={<Navigate to="/actualites" replace />} />
-                      <Route path="news" element={<Navigate to="/actualites" replace />} />
-                      <Route path="mentions-legales" element={<MentionsLegales />} />
-                      <Route path="privacy" element={<Transparence />} />
-                      
-                      {/* Additional feature routes */}
-                      <Route path="donnees-publiques" element={<DonneesPubliques />} />
-                      <Route path="contribuer" element={<Contribuer />} />
-                      <Route path="contribuer-prix" element={<ContribuerPrix />} />
-                      <Route path="comparateurs" element={<Comparateurs />} />
-                      <Route path="carte-itineraires" element={<CarteItinerairesHub />} />
-                      <Route path="comparateur-citoyen" element={<ComparateurCitoyen />} />
-                      
-                      {/* Scanner & OCR routes */}
-                      <Route path="scan" element={<Navigate to="/scanner" replace />} />
-                      <Route path="scanner" element={<ScannerHub />} />
-                      <Route path="scan-ean" element={<ScanEAN />} />
-                      <Route path="analyse-photo-produit" element={<ProductPhotoAnalysis />} />
-                      <Route path="product/:barcode" element={<ProductScanResult />} />
-                      <Route path="ocr" element={<OCRHub />} />
-                      
-                      {/* Comparison & Reporting */}
-                      <Route path="comparaison-enseignes" element={<ComparaisonEnseignes />} />
-                      <Route path="comparaison-panier" element={<BasketComparison />} />
-                      <Route path="signalement" element={<SignalerAbus />} />
-                      
-                      {/* Settings & History */}
-                      <Route path="parametres" element={<Settings />} />
-                      <Route path="historique-prix" element={<HistoriquePrix />} />
-                      <Route path="historique" element={<HistoriquePrix />} />
-                      <Route path="p/:id" element={<ProductDetailPage />} />
-                      <Route path="recherche-prix" element={<RecherchePrix />} />
-                      <Route path="alertes" element={<Alertes />} />
-                      <Route path="alertes/:id" element={<AlerteDetail />} />
-                      <Route path="promos" element={<Promos />} />
-                      <Route path="mes-listes" element={<MesListes />} />
-                      
-                      {/* Savings Dashboard */}
-                      <Route path="mes-economies" element={<MesEconomies />} />
-                      <Route path="tableau-de-bord" element={<MesEconomies />} />
-                      
-                      {/* Auth routes */}
-                      <Route path="login" element={<Login />} />
-                      <Route path="connexion" element={<Login />} />
-                      <Route path="Login" element={<Navigate to="/login" replace />} />
-                      <Route path="auth/login" element={<Navigate to="/login" replace />} />
-                      <Route path="signin" element={<Navigate to="/login" replace />} />
+                <BrowserRouter>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <Routes>
+                      {/* Admin routes with dedicated layout */}
+                      <Route path="/admin" element={<AdminLayout />}>
+                        <Route index element={<AdminDashboardNew />} />
+                        <Route path="stores" element={<StoreList />} />
+                        <Route path="stores/new" element={<StoreForm />} />
+                        <Route path="stores/:id" element={<StoreDetail />} />
+                        <Route path="stores/:id/edit" element={<StoreForm />} />
+                        <Route path="products" element={<ProductList />} />
+                        <Route path="products/new" element={<ProductForm />} />
+                        <Route path="products/:id" element={<ProductDetail />} />
+                        <Route path="products/:id/edit" element={<ProductForm />} />
+                        <Route path="import" element={<ImportPage />} />
+                        <Route path="sync" element={<SyncDashboard />} />
+                      </Route>
 
-                      <Route path="inscription" element={<Inscription />} />
-                      <Route path="auth/register" element={<Navigate to="/inscription" replace />} />
-                      <Route path="signup" element={<Navigate to="/inscription" replace />} />
+                      {/* Main site routes with Layout */}
+                      <Route path="/" element={<Layout />}>
+                        <Route index element={<Home />} />
+                        <Route path="carte" element={<Carte />} />
+                        <Route path="carte-interactive" element={<MapPage />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="home" element={<Home />} />
+                        <Route path="comparateur" element={<Comparateur />} />
+                        <Route path="search" element={<SearchPage />} />
+                        <Route path="observatoire" element={<ObservatoireHub />} />
+                        <Route path="vie-chere" element={<LutteVieChere />} />
+                        <Route path="methodologie" element={<Methodologie />} />
+                        <Route path="faq" element={<Faq />} />
+                        <Route path="contact" element={<Contact />} />
+                        <Route path="actualites" element={<Actualites />} />
+                        <Route path="mentions-legales" element={<MentionsLegales />} />
+                        <Route path="privacy" element={<Transparence />} />
 
-                      <Route path="reset-password" element={<ResetPassword />} />
-                      <Route path="auth/reset-password" element={<Navigate to="/reset-password" replace />} />
-                      <Route path="forgot-password" element={<Navigate to="/reset-password" replace />} />
+                        {/* Additional feature routes */}
+                        <Route path="donnees-publiques" element={<DonneesPubliques />} />
+                        <Route path="contribuer" element={<Contribuer />} />
+                        <Route path="contribuer-prix" element={<ContribuerPrix />} />
+                        <Route path="comparateurs" element={<Comparateurs />} />
+                        <Route path="carte-itineraires" element={<CarteItinerairesHub />} />
+                        <Route path="comparateur-citoyen" element={<ComparateurCitoyen />} />
 
-                      <Route path="auth" element={<AuthHub />} />
-                      <Route path="mon-compte" element={<RequireAuth><MonCompte /></RequireAuth>} />
-                      <Route path="moncompte" element={<Navigate to="/mon-compte" replace />} />
-                      <Route path="account" element={<Navigate to="/mon-compte" replace />} />
-                      
-                      {/* Pricing & Subscription */}
-                      <Route path="pricing" element={<Pricing />} />
-                      <Route path="subscribe" element={<Subscribe />} />
-                      <Route path="subscribe/success" element={<Subscribe />} />
-                      
-                      {/* Observatory real-time */}
-                      <Route path="observatoire-temps-reel" element={<ObservatoireTempsReel />} />
-                      
-                      {/* Transparency & reporting */}
-                      <Route path="transparence" element={<Transparence />} />
-                      <Route path="signaler-abus" element={<SignalerAbus />} />
-                      
-                      {/* Admin routes */}
-                      <Route path="admin/sync" element={<SyncDashboard />} />
-                      
-                      {/* i18n Test (development/testing) */}
-                      <Route path="test-i18n" element={<I18nTest />} />
-                      
-                      {/* Catch-all route - redirect to home */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                  </Routes>
-                  <AnalyticsTracker />
-                  <PerformanceMonitor />
-                  <OnboardingAutoStart />
-                  <OnboardingTour />
-                  <HelpButton />
-                </Suspense>
-              </BrowserRouter>
+                        {/* Scanner & OCR routes */}
+                        <Route path="scanner" element={<ScannerHub />} />
+                        <Route path="scan-ean" element={<ScanEAN />} />
+                        <Route path="analyse-photo-produit" element={<ProductPhotoAnalysis />} />
+                        <Route path="product/:barcode" element={<ProductScanResult />} />
+                        <Route path="ocr" element={<OCRHub />} />
+
+                        {/* Comparison & Reporting */}
+                        <Route path="comparaison-enseignes" element={<ComparaisonEnseignes />} />
+                        <Route path="comparaison-panier" element={<BasketComparison />} />
+                        <Route path="signalement" element={<SignalerAbus />} />
+
+                        {/* Settings & History */}
+                        <Route path="parametres" element={<Settings />} />
+                        <Route path="historique-prix" element={<HistoriquePrix />} />
+                        <Route path="historique" element={<HistoriquePrix />} />
+                        <Route path="p/:id" element={<ProductDetailPage />} />
+                        <Route path="recherche-prix" element={<RecherchePrix />} />
+                        <Route path="alertes" element={<Alertes />} />
+                        <Route path="alertes/:id" element={<AlerteDetail />} />
+                        <Route path="promos" element={<Promos />} />
+                        <Route path="mes-listes" element={<MesListes />} />
+
+                        {/* Savings Dashboard */}
+                        <Route path="mes-economies" element={<MesEconomies />} />
+                        <Route path="tableau-de-bord" element={<MesEconomies />} />
+
+                        {/* Auth routes (canoniques) */}
+                        <Route path="login" element={<Login />} />
+                        <Route path="connexion" element={<Login />} />
+                        <Route path="inscription" element={<Inscription />} />
+                        <Route path="reset-password" element={<ResetPassword />} />
+                        <Route path="auth" element={<AuthHub />} />
+                        <Route path="mon-compte" element={<RequireAuth><MonCompte /></RequireAuth>} />
+
+                        {/* Aliases centralisés */}
+                        {renderAliasRoutes(ALIASES)}
+
+                        {/* Pricing & Subscription */}
+                        <Route path="pricing" element={<Pricing />} />
+                        <Route path="subscribe" element={<Subscribe />} />
+                        <Route path="subscribe/success" element={<Subscribe />} />
+
+                        {/* Observatory real-time */}
+                        <Route path="observatoire-temps-reel" element={<ObservatoireTempsReel />} />
+
+                        {/* Transparency & reporting */}
+                        <Route path="transparence" element={<Transparence />} />
+                        <Route path="signaler-abus" element={<SignalerAbus />} />
+
+                        {/* Admin routes */}
+                        <Route path="admin/sync" element={<SyncDashboard />} />
+
+                        {/* i18n Test (development/testing) */}
+                        <Route path="test-i18n" element={<I18nTest />} />
+
+                        {/* Catch-all route - redirect to home */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Route>
+                    </Routes>
+                    <AnalyticsTracker />
+                    <PerformanceMonitor />
+                    <OnboardingAutoStart />
+                    <OnboardingTour />
+                    <HelpButton />
+                  </Suspense>
+                </BrowserRouter>
               </StoreSelectionProvider>
             </OnboardingProvider>
           </AuthProvider>
