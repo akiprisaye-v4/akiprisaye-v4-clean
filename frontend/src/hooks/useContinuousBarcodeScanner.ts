@@ -3,12 +3,14 @@ import { lookupProductByEan } from '../services/eanProductService';
 import { toProductViewModel } from '../services/productViewModelService';
 import type { DataSource, Territoire } from '../types/ean';
 import { useTiPanier } from './useTiPanier';
+import { addShoppingListItem, getShoppingListCount } from '../store/useShoppingListStore';
 
 export type ScanStatus = 'loading' | 'ok' | 'not_found' | 'error';
 
 export type ResolvedProduct = {
   name: string;
   brand?: string;
+  quantity?: string;
   imageUrl?: string;
   price?: number;
 };
@@ -33,6 +35,7 @@ type BarcodeDetectorConstructor = new (options?: { formats?: BarcodeDetectorForm
 const SUPPORTED_FORMATS: BarcodeDetectorFormat[] = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
 const DEFAULT_LOOKUP_TERRITORY: Territoire = 'martinique';
 const RESULT_LIMIT = 50;
+const RESOLVED_CACHE = new Map<string, ResolvedProduct | null>();
 
 declare global {
   interface Window {
@@ -63,23 +66,31 @@ export async function resolveBarcode(
 ): Promise<ResolvedProduct | null> {
   if (!barcode) return null;
 
+  const cached = RESOLVED_CACHE.get(barcode);
+  if (cached !== undefined) return cached;
+
   const result = await lookupProductByEan(barcode, {
     territoire,
     source,
   });
 
   if (!result.success || !result.product || result.product.status === 'non_référencé') {
+    RESOLVED_CACHE.set(barcode, null);
     return null;
   }
 
   const viewModel = toProductViewModel(result.product);
 
-  return {
-    name: viewModel.nom,
-    brand: viewModel.marque !== 'Non spécifiée' ? viewModel.marque : undefined,
+  const resolved = {
+    name: viewModel.nom || `Produit (EAN: ${barcode})`,
+    brand: viewModel.marque !== 'Non spécifiée' ? viewModel.marque : ((result.product as { marque?: string }).marque),
+    quantity: viewModel.contenance ?? (result.product as { quantity?: string }).quantity,
     imageUrl: viewModel.imageUrl,
     price: parseDisplayPrice(viewModel.prix),
   };
+
+  RESOLVED_CACHE.set(barcode, resolved);
+  return resolved;
 }
 
 type UseContinuousBarcodeScannerOptions = {
@@ -89,6 +100,7 @@ type UseContinuousBarcodeScannerOptions = {
   stabilityThreshold?: number;
   cooldownMs?: number;
   sameCodeLockMs?: number;
+  maxItems?: number;
 };
 
 export type ContinuousScannerDebugInfo = {
@@ -106,6 +118,7 @@ export function useContinuousBarcodeScanner(options: UseContinuousBarcodeScanner
     stabilityThreshold = 1,
     cooldownMs = 900,
     sameCodeLockMs = 2500,
+    maxItems = 30,
   } = options;
 
   const { addItem } = useTiPanier();
@@ -146,7 +159,20 @@ export function useContinuousBarcodeScanner(options: UseContinuousBarcodeScanner
         barcode,
       },
     });
-  }, [addItem]);
+
+    addShoppingListItem(
+      {
+        id: barcode,
+        name: product.name || `Produit (EAN: ${barcode})`,
+        quantity: 1,
+        price: product.price,
+        history: product.price ? [product.price] : undefined,
+        source: 'scan_utilisateur',
+        lastObservedAt: new Date().toISOString(),
+      },
+      maxItems,
+    );
+  }, [addItem, maxItems]);
 
   const okItems = useMemo(
     () => results.filter((item) => item.status === 'ok' && item.product),
@@ -159,13 +185,16 @@ export function useContinuousBarcodeScanner(options: UseContinuousBarcodeScanner
         addToCart(item.product, item.barcode);
       }
     });
+    return okItems.length;
   }, [addToCart, okItems]);
 
   const addItemToCart = useCallback((id: string) => {
     const target = results.find((item) => item.id === id);
     if (target?.product) {
       addToCart(target.product, target.barcode);
+      return true;
     }
+    return false;
   }, [addToCart, results]);
 
   useEffect(() => {
@@ -264,7 +293,7 @@ export function useContinuousBarcodeScanner(options: UseContinuousBarcodeScanner
           return { ...item, status: 'ok', product };
         }));
 
-        if (product && autoAddToCart) {
+        if (product && autoAddToCart && getShoppingListCount() < maxItems) {
           addToCart(product, barcode);
         }
       } catch (error) {
@@ -361,6 +390,7 @@ export function useContinuousBarcodeScanner(options: UseContinuousBarcodeScanner
     autoAddToCart,
     cooldownMs,
     debug,
+    maxItems,
     sameCodeLockMs,
     scanActive,
     source,
