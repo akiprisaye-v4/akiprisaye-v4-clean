@@ -58,16 +58,24 @@ function pickValue(obs: TerritoryPriceObservation): number | null {
   return v;
 }
 
+function ensureScope(scope: any): TerritoryScope {
+  // Si scope est null/undefined/incorrect → fallback sur le scope par défaut
+  if (scope instanceof Set) return scope as TerritoryScope;
+  return DEFAULT_TERRITORY_SCOPE;
+}
+
 export function calculateTerritoryAverages(
   observations: TerritoryPriceObservation[],
-  scope: TerritoryScope = DEFAULT_TERRITORY_SCOPE
+  scope: any = DEFAULT_TERRITORY_SCOPE
 ): TerritoryAverageMap {
+  const effectiveScope = ensureScope(scope);
+
   const byTerr: Map<string, number[]> = new Map();
 
   for (const o of observations) {
     const terr = normalizeTerritory(o.territory);
     if (!terr) continue;
-    if (scope && !scope.has(terr)) continue;
+    if (!effectiveScope.has(terr)) continue;
 
     const v = pickValue(o);
     if (v === null) continue;
@@ -86,13 +94,14 @@ export function calculateTerritoryAverages(
 export function calculateTerritoryComparison(
   observations: TerritoryPriceObservation[],
   baseTerritory: string = 'FR',
-  scope: TerritoryScope = DEFAULT_TERRITORY_SCOPE
+  scope: any = DEFAULT_TERRITORY_SCOPE
 ): TerritoryComparisonRow[] {
-  const averages = calculateTerritoryAverages(observations, scope);
+  const effectiveScope = ensureScope(scope);
+
+  const averages = calculateTerritoryAverages(observations, effectiveScope);
   const territories = Object.keys(averages);
   if (!territories.length) return [];
 
-  // tri croissant (moins cher d'abord) => rank = index+1
   const sorted = territories.sort((a, b) => averages[a] - averages[b]);
 
   const requestedBase = normalizeTerritory(baseTerritory);
@@ -118,9 +127,10 @@ export function calculateTerritoryComparison(
 
 export function buildTerritoryTimeSeries(
   observations: TerritoryPriceObservation[],
-  scope: TerritoryScope = DEFAULT_TERRITORY_SCOPE
+  scope: any = DEFAULT_TERRITORY_SCOPE
 ): Array<Record<string, any>> {
-  // date -> territory -> values[]
+  const effectiveScope = ensureScope(scope);
+
   const byDate: Map<string, Map<string, number[]>> = new Map();
 
   for (const o of observations) {
@@ -129,7 +139,7 @@ export function buildTerritoryTimeSeries(
 
     const terr = normalizeTerritory(o.territory);
     if (!terr) continue;
-    if (scope && !scope.has(terr)) continue;
+    if (!effectiveScope.has(terr)) continue;
 
     const v = pickValue(o);
     if (v === null) continue;
@@ -143,7 +153,6 @@ export function buildTerritoryTimeSeries(
 
   const dates = Array.from(byDate.keys()).sort();
 
-  // format attendu par tes tests: { date: 'YYYY-MM-DD', FR: x, GP: y, ... }
   return dates.map((date) => {
     const terrMap = byDate.get(date)!;
     const row: Record<string, any> = { date };
