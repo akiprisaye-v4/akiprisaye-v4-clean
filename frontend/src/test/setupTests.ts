@@ -1,10 +1,5 @@
 import { afterEach, vi } from 'vitest';
 
-/**
- * Storage mock 100% compatible
- * On remplace complètement localStorage
- */
-
 class MemoryStorage {
   private store: Record<string, string> = {};
 
@@ -13,8 +8,7 @@ class MemoryStorage {
   }
 
   key(index: number): string | null {
-    const keys = Object.keys(this.store);
-    return keys[index] ?? null;
+    return Object.keys(this.store)[index] ?? null;
   }
 
   getItem(key: string): string | null {
@@ -24,11 +18,11 @@ class MemoryStorage {
   }
 
   setItem(key: string, value: string): void {
-    this.store[key] = String(value);
+    this.store[String(key)] = String(value);
   }
 
   removeItem(key: string): void {
-    delete this.store[key];
+    delete this.store[String(key)];
   }
 
   clear(): void {
@@ -36,28 +30,41 @@ class MemoryStorage {
   }
 }
 
-const mockLocalStorage = new MemoryStorage();
-const mockSessionStorage = new MemoryStorage();
+const storage = new MemoryStorage();
 
 /**
- * ⚠️ IMPORTANT
- * On force le remplacement total via vi.stubGlobal
+ * 🔥 Remplacement FORCÉ du localStorage existant
  */
-vi.stubGlobal('localStorage', mockLocalStorage);
-vi.stubGlobal('sessionStorage', mockSessionStorage);
+Object.defineProperty(globalThis, 'localStorage', {
+  value: storage,
+  writable: true,
+  configurable: true,
+});
+
+Object.defineProperty(globalThis, 'sessionStorage', {
+  value: storage,
+  writable: true,
+  configurable: true,
+});
 
 if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.localStorage = mockLocalStorage;
-  // @ts-ignore
-  window.sessionStorage = mockSessionStorage;
+  Object.defineProperty(window, 'localStorage', {
+    value: storage,
+    writable: true,
+    configurable: true,
+  });
+
+  Object.defineProperty(window, 'sessionStorage', {
+    value: storage,
+    writable: true,
+    configurable: true,
+  });
 }
 
 /**
  * Nettoyage automatique
  */
 afterEach(() => {
-  mockLocalStorage.clear();
-  mockSessionStorage.clear();
+  storage.clear();
   vi.restoreAllMocks();
 });
