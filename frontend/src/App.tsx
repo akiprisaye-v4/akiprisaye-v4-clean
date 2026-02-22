@@ -20,6 +20,7 @@ import { StoreSelectionProvider } from './context/StoreSelectionContext';
 import { EntitlementProvider } from './billing/EntitlementProvider';
 import RequireAuth from './components/auth/RequireAuth';
 import { logDebug } from './utils/logger';
+import Pricing from './pages/Pricing';
 
 // Lazy-loaded pages - Main routes
 const Home = lazyPage(() => import('./pages/Home'));
@@ -221,6 +222,9 @@ export default function App() {
                 <BrowserRouter>
                   <Suspense fallback={<LoadingFallback />}>
                     <Routes>
+
+                    <Route path="/offres" element={<Pricing />} />
+                    <Route path="/pricing" element={<Pricing />} />
                       {/* Admin routes with dedicated layout */}
                       <Route path="/admin" element={<AdminLayout />}>
                         <Route index element={<AdminDashboardNew />} />

@@ -1,629 +1,260 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React from 'react';
-import { Check, Sparkles, TrendingUp, Shield, Zap, X, Lock, Database, FileText, Bell, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
+import { pricingPlans } from "../data/pricingPlans";
 
-const pricingPlans = [
-  {
-    id: 'citoyen',
-    name: 'CITOYEN',
-    icon: '🟢',
-    price: '0',
-    period: '€ / mois',
-    subtitle: 'Gratuite – sans limite',
-    description: 'Toujours gratuit',
-    features: [
-      'Accès complet aux données publiques observées',
-      'Fiches enseignes (localisation GPS, infos pratiques)',
-      'Produits les moins chers par magasin',
-      'Ajout de produits observés au panier citoyen',
-      'Comparateurs essentiels : Vols, Bateaux/ferries, Forfaits mobiles & internet, Eau & électricité',
-      'Modules pédagogiques (prix, logistique, délais)',
-      'Glossaire & FAQ citoyenne',
-      'Sans compte obligatoire',
-      'Sans publicité – sans affiliation',
-    ],
-    cta: 'Commencer gratuitement',
-    ctaLink: '/',
-    popular: false,
-    note: '📌 Objectif : informer, comprendre, comparer. Cette formule restera toujours gratuite.',
-    color: 'from-green-600 to-green-700',
-    badge: null,
-    isPro: false,
-  },
-  {
-    id: 'citoyen_plus',
-    name: 'CITOYEN+',
-    icon: '🔵',
-    price: '3,99',
-    period: '€ / mois',
-    subtitle: 'Confort & gain de temps',
-    annualPrice: '39 € / an',
-    description: 'ou 39 € / an',
-    features: [
-      'Tout le mode Citoyen',
-      'Comparaison multi-enseignes sur votre panier',
-      'Historique des prix (3, 6, 12 mois)',
-      'Filtres avancés (territoire, période, type de produit)',
-      'Export PDF "panier observé"',
-      'Interface allégée (moins d\'écrans pédagogiques répétitifs)',
-      'Accès prioritaire aux nouvelles fonctionnalités de confort',
-    ],
-    cta: 'Choisir Citoyen+',
-    ctaLink: '/inscription?plan=citoyen_plus',
-    popular: true,
-    note: '📌 Objectif : gagner du temps sans perdre en neutralité. Aucune recommandation, aucun conseil d\'achat.',
-    color: 'from-blue-600 to-blue-700',
-    badge: '⭐ Populaire',
-    isPro: false,
-  },
-  {
-    id: 'analyse',
-    name: 'ANALYSE',
-    icon: '🟣',
-    price: '9,90',
-    period: '€ / mois',
-    subtitle: 'Associations · Journalistes · Experts · Institutions',
-    annualPrice: '99 € / an',
-    description: 'ou 99 € / an',
-    features: [
-      'Tout Citoyen+',
-      'Indices territoriaux détaillés',
-      'Comparaisons DOM ↔ Métropole',
-      'Accès complet aux modules logistiques : fret maritime & aérien, délais & tensions, chaîne complète',
-      'Historique étendu multi-années',
-      'Exports CSV & graphiques',
-      'Vue agrégée multi-territoires',
-      'Données prêtes pour étude, rapport ou publication',
-    ],
-    cta: 'Choisir Analyse',
-    ctaLink: '/inscription?plan=analyse',
-    popular: false,
-    note: '📌 Objectif : analyser, documenter, expliquer.',
-    warning: '⚠️ Toujours : pas de notation de territoire, pas de jugement, pas de prédiction, pas d\'affiliation',
-    color: 'from-purple-600 to-purple-700',
-    badge: null,
-    isPro: false,
-  },
-  {
-    id: 'business_pro',
-    name: 'BUSINESS PRO',
-    icon: '💼',
-    price: '299',
-    period: '€ / mois',
-    subtitle: 'Enseignes & Grandes entreprises',
-    annualPrice: '2 990 € / an',
-    description: 'ou 2 990 € / an',
-    features: [
-      'Tout Analyse',
-      'API REST complète (50 000 req/jour)',
-      'Webhooks temps réel',
-      'Analytics avancés & prévisions',
-      'Suivi concurrence',
-      'Rapports marché détaillés',
-      'Profil entreprise visible',
-      'Badge "Pro" sur la plateforme',
-      'Support prioritaire (réponse 2h)',
-      '10 utilisateurs inclus',
-    ],
-    cta: 'Contacter l\'équipe',
-    ctaLink: '/contact?plan=business_pro',
-    popular: false,
-    note: '📌 Idéal pour les enseignes souhaitant optimiser leur positionnement prix.',
-    color: 'from-amber-600 to-amber-700',
-    badge: '💼 Pro',
-    isPro: true,
-  },
-  {
-    id: 'institutional',
-    name: 'INSTITUTIONNEL',
-    icon: '🏛️',
-    price: '1 500',
-    period: '€ / mois',
-    subtitle: 'Collectivités & Organismes publics',
-    annualPrice: '15 000 € / an',
-    description: 'ou 15 000 € / an',
-    features: [
-      'Tout Business Pro',
-      'API illimitée (500 000 req/jour)',
-      'White-label disponible',
-      'Rapports sur mesure',
-      'Utilisateurs illimités',
-      '20 clés API',
-      'Support dédié (réponse 1h)',
-      'Rétention données illimitée',
-      'Badge "Institutionnel"',
-      'Formation incluse',
-    ],
-    cta: 'Demander un devis',
-    ctaLink: '/contact-collectivites?plan=institutional',
-    popular: false,
-    note: '📌 Solution complète pour les acteurs publics du suivi des prix.',
-    color: 'from-indigo-600 to-indigo-700',
-    badge: '🏛️ Institutionnel',
-    isPro: true,
-  },
-  {
-    id: 'research',
-    name: 'RECHERCHE',
-    icon: '🎓',
-    price: 'Sur devis',
-    period: '',
-    subtitle: 'Universités & Recherche académique',
-    description: 'Tarif préférentiel',
-    features: [
-      'Accès données complet',
-      'API (100 000 req/jour)',
-      'Exports illimités (CSV, JSON, XML)',
-      'Historique complet toutes périodes',
-      '5 utilisateurs',
-      '3 clés API',
-      'Badge "Recherche"',
-      'Support email prioritaire',
-    ],
-    cta: 'Demander un accès',
-    ctaLink: '/contact?plan=research',
-    popular: false,
-    note: '📌 Accès privilégié pour la recherche académique et les publications.',
-    color: 'from-teal-600 to-teal-700',
-    badge: '🎓 Recherche',
-    isPro: true,
-  },
-];
-
-const optionalFeatures = [
-  { id: 'history_extended', name: 'Historique étendu 24–36 mois', icon: '📊', price: '+1,99 €' },
-  { id: 'exports_unlimited', name: 'Exports illimités', icon: '📁', price: '+1,99 €' },
-  { id: 'price_alerts', name: 'Alertes de variation de prix observé', icon: '🔔', price: '+2,99 €' },
-  { id: 'monthly_report', name: 'Rapport mensuel automatique (PDF)', icon: '🧾', price: '+2,99 €' },
-];
+function formatPrice(p: number | "gratuit") {
+  if (p === "gratuit") return "Gratuit";
+  return `${p.toFixed(2).replace(".", ",")} €`;
+}
 
 export default function Pricing() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-
-  // Filter citizen and professional plans
-  const citizenPlans = pricingPlans.filter(plan => !plan.isPro);
-  const proPlans = pricingPlans.filter(plan => plan.isPro);
-
-  const handleSelectPlan = (planId: string) => {
-    const target = `/inscription?plan=${planId}`;
-    if (!user) {
-      navigate(`/connexion?next=${encodeURIComponent(target)}`);
-      return;
-    }
-    navigate(target);
-  };
-
-  const handleContactPlan = (ctaLink: string) => {
-    if (ctaLink) {
-      navigate(ctaLink);
-    }
-  };
+  const { subs, annuals, options } = useMemo(() => {
+    const subs = pricingPlans.filter((p) => p.cadence === "mensuel" && p.id !== "freemium");
+    const annuals = pricingPlans.filter((p) => p.cadence === "annuel");
+    const options = pricingPlans.filter((p) => p.cadence === "option");
+    const freemium = pricingPlans.find((p) => p.id === "freemium");
+    return { subs: freemium ? [freemium, ...subs] : subs, annuals, options };
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 shadow-md border-b border-blue-100 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4">
-            <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-              Observatoire citoyen des prix – données publiques agrégées
-            </span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">
-            💰 Tarifs & Accès
-          </h1>
-          <h2 className="text-2xl sm:text-3xl font-semibold text-blue-600 dark:text-blue-400 mb-4">
-            A KI PRI SA YÉ
-          </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-            Observatoire citoyen des prix – données publiques agrégées
+    <>
+      <Helmet>
+        <title>Offres & Abonnements – A KI PRI SA YÉ</title>
+        <meta
+          name="description"
+          content="Découvrez les formules Freemium, Pro et Premium, ainsi que les options (OCR, IA) pour A KI PRI SA YÉ."
+        />
+      </Helmet>
+
+      <main style={{ padding: "24px 16px", maxWidth: 1100, margin: "0 auto" }}>
+        <header style={{ marginBottom: 18 }}>
+          <h1 style={{ fontSize: 28, margin: 0 }}>Offres & abonnements</h1>
+          <p style={{ opacity: 0.85, marginTop: 8, lineHeight: 1.5 }}>
+            Choisis une formule adaptée à ton usage. Freemium pour démarrer, Pro/Premium pour analyser et suivre tes
+            prix, options pour aller plus loin.
           </p>
-        </div>
-      </div>
+        </header>
 
-      {/* Fundamental Principle */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-500 dark:border-blue-600 rounded-2xl p-8 mb-12">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Lock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                🔒 Principe fondamental
-              </h2>
-              <p className="text-slate-700 dark:text-slate-300 text-lg leading-relaxed mb-4">
-                <strong>L'accès à l'information citoyenne reste gratuit. Toujours.</strong>
-              </p>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4">
-                A KI PRI SA YÉ est un outil d'information, pas un service commercial.
-              </p>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4">
-                Les données affichées sont publiques, observées, descriptives, <strong>sans affiliation</strong>, <strong>sans publicité</strong>, <strong>sans vente de données</strong>.
-              </p>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                Les formules payantes servent uniquement à financer :
-              </p>
-              <ul className="list-disc list-inside text-slate-700 dark:text-slate-300 ml-4 mt-2 space-y-1">
-                <li>l'analyse</li>
-                <li>l'agrégation</li>
-                <li>les outils de confort</li>
-                <li>et la maintenance de la plateforme</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
+        <section style={{ marginTop: 18 }}>
+          <h2 style={{ fontSize: 18, margin: "0 0 12px 0", opacity: 0.9 }}>Formules</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+            {subs.map((p) => (
+              <article
+                key={p.id}
+                style={{
+                  borderRadius: 16,
+                  padding: 16,
+                  border: p.highlight ? "1px solid rgba(59,130,246,0.6)" : "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(255,255,255,0.04)",
+                  boxShadow: p.highlight ? "0 0 0 1px rgba(59,130,246,0.15) inset" : "none",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+                  <div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      <strong style={{ fontSize: 16 }}>{p.name}</strong>
+                      {p.badge ? (
+                        <span
+                          style={{
+                            fontSize: 12,
+                            padding: "3px 8px",
+                            borderRadius: 999,
+                            background: "rgba(255,255,255,0.08)",
+                            border: "1px solid rgba(255,255,255,0.10)",
+                            opacity: 0.95,
+                          }}
+                        >
+                          {p.badge}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p style={{ margin: "8px 0 0 0", opacity: 0.85, lineHeight: 1.45 }}>{p.description}</p>
+                  </div>
 
-      {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {citizenPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`relative bg-white dark:bg-slate-900 rounded-2xl shadow-lg border-2 ${
-                plan.popular
-                  ? 'border-blue-500 dark:border-blue-600 transform scale-105'
-                  : 'border-slate-200 dark:border-slate-700'
-              } p-6 flex flex-col transition-all hover:shadow-xl`}
-            >
-              {/* Badge */}
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="px-4 py-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-full shadow-lg">
-                    {plan.badge}
-                  </span>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 20, fontWeight: 700 }}>{formatPrice(p.priceEur)}</div>
+                    <div style={{ fontSize: 12, opacity: 0.75 }}>{p.priceEur === "gratuit" ? "" : "/ mois"}</div>
+                  </div>
                 </div>
-              )}
 
-              {/* Icon & Title */}
-              <div className="mb-4">
-                <div className="text-4xl mb-3">{plan.icon}</div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                  {plan.name}
-                </h3>
-                <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                  {plan.subtitle}
-                </p>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {plan.description}
-                </p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-slate-900 dark:text-white">
-                    {plan.price}
-                  </span>
-                  <span className="text-lg text-slate-600 dark:text-slate-400">
-                    {plan.period}
-                  </span>
-                </div>
-                {plan.annualPrice && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    {plan.annualPrice}
-                  </p>
-                )}
-              </div>
-
-              {/* Features */}
-              <div className="flex-1 mb-6">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-700 dark:text-slate-300">
-                        {feature}
-                      </span>
-                    </li>
+                <ul style={{ margin: "12px 0 0 0", paddingLeft: 18, opacity: 0.92, lineHeight: 1.5 }}>
+                  {p.features.slice(0, 6).map((f) => (
+                    <li key={f}>{f}</li>
                   ))}
                 </ul>
-              </div>
 
-              {/* Note */}
-              {plan.note && (
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    {plan.note}
-                  </p>
+                {p.limits?.length ? (
+                  <details style={{ marginTop: 10, opacity: 0.85 }}>
+                    <summary style={{ cursor: "pointer" }}>Limites</summary>
+                    <ul style={{ margin: "8px 0 0 0", paddingLeft: 18 }}>
+                      {p.limits.map((l) => (
+                        <li key={l}>{l}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+
+                <div style={{ marginTop: 14 }}>
+                  <a
+                    href={p.ctaHref}
+                    style={{
+                      display: "inline-block",
+                      padding: "10px 12px",
+                      borderRadius: 12,
+                      textDecoration: "none",
+                      background: p.highlight ? "rgba(59,130,246,0.95)" : "rgba(255,255,255,0.10)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      color: "white",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {p.ctaLabel}
+                  </a>
                 </div>
-              )}
-
-              {/* Warning */}
-              {plan.warning && (
-                <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg">
-                  <p className="text-xs text-orange-700 dark:text-orange-300">
-                    {plan.warning}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA Button */}
-              <button
-                type="button"
-                onClick={() => handleSelectPlan(plan.id)}
-                className={`w-full py-3 px-6 text-center font-bold rounded-xl transition-all ${
-                  plan.popular
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl'
-                    : `bg-gradient-to-r ${plan.color} hover:opacity-90 text-white`
-                }`}
-              >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Optional Features */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700 mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-            ➕ Options (facultatives)
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-            (Aucune option ne bloque l'accès citoyen)
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {optionalFeatures.map((feature) => (
-              <div
-                key={feature.id}
-                className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
-              >
-                <div className="text-3xl mb-2">{feature.icon}</div>
-                <h3 className="font-semibold text-slate-900 dark:text-white text-sm mb-2">
-                  {feature.name}
-                </h3>
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {feature.price}
-                </p>
-              </div>
+              </article>
             ))}
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Separator */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-300 dark:border-slate-600"></div>
-          </div>
-          <div className="relative flex justify-center">
-            <span className="px-4 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 text-sm">
-              Offres sur mesure
-            </span>
-          </div>
-        </div>
-      </div>
+        {annuals.length ? (
+          <section style={{ marginTop: 22 }}>
+            <h2 style={{ fontSize: 18, margin: "0 0 12px 0", opacity: 0.9 }}>Annuel</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+              {annuals.map((p) => (
+                <article
+                  key={p.id}
+                  style={{
+                    borderRadius: 16,
+                    padding: 16,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <strong style={{ fontSize: 16 }}>{p.name}</strong>
+                  <p style={{ margin: "8px 0 0 0", opacity: 0.85 }}>{p.description}</p>
+                  <div style={{ marginTop: 10, fontSize: 18, fontWeight: 700 }}>{formatPrice(p.priceEur)} / an</div>
+                  <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, opacity: 0.92 }}>
+                    {p.features.map((f) => (
+                      <li key={f}>{f}</li>
+                    ))}
+                  </ul>
+                  <div style={{ marginTop: 12 }}>
+                    <a
+                      href={p.ctaHref}
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        textDecoration: "none",
+                        background: "rgba(255,255,255,0.10)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        color: "white",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {p.ctaLabel}
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-      {/* Professional Offers Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-            🏢 Offres Professionnelles
-          </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Solutions sur mesure pour les entreprises, collectivités et institutions
+        {options.length ? (
+          <section style={{ marginTop: 22 }}>
+            <h2 style={{ fontSize: 18, margin: "0 0 12px 0", opacity: 0.9 }}>Options</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
+              {options.map((p) => (
+                <article
+                  key={p.id}
+                  style={{
+                    borderRadius: 16,
+                    padding: 16,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                    <div>
+                      <strong style={{ fontSize: 16 }}>{p.name}</strong>
+                      <p style={{ margin: "8px 0 0 0", opacity: 0.85 }}>{p.description}</p>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 18, fontWeight: 700 }}>{formatPrice(p.priceEur)}</div>
+                      <div style={{ fontSize: 12, opacity: 0.75 }}>/ mois</div>
+                    </div>
+                  </div>
+
+                  <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, opacity: 0.92 }}>
+                    {p.features.map((f) => (
+                      <li key={f}>{f}</li>
+                    ))}
+                  </ul>
+
+                  <div style={{ marginTop: 12 }}>
+                    <a
+                      href={p.ctaHref}
+                      style={{
+                        display: "inline-block",
+                        padding: "10px 12px",
+                        borderRadius: 12,
+                        textDecoration: "none",
+                        background: "rgba(255,255,255,0.10)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                        color: "white",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {p.ctaLabel}
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section id="contact" style={{ marginTop: 26, paddingTop: 10 }}>
+          <h2 style={{ fontSize: 18, margin: "0 0 10px 0", opacity: 0.9 }}>Activer un abonnement</h2>
+          <p style={{ opacity: 0.85, lineHeight: 1.5 }}>
+            Paiement Stripe/PayPal branchable ensuite. Pour l’instant, ce bouton peut ouvrir un canal de contact.
           </p>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {proPlans.map((plan) => (
-            <div
-              key={plan.id}
-              className="relative bg-slate-800/50 dark:bg-slate-800/80 rounded-2xl shadow-lg border-2 border-slate-700 dark:border-slate-600 p-6 flex flex-col transition-all hover:shadow-xl hover:border-slate-600 dark:hover:border-slate-500"
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+            <a
+              href="/contact"
+              style={{
+                display: "inline-block",
+                padding: "10px 12px",
+                borderRadius: 12,
+                textDecoration: "none",
+                background: "rgba(59,130,246,0.95)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "white",
+                fontWeight: 700,
+              }}
             >
-              {/* Badge */}
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className={`px-4 py-1 bg-gradient-to-r ${plan.color} text-white text-sm font-bold rounded-full shadow-lg`}>
-                    {plan.badge}
-                  </span>
-                </div>
-              )}
-
-              {/* Icon & Title */}
-              <div className="mb-4">
-                <div className="text-4xl mb-3">{plan.icon}</div>
-                <h3 className="text-2xl font-bold text-white mb-1">
-                  {plan.name}
-                </h3>
-                <p className="text-sm font-semibold text-slate-300 mb-1">
-                  {plan.subtitle}
-                </p>
-                <p className="text-sm text-slate-400">
-                  {plan.description}
-                </p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-white">
-                    {plan.price}
-                  </span>
-                  <span className="text-lg text-slate-400">
-                    {plan.period}
-                  </span>
-                </div>
-                {plan.annualPrice && (
-                  <p className="text-sm text-slate-400 mt-1">
-                    {plan.annualPrice}
-                  </p>
-                )}
-              </div>
-
-              {/* Features */}
-              <div className="flex-1 mb-6">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-300">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Note */}
-              {plan.note && (
-                <div className="mb-4 p-3 bg-slate-700/50 border border-slate-600 rounded-lg">
-                  <p className="text-xs text-slate-300">
-                    {plan.note}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA Button */}
-              <button
-                type="button"
-                onClick={() => handleContactPlan(plan.ctaLink)}
-                className={`w-full py-3 px-6 text-center font-bold rounded-xl transition-all bg-gradient-to-r ${plan.color} hover:opacity-90 text-white shadow-lg hover:shadow-xl`}
-              >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Transparency & Ethics */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-500 dark:border-green-600 rounded-2xl p-8 mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 text-center">
-            🧭 Transparence & cadre éthique
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-4">
-                Ce que fait A KI PRI SA YÉ
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Observer</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Comparer</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Décrire</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Expliquer</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-4">
-                Ce que l'outil ne fait pas
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Ne conseille pas</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Ne vend pas</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Ne classe pas les territoires</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Ne collecte pas de données personnelles sensibles</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <X className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <span className="text-slate-700 dark:text-slate-300">Ne suit pas les utilisateurs</span>
-                </li>
-              </ul>
-            </div>
+              Contacter
+            </a>
+            <a
+              href="/"
+              style={{
+                display: "inline-block",
+                padding: "10px 12px",
+                borderRadius: 12,
+                textDecoration: "none",
+                background: "rgba(255,255,255,0.10)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                color: "white",
+                fontWeight: 600,
+              }}
+            >
+              Retour accueil
+            </a>
           </div>
-        </div>
-      </div>
-
-      {/* Why Paid Features */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700 mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-center">
-            📘 Pourquoi certaines fonctionnalités sont payantes ?
-          </h2>
-          <p className="text-slate-700 dark:text-slate-300 text-center mb-4 max-w-3xl mx-auto">
-            Les données observées restent accessibles gratuitement.
-          </p>
-          <p className="text-slate-700 dark:text-slate-300 text-center mb-6 max-w-3xl mx-auto">
-            Les formules payantes financent :
-          </p>
-          <div className="grid md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
-              <Database className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">l'infrastructure</p>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
-              <TrendingUp className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">l'agrégation intelligente</p>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
-              <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">l'historique</p>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center border border-blue-200 dark:border-blue-700">
-              <Zap className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">les outils d'analyse</p>
-            </div>
-          </div>
-          <p className="text-slate-600 dark:text-slate-400 text-center mt-6 text-sm">
-            sans publicité, sans affiliation, sans conflit d'intérêt.
-          </p>
-        </div>
-      </div>
-
-      {/* Public Commitment */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-2xl p-8 text-white shadow-xl">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Bell className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold mb-4">
-                🔔 Engagement public
-              </h2>
-              <p className="text-blue-100 mb-4 leading-relaxed">
-                A KI PRI SA YÉ s'engage à maintenir :
-              </p>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  <span>un socle citoyen gratuit</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  <span>une neutralité stricte</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-5 h-5 flex-shrink-0" />
-                  <span>une transparence totale sur ses méthodes</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </main>
+    </>
   );
 }
