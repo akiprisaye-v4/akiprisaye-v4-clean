@@ -174,7 +174,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: dist
+          path: frontend/dist
 
       - name: 🚀 Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -182,7 +182,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ${{ env.CLOUDFLARE_PROJECT_NAME }}
-          directory: dist
+          directory: frontend/dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📊 Deployment summary
