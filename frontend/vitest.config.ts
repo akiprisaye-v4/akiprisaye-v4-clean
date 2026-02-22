@@ -24,6 +24,7 @@ export default defineConfig({
       abs('./src/services/openFoodFacts.test.ts'),
       abs('./src/services/alertProductImageService.test.ts'),
       abs('./src/services/__tests__/basketPricingService.test.ts'),
+      // NOTE: si functions/ est à la racine du repo, remplace par ../functions/...
       abs('./functions/**/__tests__/*.test.ts'),
       abs('./src/test/alerts.filterActive.test.ts'),
       abs('./src/test/alerts.searchSort.test.ts'),
@@ -43,21 +44,15 @@ export default defineConfig({
       abs('./src/test/shoppingListPersistence.test.ts'),
       abs('./src/test/offCacheFallback.test.ts'),
       abs('./src/test/scannerFallback.test.tsx'),
-<<<<<<< HEAD
-
       abs('./src/test/listePage.thumbnails.test.tsx'),
-      abs('./src/test/mergeConflictMarkers.test.ts'),
-
-=======
-      abs('./src/test/listePage.thumbnails.test.tsx'),
->>>>>>> origin/main
       abs('./src/test/decisionEngine.test.ts'),
       abs('./src/domain/decision/__tests__/decisionEngine.test.ts'),
       abs('./src/domain/shoppingList/premium/tests/*.test.ts'),
+      // NOTE: si scripts/ est à la racine du repo, remplace par ../scripts/...
       abs('./scripts/verify-pages-api.test.ts'),
     ],
 
-    exclude: ['**/node_modules/**', '**/.git/**'],
+    exclude: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/coverage/**'],
 
     testTimeout: 10_000,
     hookTimeout: 10_000,

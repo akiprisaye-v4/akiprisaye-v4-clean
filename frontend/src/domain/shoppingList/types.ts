@@ -18,10 +18,6 @@ export interface ShoppingListItem {
   quantityValue?: number;
   quantityUnit?: 'kg' | 'g' | 'l' | 'ml' | 'unit';
   territory?: string;
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
   imageUrl?: string;
   imageThumbUrl?: string;
   normalized?: {
