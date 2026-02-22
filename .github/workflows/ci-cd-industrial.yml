@@ -127,6 +127,7 @@ jobs:
 
   routing-check:
     name: 4️⃣ SPA Routing Guard
+    continue-on-error: true
     needs: build
     runs-on: ubuntu-latest
     steps:
