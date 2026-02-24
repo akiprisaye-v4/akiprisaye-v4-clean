@@ -204,8 +204,14 @@ export async function handleRequest(request: Request, env: Env, ctx: ExecutionCo
         return withCors(json({ status: 'ignored', reason: 'duplicate_event' }, 200), origin, env);
       }
 
+<<<<<<< HEAD
+      await syncPaypalSubscriptionEvent(env.PRICE_DB, event);
+
+      if (hasMissingPayPalSignatureHeaders(request)) {
+=======
       if (hasMissingPayPalSignatureHeaders(request)) {
         await syncPaypalSubscriptionEvent(env.PRICE_DB, event);
+>>>>>>> origin/main
         console.warn('paypal_webhook_processed_unverified', {
           eventId,
           eventType,
@@ -220,8 +226,11 @@ export async function handleRequest(request: Request, env: Env, ctx: ExecutionCo
         return withCors(json({ error: 'invalid_signature' }, 401), origin, env);
       }
 
+<<<<<<< HEAD
+=======
       await syncPaypalSubscriptionEvent(env.PRICE_DB, event);
 
+>>>>>>> origin/main
       const status = mapPayPalEventTypeToSubscriptionStatus(event.event_type);
       if (!status) {
         console.log('paypal_webhook_ignored', { eventId, eventType, reason: 'unsupported_event_type' });
