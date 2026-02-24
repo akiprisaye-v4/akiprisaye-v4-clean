@@ -119,7 +119,9 @@ export async function ensureProductExists(
   },
 ): Promise<void> {
   await db
-    .prepare(`INSERT OR IGNORE INTO products (ean, product_name, quantity, updated_at) VALUES (?, NULL, ?, datetime('now'))`)
+    .prepare(
+      `INSERT OR IGNORE INTO products (ean, product_name, quantity, updated_at) VALUES (?, NULL, ?, datetime('now'))`,
+    )
     .bind(input.ean, input.quantity ?? null)
     .run();
 }
@@ -155,10 +157,7 @@ export async function upsertProduct(
     .run();
 }
 
-export async function insertObservationAndRefreshAggregate(
-  db: D1Database,
-  input: InsertObservationInput,
-): Promise<void> {
+export async function insertObservationAndRefreshAggregate(db: D1Database, input: InsertObservationInput): Promise<void> {
   await insertObservationCentsAndRefreshAggregate(db, {
     ...input,
     priceCents: Math.round(input.price * 100),
@@ -355,7 +354,14 @@ export async function updateImportJobProgress(
        SET status = ?, total_rows = ?, success_rows = ?, error_rows = ?, finished_at = CASE WHEN ? THEN datetime('now') ELSE NULL END
        WHERE id = ?`,
     )
-    .bind(payload.status, payload.totalRows, payload.successRows, payload.errorRows, payload.finished ? 1 : 0, payload.id)
+    .bind(
+      payload.status,
+      payload.totalRows,
+      payload.successRows,
+      payload.errorRows,
+      payload.finished ? 1 : 0,
+      payload.id,
+    )
     .run();
 }
 
@@ -461,20 +467,26 @@ export async function updateReceiptJobCashier(
     .run();
 }
 
+/**
+ * Idempotent insert: does not throw when PayPal re-sends the same event_id.
+ * Returns true if inserted, false if already existed.
+ */
 export async function recordWebhookEventIfNew(
   db: D1Database,
   payload: { eventId: string; eventType: string; createTime?: string; rawJson: string },
 ): Promise<boolean> {
   const cappedRawJson = payload.rawJson.length > 64000 ? payload.rawJson.slice(0, 64000) : payload.rawJson;
+
   const result = await db
     .prepare(
-      `INSERT OR IGNORE INTO webhook_events (event_id, event_type, create_time, raw_json)
-       VALUES (?, ?, ?, ?)`,
+      `INSERT INTO webhook_events (event_id, event_type, create_time, raw_json)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(event_id) DO NOTHING`,
     )
     .bind(payload.eventId, payload.eventType, payload.createTime ?? null, cappedRawJson)
     .run();
 
-  return Boolean(result.meta.changes && result.meta.changes > 0);
+  return (result.meta?.changes ?? 0) > 0;
 }
 
 export async function upsertSubscriptionByPayPalId(db: D1Database, payload: SubscriptionUpsertPayload): Promise<void> {
