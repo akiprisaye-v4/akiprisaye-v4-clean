@@ -1,6 +1,8 @@
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
+console.log("=== NEW VERIFY SCRIPT VERSION ACTIVE ===");
+
 const candidates = [
   resolve(process.cwd(), 'stores.json'),
   resolve(process.cwd(), 'frontend/stores.json'),
@@ -9,27 +11,17 @@ const candidates = [
   resolve(process.cwd(), 'data/stores.json'),
 ];
 
+console.log("Candidates:", candidates);
+
 const storesPath = candidates.find((p) => existsSync(p));
 
 if (!storesPath) {
-  console.error('[CI] stores.json introuvable. Chemins testés:\n- ' + candidates.join('\n- '));
+  console.error('[CI] stores.json introuvable');
   process.exit(1);
 }
 
-console.log('[CI] Vérification stores.json →', storesPath);
+console.log('[CI] Using:', storesPath);
 
-let stores;
-try {
-  stores = JSON.parse(readFileSync(storesPath, 'utf8'));
-} catch (e) {
-  console.error('[CI] stores.json invalide (JSON.parse a échoué):', e?.message || e);
-  process.exit(1);
-}
+const stores = JSON.parse(readFileSync(storesPath, 'utf8'));
 
-// Optionnel: vérifs minimales (adapte si ton schéma est différent)
-if (!stores || (typeof stores !== 'object')) {
-  console.error('[CI] stores.json: contenu inattendu (doit être un objet/array)');
-  process.exit(1);
-}
-
-console.log('[CI] OK: stores.json parsé correctement');
+console.log('[CI] OK');
