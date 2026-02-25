@@ -177,3 +177,4 @@ PR_DESCRIPTION.md
 MERGE_RESOLUTION_SUMMARY.md
 push-rebased-branch.sh
 *.bak.*
+frontend/dist/
