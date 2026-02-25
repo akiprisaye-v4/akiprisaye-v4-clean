@@ -17,7 +17,8 @@
     "typecheck:ci": "tsc -p tsconfig.json --noEmit",
     "test:ci": "vitest run --config vitest.config.ts",
     "audit": "npm audit --omit=dev --audit-level=high",
-    "audit:ci": "npm audit --omit=dev --audit-level=high"
+    "audit:ci": "npm audit --omit=dev --audit-level=high",
+    "postbuild": "cp -f public/_redirects dist/_redirects 2>/dev/null || true"
   },
   "dependencies": {
     "@capacitor/core": "^8.1.0",
