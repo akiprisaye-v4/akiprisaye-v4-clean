@@ -49,6 +49,8 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Install ripgrep (rg)
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Repository audit gate
         shell: bash
         run: |
