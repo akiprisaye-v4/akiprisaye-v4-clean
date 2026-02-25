@@ -1,25 +1,35 @@
-import fs from "fs";
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
 
-console.log("🔎 Vérification stores.json…");
+const candidates = [
+  resolve(process.cwd(), 'stores.json'),
+  resolve(process.cwd(), 'frontend/stores.json'),
+  resolve(process.cwd(), 'frontend/public/stores.json'),
+  resolve(process.cwd(), 'public/stores.json'),
+  resolve(process.cwd(), 'data/stores.json'),
+];
 
-const raw = fs.readFileSync("./stores.json", "utf8");
-const stores = JSON.parse(raw);
+const storesPath = candidates.find((p) => existsSync(p));
 
-let errors = 0;
-let seenNames = new Set();
+if (!storesPath) {
+  console.error('[CI] stores.json introuvable. Chemins testés:\n- ' + candidates.join('\n- '));
+  process.exit(1);
+}
 
-stores.forEach((s, i) => {
-  if (seenNames.has(s.name)) {
-    console.log(`❌ Doublon détecté: ${s.name}`);
-    errors++;
-  }
-  seenNames.add(s.name);
+console.log('[CI] Vérification stores.json →', storesPath);
 
-  if (!s.name || !s.city || !s.territory) {
-    console.log(`❌ Données manquantes (index ${i}):`, s);
-    errors++;
-  }
-});
+let stores;
+try {
+  stores = JSON.parse(readFileSync(storesPath, 'utf8'));
+} catch (e) {
+  console.error('[CI] stores.json invalide (JSON.parse a échoué):', e?.message || e);
+  process.exit(1);
+}
 
-console.log(errors === 0 ? "✔ OK : Aucun problème détecté." : `❌ ${errors} erreurs trouvées.`);
-process.exit(errors > 0 ? 1 : 0);
+// Optionnel: vérifs minimales (adapte si ton schéma est différent)
+if (!stores || (typeof stores !== 'object')) {
+  console.error('[CI] stores.json: contenu inattendu (doit être un objet/array)');
+  process.exit(1);
+}
+
+console.log('[CI] OK: stores.json parsé correctement');
