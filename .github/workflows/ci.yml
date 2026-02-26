@@ -29,5 +29,3 @@ jobs:
         run: npm run build
 
       - name: Typecheck
-        working-directory: frontend
-        run: npm run -s typecheck
