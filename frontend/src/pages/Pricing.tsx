@@ -18,7 +18,7 @@ export default function PricingPage() {
 
         <section className="grid gap-8 md:grid-cols-3">
 
-          <!-- GRATUIT -->
+          {/* GRATUIT */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-8 flex flex-col">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               Gratuit
@@ -44,7 +44,7 @@ export default function PricingPage() {
             </Link>
           </div>
 
-          <!-- PRO -->
+          {/* PRO */}
           <div className="rounded-2xl border-2 border-black dark:border-white bg-white dark:bg-slate-900 shadow-md p-8 flex flex-col relative">
             <div className="absolute -top-3 right-6 bg-black text-white dark:bg-white dark:text-slate-900 text-xs font-semibold px-3 py-1 rounded-full">
               Recommandé
@@ -76,7 +76,7 @@ export default function PricingPage() {
             </Link>
           </div>
 
-          <!-- BUSINESS -->
+          {/* BUSINESS */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-8 flex flex-col">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               Business
