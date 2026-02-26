@@ -124,6 +124,11 @@ function LegacyAliasRoutes() {
       {/* Scanner */}
       <Route path="scan" element={<Navigate to="/scanner" replace />} />
 
+      {/* Offres / Tarifs (aliases utiles si un lien pointe vers /offres) */}
+      <Route path="offres" element={<Navigate to="/pricing" replace />} />
+      <Route path="tarifs" element={<Navigate to="/pricing" replace />} />
+      <Route path="abonnements" element={<Navigate to="/pricing" replace />} />
+
       {/* Auth: login (legacy deep-links) */}
       <Route path="Login" element={<Navigate to="/login" replace />} />
       <Route path="auth/login" element={<Navigate to="/login" replace />} />
@@ -218,129 +223,128 @@ export default function App() {
             <OnboardingProvider>
               <StoreSelectionProvider>
                 <EntitlementProvider>
-                <BrowserRouter>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <Routes>
+                  <BrowserRouter>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <Routes>
+                        {/* Admin routes with dedicated layout */}
+                        <Route path="/admin" element={<AdminLayout />}>
+                          <Route index element={<AdminDashboardNew />} />
+                          <Route path="stores" element={<StoreList />} />
+                          <Route path="stores/new" element={<StoreForm />} />
+                          <Route path="stores/:id" element={<StoreDetail />} />
+                          <Route path="stores/:id/edit" element={<StoreForm />} />
+                          <Route path="products" element={<ProductList />} />
+                          <Route path="products/new" element={<ProductForm />} />
+                          <Route path="products/:id" element={<ProductDetail />} />
+                          <Route path="products/:id/edit" element={<ProductForm />} />
+                          <Route path="import" element={<ImportPage />} />
+                          <Route path="sync" element={<SyncDashboard />} />
+                        </Route>
 
-                      {/* Admin routes with dedicated layout */}
-                      <Route path="/admin" element={<AdminLayout />}>
-                        <Route index element={<AdminDashboardNew />} />
-                        <Route path="stores" element={<StoreList />} />
-                        <Route path="stores/new" element={<StoreForm />} />
-                        <Route path="stores/:id" element={<StoreDetail />} />
-                        <Route path="stores/:id/edit" element={<StoreForm />} />
-                        <Route path="products" element={<ProductList />} />
-                        <Route path="products/new" element={<ProductForm />} />
-                        <Route path="products/:id" element={<ProductDetail />} />
-                        <Route path="products/:id/edit" element={<ProductForm />} />
-                        <Route path="import" element={<ImportPage />} />
-                        <Route path="sync" element={<SyncDashboard />} />
-                      </Route>
+                        {/* Main site routes with Layout */}
+                        <Route path="/" element={<Layout />}>
+                          <Route index element={<Home />} />
+                          <Route path="carte" element={<Carte />} />
+                          <Route path="carte-interactive" element={<MapPage />} />
+                          <Route path="dashboard" element={<AdminDashboard />} />
+                          <Route path="home" element={<Home />} />
+                          <Route path="comparateur" element={<Comparateur />} />
+                          <Route path="search" element={<SearchPage />} />
+                          <Route path="observatoire" element={<ObservatoireHub />} />
+                          <Route path="vie-chere" element={<LutteVieChere />} />
+                          <Route path="methodologie" element={<Methodologie />} />
+                          <Route path="faq" element={<Faq />} />
+                          <Route path="contact" element={<Contact />} />
+                          <Route path="actualites" element={<Actualites />} />
+                          <Route path="mentions-legales" element={<MentionsLegales />} />
+                          <Route path="privacy" element={<Transparence />} />
 
-                      {/* Main site routes with Layout */}
-                      <Route path="/" element={<Layout />}>
-                        <Route index element={<Home />} />
-                        <Route path="carte" element={<Carte />} />
-                        <Route path="carte-interactive" element={<MapPage />} />
-                        <Route path="dashboard" element={<AdminDashboard />} />
-                        <Route path="home" element={<Home />} />
-                        <Route path="comparateur" element={<Comparateur />} />
-                        <Route path="search" element={<SearchPage />} />
-                        <Route path="observatoire" element={<ObservatoireHub />} />
-                        <Route path="vie-chere" element={<LutteVieChere />} />
-                        <Route path="methodologie" element={<Methodologie />} />
-                        <Route path="faq" element={<Faq />} />
-                        <Route path="contact" element={<Contact />} />
-                        <Route path="actualites" element={<Actualites />} />
-                        <Route path="mentions-legales" element={<MentionsLegales />} />
-                        <Route path="privacy" element={<Transparence />} />
+                          {/* Additional feature routes */}
+                          <Route path="donnees-publiques" element={<DonneesPubliques />} />
+                          <Route path="contribuer" element={<Contribuer />} />
+                          <Route path="contribuer-prix" element={<ContribuerPrix />} />
+                          <Route path="comparateurs" element={<Comparateurs />} />
+                          <Route path="carte-itineraires" element={<CarteItinerairesHub />} />
+                          <Route path="comparateur-citoyen" element={<ComparateurCitoyen />} />
 
-                        {/* Additional feature routes */}
-                        <Route path="donnees-publiques" element={<DonneesPubliques />} />
-                        <Route path="contribuer" element={<Contribuer />} />
-                        <Route path="contribuer-prix" element={<ContribuerPrix />} />
-                        <Route path="comparateurs" element={<Comparateurs />} />
-                        <Route path="carte-itineraires" element={<CarteItinerairesHub />} />
-                        <Route path="comparateur-citoyen" element={<ComparateurCitoyen />} />
+                          {/* Scanner & OCR routes */}
+                          <Route path="scanner" element={<ScannerHub />} />
+                          <Route path="scan-ean" element={<ScanEAN />} />
+                          <Route path="analyse-photo-produit" element={<ProductPhotoAnalysis />} />
+                          <Route path="product/:barcode" element={<ProductScanResult />} />
+                          <Route path="ocr" element={<OCRHub />} />
 
-                        {/* Scanner & OCR routes */}
-                        <Route path="scanner" element={<ScannerHub />} />
-                        <Route path="scan-ean" element={<ScanEAN />} />
-                        <Route path="analyse-photo-produit" element={<ProductPhotoAnalysis />} />
-                        <Route path="product/:barcode" element={<ProductScanResult />} />
-                        <Route path="ocr" element={<OCRHub />} />
+                          {/* Comparison & Reporting */}
+                          <Route path="comparaison-enseignes" element={<ComparaisonEnseignes />} />
+                          <Route path="comparaison-panier" element={<BasketComparison />} />
+                          <Route path="signalement" element={<SignalerAbus />} />
 
-                        {/* Comparison & Reporting */}
-                        <Route path="comparaison-enseignes" element={<ComparaisonEnseignes />} />
-                        <Route path="comparaison-panier" element={<BasketComparison />} />
-                        <Route path="signalement" element={<SignalerAbus />} />
+                          {/* Settings & History */}
+                          <Route path="parametres" element={<Settings />} />
+                          <Route path="historique-prix" element={<HistoriquePrix />} />
+                          <Route path="historique" element={<HistoriquePrix />} />
+                          <Route path="p/:id" element={<ProductDetailPage />} />
+                          <Route path="recherche-prix" element={<RecherchePrix />} />
+                          <Route path="alertes" element={<Alertes />} />
+                          <Route path="alertes/:id" element={<AlerteDetail />} />
+                          <Route path="promos" element={<Promos />} />
+                          <Route path="mes-listes" element={<MesListes />} />
+                          <Route path="liste" element={<ListePage />} />
+                          <Route path="upgrade" element={<UpgradePage />} />
 
-                        {/* Settings & History */}
-                        <Route path="parametres" element={<Settings />} />
-                        <Route path="historique-prix" element={<HistoriquePrix />} />
-                        <Route path="historique" element={<HistoriquePrix />} />
-                        <Route path="p/:id" element={<ProductDetailPage />} />
-                        <Route path="recherche-prix" element={<RecherchePrix />} />
-                        <Route path="alertes" element={<Alertes />} />
-                        <Route path="alertes/:id" element={<AlerteDetail />} />
-                        <Route path="promos" element={<Promos />} />
-                        <Route path="mes-listes" element={<MesListes />} />
-                        <Route path="liste" element={<ListePage />} />
-                        <Route path="upgrade" element={<UpgradePage />} />
+                          {/* Savings Dashboard */}
+                          <Route path="mes-economies" element={<MesEconomies />} />
+                          <Route path="tableau-de-bord" element={<MesEconomies />} />
 
-                        {/* Savings Dashboard */}
-                        <Route path="mes-economies" element={<MesEconomies />} />
-                        <Route path="tableau-de-bord" element={<MesEconomies />} />
+                          {/* Auth routes (canoniques) */}
+                          <Route path="login" element={<Login />} />
+                          <Route path="connexion" element={<Login />} />
+                          <Route path="inscription" element={<Inscription />} />
+                          <Route path="reset-password" element={<ResetPassword />} />
+                          <Route path="auth" element={<AuthHub />} />
+                          <Route
+                            path="mon-compte"
+                            element={
+                              <RequireAuth>
+                                <MonCompte />
+                              </RequireAuth>
+                            }
+                          />
 
-                        {/* Auth routes (canoniques) */}
-                        <Route path="login" element={<Login />} />
-                        <Route path="connexion" element={<Login />} />
-                        <Route path="inscription" element={<Inscription />} />
-                        <Route path="reset-password" element={<ResetPassword />} />
-                        <Route path="auth" element={<AuthHub />} />
-                        <Route
-                          path="mon-compte"
-                          element={
-                            <RequireAuth>
-                              <MonCompte />
-                            </RequireAuth>
-                          }
-                        />
+                          {/* Aliases legacy (stables CI) */}
+                          <LegacyAliasRoutes />
 
-                        {/* Aliases legacy (stables CI) */}
-                        {LegacyAliasRoutes()}
+                          {/* Pricing & Subscription */}
+                          <Route path="pricing" element={<Pricing />} />
+                          <Route path="subscribe" element={<Subscribe />} />
+                          <Route path="subscribe/success" element={<Subscribe />} />
 
-                        {/* Pricing & Subscription */}
-                        <Route path="pricing" element={<Pricing />} />
-                        <Route path="subscribe" element={<Subscribe />} />
-                        <Route path="subscribe/success" element={<Subscribe />} />
+                          {/* Observatory real-time */}
+                          <Route path="observatoire-temps-reel" element={<ObservatoireTempsReel />} />
 
-                        {/* Observatory real-time */}
-                        <Route path="observatoire-temps-reel" element={<ObservatoireTempsReel />} />
+                          {/* Transparency & reporting */}
+                          <Route path="transparence" element={<Transparence />} />
+                          <Route path="signaler-abus" element={<SignalerAbus />} />
 
-                        {/* Transparency & reporting */}
-                        <Route path="transparence" element={<Transparence />} />
-                        <Route path="signaler-abus" element={<SignalerAbus />} />
+                          {/* Admin routes */}
+                          <Route path="admin/sync" element={<SyncDashboard />} />
 
-                        {/* Admin routes */}
-                        <Route path="admin/sync" element={<SyncDashboard />} />
+                          {/* i18n Test (development/testing) */}
+                          <Route path="test-i18n" element={<I18nTest />} />
 
-                        {/* i18n Test (development/testing) */}
-                        <Route path="test-i18n" element={<I18nTest />} />
+                          {/* Catch-all route - redirect to home */}
+                          <Route path="*" element={<Navigate to="/" replace />} />
+                        </Route>
+                      </Routes>
 
-                        {/* Catch-all route - redirect to home */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                      </Route>
-                    </Routes>
-
-                    <AnalyticsTracker />
-                    <PerformanceMonitor />
-                    <OnboardingAutoStart />
-                    <OnboardingTour />
-                    <HelpButton />
-                    <ToastProvider />
-                  </Suspense>
-                </BrowserRouter>
+                      <AnalyticsTracker />
+                      <PerformanceMonitor />
+                      <OnboardingAutoStart />
+                      <OnboardingTour />
+                      <HelpButton />
+                      <ToastProvider />
+                    </Suspense>
+                  </BrowserRouter>
                 </EntitlementProvider>
               </StoreSelectionProvider>
             </OnboardingProvider>
