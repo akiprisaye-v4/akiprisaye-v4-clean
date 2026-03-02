@@ -1,4 +1,4 @@
-const CACHE_NAME = 'akiprisaye-smart-cache-v5';
+const CACHE_NAME = 'akiprisaye-smart-cache-v6';
 
 self.addEventListener('install', (event) => {
   const base = new URL('./', self.registration.scope).href;
@@ -27,6 +27,29 @@ self.addEventListener('fetch', (event) => {
 
   if (url.origin === self.location.origin && url.pathname.startsWith(new URL('api/', self.registration.scope).pathname)) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
+    return;
+  }
+
+  // Locale files: network-first with cache fallback for offline support
+  if (url.origin === self.location.origin && url.pathname.startsWith(new URL('locales/', self.registration.scope).pathname)) {
+    event.respondWith(
+      (async () => {
+        try {
+          const networkResponse = await fetch(request, { cache: 'no-store' });
+          if (networkResponse && networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (_e) {
+          const cachedResponse = await caches.match(request);
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return new Response('', { status: 503, statusText: 'Service Unavailable' });
+        }
+      })(),
+    );
     return;
   }
 
