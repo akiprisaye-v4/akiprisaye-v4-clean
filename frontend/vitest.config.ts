@@ -23,6 +23,8 @@ export default defineConfig({
     include: [
       abs('./src/services/openFoodFacts.test.ts'),
       abs('./src/services/alertProductImageService.test.ts'),
+      abs('./src/services/photoProductSearchService.test.ts'),
+      abs('./src/services/observatoirePriceSeries.test.ts'),
       abs('./src/services/__tests__/basketPricingService.test.ts'),
       // NOTE: si functions/ est à la racine du repo, remplace par ../functions/...
       abs('./functions/**/__tests__/*.test.ts'),
