@@ -1,0 +1,50 @@
+name: Fermer les PRs obsolètes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  close-stale-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fermer les PRs obsolètes (Codex / Copilot)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // PRs à conserver (PR courante du nettoyage)
+            const keepPRs = new Set([1161]);
+
+            // Récupère toutes les PRs ouvertes avec pagination
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const skipped = prs.filter(pr => keepPRs.has(pr.number)).length;
+            let closed = 0;
+            for (const pr of prs) {
+              if (keepPRs.has(pr.number)) {
+                console.log(`⏭️  Conserve PR #${pr.number}: ${pr.title}`);
+                continue;
+              }
+              try {
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  state: 'closed',
+                });
+                console.log(`✅ Fermée PR #${pr.number}: ${pr.title}`);
+                closed++;
+              } catch (err) {
+                console.error(`❌ Erreur PR #${pr.number}: ${err.message}`);
+              }
+            }
+            console.log(`\n🧹 Total fermées : ${closed}/${prs.length - skipped}`);
