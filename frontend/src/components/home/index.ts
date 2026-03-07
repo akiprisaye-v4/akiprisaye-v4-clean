@@ -34,3 +34,11 @@ export { default as PriceLiveTicker } from './PriceLiveTicker';
 export { default as TerritoryPriceChart } from './TerritoryPriceChart';
 export { default as PriceEvolutionChart } from './PriceEvolutionChart';
 export { default as LiveNewsFeed } from './LiveNewsFeed';
+
+// Composants innovants — inégalités tarifaires DOM
+export { default as ProduitChocWidget } from './ProduitChocWidget';
+export { default as IndiceEquiteWidget } from './IndiceEquiteWidget';
+
+// Composants illustratifs — images, vidéos, maquette logiciel
+export { default as AppDemoShowcase } from './AppDemoShowcase';
+export { default as VideoVieChere } from './VideoVieChere';
