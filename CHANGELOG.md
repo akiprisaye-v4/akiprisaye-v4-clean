@@ -3,7 +3,83 @@ Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et ce projet adhère à la [sémantique de versionnage](https://semver.org/lang/fr/).
 
-## [3.1.6] - 2026-03-09
+## [3.1.8] - 2026-03-09
+
+### Added — Octroi de Mer : enquête + conférence institutionnelle
+
+- **`pages/EnqueteOctroiMer.tsx`** — Dossier d'investigation `/enquete-octroi-mer`, 7 onglets :
+
+  | Onglet | Contenu | Sources |
+  |---|---|---|
+  | Histoire & origines | Frise 1670→2027 (Colbert, CJCE Legros, Loi 2004, Décision UE 2021) | Légifrance, EUR-Lex |
+  | Mécanisme juridique | Architecture légale, assiette OM-R/OM-C, différentiel, collecte DGDDI | Loi 2004-639, DGDDI |
+  | Taux par territoire | Tables GP/RE/MQ avec taux importé vs production locale | Délibérations Régionales 2022 |
+  | Impact consommateur | Impact par catégorie + diagramme décomposition du surcoût | INSEE 2022, Autorité concurrence |
+  | Financement collectivités | 1,2 Md€/an, table par DROM, risques budgétaires | DGDDI 2023, Cour des Comptes 2023 |
+  | Acteurs | 6 acteurs clés (Commission UE, Régions, DGDDI, Autorité conc., Cour Comptes, associations) | Sources officielles |
+  | Sources & réforme | Textes législatifs, données économiques, 4 scénarios réforme 2027 | Rapport Lurel-Hoibian 2019 |
+
+- **`pages/ConferenceOctroiMer.tsx`** — Conférence institutionnelle ultra-expert `/conference-octroi-mer`, 9 diapositives :
+
+  | Diapositive | Contenu | Sources |
+  |---|---|---|
+  | 1 — Panorama | 1,2 Md€/an, barres recettes 5 DROM | DGDDI 2023 |
+  | 2 — Histoire 350 ans | Frise chronologique SVG 1670→2027, arrêt CJCE Legros 1992 | EUR-Lex, Légifrance |
+  | 3 — Architecture juridique | Pyramide TFUE Art.349 → UE 2021/1657 → UE 2022/2 → Loi 2004 → délibérations | EUR-Lex |
+  | 4 — Mécanisme | Formule OM-R + OM-C, circuit A→E collecte/redistribution | Loi 2004-639, DGDDI |
+  | 5 — Analyse des taux | Double barres importé vs local, 8 secteurs, Guadeloupe 2026 | Délibérations CR GP 2022 |
+  | 6 — Impact macroéconomique | Chaîne OM→prix rayon (effet multiplicateur ×2,4), décomposition surcoût | INSEE 2022, Autorité conc. |
+  | 7 — Budget collectivités | Table 5 DROM recettes/budget/pct/communes, risque systémique | Cour des Comptes 2023 |
+  | 8 — Horizon 2027 | 4 scénarios réforme avec probabilités et analyse pros/cons | Rapport Lurel-Hoibian, Commission UE 2024 |
+  | 9 — Conclusion | 4 idées reçues déconstruites + 4 recommandations institutionnelles | — |
+
+- **`config/imageAssets.ts`** — Nouvelles clés `enqueteOctroiMer` et `conferenceOctroiMer`
+
+### Changed
+
+- **`App.tsx`** — +2 lazy-imports + routes `/enquete-octroi-mer` et `/conference-octroi-mer`
+- **`CalculateurOctroi.tsx`** — CTAs enrichis : « Enquête Octroi de Mer » + « Conférence institutionnelle »
+
+
+
+### Added — Conférence expert carburants DOM-TOM (niveau contre-expert)
+
+- **`pages/ConferenceCarburants.tsx`** — Nouvelle page `/conference-carburants` :
+  présentation interactive en **9 diapositives** sur l'anatomie complète du prix des carburants
+  dans les DOM-TOM. Niveau expert — données officielles vérifiables uniquement.
+
+  | Diapositive | Thème | Données clés |
+  |---|---|---|
+  | 1 — Panorama | Prix SP95/Diesel par territoire | Arrêtés préfectoraux jan. 2026 |
+  | 2 — Du puits à la pompe | 6 étapes d'approvisionnement | IEDOM / OPMR 2024 |
+  | 3 — Marché du brut | Courbe Brent 2020-2026 (SVG) | EIA, OPEC, IEA |
+  | 4 — SARA & raffinage | Capacité, brut traité, réseaux | IEDOM Martinique 2023 |
+  | 5 — Fret maritime | Surcoût par île (+3 % à +17 %) | Armateurs de France 2023 |
+  | 6 — Fiscalité comparée | DOM vs métro décomposition (SVG) | DGDDI / DGEC 2024-2025 |
+  | 7 — Prix plafonnés | Mécanisme préfectoral mensuel | Code de l'énergie / DGEC |
+  | 8 — Comparaison mondiale | 11 pays (barres SVG) | IEA / EIA jan. 2026 |
+  | 9 — Conclusion | 4 idées reçues déconstruites | — |
+
+  **Caractéristiques techniques :**
+  - Graphique SVG inline du cours du Brent (14 points, 2020-2026, inflexions annotées)
+  - Barres de décomposition du prix pump DOM vs métro
+  - Photos Wikimedia Commons avec chargement différé et fallback sur erreur
+  - Navigation clavier ← → + boutons + sélecteur de slide
+  - `SourcePill` vers toutes les sources officielles (DGEC, IEDOM, EIA, OPEC, IEA, Légifrance)
+  - SEO : `<Helmet>` avec titre et description optimisés
+
+- **`config/imageAssets.ts`** — Nouvelle clé `PAGE_HERO_IMAGES.conferenceCarburants`
+  (photo pétrole industriel, Unsplash)
+
+### Changed — Liens inter-pages carburants
+
+- **`FuelComparator.tsx`** — Barre de navigation enrichie :
+  - « Enquête » (raccourci) + nouveau bouton **« Conférence expert »** (→ `/conference-carburants`)
+  - Deux CTAs distincts en bas de résultats : enquête (orange) + conférence (amber)
+- **`EnqueteCarburants.tsx`** — CTA bas de page enrichi :
+  - Bouton secondaire **« Conférence expert »** en plus du comparateur
+
+
 
 ### Added — Transparence commissions & suivi analytique des comparateurs
 

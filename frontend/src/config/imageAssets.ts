@@ -192,11 +192,11 @@ export const PAGE_HERO_IMAGES = {
   /** Gamification profile — trophy/achievement */
   gamification: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Comparaison enseignes — supermarket aisle */
-  comparaisonEnseignes: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fm=webp&fit=crop&w=1600&q=80',
+  comparaisonEnseignes: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** App demo — person scanning barcode in tropical supermarket */
   appDemo: 'https://images.unsplash.com/photo-1607082348351-cef5cd02c7b0?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Vie chère poster — supermarket shelves with price tags */
-  videoPoster: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fm=webp&fit=crop&w=1200&q=80',
+  videoPoster: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fm=webp&fit=crop&w=1200&q=80',
   // ── Innovation Lab ───────────────────────────────────────────────────────
   /** Innovation Lab — futuristic tech lab / AI concept */
   innovationLab: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fm=webp&fit=crop&w=1600&q=80',
@@ -210,6 +210,10 @@ export const PAGE_HERO_IMAGES = {
   // ── New modules (this session) ───────────────────────────────────────────
   /** Calculateur octroi de mer — cargo ship at port */
   calculateurOctroi: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fm=webp&fit=crop&w=1600&q=80',
+  /** Enquête Octroi de Mer — customs / cargo containers at port */
+  enqueteOctroiMer: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fm=webp&fit=crop&w=1600&q=80',
+  /** Conférence Octroi de Mer — parliament / institutional building */
+  conferenceOctroiMer: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Simulateur budget familial — family grocery shopping */
   simulateurBudget: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Alertes rupture de stock — empty supermarket shelf */
@@ -336,6 +340,8 @@ export const PAGE_HERO_IMAGES = {
   comparateurCarburants: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Enquête Carburants — oil refinery at sunset (investigation dossier) */
   enqueteCarburants: 'https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fm=webp&fit=crop&w=1600&q=80',
+  /** Conférence Carburants — petroleum industry / oil tanks aerial view */
+  conferenceCarburants: 'https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Comparateur Assurances — insurance shield / contract */
   comparateurAssurances: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fm=webp&fit=crop&w=1600&q=80',
   /** Comparateur Formations — classroom / training session */

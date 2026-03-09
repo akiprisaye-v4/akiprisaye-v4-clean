@@ -21,7 +21,7 @@ import {
   Droplet, TrendingUp, Globe, Ship, DollarSign, Landmark,
   BarChart2, AlertTriangle, Info, ChevronRight, ChevronDown,
   FileText, Search, Truck, Factory, MapPin, Flame, Scale,
-  BookOpen, ExternalLink, Shield, PieChart,
+  BookOpen, ExternalLink, Shield, PieChart, ArrowLeft, GraduationCap,
 } from 'lucide-react';
 import { HeroImage } from '../components/ui/HeroImage';
 import { PAGE_HERO_IMAGES } from '../config/imageAssets';
@@ -205,6 +205,16 @@ const EnqueteCarburants: React.FC = () => {
       </Helmet>
 
       <div className="max-w-5xl mx-auto px-4 pb-16 pt-6">
+        {/* Back navigation */}
+        <div className="mb-4">
+          <Link
+            to="/comparateur-carburants"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-orange-300 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Retour au comparateur carburants
+          </Link>
+        </div>
+
         {/* Hero */}
         <div className="mb-6">
           <HeroImage
@@ -888,13 +898,21 @@ const EnqueteCarburants: React.FC = () => {
               Utilisez notre comparateur pour trouver la station la moins chère et naviguer directement vers elle avec le GPS.
             </p>
           </div>
-          <Link
-            to="/comparateur-carburants"
-            className="flex-shrink-0 flex items-center gap-2 px-5 py-3 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-xl transition-colors"
-          >
-            <Droplet className="w-4 h-4" /> Comparateur Carburants
-            <ChevronRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-wrap gap-3 flex-shrink-0">
+            <Link
+              to="/comparateur-carburants"
+              className="flex items-center gap-2 px-5 py-3 bg-orange-500 hover:bg-orange-400 text-white font-semibold rounded-xl transition-colors"
+            >
+              <Droplet className="w-4 h-4" /> Comparateur Carburants
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/conference-carburants"
+              className="flex items-center gap-2 px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-semibold rounded-xl transition-colors"
+            >
+              <GraduationCap className="w-4 h-4" /> Conf&eacute;rence expert
+            </Link>
+          </div>
         </div>
 
         <p className="mt-6 text-xs text-gray-700 text-center">
