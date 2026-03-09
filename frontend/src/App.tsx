@@ -197,6 +197,7 @@ const ConferencePrix = lazyPage(() => import('./pages/ConferencePrix'));
 const LettreHebdoIA = lazyPage(() => import('./pages/LettreHebdoIA'));
 const InnovationLab = lazyPage(() => import('./pages/InnovationLab'));
 const CalculateurOctroi = lazyPage(() => import('./pages/CalculateurOctroi'));
+const CalculateurBatiment = lazyPage(() => import('./pages/CalculateurBatiment'));
 const SimulateurBudgetFamilial = lazyPage(() => import('./pages/SimulateurBudgetFamilial'));
 const AlertesRupture = lazyPage(() => import('./pages/AlertesRupture'));
 const ReclamationIA = lazyPage(() => import('./pages/ReclamationIA'));
@@ -230,6 +231,10 @@ const AdminMarketplace = lazyPage(() => import('./pages/admin/marketplace/AdminM
 const DevisIA = lazyPage(() => import('./pages/DevisIA'));
 const DevisTracking = lazyPage(() => import('./pages/DevisTracking'));
 const AdminDevis = lazyPage(() => import('./pages/admin/AdminDevis'));
+const AdminCalculsBatiment = lazyPage(() => import('./pages/admin/AdminCalculsBatiment'));
+// Marketplace Pros Bâtiment
+const InscriptionProBatiment = lazyPage(() => import('./pages/InscriptionProBatiment'));
+const AdminInseeImport = lazyPage(() => import('./pages/admin/AdminInseeImport'));
 const RoadmapPage = lazyPage(() => import('./pages/RoadmapPage'));
 const DossierInvestisseurs = lazyPage(() => import('./pages/DossierInvestisseurs'));
 const ChecklistProduction = lazyPage(() => import('./pages/ChecklistProduction'));
@@ -377,6 +382,10 @@ export default function App() {
                           <Route path="marketplace" element={<AdminMarketplace />} />
                           {/* Devis IA admin pipeline */}
                           <Route path="devis" element={<AdminDevis />} />
+                          {/* Calculs bâtiment admin */}
+                          <Route path="calculs-batiment" element={<AdminCalculsBatiment />} />
+                          {/* Pros bâtiment — import INSEE */}
+                          <Route path="insee-import" element={<AdminInseeImport />} />
                         </Route>
 
                         {/* Main site routes with Layout */}
@@ -567,6 +576,7 @@ export default function App() {
                           <Route path="lettre-hebdo" element={<LettreHebdoIA />} />
                           <Route path="innovation-lab" element={<InnovationLab />} />
                           <Route path="calculateur-octroi" element={<CalculateurOctroi />} />
+                          <Route path="calculateur-batiment" element={<CalculateurBatiment />} />
                           <Route path="simulateur-budget" element={<SimulateurBudgetFamilial />} />
                           <Route path="alertes-rupture" element={<AlertesRupture />} />
                           <Route path="ia-reclamation" element={<ReclamationIA />} />
