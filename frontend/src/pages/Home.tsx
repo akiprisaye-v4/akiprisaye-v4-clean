@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { BarChart2, ShoppingCart, Receipt, Landmark, Search } from 'lucide-react';
 import { getComparisonOfDay, type PriceComparison } from '../data/exampleComparisons';
 import '../styles/home-v5.css';
@@ -8,6 +7,9 @@ import '../styles/animations.css';
 import { safeLocalStorage } from '../utils/safeLocalStorage';
 import { getTerritoryAsset, getProductImage } from '../config/imageAssets';
 import PriceLiveTicker from '../components/home/PriceLiveTicker';
+import { SEOHead } from '../components/ui/SEOHead';
+import { useScrollReveal } from '../hooks/useScrollReveal';
+import FlipStatCard from '../components/ui/FlipStatCard';
 
 const HowItWorksSection = lazy(() => import('./home-v5/HowItWorksSection'));
 const ObservatorySection = lazy(() => import('./home-v5/ObservatorySection'));
@@ -59,6 +61,52 @@ const TESTIMONIALS = [
   },
 ];
 
+/** Static phone mockup for the hero — shows a price comparison screen */
+const HERO_PRICES = [
+  { store: 'E.Leclerc',    price: 1.11, color: '#22c55e' },
+  { store: 'Carrefour GP', price: 1.45, color: '#f59e0b' },
+  { store: 'Hyper U MQ',   price: 1.58, color: '#f97316' },
+  { store: 'Score YT',     price: 2.03, color: '#ef4444' },
+];
+
+function HeroPhoneMockup() {
+  const maxPrice = Math.max(...HERO_PRICES.map((d) => d.price));
+  return (
+    <div className="hero-phone-wrap">
+      <div className="app-demo-phone">
+        <div className="app-demo-phone-notch" />
+        <div className="app-demo-phone-screen">
+          <div className="demo-screen demo-screen--compare">
+            <div className="demo-compare-header">
+              <span className="demo-screen-title">🥛 Lait UHT 1L</span>
+              <span className="demo-compare-date">Mars 2026</span>
+            </div>
+            <div className="demo-compare-bars">
+              {HERO_PRICES.map((d, i) => (
+                <div key={i} className="demo-compare-row">
+                  <span className="demo-compare-store">{d.store}</span>
+                  <div className="demo-compare-bar-wrap">
+                    <div
+                      className="demo-compare-bar"
+                      style={{ width: `${Math.round((d.price / maxPrice) * 100)}%`, background: d.color }}
+                    />
+                  </div>
+                  <span className="demo-compare-price" style={{ color: d.color }}>{d.price.toFixed(2)}€</span>
+                </div>
+              ))}
+            </div>
+            <div className="demo-compare-saving">
+              💡 Économie : <strong>+0,92 €/L</strong> vs le moins cher
+            </div>
+          </div>
+        </div>
+        <div className="app-demo-phone-home" />
+      </div>
+      <div className="app-demo-glow" />
+    </div>
+  );
+}
+
 export default function HomeV5() {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ scans: 1200, products: 5000, territories: 12 });
@@ -70,6 +118,9 @@ export default function HomeV5() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [exampleComparison] = useState<PriceComparison>(getComparisonOfDay());
   const statsRef = useRef<HTMLElement | null>(null);
+
+  // Scroll reveal — triggers `.revealed` on `.reveal` elements as they enter viewport
+  useScrollReveal();
 
   // Animated counter: count up to target when section comes into view
   useEffect(() => {
@@ -162,50 +213,76 @@ export default function HomeV5() {
 
   return (
     <>
-      <Helmet>
-        <title>A KI PRI SA YÉ – Transparence des prix Outre-mer</title>
-        <meta name="description" content="Comparez les prix en Guadeloupe, Martinique, Guyane, La Réunion et dans tous les territoires ultramarins. Données citoyennes réelles, scanneur de produits, observatoire des prix." />
-        <meta property="og:title" content="A KI PRI SA YÉ – Transparence des prix Outre-mer" />
-        <meta property="og:description" content="Comparez les prix en Guadeloupe, Martinique, Guyane, La Réunion et dans tous les territoires ultramarins. Données citoyennes réelles, scanneur de produits, observatoire des prix." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://teetee971.github.io/akiprisaye-web/" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="A KI PRI SA YÉ – Transparence des prix Outre-mer" />
-        <meta name="twitter:description" content="Comparez les prix en Guadeloupe, Martinique, Guyane, La Réunion et dans tous les territoires ultramarins." />
-      </Helmet>
+      <SEOHead
+        title="A KI PRI SA YÉ – Transparence des prix Outre-mer"
+        description="Comparez les prix en Guadeloupe, Martinique, Guyane, La Réunion et dans tous les territoires ultramarins. Données citoyennes réelles, scanneur de produits, observatoire des prix."
+        canonical="https://teetee971.github.io/akiprisaye-web/"
+      />
     <div className="home-v5">
       <a href="#main-content" className="skip-link">
         Aller au contenu principal
       </a>
 
       <section className="hero-v5">
-        <div className="hero-content fade-in">
-          <h1 className="hero-title slide-up">{getTerritoryTitle()}.</h1>
+        {/* ── Aurora gradient orbs ── */}
+        <div className="aurora-bg" aria-hidden="true">
+          <div className="aurora-orb aurora-orb--1" />
+          <div className="aurora-orb aurora-orb--2" />
+          <div className="aurora-orb aurora-orb--3" />
+          <div className="aurora-orb aurora-orb--4" />
+        </div>
 
-          <p className="hero-subtitle slide-up delay-100">
-            Des prix observés localement, comparés entre enseignes,
-            <br />
-            pensés pour les DOM-TOM.
-          </p>
-          <p className="hero-reassurance fade-in delay-150">
-            Sans compte. Données locales. Historique conservé sur votre appareil.
-          </p>
+        {/* ── Floating particles ── */}
+        <div className="particles-container" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, i) => (
+            <div key={i} className={`particle particle--${i + 1}`} />
+          ))}
+        </div>
 
-          <form onSubmit={handleSearch} className="hero-search-xxl fade-in delay-200">
-            <input
-              type="text"
-              placeholder="Ex : riz 5kg, lait, eau…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="hero-search-input-xxl"
-              aria-label="Rechercher un produit"
-            />
-            <button type="submit" className="hero-search-btn-xxl" aria-label="Rechercher un produit">
-              Rechercher un produit
-            </button>
-          </form>
-          <p className="hero-explain fade-in delay-300">EAN, nom de produit ou scan → comparaison instantanée.</p>
-          <p className="hero-trust fade-in delay-300">🔒 Vos recherches restent sur votre appareil.</p>
+        {/* ── Morphing blob ── */}
+        <div className="blob-decoration blob-decoration--hero" aria-hidden="true" />
+
+        <div className="hero-inner">
+          {/* Left column: headline + search */}
+          <div className="hero-content fade-in">
+            <h1 className="hero-title slide-up">{getTerritoryTitle()}.</h1>
+
+            <p className="hero-subtitle slide-up delay-100">
+              Des prix observés localement, comparés entre enseignes,
+              <br />
+              pensés pour les DOM-TOM.
+            </p>
+            <p className="hero-reassurance fade-in delay-150">
+              Sans compte. Données locales. Historique conservé sur votre appareil.
+            </p>
+
+            <form onSubmit={handleSearch} className="hero-search-xxl fade-in delay-200 border-scan">
+              <input
+                type="text"
+                placeholder="Ex : riz 5kg, lait, eau…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="hero-search-input-xxl"
+                aria-label="Rechercher un produit"
+              />
+              <button type="submit" className="hero-search-btn-xxl btn-neon" aria-label="Rechercher un produit">
+                Rechercher un produit
+              </button>
+            </form>
+            <p className="hero-explain fade-in delay-300">EAN, nom de produit ou scan → comparaison instantanée.</p>
+            <p className="hero-trust fade-in delay-300">
+              <span className="badge-live">
+                <span className="badge-live-dot" aria-hidden="true" />
+                <span>Données en direct</span>
+              </span>
+              {' · '}🔒 Vos recherches restent sur votre appareil.
+            </p>
+          </div>
+
+          {/* Right column: phone mockup illustration */}
+          <div className="hero-phone-side fade-in delay-200" aria-hidden="true">
+            <HeroPhoneMockup />
+          </div>
         </div>
 
         {showScrollIndicator && (
@@ -284,16 +361,46 @@ export default function HomeV5() {
           </div>
         </section>
 
-        <section className="benefits section-reveal">
+        {/* ── 3D Flip Stat Cards ── */}
+        <section className="reveal px-4 pb-4 pt-2 max-w-5xl mx-auto w-full" aria-label="Statistiques clés">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <FlipStatCard
+              value={`${stats.territories}`}
+              label="Territoires"
+              icon="🗺️"
+              backContent="Guadeloupe, Martinique, Guyane, La Réunion, Mayotte et plus encore."
+            />
+            <FlipStatCard
+              value={`${stats.products.toLocaleString()}+`}
+              label="Produits comparés"
+              icon="🛒"
+              backContent="Alimentaire, hygiène, entretien — relevés citoyens vérifiés."
+            />
+            <FlipStatCard
+              value={`${stats.scans.toLocaleString()}+`}
+              label="Scans effectués"
+              icon="📷"
+              backContent="Codes-barres et tickets OCR analysés par la communauté."
+            />
+            <FlipStatCard
+              value="~35%"
+              label="Surcoût moyen DOM"
+              icon="📊"
+              backContent="Par rapport à l'Hexagone — source observatoire citoyen mars 2026."
+            />
+          </div>
+        </section>
+
+        <section className="benefits section-reveal reveal">
           <h2 className="section-title slide-up">Ce que vous gagnez</h2>
-          <div className="benefits-grid">
+          <div className="benefits-grid reveal-stagger">
             {[
               "Comparez les prix AVANT d'acheter",
               "Économisez jusqu'à 30% sur vos courses",
               'Détectez les hausses anormales de prix',
               'Exportez les données pour vos analyses'
             ].map((benefit) => (
-              <div key={benefit} className="benefit-item slide-up">
+              <div key={benefit} className="benefit-item reveal slide-up">
                 <span className="benefit-check">✓</span>
                 <span className="benefit-text">{benefit}</span>
               </div>
