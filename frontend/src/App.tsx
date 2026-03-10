@@ -60,6 +60,7 @@ const LutteVieChere = lazyPage(() => import('./pages/LutteVieChereIndexPage'));
 const SolidariteHub = lazyPage(() => import('./pages/SolidariteHub'));
 const InscriptionPro = lazyPage(() => import('./pages/InscriptionPro'));
 const EspacePro = lazyPage(() => import('./pages/EspacePro'));
+const EspaceCreateur = lazyPage(() => import('./pages/EspaceCreateur'));
 
 // Scanner & OCR pages
 const ScannerHub = lazyPage(() => import('./pages/ScannerHub'));
@@ -137,6 +138,8 @@ const EnqueteCarburants = lazyPage(() => import('./pages/EnqueteCarburants'));
 const ConferenceCarburants = lazyPage(() => import('./pages/ConferenceCarburants'));
 const EnqueteOctroiMer = lazyPage(() => import('./pages/EnqueteOctroiMer'));
 const ConferenceOctroiMer = lazyPage(() => import('./pages/ConferenceOctroiMer'));
+const EnqueteEau = lazyPage(() => import('./pages/EnqueteEau'));
+const ConferenceEau = lazyPage(() => import('./pages/ConferenceEau'));
 const InsuranceComparator = lazyPage(() => import('./pages/InsuranceComparator'));
 const TrainingComparator = lazyPage(() => import('./pages/TrainingComparator'));
 const ServiceComparator = lazyPage(() => import('./pages/ServiceComparator'));
@@ -257,6 +260,9 @@ const GuideIntelligentTerritoires = lazyPage(() => import('./pages/GuideIntellig
 const ARScannerPage = lazyPage(() => import('./pages/ARScannerPage'));
 const ChaineFourniture = lazyPage(() => import('./pages/ChaineFourniture'));
 const CommerceSocial = lazyPage(() => import('./pages/CommerceSocial'));
+const PetitsCommerces = lazyPage(() => import('./pages/PetitsCommerces'));
+const ProducteursLocaux = lazyPage(() => import('./pages/ProducteursLocaux'));
+const MarchesLocaux = lazyPage(() => import('./pages/MarchesLocaux'));
 const AnalyseFactures = lazyPage(() => import('./pages/AnalyseFactures'));
 const DetectionFraude = lazyPage(() => import('./pages/DetectionFraude'));
 const EvaluationMagasins = lazyPage(() => import('./pages/EvaluationMagasins'));
@@ -432,6 +438,7 @@ export default function App() {
                           {/* Espace Professionnel */}
                           <Route path="inscription-pro" element={<InscriptionPro />} />
                           <Route path="espace-pro" element={<EspacePro />} />
+                          <Route path="espace-createur" element={<EspaceCreateur />} />
 
                           {/* Additional feature routes */}
                           <Route path="donnees-publiques" element={<DonneesPubliques />} />
@@ -600,6 +607,8 @@ export default function App() {
                           <Route path="calculateur-octroi" element={<CalculateurOctroi />} />
                           <Route path="enquete-octroi-mer" element={<EnqueteOctroiMer />} />
                           <Route path="conference-octroi-mer" element={<ConferenceOctroiMer />} />
+                          <Route path="enquete-eau" element={<EnqueteEau />} />
+                          <Route path="conference-eau" element={<ConferenceEau />} />
                           <Route path="calculateur-batiment" element={<CalculateurBatiment />} />
                           <Route path="simulateur-budget" element={<SimulateurBudgetFamilial />} />
                           <Route path="alertes-rupture" element={<AlertesRupture />} />
@@ -655,6 +664,9 @@ export default function App() {
                           <Route path="ar-scanner" element={<ARScannerPage />} />
                           <Route path="chaine-fourniture" element={<ChaineFourniture />} />
                           <Route path="commerce-social" element={<CommerceSocial />} />
+                          <Route path="petits-commerces" element={<PetitsCommerces />} />
+                          <Route path="producteurs-locaux" element={<ProducteursLocaux />} />
+                          <Route path="marches-locaux" element={<MarchesLocaux />} />
                           <Route path="analyse-factures" element={<AnalyseFactures />} />
                           <Route path="detection-fraude" element={<DetectionFraude />} />
                           <Route path="evaluation-magasins" element={<EvaluationMagasins />} />
