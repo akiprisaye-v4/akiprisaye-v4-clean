@@ -9,8 +9,8 @@ import { TERRITORIES, type TerritoryCode } from '../constants/territories';
 import { getPalmaresForTerritory, OBSERVATOIRE_PALMARES } from '../data/observatoirePalmares';
 
 
-// Real Unsplash photo: supermarket shelves
-const HERO_IMG = 'https://images.unsplash.com/photo-1607082348351-cef5cd02c7b0?auto=format&fit=crop&w=1600&q=80';
+// Real Unsplash photo: data analytics dashboard
+const HERO_IMG = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fm=webp&fit=crop&w=1600&q=80';
 
 type ObservatoireTab = 'dashboard' | 'diagnostic' | 'palmares' | 'donnees';
 
@@ -35,6 +35,9 @@ export default function ObservatoireHub() {
       <Helmet>
         <title>Observatoire des Prix — DOM-TOM · A KI PRI SA YÉ</title>
         <meta name="description" content="Données citoyennes transparentes, relevés terrain vérifiés et comparaisons territoriales en temps réel dans les DOM-TOM." />
+        <link rel="canonical" href="https://teetee971.github.io/akiprisaye-web/observatoire" />
+        <link rel="alternate" hrefLang="fr" href="https://teetee971.github.io/akiprisaye-web/observatoire" />
+        <link rel="alternate" hrefLang="x-default" href="https://teetee971.github.io/akiprisaye-web/observatoire" />
       </Helmet>
       
       <div className="min-h-screen bg-slate-950 p-3 sm:p-4 pt-20 sm:pt-24">
