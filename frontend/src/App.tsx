@@ -250,6 +250,16 @@ const AiMarketInsights = lazyPage(() => import('./pages/AiMarketInsights'));
 const TerritoryHub = lazyPage(() => import('./pages/TerritoryHub'));
 const TerritoryScanner = lazyPage(() => import('./pages/TerritoryScanner'));
 
+// ── Nouvelles pages V3 ─────────────────────────────────────────────────────
+const GuideIntelligentTerritoires = lazyPage(() => import('./pages/GuideIntelligentTerritoires'));
+const ARScannerPage = lazyPage(() => import('./pages/ARScannerPage'));
+const ChaineFourniture = lazyPage(() => import('./pages/ChaineFourniture'));
+const CommerceSocial = lazyPage(() => import('./pages/CommerceSocial'));
+const AnalyseFactures = lazyPage(() => import('./pages/AnalyseFactures'));
+const DetectionFraude = lazyPage(() => import('./pages/DetectionFraude'));
+const EvaluationMagasins = lazyPage(() => import('./pages/EvaluationMagasins'));
+const PortailDeveloppeurs = lazyPage(() => import('./pages/PortailDeveloppeurs'));
+
 /**
  * IMPORTANT — NE PAS SUPPRIMER
  * Les tests CI vérifient la présence LITTÉRALE de certaines routes alias
@@ -258,39 +268,41 @@ const TerritoryScanner = lazyPage(() => import('./pages/TerritoryScanner'));
  *
  * Tu ajoutes un alias ? Ajoute 1 ligne ici. Point final.
  */
-const LEGACY_ALIAS_ROUTES = [
-  /* Actualités */
-  <Route key="actus" path="actus" element={<Navigate to="/actualites" replace />} />,
-  <Route key="panier" path="panier" element={<Navigate to="/liste" replace />} />,
-  <Route key="cart" path="cart" element={<Navigate to="/liste" replace />} />,
-  <Route key="checkout" path="checkout" element={<Navigate to="/liste" replace />} />,
-  <Route key="news" path="news" element={<Navigate to="/actualites" replace />} />,
+const LEGACY_ALIAS_ROUTES = (
+  <>
+    {/* Actualités */}
+    <Route path="actus" element={<Navigate to="/actualites" replace />} />
+    <Route path="panier" element={<Navigate to="/liste" replace />} />
+    <Route path="cart" element={<Navigate to="/liste" replace />} />
+    <Route path="checkout" element={<Navigate to="/liste" replace />} />
+    <Route path="news" element={<Navigate to="/actualites" replace />} />
 
-  /* Scanner */
-  <Route key="scan" path="scan" element={<Navigate to="/scanner" replace />} />,
+    {/* Scanner */}
+    <Route path="scan" element={<Navigate to="/scanner" replace />} />
 
-  /* Offres / Tarifs (aliases utiles si un lien pointe vers /offres) */
-  <Route key="offres" path="offres" element={<Navigate to="/pricing" replace />} />,
-  <Route key="tarifs" path="tarifs" element={<Navigate to="/pricing" replace />} />,
-  <Route key="abonnements" path="abonnements" element={<Navigate to="/pricing" replace />} />,
+    {/* Offres / Tarifs (aliases utiles si un lien pointe vers /offres) */}
+    <Route path="offres" element={<Navigate to="/pricing" replace />} />
+    <Route path="tarifs" element={<Navigate to="/pricing" replace />} />
+    <Route path="abonnements" element={<Navigate to="/pricing" replace />} />
 
-  /* Auth: login (legacy deep-links) */
-  <Route key="Login" path="Login" element={<Navigate to="/login" replace />} />,
-  <Route key="auth/login" path="auth/login" element={<Navigate to="/login" replace />} />,
-  <Route key="signin" path="signin" element={<Navigate to="/login" replace />} />,
+    {/* Auth: login (legacy deep-links) */}
+    <Route path="Login" element={<Navigate to="/login" replace />} />
+    <Route path="auth/login" element={<Navigate to="/login" replace />} />
+    <Route path="signin" element={<Navigate to="/login" replace />} />
 
-  /* Auth: register */
-  <Route key="auth/register" path="auth/register" element={<Navigate to="/inscription" replace />} />,
-  <Route key="signup" path="signup" element={<Navigate to="/inscription" replace />} />,
+    {/* Auth: register */}
+    <Route path="auth/register" element={<Navigate to="/inscription" replace />} />
+    <Route path="signup" element={<Navigate to="/inscription" replace />} />
 
-  /* Auth: reset */
-  <Route key="auth/reset-password" path="auth/reset-password" element={<Navigate to="/reset-password" replace />} />,
-  <Route key="forgot-password" path="forgot-password" element={<Navigate to="/reset-password" replace />} />,
+    {/* Auth: reset */}
+    <Route path="auth/reset-password" element={<Navigate to="/reset-password" replace />} />
+    <Route path="forgot-password" element={<Navigate to="/reset-password" replace />} />
 
-  /* Account */
-  <Route key="moncompte" path="moncompte" element={<Navigate to="/mon-compte" replace />} />,
-  <Route key="account" path="account" element={<Navigate to="/mon-compte" replace />} />,
-];
+    {/* Account */}
+    <Route path="moncompte" element={<Navigate to="/mon-compte" replace />} />
+    <Route path="account" element={<Navigate to="/mon-compte" replace />} />
+  </>
+);
 
 function LoadingFallback() {
   const [showTimeout, setShowTimeout] = useState(false);
@@ -633,6 +645,16 @@ export default function App() {
                           {/* Pages territoire — hub par territoire et scanner territorial */}
                           <Route path="territoire/:territory" element={<TerritoryHub />} />
                           <Route path="territoire/:territory/scanner" element={<TerritoryScanner />} />
+
+                          {/* ── Nouvelles pages V3 ── */}
+                          <Route path="guide-territoire" element={<GuideIntelligentTerritoires />} />
+                          <Route path="ar-scanner" element={<ARScannerPage />} />
+                          <Route path="chaine-fourniture" element={<ChaineFourniture />} />
+                          <Route path="commerce-social" element={<CommerceSocial />} />
+                          <Route path="analyse-factures" element={<AnalyseFactures />} />
+                          <Route path="detection-fraude" element={<DetectionFraude />} />
+                          <Route path="evaluation-magasins" element={<EvaluationMagasins />} />
+                          <Route path="portail-developpeurs" element={<PortailDeveloppeurs />} />
 
                           {/* Pages fonctionnelles sans itinéraire précédent */}
                           <Route path="perimetre" element={<Perimetre />} />
