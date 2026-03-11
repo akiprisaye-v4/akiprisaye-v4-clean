@@ -6,6 +6,7 @@
  *   ✅ Liste complète des modules & sous-modules
  *   ✅ Modèles de données (schémas)
  *   ✅ Roadmap MVP → V1 → V2
+ *   ✅ UX wireframes (description structurée)
  *   ✅ Design system (règles claires)
  *   ✅ Stratégie IA responsable
  *   ✅ Modèle économique (tarification réelle)
@@ -14,7 +15,7 @@
  * Principe : aucune donnée inventée — uniquement ce qui est constaté dans la base de code.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { HeroImage } from '../components/ui/HeroImage';
@@ -32,6 +33,8 @@ import {
   Wallet,
   List,
   Search,
+  Server,
+  ExternalLink,
 } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -44,6 +47,7 @@ interface RoadmapModule {
   description: string;
   status: ModuleStatus;
   features: { label: string; done: boolean }[];
+  link?: string;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -53,6 +57,7 @@ const MODULES: RoadmapModule[] = [
     name: '1. Comparateur de prix avancé',
     description: 'Recherche et comparaison de produits entre enseignes et territoires DOM-COM.',
     status: 'partial',
+    link: '/comparateur',
     features: [
       { label: 'Comparaison multi-enseignes, multi-produits', done: true },
       { label: 'Comparaison multi-territoires', done: true },
@@ -66,6 +71,7 @@ const MODULES: RoadmapModule[] = [
     name: '2. Liste de courses intelligente GPS',
     description: 'Gestion de listes de courses avec géolocalisation et optimisation de trajet.',
     status: 'partial',
+    link: '/liste',
     features: [
       { label: 'Création et gestion de listes', done: true },
       { label: 'Recherche des produits exacts', done: true },
@@ -79,6 +85,7 @@ const MODULES: RoadmapModule[] = [
     name: '3. Scanner universel',
     description: 'Reconnaissance de produits par code-barres EAN, OCR tickets ou photo.',
     status: 'done',
+    link: '/scanner',
     features: [
       { label: 'Scan codes-barres EAN', done: true },
       { label: 'OCR tickets de caisse', done: true },
@@ -104,6 +111,7 @@ const MODULES: RoadmapModule[] = [
     name: '5. Alertes consommateurs',
     description: 'Notifications personnalisées sur les variations de prix et rappels de produits.',
     status: 'partial',
+    link: '/alertes',
     features: [
       { label: 'Alertes prix personnalisées', done: true },
       { label: 'Alertes sanitaires & rappels produits', done: true },
@@ -127,6 +135,7 @@ const MODULES: RoadmapModule[] = [
     name: '7. Marketplace enseignes (payante)',
     description: 'Espace dédié aux enseignes pour publier leurs magasins, prix et statistiques.',
     status: 'done',
+    link: '/inscription-pro',
     features: [
       { label: 'Inscription payante', done: true },
       { label: 'Ajout de magasins & mise à jour prix', done: true },
@@ -150,6 +159,7 @@ const MODULES: RoadmapModule[] = [
     name: '9. Devis IA (B2G / B2B)',
     description: 'Module de devis structuré avec pipeline de validation humaine pour institutions.',
     status: 'done',
+    link: '/devis-ia',
     features: [
       { label: 'Formulaire structuré avec identité légale', done: true },
       { label: "Moteur d'estimation IA explicable", done: true },
@@ -164,6 +174,7 @@ const MODULES: RoadmapModule[] = [
     name: '10. Observatoire des prix',
     description: 'Tableau de bord public des tendances de prix par territoire et catégorie.',
     status: 'partial',
+    link: '/observatoire',
     features: [
       { label: 'Indice de pression inflationniste', done: true },
       { label: 'Statistiques produits les plus chers', done: true },
@@ -177,6 +188,7 @@ const MODULES: RoadmapModule[] = [
     name: '11. Comparateurs spécialisés',
     description: 'Suite de comparateurs sectoriels : carburants, vols, fret, assurances, télécoms…',
     status: 'partial',
+    link: '/comparateurs',
     features: [
       { label: 'Comparateur carburants DOM-COM (temps réel)', done: true },
       { label: 'Comparateur vols DOM ↔ Métropole', done: true },
@@ -192,6 +204,7 @@ const MODULES: RoadmapModule[] = [
     name: '12. Messagerie & communauté citoyenne',
     description: 'Espaces de dialogue entre citoyens : groupes de parole, messagerie privée.',
     status: 'partial',
+    link: '/messagerie',
     features: [
       { label: 'Messagerie privée inter-citoyens', done: true },
       { label: 'Groupes de parole thématiques', done: true },
@@ -243,6 +256,7 @@ const MODULES: RoadmapModule[] = [
     name: '16. Guide intelligent des territoires',
     description: "Guide par territoire (Guadeloupe, Martinique, etc.) alimenté par l'IA avec conseils locaux.",
     status: 'partial',
+    link: '/guide-territoire',
     features: [
       { label: 'Fiche territoire : économie, prix, spécificités locales', done: true },
       { label: "Conseils d'achat contextuels par territoire", done: true },
@@ -277,6 +291,7 @@ const MODULES: RoadmapModule[] = [
     name: '19. Transparence de la chaîne d\'approvisionnement',
     description: "Représentation visuelle du parcours d'un produit de son origine à la mise en rayon.",
     status: 'partial',
+    link: '/chaine-fourniture',
     features: [
       { label: 'Timeline du parcours produit (origine → rayon)', done: true },
       { label: "Affichage des intermédiaires (importateurs, distributeurs)", done: true },
@@ -321,6 +336,7 @@ const MODULES: RoadmapModule[] = [
     name: '23. Scanner de magasin AR',
     description: 'Numérisation des rayons en réalité augmentée avec comparaison de prix instantanée.',
     status: 'partial',
+    link: '/ar-scanner',
     features: [
       { label: 'Accès caméra et flux vidéo en direct', done: true },
       { label: 'Bounding boxes et overlay produits détectés', done: true },
@@ -354,6 +370,7 @@ const MODULES: RoadmapModule[] = [
     name: '26. Commerce social',
     description: 'Partagez vos listes de courses et vos recommandations avec vos amis.',
     status: 'partial',
+    link: '/commerce-social',
     features: [
       { label: 'Partage de liste de courses entre utilisateurs', done: false },
       { label: 'Recommandations produits entre citoyens', done: false },
@@ -365,6 +382,7 @@ const MODULES: RoadmapModule[] = [
     name: '27. Analyse des factures',
     description: 'Historique des dépenses et analyse des tendances par extraction OCR.',
     status: 'partial',
+    link: '/analyse-factures',
     features: [
       { label: 'Upload de factures PDF / photo', done: false },
       { label: 'Extraction OCR des montants et produits', done: true },
@@ -377,6 +395,7 @@ const MODULES: RoadmapModule[] = [
     name: '28. Détection de fraude',
     description: "Signalement des hausses de prix inhabituelles ou des anomalies via ML.",
     status: 'partial',
+    link: '/detection-fraude',
     features: [
       { label: 'Signalement manuel abus déjà opérationnel', done: true },
       { label: 'Détection automatique d\'anomalies de prix', done: false },
@@ -388,6 +407,7 @@ const MODULES: RoadmapModule[] = [
     name: '29. Évaluation des magasins par les utilisateurs',
     description: 'Notation : qualité du service, propreté, disponibilité des produits.',
     status: 'partial',
+    link: '/evaluation-magasins',
     features: [
       { label: 'Formulaire de notation (service, propreté, disponibilité)', done: true },
       { label: 'Affichage des notes agrégées sur la fiche magasin', done: true },
@@ -399,6 +419,7 @@ const MODULES: RoadmapModule[] = [
     name: '30. Portail API pour développeurs',
     description: "API publique documentée pour les intégrations tierces et partenaires institutionnels.",
     status: 'partial',
+    link: '/portail-developpeurs',
     features: [
       { label: 'Documentation OpenAPI interactive (Swagger)', done: true },
       { label: 'Endpoints publics live (carburants, actualités, taux change, signalconso, IEVR, prix)', done: true },
@@ -459,7 +480,7 @@ const PHASES: { key: PhaseKey; label: string; subtitle: string; items: string[] 
     ],
   },
   {
-    key: 'v3' as PhaseKey,
+    key: 'v3',
     label: 'V3',
     subtitle: 'Nouvelles fonctionnalités & intelligence augmentée — Partiellement déployé',
     items: [
@@ -535,9 +556,147 @@ const DATA_SCHEMAS = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const ARCHITECTURE = [
+  {
+    couche: 'Frontend',
+    icone: '🖥️',
+    stack: [
+      'React 18 + TypeScript 5 — UI déclarative, typage strict',
+      'Vite 5 — build ultra-rapide, HMR instantané',
+      'Tailwind CSS 4 — design system utilitaire',
+      'React Router 6 — navigation SPA côté client',
+      'Firebase SDK v10 — Auth, Firestore, Storage',
+      'Recharts — graphiques de prix interactifs',
+      'Lucide React — icônes cohérentes',
+      'Framer Motion — animations fonctionnelles',
+    ],
+  },
+  {
+    couche: 'Backend / Serverless',
+    icone: '⚙️',
+    stack: [
+      'Cloudflare Pages Functions (TypeScript) — API serverless à la périphérie',
+      'Firebase Auth — authentification citoyens / pro / admin',
+      'Firestore (NoSQL) — base de données temps réel, règles de sécurité granulaires',
+      'Firebase Storage — stockage photos produits et tickets OCR',
+    ],
+  },
+  {
+    couche: 'Hébergement & Déploiement',
+    icone: '🚀',
+    stack: [
+      'Cloudflare Pages — hébergement principal (CDN mondial, latence < 50 ms)',
+      'GitHub Pages — miroir de déploiement (backup / tests)',
+      'GitHub Actions — CI/CD : lint → typecheck → tests → build → deploy',
+      'Rollback instantané via Cloudflare Pages (version précédente en 1 clic)',
+      'Prerender statique de 91+ routes pour SEO et deep-links',
+    ],
+  },
+  {
+    couche: 'APIs exposées',
+    icone: '🔌',
+    stack: [
+      'GET /api/fuel-prices — carburants DOM-COM temps réel',
+      'GET /api/news — actualités territoriales',
+      'GET /api/exchange-rates — taux de change',
+      'GET /api/signalconso — alertes SignalConso',
+      'GET /api/indice — indice IEVR',
+      'GET /api/health — statut de la plateforme',
+      'GET /api/prices/realtime?ean&territory — prix temps réel (OpenPrices)',
+      'GET /api/prices/feed?territory&since&limit — flux de prix historiques',
+    ],
+  },
+  {
+    couche: 'Sécurité',
+    icone: '🔐',
+    stack: [
+      'Règles Firestore : séparation stricte citoyen / pro / admin',
+      'Aucune clé API exposée côté client (variables Cloudflare uniquement)',
+      'CSP (Content Security Policy) configurée via Cloudflare',
+      'Audit automatique NPM (CI bloquant si vulnérabilité critique)',
+      'Merge Conflict Marker detection en CI',
+    ],
+  },
+  {
+    couche: 'Observabilité',
+    icone: '📊',
+    stack: [
+      'Cloudflare Analytics — trafic et performances',
+      'Cache HTTP adaptatif : 5 min (prix temps réel), 10 min (flux), 30 min (carburants)',
+      'Logs Firestore pour les pistes d\'audit devis',
+      'Checklist de conformité production accessible depuis /admin',
+    ],
+  },
+];
+
+const UX_WIREFRAMES = [
+  {
+    page: 'Comparateur de prix',
+    route: '/comparateur',
+    layout: [
+      'En-tête : barre de recherche produit + sélecteur de territoire',
+      'Résultats : liste de cartes produit (photo, nom, prix min/max, écart métropole)',
+      'Détail produit : historique graphique, enseignes, Nutri-Score, traçabilité',
+      'Filtres latéraux : catégorie, enseigne, territoire, fourchette de prix',
+    ],
+  },
+  {
+    page: 'Liste de courses',
+    route: '/liste',
+    layout: [
+      'Formulaire d\'ajout rapide (EAN ou nom) + bouton "Scanner"',
+      'Liste de courses avec quantités, prix unitaires et total',
+      'Carte GPS : enseignes proches avec prix comparés',
+      'Résumé : enseigne optimale (prix + distance), économies potentielles',
+    ],
+  },
+  {
+    page: 'Scanner universel',
+    route: '/scanner',
+    layout: [
+      'Flux caméra plein écran avec viseur EAN animé',
+      'Affichage immédiat du produit reconnu (nom, prix local, Nutri-Score)',
+      'Bouton "OCR ticket" : photo de ticket → liste de produits extraits',
+      'Historique des scans récents en bas de page',
+    ],
+  },
+  {
+    page: 'Observatoire des prix',
+    route: '/observatoire',
+    layout: [
+      'Tableau de bord : indice d\'inflation, top produits en hausse, carte territoriale',
+      'Graphiques de tendances (mensuel / annuel) par catégorie',
+      'Comparaison inter-territoires : Guadeloupe vs Métropole vs Martinique…',
+      'Export rapport PDF / CSV (planifié V1)',
+    ],
+  },
+  {
+    page: 'Administration',
+    route: '/admin',
+    layout: [
+      'Tableau de bord : KPIs globaux, utilisateurs actifs, devis en cours',
+      'Gestion utilisateurs : rôles, suspension, historique connexions',
+      'Gestion produits & prix : ajout, correction, validation crowdsource',
+      'Suivi devis B2G : pipeline DRAFT → VALIDATED → SENT → PAID',
+      'Checklist conformité production : 20+ critères vérifiables',
+    ],
+  },
+  {
+    page: 'Profil & Abonnement',
+    route: '/profil',
+    layout: [
+      'Informations personnelles + territoire préféré',
+      'Offre active avec limites d\'utilisation (quotas)',
+      'Historique des alertes prix reçues',
+      'Accès aux fonctionnalités premium selon le plan',
+    ],
+  },
+];
+
 const TABS = [
   { key: 'roadmap', label: 'Roadmap', icon: BarChart3 },
   { key: 'modules', label: 'Modules', icon: List },
+  { key: 'architecture', label: 'Architecture', icon: Server },
   { key: 'schemas', label: 'Schémas données', icon: Cpu },
   { key: 'design', label: 'Design system', icon: Palette },
   { key: 'ia', label: 'Stratégie IA', icon: Brain },
@@ -551,6 +710,27 @@ export default function RoadmapPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('roadmap');
   const [moduleSearch, setModuleSearch] = useState('');
 
+  const filteredModules = useMemo(() => {
+    if (!moduleSearch.trim()) return MODULES;
+    const q = moduleSearch.toLowerCase();
+    return MODULES.filter(
+      (mod) =>
+        mod.name.toLowerCase().includes(q) ||
+        mod.description.toLowerCase().includes(q) ||
+        mod.features.some((f) => f.label.toLowerCase().includes(q)),
+    );
+  }, [moduleSearch]);
+
+  const completionStats = useMemo(() => {
+    const total = MODULES.reduce((n, m) => n + m.features.length, 0);
+    const done = MODULES.reduce((n, m) => n + m.features.filter((f) => f.done).length, 0);
+    const pct = Math.round((done / total) * 100);
+    const opCount = MODULES.filter((m) => m.status === 'done').length;
+    const partialCount = MODULES.filter((m) => m.status === 'partial').length;
+    const plannedCount = MODULES.filter((m) => m.status === 'planned').length;
+    return { total, done, pct, opCount, partialCount, plannedCount };
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -559,9 +739,14 @@ export default function RoadmapPage() {
           name="description"
           content="Feuille de route, architecture technique, modules, stratégie IA et conformité — A KI PRI SA YÉ"
         />
-              <link rel="canonical" href="https://teetee971.github.io/akiprisaye-web/roadmap" />
+        <link rel="canonical" href="https://teetee971.github.io/akiprisaye-web/roadmap" />
         <link rel="alternate" hrefLang="fr" href="https://teetee971.github.io/akiprisaye-web/roadmap" />
         <link rel="alternate" hrefLang="x-default" href="https://teetee971.github.io/akiprisaye-web/roadmap" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="A KI PRI SA YÉ" />
+        <meta property="og:title" content="Roadmap & Architecture — A KI PRI SA YÉ" />
+        <meta property="og:description" content="Feuille de route publique, architecture technique, modules déployés, stratégie IA responsable et conformité RGPD de la plateforme A KI PRI SA YÉ." />
+        <meta property="og:url" content="https://teetee971.github.io/akiprisaye-web/roadmap" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -590,10 +775,14 @@ export default function RoadmapPage() {
 
         {/* Tabs */}
         <div className="max-w-5xl mx-auto px-4 pt-4 pb-2">
-          <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3">
+          <div role="tablist" aria-label="Sections de la feuille de route" className="flex flex-wrap gap-2 border-b border-gray-200 pb-3">
             {TABS.map((tab) => (
               <button
                 key={tab.key}
+                id={`tab-${tab.key}`}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                aria-controls={`panel-${tab.key}`}
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors
                   ${activeTab === tab.key
@@ -611,7 +800,7 @@ export default function RoadmapPage() {
 
           {/* ── ROADMAP ────────────────────────────────────────────────── */}
           {activeTab === 'roadmap' && (
-            <div className="space-y-6">
+            <div id="panel-roadmap" role="tabpanel" aria-labelledby="tab-roadmap" className="space-y-6">
               {PHASES.map((phase) => (
                 <div
                   key={phase.key}
@@ -664,7 +853,7 @@ export default function RoadmapPage() {
 
           {/* ── MODULES ────────────────────────────────────────────────── */}
           {activeTab === 'modules' && (
-            <div className="space-y-4">
+            <div id="panel-modules" role="tabpanel" aria-labelledby="tab-modules" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div className="flex gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Opérationnel</span>
@@ -691,42 +880,28 @@ export default function RoadmapPage() {
                 />
               </div>
               {/* Completion summary */}
-              {(() => {
-                const total = MODULES.reduce((n, m) => n + m.features.length, 0);
-                const done = MODULES.reduce((n, m) => n + m.features.filter(f => f.done).length, 0);
-                const pct = Math.round((done / total) * 100);
-                const opCount = MODULES.filter(m => m.status === 'done').length;
-                const partialCount = MODULES.filter(m => m.status === 'partial').length;
-                const plannedCount = MODULES.filter(m => m.status === 'planned').length;
-                return (
-                  <div className="bg-white border border-gray-200 rounded-xl p-4 mb-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-gray-900">Avancement global</span>
-                      <span className="text-sm font-bold text-indigo-700">{done} / {total} fonctionnalités ({pct} %)</span>
-                    </div>
-                    <div
-                      role="progressbar"
-                      aria-valuenow={pct}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`Avancement global : ${pct}%`}
-                      className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3"
-                    >
-                      <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                    </div>
-                    <div className="flex gap-4 text-xs text-gray-600">
-                      <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" /> {opCount} opérationnel{opCount > 1 ? 's' : ''}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-yellow-500" /> {partialCount} partiel{partialCount > 1 ? 's' : ''}</span>
-                      <span className="flex items-center gap-1"><Circle className="w-3.5 h-3.5 text-gray-300" /> {plannedCount} planifié{plannedCount > 1 ? 's' : ''}</span>
-                    </div>
-                  </div>
-                );
-              })()}
-              {MODULES.filter((mod) => {
-                if (!moduleSearch.trim()) return true;
-                const q = moduleSearch.toLowerCase();
-                return mod.name.toLowerCase().includes(q) || mod.description.toLowerCase().includes(q) || mod.features.some(f => f.label.toLowerCase().includes(q));
-              }).map((mod) => (
+              <div className="bg-white border border-gray-200 rounded-xl p-4 mb-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-gray-900">Avancement global</span>
+                  <span className="text-sm font-bold text-indigo-700">{completionStats.done} / {completionStats.total} fonctionnalités ({completionStats.pct} %)</span>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-valuenow={completionStats.pct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Avancement global : ${completionStats.pct}%`}
+                  className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-3"
+                >
+                  <div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${completionStats.pct}%` }} />
+                </div>
+                <div className="flex gap-4 text-xs text-gray-600">
+                  <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" /> {completionStats.opCount} opérationnel{completionStats.opCount > 1 ? 's' : ''}</span>
+                  <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-yellow-500" /> {completionStats.partialCount} partiel{completionStats.partialCount > 1 ? 's' : ''}</span>
+                  <span className="flex items-center gap-1"><Circle className="w-3.5 h-3.5 text-gray-300" /> {completionStats.plannedCount} planifié{completionStats.plannedCount > 1 ? 's' : ''}</span>
+                </div>
+              </div>
+              {filteredModules.map((mod) => (
                 <div key={mod.name} className="bg-white border border-gray-200 rounded-xl p-5">
                   <div className="flex items-start gap-3 mb-1">
                     <div className="mt-0.5 flex-shrink-0">
@@ -741,6 +916,15 @@ export default function RoadmapPage() {
                           ${mod.status === 'done' ? 'bg-green-100 text-green-700' : mod.status === 'partial' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
                           {mod.status === 'done' ? 'Opérationnel' : mod.status === 'partial' ? 'Partiel' : 'Planifié'}
                         </span>
+                        {mod.link && (
+                          <Link
+                            to={mod.link}
+                            className="flex items-center gap-1 text-xs text-indigo-600 hover:underline font-medium"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Voir la page
+                          </Link>
+                        )}
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5">{mod.description}</p>
                     </div>
@@ -758,18 +942,67 @@ export default function RoadmapPage() {
                   </div>
                 </div>
               ))}
-              {moduleSearch.trim() && !MODULES.some((mod) => {
-                const q = moduleSearch.toLowerCase();
-                return mod.name.toLowerCase().includes(q) || mod.description.toLowerCase().includes(q) || mod.features.some(f => f.label.toLowerCase().includes(q));
-              }) && (
+              {moduleSearch.trim() && filteredModules.length === 0 && (
                 <p className="text-sm text-gray-500 text-center py-6">Aucun module ne correspond à « {moduleSearch} ».</p>
               )}
             </div>
           )}
 
+          {/* ── ARCHITECTURE ───────────────────────────────────────────── */}
+          {activeTab === 'architecture' && (
+            <div id="panel-architecture" role="tabpanel" aria-labelledby="tab-architecture" className="space-y-5">
+              <p className="text-sm text-gray-600 mb-4">
+                Architecture technique telle que déployée en production.
+                Toutes les technologies listées sont actives dans la base de code.
+              </p>
+              {ARCHITECTURE.map((layer) => (
+                <div key={layer.couche} className="bg-white border border-gray-200 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-lg">{layer.icone}</span>
+                    <h3 className="font-semibold text-gray-900">{layer.couche}</h3>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {layer.stack.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+                        <ChevronRight className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0 mt-0.5" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
+              {/* UX Wireframes */}
+              <div className="border-t border-gray-200 pt-5">
+                <h2 className="text-base font-semibold text-gray-900 mb-1">🖼️ UX — Structure des écrans principaux</h2>
+                <p className="text-sm text-gray-500 mb-4">
+                  Description structurée des layouts de chaque page clé de la plateforme.
+                </p>
+                <div className="space-y-4">
+                  {UX_WIREFRAMES.map((wf) => (
+                    <div key={wf.page} className="bg-white border border-gray-200 rounded-xl p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <h3 className="font-semibold text-gray-900">{wf.page}</h3>
+                        <span className="font-mono text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">{wf.route}</span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {wf.layout.map((item) => (
+                          <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+                            <ChevronRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ── SCHEMAS ────────────────────────────────────────────────── */}
           {activeTab === 'schemas' && (
-            <div className="space-y-4">
+            <div id="panel-schemas" role="tabpanel" aria-labelledby="tab-schemas" className="space-y-4">
               <p className="text-sm text-gray-600 mb-4">
                 Collections Firestore principales. Les champs listés sont ceux utilisés
                 en production. L'architecture est schéma-flexible (NoSQL) — les champs
@@ -794,7 +1027,7 @@ export default function RoadmapPage() {
 
           {/* ── DESIGN SYSTEM ──────────────────────────────────────────── */}
           {activeTab === 'design' && (
-            <div className="space-y-2">
+            <div id="panel-design" role="tabpanel" aria-labelledby="tab-design" className="space-y-2">
               <p className="text-sm text-gray-600 mb-4">
                 Règles de design appliquées sur l'ensemble de la plateforme.
                 Fondées sur Tailwind CSS 4 + Lucide React.
@@ -810,7 +1043,7 @@ export default function RoadmapPage() {
 
           {/* ── IA ─────────────────────────────────────────────────────── */}
           {activeTab === 'ia' && (
-            <div className="space-y-3">
+            <div id="panel-ia" role="tabpanel" aria-labelledby="tab-ia" className="space-y-3">
               <p className="text-sm text-gray-600 mb-4">
                 Principes de l'IA responsable appliqués sur la plateforme.
                 Aucun modèle opaque n'est utilisé — les règles métier sont explicites
@@ -827,7 +1060,7 @@ export default function RoadmapPage() {
 
           {/* ── CONFORMITÉ ─────────────────────────────────────────────── */}
           {activeTab === 'conformite' && (
-            <div className="space-y-5">
+            <div id="panel-conformite" role="tabpanel" aria-labelledby="tab-conformite" className="space-y-5">
               {CONFORMITE.map((cat) => (
                 <div key={cat.categorie} className="bg-white border border-gray-200 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
@@ -849,7 +1082,7 @@ export default function RoadmapPage() {
 
           {/* ── MODÈLE ÉCONOMIQUE ──────────────────────────────────────── */}
           {activeTab === 'economique' && (
-            <div className="space-y-5">
+            <div id="panel-economique" role="tabpanel" aria-labelledby="tab-economique" className="space-y-5">
               <p className="text-sm text-gray-600">
                 Tarification réelle telle que configurée dans la plateforme.
                 Aucune projection de revenus n'est présentée — les métriques d'adoption
