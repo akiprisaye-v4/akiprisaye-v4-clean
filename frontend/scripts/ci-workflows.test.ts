@@ -1,0 +1,114 @@
+/**
+ * Regression tests for the CI/CD pipeline configuration.
+ *
+ * These tests guard against:
+ * 1. Re-introducing the `pull_request` trigger on deploy-pages.yml which caused a
+ *    cancel-in-progress race condition that silently killed production deployments.
+ * 2. Reverting auto-merge.yml from `pull_request_target` back to `pull_request`.
+ *    Using `pull_request_target` is critical: it runs in the context of the base
+ *    branch (main) and does NOT require GitHub's "Approve and run" bot approval,
+ *    so auto-merge is enabled immediately for Copilot PRs without human intervention.
+ *
+ * Background (deploy race condition):
+ *   A `pull_request: types: [closed]` trigger on deploy-pages.yml caused the
+ *   PR-closed run to cancel the push:main run (same concurrency group "pages").
+ *   Fixed by PR #1283.
+ *
+ * Background (action_required on bot PRs):
+ *   Workflows using `pull_request` trigger require GitHub's "Approve and run" for
+ *   bot-created PRs (total_jobs: 0 until a human approves). `auto-merge.yml` only
+ *   calls `gh pr merge` — no code checkout — so `pull_request_target` is safe and
+ *   eliminates the `action_required` block on auto-merge for Copilot PRs.
+ */
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(HERE, '..', '..');
+const WORKFLOWS_DIR = path.join(REPO_ROOT, '.github', 'workflows');
+
+function readWorkflow(filename: string): string {
+  return readFileSync(path.join(WORKFLOWS_DIR, filename), 'utf8');
+}
+
+describe('deploy-pages.yml — race condition guard', () => {
+  const deployYml = readWorkflow('deploy-pages.yml');
+
+  it('must NOT have a pull_request trigger (prevents cancel-in-progress race condition)', () => {
+    // The deploy workflow uses concurrency: cancel-in-progress: true.
+    // If a pull_request trigger were present, the PR-event run would cancel
+    // the legitimate push:main run, leaving the site undeployed.
+    const lines = deployYml
+      .split('\n')
+      .map((l, i) => ({ line: l, num: i + 1 }))
+      .filter(({ line }) => /^\s*pull_request\s*:/.test(line));
+
+    expect(lines).toEqual([]);
+  });
+
+  it('must have push:main as a trigger', () => {
+    expect(deployYml).toMatch(/push:/);
+    expect(deployYml).toMatch(/branches:\s*\[main\]/);
+  });
+
+  it('must have workflow_dispatch as a fallback trigger', () => {
+    expect(deployYml).toMatch(/workflow_dispatch/);
+  });
+
+  it('must have a validate job that runs after deploy', () => {
+    expect(deployYml).toMatch(/validate:/);
+    expect(deployYml).toMatch(/needs:\s*deploy/);
+  });
+
+  it('must keep cancel-in-progress: true to drop stale push runs', () => {
+    expect(deployYml).toMatch(/cancel-in-progress:\s*true/);
+  });
+});
+
+describe('ci.yml — CI trigger guard', () => {
+  const ciYml = readWorkflow('ci.yml');
+
+  it('must NOT have pull_request:closed trigger', () => {
+    // A closed PR trigger would cause duplicate CI runs on each merge,
+    // consuming extra runner minutes and potentially conflicting with auto-merge.
+    expect(ciYml).not.toMatch(/types:.*closed/);
+    expect(ciYml).not.toMatch(/closed.*pull_request/);
+  });
+
+  it('must trigger on push:main', () => {
+    expect(ciYml).toMatch(/push:/);
+    expect(ciYml).toMatch(/branches:\s*\[main\]/);
+  });
+
+  it('must trigger on pull_request opened/synchronize/reopened only', () => {
+    expect(ciYml).toMatch(/opened/);
+    expect(ciYml).toMatch(/synchronize/);
+    expect(ciYml).toMatch(/reopened/);
+  });
+});
+
+describe('auto-merge.yml — pull_request_target guard', () => {
+  const autoMergeYml = readWorkflow('auto-merge.yml');
+
+  it('must use pull_request_target (not pull_request) to avoid action_required block on bot PRs', () => {
+    // pull_request_target runs in the base-branch context — no "Approve and run"
+    // required for bot actors. Safe here because the job only calls `gh pr merge`
+    // and never checks out or executes any PR code.
+    expect(autoMergeYml).toMatch(/pull_request_target\s*:/);
+  });
+
+  it('must NOT use plain pull_request trigger (would block Copilot PRs requiring approval)', () => {
+    // Ensure no plain `pull_request:` trigger line exists in the on: block.
+    // pull_request_target is the intentional replacement.
+    const triggerLines = autoMergeYml
+      .split('\n')
+      .filter(line => /^\s{2}pull_request\s*:/.test(line));
+    expect(triggerLines).toEqual([]);
+  });
+
+  it('must restrict auto-merge to Copilot branches or trusted bots', () => {
+    expect(autoMergeYml).toMatch(/startsWith.*copilot/);
+  });
+});
