@@ -190,6 +190,173 @@ describe('deploy-cloudflare-pages.yml — validation guard', () => {
   });
 });
 
+describe('deploy-cloudflare-pages.yml — lighthouse on real preview URL', () => {
+  const cloudflareYml = readWorkflow('deploy-cloudflare-pages.yml');
+
+  it('must have a lighthouse job', () => {
+    expect(cloudflareYml).toMatch(/^\s*lighthouse:/m);
+  });
+
+  it('lighthouse job must run after both deploy and validate', () => {
+    // Ensures the real URL is confirmed live before Lighthouse audits it.
+    expect(cloudflareYml).toMatch(/needs:\s*\[deploy,\s*validate\]/);
+  });
+
+  it('lighthouse job must use the real deployment URL via LHCI_URL or DEPLOY_URL', () => {
+    // The deployment URL from wrangler-action must be passed to Lighthouse.
+    expect(cloudflareYml).toMatch(/needs\.deploy\.outputs\.deployment_url/);
+  });
+
+  it('fallback URL must be defined as DEFAULT_PREVIEW_URL env var, not hardcoded inline', () => {
+    // Avoids hardcoded strings in each job env; allows env-level override for staging.
+    expect(cloudflareYml).toMatch(/DEFAULT_PREVIEW_URL:/);
+    expect(cloudflareYml).toMatch(/env\.DEFAULT_PREVIEW_URL/);
+  });
+
+  it('lighthouse job must call prepare-lighthouse-config.mjs', () => {
+    expect(cloudflareYml).toMatch(/prepare-lighthouse-config\.mjs/);
+  });
+
+  it('lighthouse job must upload reports as artifacts', () => {
+    expect(cloudflareYml).toMatch(/lighthouse-cloudflare-reports/);
+  });
+
+  it('lighthouse job must upload scores as a separate baseline artifact', () => {
+    expect(cloudflareYml).toMatch(/lighthouse-scores-cloudflare/);
+  });
+
+  it('lighthouse job must run lighthouse-guard.mjs --write to save scores', () => {
+    expect(cloudflareYml).toMatch(/lighthouse-guard\.mjs.*--write/);
+  });
+});
+
+describe('ci.yml — Lighthouse regression guard and PR comment', () => {
+  const ciYml = readWorkflow('ci.yml');
+
+  it('lighthouse job must have pull-requests:write permission for PR comments', () => {
+    expect(ciYml).toMatch(/pull-requests:\s*write/);
+  });
+
+  it('lighthouse job must have actions:read permission for artifact download', () => {
+    expect(ciYml).toMatch(/actions:\s*read/);
+  });
+
+  it('lighthouse job must run lighthouse-guard.mjs --write after LHCI', () => {
+    expect(ciYml).toMatch(/lighthouse-guard\.mjs.*--write/);
+  });
+
+  it('lighthouse job must run regression guard --compare on pull_request events', () => {
+    expect(ciYml).toMatch(/lighthouse-guard\.mjs.*--compare/);
+    expect(ciYml).toMatch(/github\.event_name\s*==\s*['"]pull_request['"]/);
+  });
+
+  it('lighthouse job must post a PR comment with Lighthouse scores', () => {
+    expect(ciYml).toMatch(/lighthouse-pr-comment\.mjs/);
+  });
+
+  it('PR comment step must have continue-on-error to never block CI', () => {
+    expect(ciYml).toMatch(/continue-on-error:\s*true/);
+  });
+
+  it('lighthouse job must upload separate lighthouse-scores artifact (90-day baseline)', () => {
+    expect(ciYml).toMatch(/name:\s*lighthouse-scores/);
+    expect(ciYml).toMatch(/retention-days:\s*90/);
+  });
+});
+
+describe('lighthouse-guard.mjs — per-metric regression thresholds', () => {
+  const src = readFileSync(path.join(HERE, 'lighthouse-guard.mjs'), 'utf8');
+
+  it('must use per-metric thresholds, not a single global threshold', () => {
+    expect(src).toMatch(/THRESHOLD_PERFORMANCE/);
+    expect(src).toMatch(/THRESHOLD_ACCESSIBILITY/);
+    expect(src).toMatch(/THRESHOLD_SEO/);
+    expect(src).toMatch(/THRESHOLD_BEST_PRACTICES/);
+  });
+
+  it('must use correct default thresholds (perf=5, a11y=2, seo=3, bp=3)', () => {
+    // Perf threshold default 5
+    expect(src).toMatch(/THRESHOLD_PERFORMANCE[^\n]*\?\?[^\n]*5/);
+    // Accessibility threshold default 2
+    expect(src).toMatch(/THRESHOLD_ACCESSIBILITY[^\n]*\?\?[^\n]*2/);
+    // SEO threshold default 3
+    expect(src).toMatch(/THRESHOLD_SEO[^\n]*\?\?[^\n]*3/);
+    // Best-practices threshold default 3
+    expect(src).toMatch(/THRESHOLD_BEST_PRACTICES[^\n]*\?\?[^\n]*3/);
+  });
+
+  it('must produce a PASS/WARN/FAIL verdict', () => {
+    expect(src).toMatch(/'PASS'/);
+    expect(src).toMatch(/'WARN'/);
+    expect(src).toMatch(/'FAIL'/);
+  });
+
+  it('must write /tmp/lh-verdict.json for the PR comment script', () => {
+    expect(src).toMatch(/lh-verdict\.json/);
+  });
+});
+
+describe('lighthouse-pr-comment.mjs — PASS/WARN/FAIL verdict banner', () => {
+  const src = readFileSync(path.join(HERE, 'lighthouse-pr-comment.mjs'), 'utf8');
+
+  it('must render a PASS banner', () => {
+    expect(src).toMatch(/PASS/);
+  });
+
+  it('must render a WARN banner', () => {
+    expect(src).toMatch(/WARN.*[Ll]ég.*re.*d.*gradation/);
+  });
+
+  it('must render a FAIL banner', () => {
+    expect(src).toMatch(/FAIL.*[Rr]égression.*bloquante/);
+  });
+
+  it('must include per-metric regression thresholds matching the guard defaults', () => {
+    expect(src).toMatch(/THRESHOLDS/);
+    expect(src).toMatch(/performance.*5/);
+    expect(src).toMatch(/accessibility.*2/);
+    expect(src).toMatch(/seo.*3/);
+    expect(src).toMatch(/bestPractices.*3/);
+  });
+
+  it('must show regression vs main column in comment table', () => {
+    expect(src).toMatch(/gression vs main/i);
+  });
+});
+
+describe('lighthouserc.json — performance resource budgets', () => {
+  const lhrc = JSON.parse(readFileSync(path.join(REPO_ROOT, 'lighthouserc.json'), 'utf8'));
+  const budgets = lhrc.ci.collect.settings.budgets[0];
+
+  it('must have a stylesheet (CSS) size budget', () => {
+    expect(budgets.resourceSizes.some(
+      (b: { resourceType: string; budget: number }) => b.resourceType === 'stylesheet',
+    )).toBe(true);
+  });
+
+  it('must have an image size budget', () => {
+    expect(budgets.resourceSizes.some(
+      (b: { resourceType: string; budget: number }) => b.resourceType === 'image',
+    )).toBe(true);
+  });
+
+  it('must have a script count budget (≤ 15)', () => {
+    const s = budgets.resourceCounts.find(
+      (b: { resourceType: string; budget: number }) => b.resourceType === 'script',
+    );
+    expect(s).toBeDefined();
+    expect(s.budget).toBeLessThanOrEqual(15);
+  });
+
+  it('must have third-party count budget ≤ 5', () => {
+    const tp = budgets.resourceCounts.find(
+      (b: { resourceType: string; budget: number }) => b.resourceType === 'third-party',
+    );
+    expect(tp).toBeDefined();
+    expect(tp.budget).toBeLessThanOrEqual(5);
+  });
+});
+
 describe('auto-merge.yml — pull_request_target guard', () => {
   const autoMergeYml = readWorkflow('auto-merge.yml');
 
