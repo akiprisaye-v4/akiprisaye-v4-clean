@@ -60,7 +60,7 @@ jobs:
       - name: ⚙️ Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: .nvmrc
           cache: 'npm'
           cache-dependency-path: scripts/lettre-hebdo/package.json
 
@@ -74,6 +74,10 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "⚠️  OPENAI_API_KEY absent — génération de la lettre hebdo ignorée (secret manquant)"
+            exit 0
+          fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             node generate.js --dry-run
           else

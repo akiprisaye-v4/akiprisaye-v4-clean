@@ -374,9 +374,9 @@ async function main() {
     if (rawServices.length > 0) {
       const existingServices = loadJSON(join(dataDir, 'services-prices.json')) ?? { metadata: {}, services: [] };
       const updatedServices = {
-        metadata: { ...existingServices.metadata, lastUpdated: ISO_NOW, autoUpdated: true },
+        metadata: { ...(existingServices.metadata ?? {}), lastUpdated: ISO_NOW, autoUpdated: true },
         services: [
-          ...existingServices.services.filter((s) => !s.autoCollected),
+          ...(existingServices.services ?? []).filter((s) => !s.autoCollected),
           ...rawServices.map((s) => ({ ...s, autoCollected: true })),
         ],
       };

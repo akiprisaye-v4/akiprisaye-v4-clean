@@ -20,6 +20,7 @@ import RequireAuth from './components/auth/RequireAuth';
 import RequireCreator from './components/auth/RequireCreator';
 import RequireAdmin from './components/auth/RequireAdmin';
 import { logDebug } from './utils/logger';
+import { BuildInfo } from './components/BuildInfo';
 
 // Non-critical overlays — lazy-loaded so they don't block initial paint
 const PerformanceMonitor = lazyPage(() =>
@@ -41,6 +42,7 @@ const Comparateur = lazyPage(() => import('./pages/Comparateur'));
 const AdminLayout = lazyPage(() => import('./pages/admin/AdminLayout'));
 const AdminDashboardNew = lazyPage(() => import('./pages/admin/AdminDashboard'));
 const AdminUsers = lazyPage(() => import('./pages/admin/AdminUsers'));
+const AdminUsersPanel = lazyPage(() => import('./pages/admin/AdminUsersPanel'));
 const AdminAudience = lazyPage(() => import('./pages/admin/AdminAudience'));
 const StoreList = lazyPage(() => import('./pages/admin/stores/StoreList'));
 const StoreForm = lazyPage(() => import('./pages/admin/stores/StoreForm'));
@@ -236,6 +238,7 @@ const Promotions = lazyPage(() => import('./pages/Promotions'));
 const BudgetVital = lazyPage(() => import('./pages/BudgetVital'));
 const IEVRPage = lazyPage(() => import('./pages/IEVR'));
 const Versions = lazyPage(() => import('./pages/Versions'));
+const VersionPage = lazyPage(() => import('./pages/VersionPage'));
 const ScanOCR = lazyPage(() => import('./pages/ScanOCR'));
 
 // Messagerie interne
@@ -409,7 +412,7 @@ export default function App() {
                         {/* Admin routes — RequireAdmin guard: redirects non-admin users to / */}
                         <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
                           <Route index element={<AdminDashboardNew />} />
-                          <Route path="users" element={<AdminUsers />} />
+                          <Route path="users" element={<AdminUsersPanel />} />
                           <Route path="audience" element={<AdminAudience />} />
                           <Route path="stores" element={<StoreList />} />
                           <Route path="stores/new" element={<StoreForm />} />
@@ -651,6 +654,7 @@ export default function App() {
                           <Route path="budget-vital" element={<BudgetVital />} />
                           <Route path="ievr" element={<IEVRPage />} />
                           <Route path="versions" element={<Versions />} />
+                          <Route path="version" element={<VersionPage />} />
 
                           {/* Messagerie interne */}
                           <Route path="messagerie" element={<Messagerie />} />
@@ -723,6 +727,8 @@ export default function App() {
                       <HelpButton />
                       <ToastProvider />
                       <AuthDebugPanel />
+                      {/* Deployment proof badge — shows shortSHA + date in bottom-right */}
+                      <BuildInfo />
                     </Suspense>
                   </BrowserRouter>
                 </EntitlementProvider>
