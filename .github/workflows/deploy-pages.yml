@@ -156,6 +156,43 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+  verify-live:
+    needs: deploy
+    if: needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    # Hardcoded URL is more reliable than needs.deploy.outputs.page_url which
+    # can be empty when the Pages environment is not yet fully configured.
+    env:
+      SITE_URL: https://teetee971.github.io/akiprisaye-web/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+
+      - name: Verify live deployed version
+        env:
+          EXPECTED_COMMIT: ${{ github.sha }}
+          EXPECTED_BRANCH: ${{ github.ref_name }}
+          MAX_ATTEMPTS: 36
+          DELAY_MS: 10000
+        run: node frontend/scripts/verify-live-deployment.mjs
+
+      - name: Final proof
+        run: |
+          echo ""
+          echo "🏆 ====================================="
+          echo "🏆 PREUVE FINALE – DÉPLOIEMENT VALIDÉ"
+          echo "🏆 ====================================="
+          echo "🌍 URL : $SITE_URL"
+          echo "📌 SHA : ${{ github.sha }}"
+          echo "📅 Timestamp : $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          echo "🚀 Statut : LIVE = VERIFIED BUILD"
+
   validate:
     needs: deploy
     if: needs.deploy.result == 'success'
