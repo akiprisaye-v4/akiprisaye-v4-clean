@@ -120,6 +120,10 @@ export default defineConfig({
       // Booking links — UTM params et statut commissions
       abs('./src/test/bookingLinks.test.ts'),
       abs('./src/test/home.page.test.tsx'),
+      // SEO content engine — determinism, angles, FAQ generation, similar products
+      abs('./src/test/seoContentEngine.test.ts'),
+      // SEO stats tracker — localStorage-based SEO analytics (RGPD compliant)
+      abs('./src/test/statsTracker.test.ts'),
       // Comparateurs spécialisés — services de comparaison
       abs('./src/services/__tests__/carRentalService.test.ts'),
       abs('./src/services/__tests__/freightComparisonService.test.ts'),
@@ -160,6 +164,10 @@ export default defineConfig({
       abs('./src/test/rbac.test.ts'),
       // RequireRole / RequireCreator / RequireAdmin guards — loading, redirect, access control
       abs('./src/test/requireRole.test.tsx'),
+      // Auto SEO guardrails — capHighPriority, capDuplications, isWhitelisted, validateRecommendations
+      abs('./src/test/autoSeoGuardrails.test.ts'),
+      // Auto SEO engine — scoring determinism, recommendation rules, getSummaryStats, edge cases
+      abs('./src/test/autoSeoEngine.test.ts'),
     ],
 
     exclude: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/coverage/**'],

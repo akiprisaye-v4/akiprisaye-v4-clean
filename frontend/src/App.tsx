@@ -312,7 +312,28 @@ const MonitoringIAPage = lazyPage(() => import('./pages/MonitoringIAPage'));
 // ── SEO & Growth Pages ───────────────────────────────────────────────────────
 const SEOProductPage = lazyPage(() => import('./pages/SEOProductPage'));
 const SEOCategoryPage = lazyPage(() => import('./pages/SEOCategoryPage'));
+const SEOPrixLocalPage = lazyPage(() => import('./pages/SEOPrixLocalPage'));
+const SEOComparaisonPage = lazyPage(() => import('./pages/SEOComparaisonPage'));
+const SEOInflationPage = lazyPage(() => import('./pages/SEOInflationPage'));
+const SEOMoinsChersPage = lazyPage(() => import('./pages/SEOMoinsChersPage'));
+const SEOBrandPage = lazyPage(() => import('./pages/SEOBrandPage'));
+const SEOEnseignePrixPage = lazyPage(() => import('./pages/SEOEnseignePrixPage'));
+const SEOGuidePrixPage = lazyPage(() => import('./pages/SEOGuidePrixPage'));
+const GuidePrixAlimentaireDOM = lazyPage(() => import('./pages/pillar/GuidePrixAlimentaireDOM'));
+const ComparateurSuperMarchesDOM = lazyPage(() => import('./pages/pillar/ComparateurSuperMarchesDOM'));
+const InflationAlimentaireDOMAnalyse = lazyPage(() => import('./pages/pillar/InflationAlimentaireDOMAnalyse'));
+const OuFaireCoursesDOMPage = lazyPage(() => import('./pages/pillar/OuFaireCoursesDOMPage'));
 const StatsDashboard = lazyPage(() => import('./pages/StatsDashboard'));
+const SeoMonitoringPage = lazyPage(() => import('./pages/SeoMonitoringPage'));
+const OutreachDashboardPage = lazyPage(() => import('./pages/OutreachDashboardPage'));
+const CRODashboardPage = lazyPage(() => import('./pages/CRODashboardPage'));
+const SeoLoopDashboardPage = lazyPage(() => import('./pages/SeoLoopDashboardPage'));
+const RevenueDashboardPage = lazyPage(() => import('./pages/RevenueDashboardPage'));
+const ExpansionDashboardPage = lazyPage(() => import('./pages/ExpansionDashboardPage'));
+const AuthorityDashboardPage = lazyPage(() => import('./pages/AuthorityDashboardPage'));
+const GlobalDashboardPage = lazyPage(() => import('./pages/GlobalDashboardPage'));
+const AutoSeoDashboardPage = lazyPage(() => import('./pages/AutoSeoDashboardPage'));
+const SEOCompetitorComparisonPage = lazyPage(() => import('./pages/SEOCompetitorComparisonPage'));
 const TopEconomiesPage = lazyPage(() => import('./pages/TopEconomiesPage'));
 const TendancesPage = lazyPage(() => import('./pages/TendancesPage'));
 const PopulairesPage = lazyPage(() => import('./pages/PopulairesPage'));
@@ -747,7 +768,38 @@ export default function App() {
                           {/* ── SEO & Growth Pages ── */}
                           <Route path="produit/:slug" element={<SEOProductPage />} />
                           <Route path="categorie/:slug" element={<SEOCategoryPage />} />
+                          {/* Long-tail SEO: local price pages /prix/<product>-<territory> */}
+                          <Route path="prix/:slug" element={<SEOPrixLocalPage />} />
+                          {/* Long-tail SEO: retailer comparison /comparer/<r1>-vs-<r2>-<territory> */}
+                          <Route path="comparer/:slug" element={<SEOComparaisonPage />} />
+                          {/* Long-tail SEO: inflation trends /inflation/<category>-<territory>-<year> */}
+                          <Route path="inflation/:slug" element={<SEOInflationPage />} />
+                          {/* Long-tail SEO: cheapest products /moins-cher/<territory>[/<category>] */}
+                          <Route path="moins-cher/:territory" element={<SEOMoinsChersPage />} />
+                          <Route path="moins-cher/:territory/:category" element={<SEOMoinsChersPage />} />
+                          {/* Long-tail SEO: brand pages /marque/<brand>-<territory> */}
+                          <Route path="marque/:slug" element={<SEOBrandPage />} />
+                          {/* Long-tail SEO: retailer price pages /prix-enseigne/<retailer>/<territory> */}
+                          <Route path="prix-enseigne/:retailer/:territory" element={<SEOEnseignePrixPage />} />
+                          {/* Long-tail SEO: guide pages /guide-prix/<product>-<territory> */}
+                          <Route path="guide-prix/:slug" element={<SEOGuidePrixPage />} />
+                          {/* Pillar pages */}
+                          <Route path="guide-prix-alimentaire-dom" element={<GuidePrixAlimentaireDOM />} />
+                          <Route path="comparateur-supermarches-dom" element={<ComparateurSuperMarchesDOM />} />
+                          <Route path="inflation-alimentaire-dom" element={<InflationAlimentaireDOMAnalyse />} />
+                          <Route path="ou-faire-courses-dom" element={<OuFaireCoursesDOMPage />} />
                           <Route path="stats-dashboard" element={<StatsDashboard />} />
+                          {/* Internal/admin dashboards — RequireAdmin guard */}
+                          <Route path="seo-monitoring" element={<RequireAdmin><SeoMonitoringPage /></RequireAdmin>} />
+                          <Route path="outreach" element={<RequireAdmin><OutreachDashboardPage /></RequireAdmin>} />
+                          <Route path="cro-dashboard" element={<RequireAdmin><CRODashboardPage /></RequireAdmin>} />
+                          <Route path="seo-loop-dashboard" element={<RequireAdmin><SeoLoopDashboardPage /></RequireAdmin>} />
+                          <Route path="revenue-dashboard" element={<RequireAdmin><RevenueDashboardPage /></RequireAdmin>} />
+                          <Route path="expansion-dashboard" element={<RequireAdmin><ExpansionDashboardPage /></RequireAdmin>} />
+                          <Route path="authority-dashboard" element={<RequireAdmin><AuthorityDashboardPage /></RequireAdmin>} />
+                          <Route path="global-dashboard" element={<RequireAdmin><GlobalDashboardPage /></RequireAdmin>} />
+                          <Route path="auto-seo-dashboard" element={<RequireAdmin><AutoSeoDashboardPage /></RequireAdmin>} />
+                          <Route path="vs/:slug" element={<SEOCompetitorComparisonPage />} />
                           <Route path="top-economies" element={<TopEconomiesPage />} />
                           <Route path="tendances" element={<TendancesPage />} />
                           <Route path="populaires" element={<PopulairesPage />} />
