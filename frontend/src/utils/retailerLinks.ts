@@ -25,8 +25,8 @@ const RETAILER_URLS: Record<string, string> = {
   'Carrefour':        'https://www.carrefour.fr/',
   'Carrefour Market': 'https://www.carrefour.fr/',
   'Leader Price':     'https://www.leaderprice.fr/',
-  'Super U':          'https://www.courses.super-u.fr/',
-  'E.Leclerc':        'https://www.courses.leclerc.fr/',
+  'Super U':          'https://www.courses.u.fr/',
+  'E.Leclerc':        'https://www.e.leclerc/',
   'Intermarché':      'https://www.intermarche.com/',
   'Match':            'https://www.match.fr/',
   'Simply Market':    'https://www.auchan.fr/',  // Simply Market → Auchan
@@ -83,7 +83,7 @@ function buildDeepLink(
     return `https://www.carrefour.fr/recherche?q=${encoded}`;
   }
   if (retailer === 'E.Leclerc') {
-    return `https://www.courses.leclerc.fr/search?q=${encoded}`;
+    return `https://www.e.leclerc/recherche?q=${encoded}`;
   }
   if (retailer === 'Intermarché') {
     return `https://www.intermarche.com/nos-produits/recherche?term=${encoded}`;
