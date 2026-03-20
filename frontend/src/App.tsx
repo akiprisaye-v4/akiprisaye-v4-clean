@@ -1,5 +1,5 @@
  
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { lazyPage } from './router/lazy';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -7,27 +7,48 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
-import AuthProvider from './context/AuthContext';
 import { OnboardingProvider } from './context/OnboardingContext';
-import { LanguageProvider } from './context/LanguageProvider';
-import OnboardingAutoStart from './components/OnboardingAutoStart';
-import HelpButton from './components/HelpButton';
-import AnalyticsTracker from './components/analytics/AnalyticsTracker';
 import { ToastProvider } from './components/Toast/ToastProvider';
 import { StoreSelectionProvider } from './context/StoreSelectionContext';
-import { EntitlementProvider } from './billing/EntitlementProvider';
 import RequireAuth from './components/auth/RequireAuth';
 import RequireCreator from './components/auth/RequireCreator';
 import RequireAdmin from './components/auth/RequireAdmin';
 import { logDebug } from './utils/logger';
-import { BuildInfo } from './components/BuildInfo';
 
-// Non-critical overlays — lazy-loaded so they don't block initial paint
+// ── Parallel preloading ──────────────────────────────────────────────────────
+// All three provider modules start downloading immediately when this module is
+// evaluated — NOT when React first tries to render them.  Because these are
+// pre-evaluated promises (not factory functions), the browser can download all
+// three in parallel during the single Suspense loading phase.
+// vendor-i18n (21 kB gzip) and Firebase (144 kB gzip) no longer block first paint.
+const _langProviderImport  = import('./context/LanguageProvider');
+const _authProviderImport  = import('./contexts/AuthContext');
+const _entitImport         = import('./billing/EntitlementProvider');
+
+const LanguageProvider = lazy(() =>
+  _langProviderImport.then((m) => ({ default: m.LanguageProvider }))
+);
+
+// Heavy providers — lazy-loaded so Firebase (485 kB) doesn't block first paint.
+const AuthProvider = lazy(() =>
+  _authProviderImport.then((m) => ({ default: m.AuthProvider }))
+);
+const EntitlementProvider = lazy(() =>
+  _entitImport.then((m) => ({ default: m.EntitlementProvider }))
+);
+
+// Non-critical UI/tracking — lazy-loaded so they don't block initial paint
 const PerformanceMonitor = lazyPage(() =>
   import('./components/PerformanceMonitor').then((m) => ({ default: m.PerformanceMonitor }))
 );
 const OnboardingTour = lazyPage(() => import('./components/OnboardingTour'));
 const AuthDebugPanel = lazyPage(() => import('./components/AuthDebugPanel'));
+const OnboardingAutoStart = lazy(() => import('./components/OnboardingAutoStart'));
+const HelpButton = lazy(() => import('./components/HelpButton'));
+const AnalyticsTracker = lazy(() => import('./components/analytics/AnalyticsTracker'));
+const BuildInfo = lazy(() =>
+  import('./components/BuildInfo').then((m) => ({ default: m.BuildInfo }))
+);
 
 // Lazy-loaded pages - Main routes
 const Home = lazyPage(() => import('./pages/Home'));
@@ -400,14 +421,20 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <LanguageProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <OnboardingProvider>
-              <StoreSelectionProvider>
-                <EntitlementProvider>
-                  <BrowserRouter basename={import.meta.env.BASE_URL}>
-                    <Suspense fallback={<LoadingFallback />}>
+      {/* Single top-level Suspense: LanguageProvider (vendor-i18n 21kB), AuthProvider (Firebase
+          485kB) and EntitlementProvider all download in parallel thanks to the pre-evaluated
+          import promises above.  The LoadingFallback replaces the HTML #loading-fallback div. */}
+      <Suspense fallback={<LoadingFallback />}>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <OnboardingProvider>
+                <StoreSelectionProvider>
+                  {/* EntitlementProvider also imports Firebase (Firestore); already preloaded. */}
+                  <Suspense fallback={null}>
+                    <EntitlementProvider>
+                      <BrowserRouter basename={import.meta.env.BASE_URL}>
+                        <Suspense fallback={<LoadingFallback />}>
                       <Routes>
                         {/* Admin routes — RequireAdmin guard: redirects non-admin users to / */}
                         <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
@@ -720,23 +747,25 @@ export default function App() {
                         </Route>
                       </Routes>
 
-                      <AnalyticsTracker />
+                      <Suspense fallback={null}><AnalyticsTracker /></Suspense>
                       <PerformanceMonitor />
-                      <OnboardingAutoStart />
+                      <Suspense fallback={null}><OnboardingAutoStart /></Suspense>
                       <OnboardingTour />
-                      <HelpButton />
+                      <Suspense fallback={null}><HelpButton /></Suspense>
                       <ToastProvider />
                       <AuthDebugPanel />
                       {/* Deployment proof badge — shows shortSHA + date in bottom-right */}
-                      <BuildInfo />
+                      <Suspense fallback={null}><BuildInfo /></Suspense>
                     </Suspense>
                   </BrowserRouter>
-                </EntitlementProvider>
-              </StoreSelectionProvider>
-            </OnboardingProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </LanguageProvider>
+                    </EntitlementProvider>
+                  </Suspense>
+                </StoreSelectionProvider>
+              </OnboardingProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </LanguageProvider>
+      </Suspense>
     </ErrorBoundary>
   );
 }
