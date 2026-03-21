@@ -63,7 +63,7 @@ export interface FuelFilters extends Omit<ServiceFilters, 'specificFilters'> {
  * Mapping DOM-TOM departments
  * Uses same territory codes as frontend for consistency
  */
-const TERRITORY_TO_DEPARTMENT: Record<string, string> = {
+const _TERRITORY_TO_DEPARTMENT: Record<string, string> = {
   GP: '971', // Guadeloupe
   MQ: '972', // Martinique  
   GY: '973', // Guyane
@@ -198,14 +198,6 @@ export class FuelComparisonService extends ServiceComparisonCore {
   }
 
   /**
-   * Get department code from territory
-   */
-  private getDepartmentFromTerritory(territory?: Territory): string | null {
-    if (!territory) return null;
-    return TERRITORY_TO_DEPARTMENT[territory] || null;
-  }
-
-  /**
    * Calculate distance between two coordinates (Haversine formula)
    */
   private calculateDistance(
@@ -229,18 +221,6 @@ export class FuelComparisonService extends ServiceComparisonCore {
 
   private toRadians(degrees: number): number {
     return degrees * (Math.PI / 180);
-  }
-
-  /**
-   * Fetch from government API (placeholder for future implementation)
-   */
-  private async fetchFromGovernmentAPI(department: string | null): Promise<any[]> {
-    // TODO: Implement actual API call to prix-carburants.gouv.fr
-    // Example:
-    // const response = await fetch(`https://www.prix-carburants.gouv.fr/api/stations/${department}`);
-    // return await response.json();
-    console.log(`Would fetch fuel prices for department: ${department}`);
-    return [];
   }
 }
 

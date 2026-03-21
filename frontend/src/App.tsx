@@ -16,14 +16,14 @@ import RequireAdmin from './components/auth/RequireAdmin';
 import { logDebug } from './utils/logger';
 
 // ── Parallel preloading ──────────────────────────────────────────────────────
-// All three provider modules start downloading immediately when this module is
-// evaluated — NOT when React first tries to render them.  Because these are
-// pre-evaluated promises (not factory functions), the browser can download all
-// three in parallel during the single Suspense loading phase.
-// vendor-i18n (21 kB gzip) and Firebase (144 kB gzip) no longer block first paint.
-const _langProviderImport  = import('./context/LanguageProvider');
-const _authProviderImport  = import('./contexts/AuthContext');
-const _entitImport         = import('./billing/EntitlementProvider');
+// LanguageProvider (i18next, ~21 kB gzip): preloaded eagerly so text content
+// is available on first render without a Suspense waterfall.
+// AuthProvider (Firebase, ~144 kB gzip) and EntitlementProvider (billing) are
+// NOT preloaded eagerly — their downloads now start when React first hits the
+// Suspense boundary (not at module-eval time).  This avoids competing for
+// bandwidth with the LCP image and critical JS on throttled mobile connections.
+// The Suspense phase is slightly longer but FCP/LCP improve on slow networks.
+const _langProviderImport = import('./context/LanguageProvider');
 
 const LanguageProvider = lazy(() =>
   _langProviderImport.then((m) => ({ default: m.LanguageProvider }))
@@ -31,10 +31,10 @@ const LanguageProvider = lazy(() =>
 
 // Heavy providers — lazy-loaded so Firebase (485 kB) doesn't block first paint.
 const AuthProvider = lazy(() =>
-  _authProviderImport.then((m) => ({ default: m.AuthProvider }))
+  import('./contexts/AuthContext').then((m) => ({ default: m.AuthProvider }))
 );
 const EntitlementProvider = lazy(() =>
-  _entitImport.then((m) => ({ default: m.EntitlementProvider }))
+  import('./billing/EntitlementProvider').then((m) => ({ default: m.EntitlementProvider }))
 );
 
 // Non-critical UI/tracking — lazy-loaded so they don't block initial paint
@@ -319,7 +319,9 @@ const SEOMoinsChersPage = lazyPage(() => import('./pages/SEOMoinsChersPage'));
 const SEOBrandPage = lazyPage(() => import('./pages/SEOBrandPage'));
 const SEOEnseignePrixPage = lazyPage(() => import('./pages/SEOEnseignePrixPage'));
 const SEOGuidePrixPage = lazyPage(() => import('./pages/SEOGuidePrixPage'));
-const LandingPage = lazyPage(() => import('./pages/LandingPage'));
+const SEOComparateurSlugPage = lazyPage(() => import('./pages/SEOComparateurSlugPage'));
+const LandingPage   = lazyPage(() => import('./pages/LandingPage'));
+const PartnerPage   = lazyPage(() => import('./pages/PartnerPage'));
 const GuidePrixAlimentaireDOM = lazyPage(() => import('./pages/pillar/GuidePrixAlimentaireDOM'));
 const ComparateurSuperMarchesDOM = lazyPage(() => import('./pages/pillar/ComparateurSuperMarchesDOM'));
 const InflationAlimentaireDOMAnalyse = lazyPage(() => import('./pages/pillar/InflationAlimentaireDOMAnalyse'));
@@ -338,6 +340,9 @@ const SEOCompetitorComparisonPage = lazyPage(() => import('./pages/SEOCompetitor
 const TopEconomiesPage = lazyPage(() => import('./pages/TopEconomiesPage'));
 const TendancesPage = lazyPage(() => import('./pages/TendancesPage'));
 const PopulairesPage = lazyPage(() => import('./pages/PopulairesPage'));
+const UserDashboardPage = lazyPage(() => import('./pages/UserDashboardPage'));
+const ExecutiveDashboardPage = lazyPage(() => import('./pages/ExecutiveDashboardPage'));
+const TopDealsDuJourPage = lazyPage(() => import('./pages/TopDealsDuJourPage'));
 
 /**
  * IMPORTANT — NE PAS SUPPRIMER
@@ -784,8 +789,11 @@ export default function App() {
                           <Route path="prix-enseigne/:retailer/:territory" element={<SEOEnseignePrixPage />} />
                           {/* Long-tail SEO: guide pages /guide-prix/<product>-<territory> */}
                           <Route path="guide-prix/:slug" element={<SEOGuidePrixPage />} />
+                          {/* Long-tail SEO: comparateur dynamique /comparateur/<product>-<territory> (V2/V3) */}
+                          <Route path="comparateur/:slug" element={<SEOComparateurSlugPage />} />
                           {/* Landing page — high-conversion entry point */}
                           <Route path="landing" element={<LandingPage />} />
+                          <Route path="devenir-partenaire" element={<PartnerPage />} />
                           {/* Pillar pages */}
                           <Route path="guide-prix-alimentaire-dom" element={<GuidePrixAlimentaireDOM />} />
                           <Route path="comparateur-supermarches-dom" element={<ComparateurSuperMarchesDOM />} />
@@ -812,6 +820,11 @@ export default function App() {
                           <Route path="predictions" element={<Predictions />} />
                           <Route path="ia-conseiller" element={<IaConseiller />} />
                           <Route path="ai-insights" element={<AiMarketInsights />} />
+
+                          {/* Conversion + User OS + Executive OS */}
+                          <Route path="mon-espace" element={<UserDashboardPage />} />
+                          <Route path="executive" element={<ExecutiveDashboardPage />} />
+                          <Route path="top-deals-du-jour" element={<TopDealsDuJourPage />} />
 
                           {/* Catch-all route - 404 page */}
                           <Route path="*" element={<NotFound />} />

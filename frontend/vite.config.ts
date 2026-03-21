@@ -29,7 +29,29 @@ const buildEnv = process.env.CF_PAGES === '1'
     : process.env.NODE_ENV ?? 'development';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // ── Google Search Console ownership verification ──────────────────────────
+    // Injects <meta name="google-site-verification"> when the env var is set.
+    // Set VITE_GOOGLE_SITE_VERIFICATION as a repo secret and pass it in the
+    // deploy-pages workflow Build step env section.
+    // When the env var is absent (local dev, CI without the secret) the tag is
+    // simply omitted — harmless and clean.
+    {
+      name: 'google-site-verification',
+      transformIndexHtml() {
+        const token = process.env.VITE_GOOGLE_SITE_VERIFICATION?.trim();
+        if (!token) return [];
+        return [
+          {
+            tag: 'meta',
+            attrs: { name: 'google-site-verification', content: token },
+            injectTo: 'head' as const,
+          },
+        ];
+      },
+    },
+  ],
   resolve: {
     alias: [
       // Supporte "@/..." et aussi "@..."
@@ -121,10 +143,15 @@ export default defineConfig({
           if (id.includes('@firebase/') || id.includes('firebase/')) {
             return 'vendor-firebase';
           }
-          // ── Icons (lucide-react — large, split to own chunk) ──────────────
-          if (id.includes('lucide-react')) {
-            return 'vendor-icons';
-          }
+          // ── Icons (lucide-react) ─────────────────────────────────────────
+          // NOTE: intentionally NOT in manualChunks — same rationale as vendor-charts,
+          // vendor-leaflet, and vendor-i18n.  Header.tsx imports lucide-react synchronously
+          // (critical path); forcing it into a named 'vendor-icons' chunk caused Vite's
+          // __vite__preload helper to migrate there and added it as a static modulepreload
+          // in the main entry, keeping lucide-react on the critical path with an extra
+          // HTTP round-trip.  With Footer now lazy-loaded, lucide-react naturally
+          // tree-shakes into the Layout/Header chunk with zero extra preload overhead.
+          // Let Rollup auto-split: icons used by lazy pages go into their own chunks.
           // ── i18n ──────────────────────────────────────────────────────────
           // NOTE: intentionally NOT in manualChunks — same pattern as vendor-charts.
           // LanguageProvider is lazy-loaded in App.tsx, so i18next and react-i18next

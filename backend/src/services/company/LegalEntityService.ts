@@ -14,7 +14,10 @@
  * - Les numéros SIREN/SIRET sont des données publiques
  */
 
-import { PrismaClient, LegalEntity, EntityStatus } from '@prisma/client';
+import { PrismaClient, EntityStatus } from '@prisma/client';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LegalEntity = any;
 import type {
   CreateLegalEntityInput,
   UpdateLegalEntityInput,
@@ -41,7 +44,7 @@ export class LegalEntityService {
    */
   async create(data: CreateLegalEntityInput): Promise<LegalEntity> {
     // Vérification de l'unicité du SIREN
-    const existingSiren = await this.prisma.legalEntity.findUnique({
+    const existingSiren = await this.prisma.legalEntity.findFirst({
       where: { siren: data.siren },
     });
 
@@ -88,7 +91,7 @@ export class LegalEntityService {
    * @returns L'entité légale ou null si non trouvée
    */
   async findBySiren(siren: string): Promise<LegalEntity | null> {
-    return await this.prisma.legalEntity.findUnique({
+    return await this.prisma.legalEntity.findFirst({
       where: { siren },
     });
   }

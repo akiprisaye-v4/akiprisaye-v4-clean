@@ -16,15 +16,23 @@
  * Mobile-first: large touch targets, no overflow, minimal text.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SEOHead }   from '../components/ui/SEOHead';
 import { PrimaryCTA } from '../components/PrimaryCTA';
+import { PrimaryConversionBlock } from '../components/conversion/PrimaryConversionBlock';
 import { formatEur } from '../utils/currency';
 import { SITE_URL } from '../utils/seoHelpers';
 import { buildRetailerUrl } from '../utils/retailerLinks';
 import { trackRetailerClick } from '../utils/priceClickTracker';
 import { getCROStats, trackPageView, trackConversionEvent, getVariantForPage } from '../utils/conversionTracker';
+import { trackRevenueClick } from '../utils/revenueTracker';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 import AlertesPrixBanner, { WHATSAPP_SUBSCRIBE_URL } from '../components/business/AlertesPrixBanner';
+import { useNavigate } from 'react-router-dom';
+import TopDealsSection from '../components/ui/TopDealsSection';
+import { trackEvent, countEvents } from '../utils/eventTracker';
+import { selectViralProducts } from '../engine/growthBrain';
+import alertsData from '../data/alerts/generated-alerts.json';
 
 // ── Viral share scripts ───────────────────────────────────────────────────────
 
@@ -77,6 +85,12 @@ export default function LandingPage() {
   // Viral script copy state: id of last-copied script
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // PWA install prompt
+  const { canInstall, install: installPWA } = usePWAInstall();
+  // Post-click share toast: shown after user clicks a retailer link
+  const [showShareToast, setShowShareToast] = useState(false);
+  const shareToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navigate = useNavigate();
 
   // Always use the canonical SITE_URL so the path includes the deployment
   // subpath (e.g. /akiprisaye-web/landing on GitHub Pages).
@@ -88,8 +102,36 @@ export default function LandingPage() {
     typeof window !== 'undefined' ? window.location.pathname : '/landing';
   const variant = getVariantForPage(pageUrl);
 
+  // Top deals derived from generated alerts (V2 pipeline output)
+  const topDeals = useMemo(() => {
+    const raw = (alertsData as { alerts?: unknown[] }).alerts ?? [];
+    if (raw.length === 0) return [];
+    return selectViralProducts(
+      raw.map((a: unknown) => {
+        const alert = a as Record<string, unknown>;
+        return {
+          name:         String(alert.productName ?? alert.product ?? ''),
+          delta:        Number(alert.delta ?? alert.spread ?? 0),
+          score:        Number(alert.alertScore ?? alert.score ?? 50),
+          bestPrice:    Number(alert.bestPrice ?? alert.price ?? 0),
+          bestRetailer: String(alert.bestRetailer ?? alert.enseigne ?? alert.retailer ?? ''),
+          territory:    String(alert.territory ?? alert.code ?? 'gp'),
+          slug:         String(alert.slug ?? ''),
+        };
+      }),
+      0.15,
+      5,
+    );
+  }, []);
+
+  // Live comparison count from eventTracker (RGPD-safe)
+  const [comparisonCount, setComparisonCount] = useState(0);
+  // Hours since last data update (rough estimate based on session activity)
+  const [hoursAgo, setHoursAgo] = useState<number | null>(null);
+
   useEffect(() => {
     trackPageView('/landing');
+    trackEvent('page_view', { page: '/landing' });
     try {
       const stats = getCROStats();
       if (stats.totalClicks > 0 || stats.conversionRate > 0) {
@@ -97,6 +139,14 @@ export default function LandingPage() {
       }
     } catch {
       // ignore
+    }
+    // Count today's comparisons from eventTracker
+    setComparisonCount(countEvents('page_view') + countEvents('deal_view'));
+    // Approximate freshness from generatedAt timestamp in alerts JSON
+    const generatedAt = (alertsData as { generatedAt?: string }).generatedAt;
+    if (generatedAt) {
+      const ageMs = Date.now() - Date.parse(generatedAt);
+      setHoursAgo(Math.round(ageMs / 3_600_000));
     }
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
@@ -170,6 +220,13 @@ export default function LandingPage() {
           className="w-full max-w-xs py-4 text-base"
         />
 
+        {/* Trust signals — shown immediately under the primary CTA */}
+        <ul className="flex flex-col items-center gap-1 text-xs text-zinc-500 sm:flex-row sm:gap-4" aria-label="Garanties">
+          <li>✔ Comparaison en temps réel</li>
+          <li>✔ Données locales (Guadeloupe / DOM)</li>
+          <li>✔ Gratuit &amp; sans inscription</li>
+        </ul>
+
         {/* Urgency signal */}
         <p className="text-xs text-amber-400/90">
           ⚠️ Les prix changent tous les jours
@@ -193,6 +250,18 @@ export default function LandingPage() {
         >
           Recevoir les bons plans gratuits →
         </a>
+
+        {/* PWA install button — only shown when the browser offers install prompt */}
+        {canInstall && (
+          <button
+            type="button"
+            onClick={installPWA}
+            className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-800/60 px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+            aria-label="Installer l'application A KI PRI SA YÉ sur cet appareil"
+          >
+            📲 Installer l&apos;app
+          </button>
+        )}
 
         {/* Live CTR badge — only shown when data is available */}
         {ctrPct !== null && ctrPct > 0 && (
@@ -222,7 +291,49 @@ export default function LandingPage() {
             </div>
           ))}
         </div>
+
+        {/* Urgency + proof live indicators */}
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          {hoursAgo !== null && (
+            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-400">
+              ⏱ Mis à jour il y a {hoursAgo < 1 ? 'moins d\'1 heure' : `${hoursAgo} heure${hoursAgo > 1 ? 's' : ''}`}
+            </span>
+          )}
+          {comparisonCount > 0 && (
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+              📊 +{comparisonCount} comparaisons aujourd'hui
+            </span>
+          )}
+        </div>
       </section>
+
+      {/* ── 2b. BEST DEAL HERO — dominant product CTA block ─────────────────── */}
+      {topDeals.length > 0 && (
+        <section className="mx-auto max-w-md px-4 pb-2">
+          <PrimaryConversionBlock
+            products={topDeals.map((d) => ({
+              id:        d.slug ?? d.name,
+              name:      d.name,
+              price:     d.bestPrice,
+              score:     d.scoreFinal,
+              priceDrop: d.bestPrice && d.delta ? d.delta / (d.bestPrice + d.delta) : undefined,
+              trending:  d.tier === 'viral',
+              retailer:  d.bestRetailer,
+              url:       d.slug ? `/produit/${d.slug}` : '/comparateur',
+              territory: d.territory,
+            }))}
+          />
+        </section>
+      )}
+
+      {/* ── 2c. TOP DEALS LIST (V2 pipeline alerts) ──────────────────────────── */}
+      {topDeals.length > 0 && (
+        <TopDealsSection
+          deals={topDeals}
+          title="🔥 Les meilleures offres en ce moment"
+          limit={6}
+        />
+      )}
 
       {/* ── 3. DEMO ─────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-md px-4 py-10">
@@ -268,8 +379,12 @@ export default function LandingPage() {
                     {formatEur(item.price)}
                   </span>
                   {affiliateUrl && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
-                      →
+                    <span className={`rounded-lg px-2 py-1 text-[10px] font-bold ${
+                      isBest
+                        ? 'bg-emerald-400/20 text-emerald-300'
+                        : 'bg-white/8 text-zinc-400'
+                    }`}>
+                      Voir chez {item.retailer}
                     </span>
                   )}
                 </div>
@@ -289,14 +404,24 @@ export default function LandingPage() {
                   href={affiliateUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() =>
+                  onClick={() => {
                     trackRetailerClick(
                       DEMO_PRODUCT.barcode,
                       item.retailer,
                       DEMO_PRODUCT.territory,
                       item.price,
-                    )
-                  }
+                    );
+                    trackRevenueClick({
+                      url: pageUrl,
+                      product: DEMO_PRODUCT.name,
+                      retailer: item.retailer,
+                      price: item.price,
+                    });
+                    // Show share nudge toast
+                    if (shareToastTimerRef.current) clearTimeout(shareToastTimerRef.current);
+                    setShowShareToast(true);
+                    shareToastTimerRef.current = setTimeout(() => setShowShareToast(false), 4000);
+                  }}
                   className={rowClass}
                   aria-label={`Voir ${DEMO_PRODUCT.name} chez ${item.retailer} à ${formatEur(item.price)}`}
                 >
@@ -361,6 +486,28 @@ export default function LandingPage() {
             );
           })}
         </div>
+
+        {/* Native Web Share — mobile only, degrades to nothing on desktop */}
+        {'share' in navigator && (
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.share({
+                  title: 'A KI PRI SA YÉ — Comparateur de prix Outre-mer',
+                  text: `🔥 Même produit. Prix différent.\n\nCoca-Cola 1,5L :\n2,85€ → 2,49€ selon le magasin\n\n👉 Vérifie pour tes courses :`,
+                  url: landingUrl,
+                });
+              } catch {
+                // User dismissed — no-op
+              }
+            }}
+            className="mx-auto mt-4 flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-400 transition-colors hover:border-white/20 hover:text-zinc-200"
+            aria-label="Partager via l'application de messagerie de votre choix"
+          >
+            🔗 Partager
+          </button>
+        )}
       </section>
 
       {/* ── 5. SUBSCRIPTION BANNER ──────────────────────────────────────────── */}
@@ -383,6 +530,48 @@ export default function LandingPage() {
           className="py-4 text-base"
         />
       </section>
+
+      {/* ── Share toast — shown for 4s after a retailer click ────────────────── */}
+      {showShareToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-24 left-1/2 z-[90] -translate-x-1/2 rounded-2xl border border-emerald-400/30 bg-black/90 px-5 py-3 text-center shadow-2xl backdrop-blur sm:bottom-6"
+        >
+          <p className="text-sm font-semibold text-white">
+            Bon choix&nbsp;👍&nbsp; Partage ce bon plan à un proche&nbsp;!
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.share({
+                  title: 'Bon plan trouvé',
+                  text: `🔥 Même produit. Prix différent.\n\n${DEMO_PRODUCT.name} :\n2,85€ → 2,49€ selon le magasin\n\n👉 Vérifie pour tes courses :`,
+                  url: SITE_URL,
+                });
+              } catch {
+                navigate('/comparateur');
+              }
+              setShowShareToast(false);
+            }}
+            className="mt-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-black transition hover:bg-emerald-400"
+          >
+            Partager
+          </button>
+        </div>
+      )}
+
+      {/* ── Sticky mobile CTA — fixed bottom bar, hidden on desktop ─────────── */}
+      <div className="fixed bottom-0 left-0 z-[60] w-full border-t border-white/10 bg-black/90 p-3 backdrop-blur sm:hidden">
+        <button
+          type="button"
+          onClick={() => navigate('/comparateur')}
+          className="block w-full rounded-2xl bg-emerald-500 py-3.5 text-sm font-extrabold text-black transition hover:bg-emerald-400 active:scale-95"
+        >
+          Voir le meilleur prix maintenant
+        </button>
+      </div>
     </div>
   );
 }
