@@ -38,6 +38,26 @@ npx wrangler secret put PRICE_ADMIN_TOKEN
 
 Configurer CORS en production via `ALLOWED_ORIGINS` (origines Cloudflare Pages exactes, séparées par virgule).
 
+## Configuration CI / Déploiement GitHub Actions
+
+Le déploiement automatique nécessite un jeton API Cloudflare avec les bonnes permissions.
+
+**Secrets GitHub requis :** `CLOUDFLARE_API_TOKEN` et `CLOUDFLARE_ACCOUNT_ID`
+
+Permissions à sélectionner lors de la création du jeton sur [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) :
+
+| Colonne 1 | Colonne 2 | Colonne 3 |
+|-----------|-----------|-----------|
+| Compte | Workers D1 | Modifier |
+| Compte | Scripts Workers | Modifier |
+| Compte | Cloudflare Pages | Modifier |
+
+> `CLOUDFLARE_ACCOUNT_ID` doit être votre Account ID Cloudflare (32 caractères hexadécimaux).
+> Trouvez-le dans l'URL du dashboard : `dash.cloudflare.com/<ACCOUNT_ID>/home/overview`.
+> Le workflow valide le format avant tout appel API — une valeur incorrecte retourne l'erreur 7003.
+
+📄 Guide complet étape par étape : [CLOUDFLARE_SETUP.md](../CLOUDFLARE_SETUP.md)
+
 Lancer en dev :
 
 ```bash
