@@ -70,6 +70,17 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Generate sitemap
+        working-directory: ${{ github.workspace }}
+        run: |
+          node scripts/generate-sitemap.mjs
+          if [ ! -f sitemap.xml ]; then
+            echo "❌ generate-sitemap.mjs did not produce sitemap.xml"
+            exit 1
+          fi
+          cp sitemap.xml frontend/public/sitemap.xml
+          echo "✅ sitemap.xml generated and copied to frontend/public/sitemap.xml"
+
       - name: Build
         run: npm run build
         env:
