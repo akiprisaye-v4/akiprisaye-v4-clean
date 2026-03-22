@@ -124,6 +124,7 @@ enum Territory {
 }
 
 enum PointAction {
+  LEVEL_UP
   PRICE_REPORT
   PRICE_VERIFY
   PHOTO_UPLOAD

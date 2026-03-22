@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 
 /** Points awarded per valid PointAction value (schema enum). */
 export const POINTS_CONFIG: Record<PointAction, number> = {
+  LEVEL_UP: 25,
   PRICE_REPORT: 10,
   PRICE_VERIFY: 5,
   PHOTO_UPLOAD: 8,
