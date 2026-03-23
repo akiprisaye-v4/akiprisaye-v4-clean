@@ -238,10 +238,13 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Cache Puppeteer / Chrome
+      - name: Create Puppeteer cache directory
+        run: mkdir -p /home/runner/.cache/puppeteer
+
+      - name: Restore Puppeteer / Chrome cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/puppeteer
+          path: /home/runner/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
           restore-keys: |
             puppeteer-${{ runner.os }}-
@@ -261,19 +264,26 @@ jobs:
         # --host 127.0.0.1 pour éviter d'exposer le serveur sur toutes les interfaces.
         # $! est disponible immédiatement après & dans bash.
         working-directory: frontend
+        env:
+          PREVIEW_PORT: "4173"
+          PREVIEW_URL: http://127.0.0.1:4173
         run: |
-          npm run preview -- --host 127.0.0.1 &
+          npm run preview -- --host 127.0.0.1 --port "$PREVIEW_PORT" > /tmp/preview-server.log 2>&1 &
           echo $! > /tmp/preview-server.pid
           echo "🚀 Preview server démarré (PID: $!)"
+          # 180000ms (3 min) absorbe les pics de latence npm/IO en runners GitHub partagés.
+          # wait-on valide la disponibilité du service; curl confirme une réponse HTTP effective.
+          npx wait-on --timeout 180000 "$PREVIEW_URL"
+          curl --fail --silent --show-error --retry 10 --retry-delay 1 --retry-connrefused "$PREVIEW_URL" >/dev/null
+          echo "✅ Preview server prêt (wait-on + curl)."
 
-      - name: Wait for preview server
-        # Attend que le serveur réponde avant de lancer LHCI.
-        # Sans cette attente, LHCI échoue avec "Timed out waiting for the server".
+      - name: Dump preview server log on failure
+        if: failure()
         run: |
-          echo "⏳ Attente du preview server sur http://127.0.0.1:4173 ..."
-          timeout 60 bash -c 'until curl -sf http://127.0.0.1:4173/ > /dev/null 2>&1; do sleep 2; done' \
-            || { echo '❌ Preview server non disponible après 60s — vérifier vite preview'; exit 1; }
-          echo "✅ Preview server prêt."
+          if [ -f /tmp/preview-server.log ]; then
+            echo "----- /tmp/preview-server.log (tail) -----"
+            tail -n 200 /tmp/preview-server.log || true
+          fi
 
       - name: Check override label (ci:override-lighthouse)
         # Détecte si le label 'ci:override-lighthouse' est présent sur la PR.
@@ -322,6 +332,29 @@ jobs:
             kill -TERM "$PID" 2>/dev/null || true
             rm -f /tmp/preview-server.pid
             echo "🛑 Preview server (PID: $PID) arrêté."
+          fi
+
+      - name: Ensure Lighthouse report files exist for artifact upload
+        if: always()
+        working-directory: frontend
+        run: |
+          mkdir -p .lighthouseci
+          if [ ! -f .lighthouseci/lighthouse-scores.json ]; then
+            cat > .lighthouseci/lighthouse-scores.json <<'JSON'
+          {
+            "status": "missing",
+            "reason": "lighthouse-scores.json not produced by previous steps",
+            "generatedBy": "ci.yml safety step"
+          }
+          JSON
+          fi
+          if [ ! -f .lighthouseci/infra-metadata.json ]; then
+            cat > .lighthouseci/infra-metadata.json <<'JSON'
+          {
+            "status": "placeholder",
+            "generatedBy": "ci.yml safety step"
+          }
+          JSON
           fi
 
       - name: Write Lighthouse scores (input baseline)
@@ -398,7 +431,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
-          path: frontend/.lighthouseci/
+          path: frontend/.lighthouseci/**
           retention-days: 30
           if-no-files-found: warn
 

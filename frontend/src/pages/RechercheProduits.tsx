@@ -15,8 +15,10 @@ import type { TipContext } from '../features/tips';
 import { getProductImageFallback } from '../utils/productImageFallback';
 import { safeLocalStorage } from '../utils/safeLocalStorage';
 import { HeroImage } from '../components/ui/HeroImage';
+import OptimizedImage from '../components/OptimizedImage';
 import { PAGE_HERO_IMAGES } from '../config/imageAssets';
 import { getPreferredTerritory } from '../utils/userPreferences';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
 const TERRITORIES: { code: TerritoryCode; label: string; flag: string }[] = [
   { code: 'fr', label: 'Métropole', flag: '🇫🇷' },
@@ -580,7 +582,7 @@ export function PriceResults({
         {productImages.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {productImages.map((img) => (
-              <img
+              <OptimizedImage
                 key={img.url}
                 src={img.url}
                 alt={productTitle}
@@ -593,7 +595,7 @@ export function PriceResults({
             ))}
           </div>
         ) : (
-          <img
+          <OptimizedImage
             src={getProductImageFallback({ productName: productTitle })}
             alt={productTitle}
             className="rounded-xl object-cover w-full h-40 bg-slate-800"
@@ -841,6 +843,7 @@ export default function RechercheProduits() {
   const [hasAutoSearched, setHasAutoSearched] = useState(false);
   const [cachedAt, setCachedAt] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [premiumVisualRef, premiumVisualVisible] = useIntersectionObserver({ rootMargin: '200px', threshold: 0.01 });
   const hasSearchInput = Boolean(barcode.trim() || query.trim());
   const canSearch = hasSearchInput && !loading;
   const shouldShowReset = hasSearchInput || Boolean(result) || Boolean(error);
@@ -1010,20 +1013,44 @@ export default function RechercheProduits() {
           name="description"
           content="Recherche multi-sources de prix observés, normalisés et contextualisés pour la France et les DOM."
         />
-              <link rel="canonical" href="https://teetee971.github.io/akiprisaye-web/recherche-produits" />
+        <link rel="canonical" href="https://teetee971.github.io/akiprisaye-web/recherche-produits" />
         <link rel="alternate" hrefLang="fr" href="https://teetee971.github.io/akiprisaye-web/recherche-produits" />
         <link rel="alternate" hrefLang="x-default" href="https://teetee971.github.io/akiprisaye-web/recherche-produits" />
+        <link rel="preload" as="image" href={PAGE_HERO_IMAGES.heroRecherche} />
       </Helmet>
 
       <HeroImage
-        src={PAGE_HERO_IMAGES.rechercheProduits}
+        src={PAGE_HERO_IMAGES.heroRecherche}
         alt="Recherche de produits"
         gradient="from-slate-950 to-blue-900"
         height="h-40 sm:h-52"
+        loading="eager"
+        fetchPriority="high"
+        width={1200}
+        heightPx={624}
+        sizes="100vw"
       >
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>🔍 Recherche de produits</h1>
+        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>Recherche de produits</h1>
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)' }}>Trouvez et comparez les prix de vos produits</p>
       </HeroImage>
+
+      <section ref={premiumVisualRef} className="max-w-4xl mx-auto mt-4">
+        {premiumVisualVisible ? (
+          <OptimizedImage
+            src={PAGE_HERO_IMAGES.sectionProfessional3d}
+            alt="Section premium de recherche de produits"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            className="w-full h-40 sm:h-52 rounded-2xl object-cover border border-white/10"
+          />
+        ) : (
+          <div
+            className="w-full h-40 sm:h-52 rounded-2xl border border-white/10 bg-slate-900/50"
+            aria-hidden="true"
+          />
+        )}
+      </section>
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* ── Search card ─────────────────────────────────────────────── */}

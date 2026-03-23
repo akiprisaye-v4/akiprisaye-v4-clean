@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { useProductSearch } from '../hooks/useProductSearch';
 import styles from './RechercheHub.module.css';
 import { HeroImage } from '../components/ui/HeroImage';
+import OptimizedImage from '../components/OptimizedImage';
 import { PAGE_HERO_IMAGES } from '../config/imageAssets';
 
 const suggestedQueries = [
@@ -35,9 +36,8 @@ const destinations = [
 ];
 
 export default function RechercheHub() {
-  const [query, setQuery] = useState('');
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const { results, loading, error, hasQuery } = useProductSearch(query);
+  const visualRef = useRef<HTMLElement | null>(null);
+  const [showVisual, setShowVisual] = useState(false);
   const currencyFormatter = useMemo(
     () =>
       new Intl.NumberFormat('fr-FR', {
@@ -48,36 +48,25 @@ export default function RechercheHub() {
     [],
   );
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    inputRef.current?.focus();
-  };
+  const formatSuggestedPrice = (index: number) => currencyFormatter.format(1.8 + index * 0.7);
 
-  const formatPrice = (price?: number, range?: [number, number]) => {
-    if (price !== undefined) {
-      return currencyFormatter.format(price);
-    }
-    if (range) {
-      return `${currencyFormatter.format(range[0])} – ${currencyFormatter.format(range[1])}`;
-    }
-    return 'Prix indisponible';
-  };
+  useEffect(() => {
+    const node = visualRef.current;
+    if (!node) return;
 
-  const formatSource = (source: string, region?: string) => {
-    const base =
-      source === 'openfoodfacts'
-        ? 'Open Food Facts'
-        : source === 'datagouv'
-          ? 'Data.gouv.fr'
-          : 'Estimation données publiques';
-    return region ? `${base} (${region})` : base;
-  };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShowVisual(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' },
+    );
 
-  const formatUpdatedAt = (value: string) =>
-    new Date(value).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     // ⚠️ A11y contract – do not alter without accessibility review.
@@ -85,41 +74,59 @@ export default function RechercheHub() {
     // Choix sémantiques natifs (label/input, nav/ul/li, button/link) pour des noms accessibles sans ARIA superflu.
     // TODO(a11y): ajouter un test automatisé Lighthouse/axe en CI.
     <main className={styles.page}>
+      <Helmet>
+        <link rel="preload" as="image" href={PAGE_HERO_IMAGES.heroRecherche} />
+      </Helmet>
       <HeroImage
-        src={PAGE_HERO_IMAGES.rechercheHub}
+        src={PAGE_HERO_IMAGES.heroRecherche}
         alt="Recherche"
         gradient="from-slate-950 to-blue-900"
         height="h-40 sm:h-52"
+        loading="eager"
+        fetchPriority="high"
+        width={1200}
+        heightPx={624}
+        sizes="100vw"
       >
-        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>🔍 Recherche</h1>
-        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)' }}>Cherchez un produit, un prix ou un magasin</p>
+        <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>Recherche unifiée</h1>
+        <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)' }}>Point d’entrée unique pour rechercher un produit, un prix ou un magasin.</p>
       </HeroImage>
 
+      <section ref={visualRef} className={styles.searchSection} aria-label="Habillage visuel professionnel">
+        <h2 className={styles.cardTitle}>Visualisation professionnelle 2D / 3D</h2>
+        {showVisual ? (
+          <OptimizedImage
+            src={PAGE_HERO_IMAGES.sectionProfessional3d}
+            alt="Visualisation professionnelle de données pour la recherche"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            className="w-full h-44 sm:h-56 rounded-xl object-cover border border-white/10"
+          />
+        ) : (
+          <div
+            className="w-full h-44 sm:h-56 rounded-xl border border-white/10 bg-slate-900/50"
+            aria-hidden="true"
+          />
+        )}
+      </section>
+
       <section className={styles.searchSection} aria-label="Recherche">
-        <label className={styles.label} htmlFor="recherche-hub-input">
-          Rechercher
-        </label>
-        <input
-          id="recherche-hub-input"
-          className={styles.input}
-          type="search"
-          placeholder="Produit, enseigne ou comparateur"
-          autoComplete="off"
-          autoFocus
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          ref={inputRef}
-        />
+        <p className={styles.label}>
+          Utilisez la recherche globale depuis l’en-tête (Ctrl/Cmd + K) pour éviter les saisies redondantes.
+        </p>
+        <Link to="/" className={styles.card}>
+          <div>
+            <h2 className={styles.cardTitle}>Ouvrir la recherche globale</h2>
+            <p className={styles.cardDescription}>Retournez à l’accueil puis activez la recherche centrale.</p>
+          </div>
+          <span className={styles.cardAction}>Accéder</span>
+        </Link>
         <div className={styles.suggestions}>
-          {suggestedQueries.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              className={styles.suggestion}
-              onClick={() => handleSuggestionClick(suggestion)}
-            >
-              {suggestion}
-            </button>
+          {suggestedQueries.map((suggestion, index) => (
+            <span key={suggestion} className={styles.suggestion}>
+              {suggestion} · à partir de {formatSuggestedPrice(index)}
+            </span>
           ))}
         </div>
 
@@ -129,53 +136,9 @@ export default function RechercheHub() {
           aria-atomic="true"
           aria-label="Résultats de recherche"
         >
-          {loading && <p className={styles.resultMessage}>Recherche en cours...</p>}
-          {!loading && error && (
-            <p className={styles.resultMessage} role="alert">
-              {error} Les résultats peuvent être limités.
-            </p>
-          )}
-          {!loading && !error && hasQuery && results.length === 0 && (
-            <p className={styles.resultMessage}>
-              Aucun résultat pour l’instant. Essayez un autre libellé.
-            </p>
-          )}
-          {!loading && results.length > 0 && (
-            <ul className={styles.resultList}>
-              {results.map((product) => (
-                <li key={product.id} className={styles.resultItem}>
-                  <button
-                    type="button"
-                    className={styles.resultCard}
-                    aria-disabled="true"
-                    aria-describedby={`${product.id}-hint`}
-                  >
-                    <span className={styles.resultTitle}>{product.name}</span>
-                    <span className={styles.resultMeta}>
-                      {[product.brand, product.store, product.location]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                    <span className={styles.resultPrice}>
-                      {formatPrice(product.price, product.priceRange)}
-                    </span>
-                    <span className={styles.resultUpdated}>
-                      {product.price
-                        ? 'Prix observé'
-                        : product.priceRange
-                          ? 'Prix estimé'
-                          : 'Infos produit'}{' '}
-                      – {formatSource(product.source, product.region)} – mis à jour le{' '}
-                      {formatUpdatedAt(product.lastUpdated)}
-                    </span>
-                  </button>
-                  <span id={`${product.id}-hint`} className={styles.srOnly}>
-                    Détails indisponibles pour le moment.
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <p className={styles.resultMessage}>
+            La recherche centrale agrège pages, produits, enseignes et territoires dans une seule interface.
+          </p>
         </div>
       </section>
 

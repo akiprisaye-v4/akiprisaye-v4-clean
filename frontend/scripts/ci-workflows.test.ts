@@ -290,7 +290,7 @@ describe('ci.yml — Lighthouse regression guard and PR comment', () => {
     // This prevents "Timed out waiting for the server to start listening" from LHCI.
     expect(ciYml).toMatch(/npm run preview.*--host 127\.0\.0\.1/);
     expect(ciYml).toMatch(/preview-server\.pid/);
-    expect(ciYml).toMatch(/curl.*127\.0\.0\.1:4173/);
+    expect(ciYml).toMatch(/((wait-on|curl).*127\.0\.0\.1:4173|PREVIEW_URL:\s*http:\/\/127\.0\.0\.1:4173)/);
   });
 
   it('lighthouse job must stop the preview server cleanly (if: always())', () => {
@@ -520,9 +520,11 @@ describe('auto-merge.yml — pull_request_target guard', () => {
     // could push a branch named 'copilot/malicious' from a fork and trigger
     // auto-merge without being an official GitHub Copilot bot.
     // We verify that:
-    //   1. The workflow gates on 'github-actions[bot]' and 'dependabot[bot]'.
+    //   1. The workflow gates on trusted bot actors (Copilot/Copilot SWE, GitHub Actions, Dependabot).
     //   2. The insecure branch-prefix condition 'startsWith(github.head_ref, ''copilot/'')'
     //      is NOT present.
+    expect(autoMergeYml).toMatch(/Copilot/);
+    expect(autoMergeYml).toMatch(/copilot-swe-agent\[bot\]/);
     expect(autoMergeYml).toMatch(/github-actions\[bot\]/);
     expect(autoMergeYml).toMatch(/dependabot\[bot\]/);
     expect(autoMergeYml).not.toMatch(/startsWith.*copilot/);

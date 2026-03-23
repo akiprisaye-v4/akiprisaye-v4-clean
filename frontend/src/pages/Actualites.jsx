@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { HeroImage } from '../components/ui/HeroImage';
+import OptimizedImage from '../components/OptimizedImage';
 import { PAGE_HERO_IMAGES } from '../config/imageAssets';
 import { newsFallback } from '../data/newsFallback';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
 
 const TERRITORY_LABELS = {
   all: 'Tous territoires',
@@ -33,11 +35,22 @@ export default function Actualites() {
   const [territory, setTerritory] = useState('all');
   const [type, setType] = useState('');
   const [impact, setImpact] = useState('');
-  const [q, setQ] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [limit, setLimit] = useState(30);
+  const [limit, setLimit] = useState(12);
   const [state, setState] = useState({ status: 'loading', items: [], mode: 'mock' });
   const [openEvidence, setOpenEvidence] = useState({});
+  const [showFeaturedMedia, setShowFeaturedMedia] = useState(false);
+  const [mediaSectionRef, mediaSectionVisible] = useIntersectionObserver({ rootMargin: '200px', threshold: 0.01 });
+  const [newsListRef, newsListVisible] = useIntersectionObserver({ rootMargin: '250px', threshold: 0.01 });
+  const dateFormatter = useMemo(
+    () => new Intl.DateTimeFormat('fr-FR'),
+    [],
+  );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowFeaturedMedia(true), 1200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -48,7 +61,6 @@ export default function Actualites() {
       const params = new URLSearchParams({ territory, limit: String(limit) });
       if (type) params.set('type', type);
       if (impact) params.set('impact', impact);
-      if (q.trim()) params.set('q', q.trim());
 
       try {
         const response = await fetch(`/api/news?${params.toString()}`, { signal: controller.signal });
@@ -68,7 +80,7 @@ export default function Actualites() {
       mounted = false;
       controller.abort();
     };
-  }, [territory, type, impact, q, limit]);
+  }, [territory, type, impact, limit]);
 
   const displayedItems = useMemo(() => {
     const sorted = [...state.items].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
@@ -80,27 +92,33 @@ export default function Actualites() {
       <Helmet>
         <title>Actualités & Bons plans consommateurs | A KI PRI SA YÉ</title>
         <meta name="description" content="Rappels sanitaires, bons plans vérifiés, réglementaire et signaux conso avec source obligatoire." />
+        <link rel="preload" as="image" href={PAGE_HERO_IMAGES.heroActualites} />
       </Helmet>
 
       <section className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 backdrop-blur animate-fade-in">
         <HeroImage
-          src={PAGE_HERO_IMAGES.contact}
+          src={PAGE_HERO_IMAGES.heroActualites}
           alt="Actualités consommateurs"
           gradient="from-slate-900 to-teal-950"
           height="h-24 sm:h-44"
+          loading="eager"
+          fetchPriority="high"
+          width={1200}
+          heightPx={480}
+          sizes="100vw"
         >
-          <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow">📰 Actualités &amp; Bons plans</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow">Actualités &amp; Bons plans</h1>
           <p className="text-slate-200 text-xs sm:text-sm drop-shadow">Rappels sanitaires, bons plans vérifiés et signaux conso</p>
         </HeroImage>
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 backdrop-blur space-y-3">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="🔍 Rechercher un mot-clé"
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm"
-        />
+        <a
+          href="/recherche-hub"
+          className="block w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 hover:bg-slate-800 transition-colors"
+        >
+          Ouvrir la recherche globale du site
+        </a>
 
         <div className="grid gap-2 grid-cols-2">
           <select value={territory} onChange={(e) => setTerritory(e.target.value)} className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-2 text-xs sm:text-sm">
@@ -135,20 +153,64 @@ export default function Actualites() {
       {state.status === 'error' && <p className="text-sm text-amber-300 px-1">API indisponible : fallback embarqué affiché.</p>}
       {displayedItems.length === 0 && state.status !== 'loading' && <p className="text-sm text-slate-400 px-1">Aucun résultat pour ces filtres.</p>}
 
-      <section className="grid gap-3">
-        {displayedItems.map((item) => {
+      <section ref={mediaSectionRef} className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4 backdrop-blur">
+        <h2 className="text-sm sm:text-base font-semibold text-white mb-2">Média à la une</h2>
+        {mediaSectionVisible ? (
+          <div className="grid gap-3 md:grid-cols-2">
+              <OptimizedImage
+              src={PAGE_HERO_IMAGES.articleDefault}
+              alt="Illustration éditoriale des actualités consommateurs"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              className="w-full h-44 rounded-xl object-cover border border-white/10"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+            {showFeaturedMedia ? (
+              <video
+                muted
+                playsInline
+                controls
+                preload="metadata"
+                poster={PAGE_HERO_IMAGES.heroActualites}
+                className="w-full h-44 rounded-xl object-cover border border-white/10 bg-slate-900"
+                aria-label="Ambiance éditoriale de veille marché"
+              >
+                <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+                <track kind="captions" srcLang="fr" label="Français" src="data:text/vtt,WEBVTT" default />
+              </video>
+            ) : (
+              <div
+                className="w-full h-44 rounded-xl border border-white/10 bg-slate-900/60"
+                aria-hidden="true"
+              />
+            )}
+          </div>
+        ) : (
+          <div className="h-44 rounded-xl border border-white/10 bg-slate-900/50" aria-hidden="true" />
+        )}
+      </section>
+
+      <section ref={newsListRef} className="grid gap-3">
+        {newsListVisible ? displayedItems.map((item) => {
           const evidenceOpen = Boolean(openEvidence[item.id]);
           const impactColor = item.impact === 'fort' ? 'border-l-red-500' : item.impact === 'moyen' ? 'border-l-amber-500' : 'border-l-blue-500';
           return (
             <article key={item.id} className={`rounded-2xl border border-white/10 bg-slate-900/70 overflow-hidden border-l-4 ${impactColor}`}>
-              {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
+              {(item.imageUrl || PAGE_HERO_IMAGES.articleDefault) && (
+                <OptimizedImage
+                  src={item.imageUrl ?? PAGE_HERO_IMAGES.articleDefault}
                   alt={item.title}
                   loading="lazy"
                   className="w-full h-28 sm:h-40 object-cover"
                   onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 />
+              )}
+              {item.videoUrl && (
+                <video controls preload="none" className="w-full h-44 object-cover border-t border-white/10" poster={item.imageUrl ?? PAGE_HERO_IMAGES.articleDefault}>
+                  <source src={item.videoUrl} type="video/mp4" />
+                  <track kind="captions" srcLang="fr" label="Français" src="data:text/vtt,WEBVTT" default />
+                </video>
               )}
               <div className="p-3 sm:p-4">
                 <div className="mb-2 flex flex-wrap gap-1.5 text-xs">
@@ -156,7 +218,7 @@ export default function Actualites() {
                   <span className={`rounded px-2 py-0.5 font-medium ${item.impact === 'fort' ? 'bg-red-900/60 text-red-300' : item.impact === 'moyen' ? 'bg-amber-900/60 text-amber-300' : 'bg-blue-900/60 text-blue-300'}`}>
                     {IMPACT_LABELS[item.impact] ?? item.impact}
                   </span>
-                  {item.verified && <span className="rounded bg-emerald-700/70 px-2 py-0.5 text-emerald-200">✓ Vérifié</span>}
+                  {item.verified && <span className="rounded bg-emerald-700/70 px-2 py-0.5 text-emerald-200">Vérifié</span>}
                   {item.isSponsored && <span className="rounded bg-amber-700/70 px-2 py-0.5">Sponsorisé</span>}
                 </div>
                 <h2 className="text-sm sm:text-base font-semibold leading-snug">{item.title}</h2>
@@ -164,14 +226,14 @@ export default function Actualites() {
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                   <a href={item.source_url} target="_blank" rel="noreferrer" className="underline hover:text-slate-200 truncate max-w-[140px]">{item.source_name}</a>
                   <span>·</span>
-                  <span>{new Date(item.published_at).toLocaleDateString('fr-FR')}</span>
+                  <span>{dateFormatter.format(new Date(item.published_at))}</span>
                   {item.canonical_url && <a href={item.canonical_url} target="_blank" rel="noreferrer" className="underline hover:text-slate-200">Détail →</a>}
                 </div>
 
                 {item.evidence && (
                   <div className="mt-2">
                     <button className="text-xs text-blue-400 underline" onClick={() => setOpenEvidence((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}>
-                      {evidenceOpen ? '▲ Masquer' : '▼ Preuves'}
+                      {evidenceOpen ? 'Masquer les preuves' : 'Afficher les preuves'}
                     </button>
                     {evidenceOpen && (
                       <ul className="mt-2 list-disc pl-4 text-xs text-slate-300 space-y-0.5">
@@ -183,7 +245,9 @@ export default function Actualites() {
               </div>
             </article>
           );
-        })}
+        }) : (
+          <div className="h-64 rounded-2xl border border-white/10 bg-slate-900/50" aria-hidden="true" />
+        )}
       </section>
 
       <button onClick={() => setLimit((prev) => prev + 30)} className="w-full rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 px-4 py-3 text-sm font-medium transition-colors">
