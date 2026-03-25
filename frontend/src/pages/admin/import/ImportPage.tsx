@@ -264,6 +264,10 @@ export function ImportPage() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Header */}
       <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Import CSV
+        </h1>
+        <p className="text-white/90">
         <h1 className="mb-2 text-3xl font-bold text-slate-900">
           Import CSV
         </h1>
@@ -285,6 +289,8 @@ export function ImportPage() {
               className={cn(
                 'flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap',
                 isActive
+                  ? 'bg-white/20 text-white border-2 border-white/40'
+                  : 'bg-white/15 text-white border border-white/35 hover:bg-white/20 hover:text-white'
                   ? 'border-2 border-blue-500/60 bg-blue-100 text-blue-800'
                   : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900'
               )}
@@ -304,6 +310,12 @@ export function ImportPage() {
             <div className="flex items-start space-x-3 mb-4">
               <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
               <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Instructions d'import
+                </h3>
+                <ul className="space-y-1 text-sm text-white">
+                  {currentTab.instructions.map((instruction, index) => (
+                    <li key={instruction} className={index === 0 ? 'font-medium text-white/90' : ''}>
                 <h3 className="mb-2 text-lg font-semibold text-slate-900">
                   Instructions d'import
                 </h3>
@@ -318,6 +330,10 @@ export function ImportPage() {
             </div>
 
             {/* Download Template Button */}
+            <div className="mt-4 pt-4 border-t border-white/35">
+              <button
+                onClick={handleDownloadTemplate}
+                className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/20 border border-white/30 text-white rounded-lg transition-colors"
             <div className="mt-4 border-t border-slate-200 pt-4">
               <button
                 onClick={handleDownloadTemplate}
@@ -332,6 +348,8 @@ export function ImportPage() {
 
         {/* Upload */}
         {step === 'upload' && (
+          <GlassCard>
+            <h3 className="text-lg font-semibold text-white mb-4">
           <section className={panelClassName}>
             <h3 className="mb-4 text-lg font-semibold text-slate-900">
               Sélectionner un fichier
@@ -348,6 +366,8 @@ export function ImportPage() {
         {/* Preview */}
         {step === 'preview' && (
           <>
+            <GlassCard>
+              <h3 className="text-lg font-semibold text-white mb-4">
             <section className={panelClassName}>
               <h3 className="mb-4 text-lg font-semibold text-slate-900">
                 Aperçu des données
@@ -366,6 +386,7 @@ export function ImportPage() {
             <div className="flex items-center justify-between">
               <button
                 onClick={handleReset}
+                className="px-6 py-3 bg-white/15 hover:bg-white/20 border border-white/35 text-white rounded-lg transition-colors"
                 className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-slate-700 transition-colors hover:bg-slate-100"
               >
                 Annuler
@@ -377,6 +398,7 @@ export function ImportPage() {
                   'flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all',
                   canImport
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-white/20 text-white/40 cursor-not-allowed'
                     : 'cursor-not-allowed bg-slate-200 text-slate-400'
                 )}
               >
@@ -397,6 +419,18 @@ export function ImportPage() {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/20 mb-4">
                 <div className="w-8 h-8 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
               </div>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Import en cours...
+              </h3>
+              <p className="text-white/90 mb-4">
+                Veuillez patienter pendant l'import des données
+              </p>
+              <div className="max-w-md mx-auto">
+                <div className="flex items-center justify-between text-sm text-white mb-2">
+                  <span>Progression</span>
+                  <span>{importProgress}%</span>
+                </div>
+                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
               <h3 className="mb-2 text-xl font-semibold text-slate-900">
                 Import en cours...
               </h3>
