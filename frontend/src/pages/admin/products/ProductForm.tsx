@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { GlassCard } from '@/components/ui/glass-card';
 import {
   createProduct,
   updateProduct,
@@ -211,12 +210,13 @@ export function ProductForm() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <GlassCard>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500" />
             <div className="inline-block w-8 h-8 border-4 border-white/20 border-t-blue-500 rounded-full animate-spin" />
             <p className="mt-4 text-slate-600">Chargement...</p>
           </div>
-        </GlassCard>
+        </div>
       </div>
     );
   }
@@ -230,7 +230,7 @@ export function ProductForm() {
         </h1>
       </div>
 
-      <GlassCard>
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Name */}
           <div>
@@ -427,7 +427,7 @@ export function ProductForm() {
             </button>
           </div>
         </form>
-      </GlassCard>
+      </div>
     </div>
   );
 }

@@ -15,7 +15,6 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { GlassCard } from '@/components/ui/glass-card';
 import { cn } from '@/lib/utils';
 import { CsvUploader } from './CsvUploader';
 import { ImportPreview } from './ImportPreview';
@@ -259,6 +258,7 @@ export function ImportPage() {
   }, [handleReset]);
 
   const canImport = csvData.length > 0 && validCount > 0;
+  const panelClassName = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm';
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -300,7 +300,7 @@ export function ImportPage() {
       <div className="space-y-6">
         {/* Instructions */}
         {step === 'upload' && (
-          <GlassCard>
+          <section className={panelClassName}>
             <div className="flex items-start space-x-3 mb-4">
               <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-1" />
               <div className="flex-1">
@@ -327,11 +327,12 @@ export function ImportPage() {
                 <span>Télécharger le modèle CSV</span>
               </button>
             </div>
-          </GlassCard>
+          </section>
         )}
 
         {/* Upload */}
         {step === 'upload' && (
+          <section className={panelClassName}>
           <GlassCard>
             <h3 className="mb-4 text-lg font-semibold text-slate-900">
               Sélectionner un fichier
@@ -342,12 +343,13 @@ export function ImportPage() {
               acceptedTypes={['.csv']}
               maxSize={50}
             />
-          </GlassCard>
+          </section>
         )}
 
         {/* Preview */}
         {step === 'preview' && (
           <>
+            <section className={panelClassName}>
             <GlassCard>
               <h3 className="mb-4 text-lg font-semibold text-slate-900">
                 Aperçu des données
@@ -360,7 +362,7 @@ export function ImportPage() {
                   setErrorCount(errors);
                 }}
               />
-            </GlassCard>
+            </section>
 
             {/* Import Actions */}
             <div className="flex items-center justify-between">
@@ -392,7 +394,7 @@ export function ImportPage() {
 
         {/* Importing */}
         {step === 'importing' && (
-          <GlassCard>
+          <section className={panelClassName}>
             <div className="text-center py-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/20 mb-4">
                 <div className="w-8 h-8 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
@@ -416,7 +418,7 @@ export function ImportPage() {
                 </div>
               </div>
             </div>
-          </GlassCard>
+          </section>
         )}
 
         {/* Results */}

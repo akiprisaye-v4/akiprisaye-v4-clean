@@ -3,7 +3,7 @@
  * ImportPreview Component
  * Display CSV data preview with validation errors
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -49,7 +49,7 @@ export function ImportPreview({
   }, [errors]);
 
   // Notify parent of validation results
-  useMemo(() => {
+  useEffect(() => {
     onValidationComplete?.(validRows, errorRows);
   }, [validRows, errorRows, onValidationComplete]);
 

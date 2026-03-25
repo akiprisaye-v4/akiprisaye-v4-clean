@@ -4,7 +4,6 @@
  * Display import results and statistics
  */
 import { CheckCircle, XCircle, AlertTriangle, Download, RefreshCw } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
 import { cn } from '@/lib/utils';
 import { stringifyCsv } from '@/utils/csv';
 import type { ImportResult } from '@/services/csvImportService';
@@ -41,7 +40,7 @@ export function ImportReport({ result, onReset, entityType }: ImportReportProps)
   };
 
   return (
-    <GlassCard className="space-y-6">
+    <div className="space-y-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       {/* Header */}
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 mb-4">
@@ -190,6 +189,6 @@ export function ImportReport({ result, onReset, entityType }: ImportReportProps)
           <span>Importer un autre fichier</span>
         </button>
       </div>
-    </GlassCard>
+    </div>
   );
 }
