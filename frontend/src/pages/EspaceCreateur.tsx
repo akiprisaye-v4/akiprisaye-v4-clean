@@ -443,8 +443,9 @@ const EspaceCreateur: React.FC = () => {
   const ghostwriterPreviewPost = useMemo(() => {
     const conversionStats = revenueAnalytics.conversionStats;
     const leadingTerritory = byTerritory[0];
+    const BASELINE_CTR_ADJUSTMENT = 2; // Example: baseline or target CTR percentage
     const averagePriceChangePct = conversionStats.clickThroughRate > 0
-      ? Number(((conversionStats.clickThroughRate * 100) - 2).toFixed(1))
+      ? Number(((conversionStats.clickThroughRate * 100) - BASELINE_CTR_ADJUSTMENT).toFixed(1))
       : 0;
 
     return generateDailyPost({
@@ -454,11 +455,11 @@ const EspaceCreateur: React.FC = () => {
       averagePriceChangePct,
       notableDrops: conversionStats.topProducts?.slice(0, 2).map((product) => ({
         name: product.name,
-        changePct: Math.min(-1, -(product.ctr * 100)), // Assure que la baisse est au moins de 1%
+        changePct: Math.min(-1, -(product.ctr * 100)),
       })),
       notableIncreases: byTerritory.slice(0, 2).map((territory) => ({
         name: territory.name,
-        changePct: Math.max(1, (territory.online / Math.max(territory.totalVisits, 1)) * 100), // Assure que la hausse est au moins de 1%
+        changePct: Math.max(1, (territory.online / Math.max(territory.totalVisits, 1)) * 100),
       })),
       date: new Date().toISOString(),
       revenueAnalytics,
