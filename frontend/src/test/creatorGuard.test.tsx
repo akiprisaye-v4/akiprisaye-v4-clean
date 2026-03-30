@@ -13,6 +13,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+(globalThis as any).revenueAnalytics = { track: vi.fn(), init: vi.fn(), getStats: vi.fn(() => ({})) };
 import '@testing-library/jest-dom/vitest';
 
 /* ── Firebase / lib mocks ──────────────────────────────────────────────── */
