@@ -83,7 +83,7 @@ jobs:
           cp sitemap.xml frontend/public/sitemap.xml
           echo "✅ sitemap.xml generated and copied to frontend/public/sitemap.xml"
 
-      - name: Build (retry once + capture logs)
+      - name: Build
         run: |
           set -euo pipefail
           npm run build 2>&1 | tee /tmp/pages-build.log || {
