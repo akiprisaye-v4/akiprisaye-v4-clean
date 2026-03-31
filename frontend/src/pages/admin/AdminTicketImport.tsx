@@ -186,7 +186,6 @@ export default function AdminTicketImport() {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      formData.append('type', 'receipt');
 
       const response = await fetch('/api/scan-price', {
         method: 'POST',

@@ -15,11 +15,6 @@ function jsonResponse(payload, status = 200) {
 function extractJson(text) {
   if (!text) return null;
   const fenced = text.match(/```json\s*([\s\S]*?)```/i);
-  const fenced = text.match(/\`\`\`json\s*([\s\S]*?)\`\`\`/i);
-
-  const fenced = text.match(/```json\s*([\s\S]*?)```/i);
-  const fenced = text.match(/\`\`\`json\s*([\s\S]*?)\`\`\`/i);
-  
   const candidate = fenced ? fenced[1] : text;
   try {
     return JSON.parse(candidate);
@@ -129,22 +124,11 @@ export async function onRequestPost({ request, env }) {
     const base64Image = toBase64(arrayBuffer);
 
     const geminiPayload = {
-      contents: [{
-        parts: [
-          { text: "Analyse cette photo de catalogue promo et renvoie uniquement un JSON valide avec la structure campaign, stores_applicable, products." },
-          { inline_data: { mime_type: image.type || 'image/jpeg', data: base64Image } }
-        ]
-      }],
-      generationConfig: { responseMimeType: 'application/json' }
-
-
       contents: [
         {
           parts: [
             {
-              text: scanType === 'receipt' 
-                ? "Analyse ce ticket de caisse et renvoie uniquement un JSON valide avec la structure store, transaction, items."
-                : "Analyse cette photo de catalogue promo et renvoie uniquement un JSON valide avec la structure campaign, stores_applicable, products.",
+              text: "Analyse cette photo de catalogue promo et renvoie uniquement un JSON valide avec la structure campaign, stores_applicable, products.",
             },
             {
               inline_data: {
@@ -158,25 +142,12 @@ export async function onRequestPost({ request, env }) {
       generationConfig: {
         responseMimeType: 'application/json',
       },
-
-
-    };
-
-    const geminiResponse = await callGeminiWithRetry(
-      `${GEMINI_ENDPOINT}?key=${encodeURIComponent(env.GEMINI_API_KEY)}`,
-      geminiPayload,
-    );
-
-    const geminiData = await safeJson(geminiResponse);
-
     };
 
     const geminiResponse = await fetch(`${GEMINI_ENDPOINT}?key=${env.GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(geminiPayload),
-      body: JSON.stringify(geminiPayload)
-
     });
 
     const geminiData = await geminiResponse.json();
@@ -195,8 +166,5 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ json: parsed });
   } catch (error) {
     return jsonResponse({ error: 'Erreur scan photo.', message: error instanceof Error ? error.message : String(error) }, 500);
-
-
-
   }
 }
