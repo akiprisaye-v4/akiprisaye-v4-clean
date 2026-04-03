@@ -9,22 +9,13 @@ const Home = () => {
   const [territory, setTerritory] = useState('GP');
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const shareUrl = "https://akiprisaye-web.pages.dev";
   const shareTitle = "AkiPrisaye : Compare les prix en Guadeloupe ! 🛒";
 
-  const copyToClipboard = async () => {
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-      } else {
-        window.prompt('Copiez ce lien :', shareUrl);
-      }
-
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      window.prompt('Copiez ce lien :', shareUrl);
-    }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const shareLinks = [
@@ -83,15 +74,8 @@ const Home = () => {
           </h2>
           <div className="grid grid-cols-4 gap-4 mb-6">
             {shareLinks.map((s) => (
-              <a
-                key={s.name}
-                href={s.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Partager via ${s.name} (ouvre dans un nouvel onglet)`}
-                title={`Partager via ${s.name}`}
-                className={`${s.color} aspect-square rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all`}
-              >
+              <a key={s.name} href={s.link} target="_blank" rel="noopener noreferrer" 
+                 className={`${s.color} aspect-square rounded-2xl flex items-center justify-center shadow-lg active:scale-90 transition-all`}>
                 {s.icon}
               </a>
             ))}
