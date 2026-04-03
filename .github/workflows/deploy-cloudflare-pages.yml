@@ -2,7 +2,7 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [main, "feat/**", "codex/**"]
+    branches: [main, "work", "feat/**", "codex/**"]
   pull_request:
     branches: [main]
 
