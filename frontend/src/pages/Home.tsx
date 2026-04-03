@@ -208,159 +208,104 @@ export default function Home() {
     trackQuicklinkEvent('click', { territory, abVariant, key, to });
   };
 
-  const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    rememberAction('/recherche-produits');
-    navigate(`/recherche-produits?q=${encodeURIComponent(q)}`);
-  };
+  const shareLinks = [
+    {
+      name: 'WhatsApp',
+      icon: <MessageCircle size={24} />,
+      color: 'bg-[#25D366]',
+      link: `https://wa.me/?text=${encodeURIComponent(shareTitle + " " + shareUrl)}`
+    },
+    {
+      name: 'Facebook',
+      icon: <Facebook size={24} />,
+      color: 'bg-[#1877F2]',
+      link: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`
+    },
+    {
+      name: 'Telegram',
+      icon: <Send size={24} />,
+      color: 'bg-[#0088cc]',
+      link: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`
+    },
+    {
+      name: 'TikTok',
+      icon: <Video size={24} />, // Icône vidéo pour TikTok
+      color: 'bg-[#000000] border border-slate-700',
+      link: tiktokProfile
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 overflow-x-hidden">
-      <SEOHead 
-        title="AkiPrisaye — Le comparateur de prix n°1 en Guadeloupe"
-        description="Scannez vos tickets, comparez les prix des supermarchés en Guadeloupe et économisez sur vos courses."
-      />
-
-      <header className="relative pt-20 pb-32 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent" />
-        <div className="max-w-7xl mx-auto relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest">
-              <Zap className="w-3 h-3" /> Communauté GP
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-black leading-tight italic uppercase">
-              Ne payez plus <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">le prix fort.</span>
-            </h1>
-            <p className="text-lg text-slate-400 max-w-lg leading-relaxed">
-              L'application citoyenne qui scanne les tickets de caisse pour vous dire où vos courses sont les moins chères en Guadeloupe.
-            </p>
-            <p className="text-sm text-slate-300 font-semibold">Le plus utile, sans surcharge.</p>
-            <p className="text-xs text-slate-400">Page d’accueil simplifiée.</p>
-            <form onSubmit={onSearchSubmit} className="flex flex-col sm:flex-row gap-2 max-w-xl">
-              <label htmlFor="hero-search" className="sr-only">Rechercher un produit</label>
-              <input
-                id="hero-search"
-                aria-label="Rechercher un produit"
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="flex-1 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700"
-                placeholder="Rechercher un produit"
-              />
-              <button type="submit" className="px-4 py-3 bg-emerald-500 text-slate-950 rounded-xl font-bold">Rechercher</button>
-            </form>
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => {
-                  rememberAction('/scanner');
-                  navigate('/scan');
-                }}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all hover:scale-105 flex items-center gap-2"
-              >
-                <Camera className="w-5 h-5" /> Scanner un ticket
-              </button>
-              {lastAction && lastActionLabel && (
-                <button
-                  type="button"
-                  onClick={() => navigate(lastAction)}
-                  className="px-6 py-4 bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-2xl border border-emerald-500/40"
-                >
-                  {lastActionLabel}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowFullHome((v) => !v)}
-                className="px-6 py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl border border-slate-600"
-              >
-                {showFullHome ? 'Masquer la vue complète' : 'Voir toute la page d’accueil'}
-              </button>
+    <div className="min-h-screen bg-[#0f172a] text-white p-4">
+      <div className="max-w-md mx-auto space-y-8 pt-12 pb-24">
+        
+        {/* Header Hero */}
+        <div className="text-center space-y-4">
+          <div className="inline-block p-1 rounded-2xl bg-gradient-to-tr from-blue-500 to-emerald-500 mb-2">
+            <div className="bg-[#0f172a] rounded-xl px-4 py-1">
+              <span className="text-xs font-bold text-blue-400">VERSION 4.6.4</span>
             </div>
           </div>
+          <h1 className="text-5xl font-black tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">
+            AkiPrisaye
+          </h1>
+          <p className="text-slate-400 text-lg font-medium">
+            Économisez sur vos courses <br/>en Guadeloupe. 🏝️
+          </p>
         </div>
-      </header>
 
-      <section className="py-20 px-6 overflow-hidden text-center">
-        <div className="max-w-5xl mx-auto space-y-10">
-          <h2 className="text-3xl lg:text-4xl font-black italic uppercase flex items-center justify-center gap-3">
-            <Play className="text-emerald-400 w-8 h-8 fill-emerald-400" />
-            Comment ça marche ?
-          </h2>
-          <div className="relative aspect-video max-w-4xl mx-auto rounded-3xl overflow-hidden border-8 border-slate-900 shadow-2xl bg-black">
-            <video controls muted preload="none" poster="/logo-akiprisaye.svg" className="w-full h-full object-cover">
-              <source src="/assets/demo-app.mp4" type="video/mp4" />
-              <track kind="captions" label="Français" />
-              Navigateur non supporté.
-            </video>
+        {/* Section Partage & Réseaux */}
+        <div className="bg-slate-800/40 backdrop-blur-xl p-6 rounded-[2.5rem] border border-slate-700/50 shadow-2xl">
+          <div className="flex items-center justify-between mb-6 px-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+              <Share2 size={18} className="text-blue-500" /> Propager l'appli
+            </h2>
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
           </div>
+          
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {shareLinks.map((social) => (
+              <a
+                key={social.name}
+                href={social.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${social.color} aspect-square rounded-2xl flex flex-col items-center justify-center gap-1 shadow-lg active:scale-90 transition-all`}
+              >
+                {social.icon}
+                <span className="text-[10px] font-bold uppercase">{social.name}</span>
+              </a>
+            ))}
+          </div>
+
+          <button
+            onClick={copyToClipboard}
+            className="w-full bg-slate-900/50 hover:bg-slate-900 text-slate-300 py-4 rounded-2xl flex items-center justify-center gap-3 border border-slate-700/50 transition-all active:bg-blue-600 active:text-white"
+          >
+            {copied ? (
+              <>
+                <Check size={20} className="text-emerald-400" />
+                <span className="font-bold uppercase text-xs tracking-widest">Lien copié !</span>
+              </>
+            ) : (
+              <>
+                <Copy size={20} />
+                <span className="font-bold uppercase text-xs tracking-widest">Copier le lien direct</span>
+              </>
+            )}
+          </button>
         </div>
-      </section>
 
-      {showFullHome ? (
-        <section className="py-20 px-6 space-y-32">
-          <div className="max-w-6xl mx-auto">
-            <h3 className="text-xl font-extrabold mb-4">
-              Accès rapides les plus consultés ({territory.toUpperCase()})
-            </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {orderedLinksForRender.map((item) => (
-                <Link
-                  key={item.key}
-                  to={item.to}
-                  onClick={() => onQuicklinkClick(item.to, item.key)}
-                  className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 hover:border-blue-400 transition"
-                >
-                  <div className="text-lg">{item.emoji}</div>
-                  <div className="font-bold text-sm mt-1">{item.label}</div>
-                  <div className="text-xs text-slate-400">{item.views} vues</div>
-                </Link>
-              ))}
-            </div>
-          </div>
-          <h3 className="text-2xl font-bold text-center">Ce que disent nos utilisateurs</h3>
-          <Suspense fallback={<SkeletonSection />}>
-            <div className="max-w-7xl mx-auto"><ObservatorySection /></div>
-          </Suspense>
-          <Suspense fallback={<SkeletonStatGrid />}>
-            <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8">
-              <StoreRankingWidget />
-              <LiveNewsFeed />
-            </div>
-          </Suspense>
-        </section>
-      ) : (
-        <section className="py-20 px-6 space-y-32">
-          <div className="max-w-6xl mx-auto">
-            <h3 className="text-xl font-extrabold mb-4">
-              Accès rapides les plus consultés ({territory.toUpperCase()})
-            </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {orderedLinksForRender.map((item) => (
-                <Link
-                  key={item.key}
-                  to={item.to}
-                  onClick={() => onQuicklinkClick(item.to, item.key)}
-                  className="rounded-xl border border-slate-700 bg-slate-900/70 p-3 hover:border-blue-400 transition"
-                >
-                  <div className="text-lg">{item.emoji}</div>
-                  <div className="font-bold text-sm mt-1">{item.label}</div>
-                  <div className="text-xs text-slate-400">{item.views} vues</div>
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div aria-hidden className="w-full animate-pulse rounded-xl bg-slate-900/60 border border-slate-800 " style={{ minHeight: 280 }} />
-          <div aria-hidden className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="h-28 rounded-xl border border-slate-800 bg-slate-900/60 animate-pulse" />
-            <div className="h-28 rounded-xl border border-slate-800 bg-slate-900/60 animate-pulse" />
-            <div className="h-28 rounded-xl border border-slate-800 bg-slate-900/60 animate-pulse" />
-            <div className="h-28 rounded-xl border border-slate-800 bg-slate-900/60 animate-pulse" />
-          </div>
-        </section>
-      )}
+        {/* Info supplémentaire */}
+        <div className="text-center">
+          <p className="text-slate-500 text-xs font-medium">
+            Rejoignez la communauté des chasseurs de prix. 🏷️
+          </p>
+        </div>
+
+      </div>
     </div>
   );
-}
+};
+
+export default Home;
