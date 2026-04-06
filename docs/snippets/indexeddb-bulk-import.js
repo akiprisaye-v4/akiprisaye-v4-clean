@@ -1,106 +1,245 @@
 (async () => {
-  console.log("⚡ DÉMARRAGE DE L'ÉLECTROCHOC v41...");
+  console.log('🦾 DÉMARRAGE DE LA SERINGUE 2.5 (mode assisté)...');
 
-  const TARGET_COUNT = 34;
-  const MAX_VISUAL_PASSES = 30;
-  const DB_NAME_FALLBACK = 'AkiPrisayeDB';
-  const STORE_NAME_FALLBACK = 'products';
-  const COUNTER_MATCH_PATTERN = /\b\d+\s+ARTICLES?(\s+SYNCHRONISÉS?)?\b/i;
-  const COUNTER_REPLACE_PATTERN = /\b\d+\s+ARTICLES?(\s+SYNCHRONISÉS?)?\b/gi;
-  const CANDIDATE_STORE_NAMES = ['products', 'catalog', 'catalogue', 'items', 'ean_products'];
-  const CANDIDATE_LOCALSTORAGE_KEYS = [
-    'product-count',
-    'aki-cached-count',
-    'last-sync-date',
-    'aki-user-pref-sync',
-    'catalog-count',
-    'catalogue-count',
-    'products-count',
+  if (typeof location !== 'undefined' && location.protocol === 'devtools:') {
+    const message =
+      'Contexte DevTools détecté (devtools://). Ouvre la Console sur la page cible (contexte "top"), puis relance le script.';
+    console.error(`❌ ${message}`);
+    alert(message);
+    return;
+  }
+
+  const FILE_CANDIDATES = [
+    '/data/data_ultra_1775330358.json',
+    '/data/prices.json',
+    '/data/prices-dataset.json',
+    '/data/expanded-prices.json',
+    '/data/catalogue.json',
+    '/prices.json',
+    '/prices-dataset.json',
+    '/expanded-prices.json',
+    '/catalogue.json',
   ];
+  const FALLBACK_ORIGIN = 'https://akiprisaye-v13-horizon.pages.dev';
+  const DB_NAME = 'AkiPrisayeDB';
+  const STORE_NAME = 'products';
+  const CHUNK_SIZE = 500;
+  const FETCH_TIMEOUT_MS = 8000;
 
-  const normalizeProduct = (entry, territory = 'guadeloupe', bucket = 'essentiel') => {
-    const id = entry?.id || `${bucket}-${Math.random().toString(36).slice(2, 8)}`;
-    const label = entry?.label || entry?.name || 'Produit sans nom';
-    const price = Number(entry?.price_min ?? entry?.price ?? 0);
-    const store = entry?.store || entry?.storeName || 'Magasin local';
+  const runtimeOrigin =
+    typeof location !== 'undefined' && /^https?:/i.test(location.origin)
+      ? location.origin
+      : FALLBACK_ORIGIN;
+  const appBasePath = (() => {
+    if (typeof document === 'undefined') return '/';
+    const baseHref = document.querySelector('base[href]')?.getAttribute('href');
+    if (!baseHref) return '/';
+    try {
+      const parsed = new URL(baseHref, runtimeOrigin);
+      return parsed.pathname.endsWith('/') ? parsed.pathname : `${parsed.pathname}/`;
+    } catch {
+      return '/';
+    }
+  })();
 
-    return {
-      id,
-      name: label,
-      label,
-      price,
-      price_min: price,
-      store,
-      category: bucket,
-      territory,
-      syncedAt: new Date().toISOString(),
-      source: 'panier-anticrise',
-    };
-  };
+  function buildUrl(path) {
+    const normalizedPath = path.startsWith('/') ? path.slice(1) : path;
+    const prefixedPath =
+      appBasePath !== '/' && !normalizedPath.startsWith('api/')
+        ? `${appBasePath}${normalizedPath}`
+        : `/${normalizedPath}`;
+    return new URL(prefixedPath, runtimeOrigin).toString();
+  }
 
-  const extractProducts = (data) => {
-    if (Array.isArray(data)) return data;
+  function assertNotDevtoolsUrl(raw) {
+    const value = String(raw || '').trim();
+    if (!value) return;
 
-    const territories = data?.territories;
-    if (!territories || typeof territories !== 'object') return [];
+    try {
+      const url = new URL(value, runtimeOrigin);
+      const protocol = url.protocol.toLowerCase();
+      const hostname = url.hostname.toLowerCase();
 
-    const flattened = [];
-    for (const [territoryName, territoryData] of Object.entries(territories)) {
-      const basket = territoryData?.basket;
-      if (!basket || typeof basket !== 'object') continue;
-      for (const [bucketName, items] of Object.entries(basket)) {
-        if (!Array.isArray(items)) continue;
-        for (const item of items) {
-          flattened.push(normalizeProduct(item, territoryName, bucketName));
-        }
+      if (
+        protocol === 'devtools:' ||
+        protocol === 'chrome:' ||
+        hostname === 'chrome-devtools-frontend.appspot.com' ||
+        value.toLowerCase().includes('targettype=tab')
+      ) {
+        throw new Error(
+          'URL DevTools détectée. Utilise une URL de données JSON (https://.../data/...json), pas devtools://',
+        );
+      }
+    } catch {
+      // Fallback for unparsable values: keep conservative string-based checks
+      const lower = value.toLowerCase();
+      if (
+        lower.startsWith('devtools://') ||
+        lower.startsWith('chrome://') ||
+        lower.includes('targettype=tab')
+      ) {
+        throw new Error(
+          'URL DevTools détectée. Utilise une URL de données JSON (https://.../data/...json), pas devtools://',
+        );
       }
     }
+  }
 
-    return flattened;
-  };
+  async function fetchWithTimeout(url, timeoutMs) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const buildSeededProducts = (products) => {
-    if (!products.length) return [];
+    try {
+      return await fetch(url, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 
-    return Array.from({ length: TARGET_COUNT }, (_, i) => {
-      const source = products[i % products.length] || {};
-      const baseId = source.id || source.ean || source.label || `seed-${i + 1}`;
-      return {
-        ...source,
-        id: `${String(baseId)}__${i + 1}`,
-        seedIndex: i + 1,
+  function isLikelyProductRecord(value) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
+    const productIdentityKeys = ['id', 'name', 'title', 'sku', 'slug', 'reference'];
+    return productIdentityKeys.some((key) => key in value);
+  }
+
+  function isProductArray(value) {
+    return Array.isArray(value) && value.every(isLikelyProductRecord);
+  }
+
+  function extractProducts(payload) {
+    if (isProductArray(payload?.products)) return payload.products;
+    if (isProductArray(payload)) return payload;
+    return null;
+  }
+
+  function pickLocalJsonText() {
+    return new Promise((resolve, reject) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json,.json';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+
+      input.onchange = async () => {
+        try {
+          const file = input.files?.[0];
+          if (!file) {
+            reject(new Error('Aucun fichier sélectionné.'));
+            return;
+          }
+          const text = await file.text();
+          resolve(text);
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error(String(error)));
+        } finally {
+          input.remove();
+        }
       };
+
+      input.click();
     });
-  };
+  }
 
-  const readUiSyncedCount = () => {
-    const bodyText = document.body?.innerText || '';
-    const match = bodyText.match(/(\d+)\s+ARTICLES?\s+SYNCHRONISÉS?/i);
-    return match ? Number(match[1]) : null;
-  };
+  async function readJsonFromPromptOrUrl() {
+    const input = prompt(
+      "Import secours: colle le JSON ici, OU colle une URL JSON complète (https://...).",
+      '',
+    );
 
-  // 1) PATCH VISUEL CIBLÉ (sans casser toute la page)
-  const forceVisual = () => {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    let patched = 0;
+    if (!input || !input.trim()) {
+      throw new Error('Aucune donnée manuelle fournie.');
+    }
 
-    while (walker.nextNode()) {
-      const node = walker.currentNode;
-      const original = node.nodeValue || '';
-      if (COUNTER_MATCH_PATTERN.test(original)) {
-        node.nodeValue = original.replace(
-          COUNTER_REPLACE_PATTERN,
-          `${TARGET_COUNT} ARTICLES SYNCHRONISÉS`,
-        );
-        if (node.parentElement) {
-          node.parentElement.style.color = '#10b981';
+    const trimmed = input.trim();
+    const looksLikeUrl = /^https?:\/\//i.test(trimmed) || trimmed.startsWith('/') || (trimmed.includes('.') && !trimmed.includes(' '));
+
+    if (looksLikeUrl) {
+      assertNotDevtoolsUrl(trimmed);
+      const url = /^https?:\/\//i.test(trimmed) ? trimmed : buildUrl(trimmed);
+      const response = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+      if (!response.ok) {
+        throw new Error(`URL manuelle invalide (${response.status}) : ${url}`);
+      }
+      return response.text();
+    }
+
+    return trimmed;
+  }
+
+  async function resolveFirstReachableUrl(preferredUrl) {
+    const tried = [];
+    const queue = [];
+
+    if (preferredUrl && preferredUrl.trim()) {
+      const trimmed = preferredUrl.trim();
+      assertNotDevtoolsUrl(trimmed);
+      const absolute = /^https?:\/\//i.test(trimmed) ? trimmed : buildUrl(trimmed);
+      queue.push(absolute);
+    }
+
+    for (const path of FILE_CANDIDATES) {
+      queue.push(buildUrl(path));
+    }
+
+    const uniqueQueue = [...new Set(queue)];
+
+    for (const url of uniqueQueue) {
+      tried.push(url);
+      console.log(`🔎 Test URL: ${url}`);
+
+      try {
+        const response = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+        if (!response.ok) {
+          console.warn(`⚠️ ${url} → HTTP ${response.status}`);
+          continue;
+        }
+
+        const rawText = await response.text();
+        let payload;
+        try {
+          payload = JSON.parse(rawText);
+        } catch {
+          console.warn(`⚠️ ${url} → réponse non JSON (probable HTML de fallback SPA)`);
+          continue;
+        }
+
+        const products = extractProducts(payload);
+        if (!products) {
+          console.warn(`⚠️ ${url} → JSON valide mais sans tableau products[]`);
+          continue;
         }
         patched++;
       }
     }
 
-    return patched;
-  };
+    console.warn(
+      `⚠️ Aucun dataset JSON valide trouvé (ou délai dépassé ${FETCH_TIMEOUT_MS} ms). URL testées :\n- ${tried.join('\n- ')}`,
+    );
+    return null;
+  }
+
+  function openDb(version = 1) {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, version);
+
+      req.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error || new Error('Impossible d’ouvrir IndexedDB'));
+    });
+  }
+
+  async function ensureProductsStore() {
+    const db = await openDb(1);
 
   // Quelques passes seulement (évite boucle infinie + drain CPU)
   let visualPasses = 0;
@@ -221,11 +360,51 @@
   };
 
   try {
-    // 2) DÉSACTIVE LES SERVICE WORKERS
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    for (const registration of registrations) {
-      await registration.unregister();
-      console.log('🧨 Gardien supprimé.');
+    console.log(`🌍 Origine utilisée : ${runtimeOrigin}`);
+    console.log('🔎 Recherche du JSON disponible...');
+
+    let fileLabel = 'source locale';
+    let products = null;
+    const wantsCustomUrl = confirm(
+      'Tu veux saisir une URL JSON personnalisée ? (OK = oui, Annuler = auto-détection)',
+    );
+    const preferredUrl = wantsCustomUrl
+      ? prompt(
+          "URL JSON personnalisée (laisser vide pour auto-détection). Ex: /data/observatoire/prix-panier-base.json",
+          '',
+        )
+      : '';
+
+    try {
+      const found = await resolveFirstReachableUrl(preferredUrl || '');
+      if (found) {
+        fileLabel = found.url;
+        products = found.products;
+      }
+    } catch {
+      // Le détail est déjà journalisé.
+    }
+
+    if (!products) {
+      console.warn('⚠️ Aucun dataset distant valide trouvé. Basculage vers import local (.json).');
+      let rawText;
+      try {
+        rawText = await pickLocalJsonText();
+      } catch (localPickerError) {
+        console.warn('⚠️ Sélecteur de fichier indisponible (souvent: absence de user activation).');
+        console.warn(localPickerError);
+        try {
+          rawText = await readJsonFromPromptOrUrl();
+        } catch {
+          alert(
+            "Aucune source exploitable trouvée. Conseil: relance le script puis colle directement une URL JSON valide quand demandé (ou colle le JSON brut).",
+          );
+          return;
+        }
+      }
+      const payload = JSON.parse(rawText);
+      products = extractProducts(payload);
+      fileLabel = 'source manuelle/locale';
     }
 
     // 3) TEST SERVEUR DONNÉES + INJECTION INDEXEDDB
@@ -265,9 +444,16 @@
       `🎯 ÉLECTROCHOC RÉUSSI !\n\n${seededProducts.length} produits injectés (${seededStores} store(s), vérifiés: ${maxVerifiedCount}).\nCompteur UI détecté avant reload: ${uiCountBeforeReload ?? 'non trouvé'}.\nClique sur OK pour tenter un redémarrage propre.`,
     );
 
-    window.location.href = `${window.location.origin}${window.location.pathname}?clean=true`;
-  } catch {
-    alert("⚠️ TERMUX NE RÉPOND PAS.\nVérifie que 'python -m http.server' tourne encore !");
+    db.close();
+    alert(`🏆 VICTOIRE FINALE ! ${products.length} produits chargés.`);
+    if (confirm('Import terminé. Recharger la page maintenant ?')) {
+      location.reload();
+    }
+  } catch (err) {
+    console.error('⚠️ Échec de l’électrochoc IndexedDB :', err);
+    alert(
+      `⚠️ TERMUX NE RÉPOND PAS.\nVérifie que 'python -m http.server' tourne encore !\n\nDétail : ${err && err.message ? err.message : String(err)}`,
+    );
   } finally {
     clearInterval(visualTimer);
     observer.disconnect();
