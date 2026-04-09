@@ -186,9 +186,52 @@ async function getWikimediaThumb(title: string, signal: AbortSignal): Promise<st
   }
 }
 
+
+async function searchWikipediaPageImage(query: string, signal: AbortSignal): Promise<string | null> {
+  const shortQuery = query
+    .replace(/\b\d+(?:[\.,]\d+)?\s?(?:g|kg|ml|cl|l|oz)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const q = shortQuery || query;
+
+  const url = new URL('https://en.wikipedia.org/w/api.php');
+  url.searchParams.set('action', 'query');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('origin', '*');
+  url.searchParams.set('prop', 'pageimages');
+  url.searchParams.set('piprop', 'original');
+  url.searchParams.set('titles', q);
+
+  const response = await fetch(url.toString(), {
+    signal,
+    headers: {
+      'user-agent': USER_AGENT,
+      'accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json<{ query?: { pages?: Record<string, { original?: { source?: string } }> } }>();
+  const pages = data.query?.pages ?? {};
+
+  for (const page of Object.values(pages)) {
+    const image = page.original?.source;
+    if (image && image.startsWith('http')) return image;
+  }
+
+  return null;
+}
 async function searchWikimedia(query: string, signal: AbortSignal): Promise<string | null> {
   // Append context keywords to improve relevance.
-  const searchQuery = `${query} (packaging OR jar OR bottle) (jpg OR png OR webp)`;
+  const shortQuery = query
+    .replace(/\\b\\d+(?:[\\.,]\\d+)?\\s?(?:g|kg|ml|cl|l|oz)\\b/gi, "")
+    .replace(/\\s+/g, " ")
+    .trim();
+
+  const q = shortQuery || query;
+  const searchQuery = `${q} product label`;
 
   const params = new URLSearchParams({
     action: 'query',
@@ -299,7 +342,10 @@ export default {
 
       // 2. Wikimedia Commons fallback
       if (!imageUrl) {
+        imageUrl = await searchWikipediaPageImage(normalizedQuery, controller.signal);
+      if (!imageUrl) {
         imageUrl = await searchWikimedia(normalizedQuery, controller.signal);
+      }
         if (imageUrl) {
           source = 'wikimedia';
           confidence = 0.4;
@@ -319,6 +365,7 @@ export default {
     };
 
     // Store in cache asynchronously
+  if (imageUrl) {
     ctx.waitUntil(
       cache.put(
         cacheKey,
@@ -330,6 +377,7 @@ export default {
         }),
       ),
     );
+    }
 
     return jsonResponse(result);
   },
