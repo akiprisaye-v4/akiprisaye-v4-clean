@@ -14,13 +14,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const RELEASE_META = {
-  version: 'v4.6.20',
-  codename: 'Horizon Souverain',
-  confidenceIndex: 0.95,
-  territories: ['GP', 'MQ', 'GF', 'RE', 'YT', 'NC', 'PF', 'WF'],
-};
-
 /** Calcule un libellé relatif ("il y a X min", "il y a X h") à partir d'un timestamp ISO. */
 function relativeTime(isoString) {
   if (!isoString) return 'Inconnu';
@@ -154,17 +147,8 @@ export async function onRequest(context) {
       },
     ];
 
-    return new Response(JSON.stringify({
-      release: RELEASE_META,
-      updatedAt: lastScrapedAt,
-      stale: isStale,
-      sources: result,
-    }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Akiprisaye-Release': RELEASE_META.version,
-        ...CORS_HEADERS,
-      },
+    return new Response(JSON.stringify(result), {
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
 
   } catch {
@@ -182,17 +166,8 @@ export async function onRequest(context) {
       { name: 'COM NC/PF/WF/PM/BL/MF — IEOM / ISPF / INSEE',                    source: 'com',         status: 'offline', health: 0, lastScan: 'Inconnu', count: 0 },
       { name: 'Grossistes alimentaires DOM (MIN / FranceAgriMer / ODEADOM)',      source: 'grossistes',  status: 'offline', health: 0, lastScan: 'Inconnu', count: 0 },
     ];
-    return new Response(JSON.stringify({
-      release: RELEASE_META,
-      updatedAt: null,
-      stale: true,
-      sources: fallback,
-    }), {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Akiprisaye-Release': RELEASE_META.version,
-        ...CORS_HEADERS,
-      },
+    return new Response(JSON.stringify(fallback), {
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
   }
 }

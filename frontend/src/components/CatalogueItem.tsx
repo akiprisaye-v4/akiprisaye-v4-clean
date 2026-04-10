@@ -33,70 +33,13 @@ interface NutriInfo {
   loaded: boolean;
 }
 
-const NUTRI_CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
-const NUTRI_CACHE_KEY = `akiprisaye:nutri-cache:v2:${Math.floor(Date.now() / NUTRI_CACHE_TTL_MS)}`;
-const nutriMemoryCache = new Map<string, { ts: number; data: NutriInfo }>();
-
-type StoredNutriCache = Record<string, { ts: number; data: NutriInfo } | NutriInfo>;
-
-function normalizeStoredEntry(value: { ts: number; data: NutriInfo } | NutriInfo): { ts: number; data: NutriInfo } | null {
-  if (!value) return null;
-  if ('ts' in (value as any) && 'data' in (value as any)) {
-    const v = value as { ts: number; data: NutriInfo };
-    if (!Number.isFinite(v.ts) || !v.data) return null;
-    return v;
-  }
-  return { ts: Date.now(), data: value as NutriInfo };
-}
-
-function readNutriFromStorage(ean: string): NutriInfo | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = window.localStorage.getItem(NUTRI_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredNutriCache;
-    const normalized = normalizeStoredEntry(parsed[ean]);
-    if (!normalized) return null;
-    if (Date.now() - normalized.ts > NUTRI_CACHE_TTL_MS) return null;
-    return normalized.data;
-  } catch {
-    return null;
-  }
-}
-
-function writeNutriToStorage(ean: string, info: NutriInfo): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const raw = window.localStorage.getItem(NUTRI_CACHE_KEY);
-    const parsed = raw ? JSON.parse(raw) as StoredNutriCache : {};
-    parsed[ean] = { ts: Date.now(), data: info };
-    window.localStorage.setItem(NUTRI_CACHE_KEY, JSON.stringify(parsed));
-  } catch {
-    // Ignore quota / parse errors silently
-  }
-}
-
 async function fetchNutriInfo(ean: string): Promise<NutriInfo> {
-  const cachedMemory = nutriMemoryCache.get(ean);
-  if (cachedMemory && Date.now() - cachedMemory.ts <= NUTRI_CACHE_TTL_MS) return cachedMemory.data;
-
-  const cachedStorage = readNutriFromStorage(ean);
-  if (cachedStorage) {
-    nutriMemoryCache.set(ean, { ts: Date.now(), data: cachedStorage });
-    return cachedStorage;
-  }
-
   try {
     const res = await fetch(
       `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(ean)}.json?fields=nutriscore_grade,nova_group,ingredients_text_fr,ingredients_text`,
       { headers: { Accept: 'application/json' } },
     );
-    if (!res.ok) {
-      const fallback = { loaded: true };
-      nutriMemoryCache.set(ean, { ts: Date.now(), data: fallback });
-      writeNutriToStorage(ean, fallback);
-      return fallback;
-    }
+    if (!res.ok) return { loaded: true };
     const data = await res.json() as {
       status?: number;
       product?: {
@@ -106,28 +49,17 @@ async function fetchNutriInfo(ean: string): Promise<NutriInfo> {
         ingredients_text?: string;
       };
     };
-    if (data.status !== 1 || !data.product) {
-      const fallback = { loaded: true };
-      nutriMemoryCache.set(ean, { ts: Date.now(), data: fallback });
-      writeNutriToStorage(ean, fallback);
-      return fallback;
-    }
+    if (data.status !== 1 || !data.product) return { loaded: true };
     const p = data.product;
     const rawIng = (p.ingredients_text_fr || p.ingredients_text || '').trim();
-    const info = {
+    return {
       nutriScore: p.nutriscore_grade ? p.nutriscore_grade.toUpperCase() : undefined,
       novaGroup: p.nova_group,
       ingredients: rawIng ? rawIng.slice(0, 280) : undefined,
       loaded: true,
     };
-    nutriMemoryCache.set(ean, { ts: Date.now(), data: info });
-    writeNutriToStorage(ean, info);
-    return info;
   } catch {
-    const fallback = { loaded: true };
-    nutriMemoryCache.set(ean, { ts: Date.now(), data: fallback });
-    writeNutriToStorage(ean, fallback);
-    return fallback;
+    return { loaded: true };
   }
 }
 

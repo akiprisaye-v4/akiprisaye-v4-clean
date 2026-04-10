@@ -43,7 +43,7 @@ import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import admin from 'firebase-admin';
 import OpenAI from 'openai';
-import { timedSource } from './sources/utils.mjs';
+import { timedSource, isScrapingAllowed } from './sources/utils.mjs';
 
 import { scrapeFuelPrices }        from './sources/fuel.mjs';
 import { scrapeFoodPrices }        from './sources/food.mjs';
@@ -165,35 +165,7 @@ function computePriceGaps(domEntries, hexEntries) {
   const byEan  = new Map();
   const byName = new Map();
 
-  const normalize = (s) =>
-    (s ?? '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
-  const tokenize = (s) => {
-    const normalized = normalize(s);
-    if (!normalized) return [];
-    const chunks = normalized
-      .replace(/(litres?|ltrs?|ltr)/g, 'l')
-      .replace(/(grammes?|grs?)/g, 'g')
-      .replace(/(kilogrammes?|kgs?)/g, 'kg')
-      .replace(/([0-9]+)([a-z]+)/g, '$1 $2')
-      .replace(/([a-z]+)([0-9]+)/g, '$1 $2')
-      .split(/[^a-z0-9]+/)
-      .filter(Boolean);
-    const stop = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'et', 'a', 'au']);
-    return chunks.filter((t) => t.length > 1 && !stop.has(t));
-  };
-  const jaccard = (aTokens, bTokens) => {
-    if (aTokens.length === 0 || bTokens.length === 0) return 0;
-    const a = new Set(aTokens);
-    const b = new Set(bTokens);
-    let intersection = 0;
-    for (const token of a) if (b.has(token)) intersection += 1;
-    const union = new Set([...a, ...b]).size;
-    return union > 0 ? intersection / union : 0;
-  };
+  const normalize = (s) => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   for (const h of hexEntries) {
     if (h.ean && h.price > 0) {
@@ -209,46 +181,11 @@ function computePriceGaps(domEntries, hexEntries) {
 
   const avgEan  = new Map([...byEan.entries()].map(([k, v]) => [k, Math.round((v.sum / v.count) * 100) / 100]));
   const avgName = new Map([...byName.entries()].map(([k, v]) => [k, Math.round((v.sum / v.count) * 100) / 100]));
-  const nameTokens = new Map([...avgName.keys()].map((k) => [k, tokenize(k)]));
-  const tokenIndex = new Map();
-  for (const [nameKey, tokens] of nameTokens.entries()) {
-    for (const token of tokens) {
-      if (!tokenIndex.has(token)) tokenIndex.set(token, new Set());
-      tokenIndex.get(token).add(nameKey);
-    }
-  }
-
-  const findFuzzyNameMatch = (productName) => {
-    const normalized = normalize(productName);
-    if (!normalized) return undefined;
-    const exact = avgName.get(normalized);
-    if (exact) return exact;
-
-    const domTokens = tokenize(productName);
-    const candidates = new Set();
-    for (const token of domTokens) {
-      for (const candidate of tokenIndex.get(token) ?? []) {
-        candidates.add(candidate);
-      }
-    }
-
-    let bestName = '';
-    let bestScore = 0;
-    for (const candidate of candidates) {
-      const score = jaccard(domTokens, nameTokens.get(candidate) ?? []);
-      if (score > bestScore) {
-        bestScore = score;
-        bestName = candidate;
-      }
-    }
-    if (bestScore < 0.55 || !bestName) return undefined;
-    return avgName.get(bestName);
-  };
 
   return domEntries.map((e) => {
     let priceRef;
     if (e.ean) priceRef = avgEan.get(e.ean);
-    if (!priceRef) priceRef = findFuzzyNameMatch(e.productName);
+    if (!priceRef) priceRef = avgName.get(normalize(e.productName));
 
     if (!priceRef || !e.price) return e;
 
@@ -447,21 +384,22 @@ async function main() {
 
   console.log('📡 Lancement du scraping…\n');
   const [
-    fuelRes, foodRes, freshRes, catalogueRes, hexagoneRes, bqpRes, servicesRes,
-    loyerRes, medicamentsRes, octroiRes, comRes, grossistesRes,
+    rawFuel, rawFood, rawFresh, rawCatalogue, rawHexagone, rawBQP, rawServices,
+    rawLoyer, rawMedicaments, rawOctrois, rawCOM, rawGrossistes,
   ] = await Promise.all([
-    runSource('fuel', () => scrapeFuelPrices()),
-    runSource('food', () => scrapeFoodPrices({ deepScan: DEEP_SCAN })),
-    runSource('fresh', () => scrapeFreshPrices()),
-    runSource('catalogue', () => scrapeCataloguePrices()),
-    timedSource('hexagone', () => shouldRun('hexagone') || shouldRun('catalogue') ? scrapeHexagonePrices() : Promise.resolve([])),
-    runSource('bqp', () => scrapeBQPPrices()),
-    runSource('services', () => scrapeServicePrices()),
-    runSource('loyer', () => scrapeLoyerPrices()),
-    runSource('medicaments', () => scrapeMedicamentPrices()),
-    runSource('octroi-mer', () => scrapeOctroisMer()),
-    runSource('com', () => scrapeCOMPrices()),
-    runSource('grossistes', () => scrapeGrossistePrices()),
+    shouldRun('fuel')         ? scrapeFuelPrices()                         : Promise.resolve([]),
+    shouldRun('food')         ? scrapeFoodPrices({ deepScan: DEEP_SCAN })  : Promise.resolve([]),
+    shouldRun('fresh')        ? scrapeFreshPrices()                        : Promise.resolve([]),
+    shouldRun('catalogue')    ? scrapeCataloguePrices()                    : Promise.resolve([]),
+    shouldRun('hexagone') || shouldRun('catalogue') || shouldRun('all')
+                              ? scrapeHexagonePrices()                     : Promise.resolve([]),
+    shouldRun('bqp')          ? scrapeBQPPrices()                          : Promise.resolve([]),
+    shouldRun('services')     ? scrapeServicePrices()                      : Promise.resolve([]),
+    shouldRun('loyer')        ? scrapeLoyerPrices()                        : Promise.resolve([]),
+    shouldRun('medicaments')  ? scrapeMedicamentPrices()                   : Promise.resolve([]),
+    shouldRun('octroi-mer')   ? scrapeOctroisMer()                         : Promise.resolve([]),
+    shouldRun('com')          ? scrapeCOMPrices()                          : Promise.resolve([]),
+    shouldRun('grossistes')   ? scrapeGrossistePrices()                    : Promise.resolve([]),
   ]);
   const rawFuel = fuelRes.data;
   const rawFood = foodRes.data;
@@ -516,11 +454,6 @@ async function main() {
   console.log(`   🏛️  Octroi de mer   : ${counts.octroisMer} taux`);
   console.log(`   🌏 COM (NC/PF/…)   : ${counts.com} entrées IEOM/ISPF/INSEE`);
   console.log(`   🏭 Grossistes      : ${counts.grossistes} cours de gros (MIN/FranceAgriMer/ODEADOM)`);
-  console.log('\n⏱️  Durée par source :');
-  Object.entries(sourceDiagnostics).forEach(([name, res]) => {
-    const errorPart = res.error ? ` — erreur: ${res.error}` : '';
-    console.log(`   - ${name.padEnd(12)} ${String(res.durationMs).padStart(5)} ms${errorPart}`);
-  });
 
   // ── Shock detection ───────────────────────────────────────────────────────
   console.log('\n🔍 Détection des chocs de prix…');
@@ -740,18 +673,18 @@ async function main() {
     dryRun: DRY_RUN,
     deepScan: DEEP_SCAN,
     sources: {
-      fuel:        { count: counts.fuel,        ok: counts.fuel > 0,        durationMs: fuelRes.durationMs,       error: fuelRes.error },
-      food:        { count: counts.food,        ok: counts.food > 0,        durationMs: foodRes.durationMs,       error: foodRes.error },
-      fresh:       { count: counts.fresh,       ok: counts.fresh > 0,       durationMs: freshRes.durationMs,      error: freshRes.error },
-      catalogue:   { count: counts.catalogue,   ok: counts.catalogue > 0,   durationMs: catalogueRes.durationMs,  error: catalogueRes.error },
-      hexagone:    { count: counts.hexagone,    ok: counts.hexagone > 0,    durationMs: hexagoneRes.durationMs,   error: hexagoneRes.error },
-      bqp:         { count: counts.bqp,         ok: counts.bqp > 0,         durationMs: bqpRes.durationMs,        error: bqpRes.error },
-      services:    { count: counts.services,    ok: counts.services > 0,    durationMs: servicesRes.durationMs,   error: servicesRes.error },
-      loyer:       { count: counts.loyer,       ok: counts.loyer > 0,       durationMs: loyerRes.durationMs,      error: loyerRes.error },
-      medicaments: { count: counts.medicaments, ok: counts.medicaments > 0, durationMs: medicamentsRes.durationMs, error: medicamentsRes.error },
-      octroisMer:  { count: counts.octroisMer,  ok: counts.octroisMer > 0,  durationMs: octroiRes.durationMs,     error: octroiRes.error },
-      com:         { count: counts.com,         ok: counts.com > 0,         durationMs: comRes.durationMs,        error: comRes.error },
-      grossistes:  { count: counts.grossistes,  ok: counts.grossistes > 0,  durationMs: grossistesRes.durationMs, error: grossistesRes.error },
+      fuel:        { count: counts.fuel,        ok: counts.fuel > 0 },
+      food:        { count: counts.food,        ok: counts.food > 0 },
+      fresh:       { count: counts.fresh,       ok: counts.fresh > 0 },
+      catalogue:   { count: counts.catalogue,   ok: counts.catalogue > 0 },
+      hexagone:    { count: counts.hexagone,    ok: counts.hexagone > 0 },
+      bqp:         { count: counts.bqp,         ok: counts.bqp > 0 },
+      services:    { count: counts.services,    ok: counts.services > 0 },
+      loyer:       { count: counts.loyer,       ok: counts.loyer > 0 },
+      medicaments: { count: counts.medicaments, ok: counts.medicaments > 0 },
+      octroisMer:  { count: counts.octroisMer,  ok: counts.octroisMer > 0 },
+      com:         { count: counts.com,         ok: counts.com > 0 },
+      grossistes:  { count: counts.grossistes,  ok: counts.grossistes > 0 },
     },
     totalEntries,
     shocksDetected: allShocks.length,

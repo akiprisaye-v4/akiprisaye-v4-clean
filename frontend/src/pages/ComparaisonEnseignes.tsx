@@ -766,10 +766,6 @@ export default function ComparaisonEnseignes() {
               🏪 Score vie chère par enseigne
               <span className="text-sm font-normal text-white/50">(panier catalogue — moins cher en haut)</span>
             </h2>
-            <div className="mb-3 text-xs text-white/60">
-              <span className="font-semibold text-white/75">Méthodologie :</span>{' '}
-              calcul basé sur un panier type de produits communs observés. Les prix peuvent varier selon la date de collecte, les arrivages et les promotions locales.
-            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

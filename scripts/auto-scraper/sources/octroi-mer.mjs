@@ -39,23 +39,6 @@ import { sleep, fetchJSONWithRetry, fetchTextWithRetry } from './utils.mjs';
 const fetchJSON = (url, label) => fetchJSONWithRetry(url, label, 'octroi-mer');
 const fetchText = (url, label) => fetchTextWithRetry(url, label, 'octroi-mer');
 
-/**
- * Nettoie une valeur de taux pour éviter les encodages partiels.
- * Exemples acceptés: "12,5 %", "8.0%", "  30 ".
- * @param {string} raw
- * @returns {number}
- */
-function parseRate(raw) {
-  const normalized = String(raw ?? '')
-    .trim()
-    .replace(/\s+/g, '')
-    .replace(/%/g, '')
-    .replace(/,/g, '.');
-
-  if (!/^\d+(\.\d+)?$/.test(normalized)) return NaN;
-  return Number.parseFloat(normalized);
-}
-
 // ─── Taux de référence Octroi de Mer 2024 ─────────────────────────────────────
 
 /**
@@ -194,7 +177,7 @@ async function fetchOctroisLive() {
     const period = new Date().toISOString().slice(0, 7);
     for (const line of lines.slice(1, 80)) {
       const cells = line.split(sep).map((c) => c.trim().replace(/"/g, ''));
-      const rate  = parseRate(cells[rateIdx] ?? '0');
+      const rate  = parseFloat((cells[rateIdx] ?? '0').replace(',', '.').replace(/%/g, ''));
       const cat   = cells[catIdx] ?? '';
       if (!cat || !Number.isFinite(rate) || rate < 0 || rate > 100) continue;
 
