@@ -224,6 +224,18 @@ describe('product-image worker', () => {
             headers: { 'content-type': 'application/json' },
           });
         }
+    if (
+      parsedUrl.origin === 'https://en.wikipedia.org' &&
+      parsedUrl.pathname === '/w/api.php' &&
+      parsedUrl.searchParams.get('action') === 'query' &&
+      parsedUrl.searchParams.get('prop') === 'pageimages'
+    ) {
+      return new Response(
+        JSON.stringify({ query: { pages: {} } }),
+        { headers: { 'content-type': 'application/json' } },
+      );
+    }
+
 
         if (
           parsedUrl.origin === 'https://commons.wikimedia.org' &&
