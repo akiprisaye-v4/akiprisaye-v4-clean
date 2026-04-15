@@ -12,51 +12,49 @@
  * Collection Firestore : `click_events`
  * Document auto-id avec champs :
  *   - retailer: string
- *   - barcode?: string (omis si inconnu)
+ *   - barcode: string (peut être vide)
  *   - territory: string
  *   - price: number
- *   - pageUrl?: string (omis si window indisponible)
+ *   - pageUrl: string
  *   - clickedAt: Timestamp
- *   - sessionId?: string (anonyme, généré côté client, non persisté)
+ *   - sessionId: string (anonyme, généré côté client, non persisté)
  */
 
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { getApps, getApp } from 'firebase/app';
+import { getApp } from 'firebase/app';
+
+// Générer un suffixe aléatoire avec une source cryptographiquement sûre (navigateur)
+function getSecureRandomSuffix(length = 7): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const bytes = new Uint8Array(length);
+  if (typeof globalThis !== 'undefined' && globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('');
+  }
+  // Fallback défensif (ne devrait pas arriver en navigateur moderne)
+  return `${Date.now().toString(36)}`.slice(-length);
+}
 
 // Générer un sessionId anonyme (non persisté, non lié à l'utilisateur)
 function getAnonymousSessionId(): string {
   const key = 'akp:session:anon';
-
-  const generateId = (): string => {
-    if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
-      return `anon_${window.crypto.randomUUID()}`;
-    }
-    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
-      const bytes = new Uint8Array(16);
-      window.crypto.getRandomValues(bytes);
-      const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-      return `anon_${hex}`;
-    }
-    return `anon_${Date.now()}`;
-  };
-
   try {
     const existing = sessionStorage.getItem(key);
     if (existing) return existing;
-    const id = generateId();
+    const id = `anon_${Date.now()}_${getSecureRandomSuffix(7)}`;
     sessionStorage.setItem(key, id);
     return id;
   } catch {
-    return generateId();
+    return `anon_${Date.now()}_${getSecureRandomSuffix(7)}`;
   }
 }
 
 export interface FirestoreClickEvent {
   retailer: string;
-  barcode?: string;
+  barcode: string;
   territory: string;
   price: number;
-  pageUrl?: string;
+  pageUrl: string;
 }
 
 /**
@@ -67,21 +65,12 @@ export function trackClickToFirestore(event: FirestoreClickEvent): void {
   // Ne pas awaiter — fire and forget
   void (async () => {
     try {
-      if (!getApps().length) return;
       const db = getFirestore(getApp());
       const ref = collection(db, 'click_events');
-      const pageUrl =
-        typeof window !== 'undefined' && window.location.pathname
-          ? window.location.pathname
-          : event.pageUrl;
-      const sessionId = getAnonymousSessionId();
       await addDoc(ref, {
-        retailer: event.retailer,
-        territory: event.territory,
-        price: event.price,
-        ...(event.barcode ? { barcode: event.barcode } : {}),
-        ...(pageUrl ? { pageUrl } : {}),
-        ...(sessionId ? { sessionId } : {}),
+        ...event,
+        sessionId: getAnonymousSessionId(),
+        pageUrl: typeof window !== 'undefined' ? window.location.pathname : event.pageUrl,
         clickedAt: serverTimestamp(),
       });
     } catch {

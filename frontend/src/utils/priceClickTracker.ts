@@ -114,28 +114,26 @@ export function trackRetailerClick(
   clicks.push({ barcode, retailer, territory, price, clickedAt: Date.now() });
   writeJson(KEY_CLICKS, prune(clicks));
 
-  // Firestore (fire-and-forget)
+  // Firestore (fire-and-forget / best-effort)
   try {
-    const normalizedTerritory = territory.trim();
-    if (!normalizedTerritory) {
-      return;
-    }
-
-    const normalizedBarcode = barcode.trim();
-    const pageUrl =
-      typeof window !== 'undefined' && window.location.pathname
-        ? window.location.pathname
-        : undefined;
-
-    trackClickToFirestore({
+    const firestoreResult = trackClickToFirestore({
       retailer,
-      territory: normalizedTerritory,
+      barcode,
+      territory,
       price,
-      ...(normalizedBarcode ? { barcode: normalizedBarcode } : {}),
-      ...(pageUrl ? { pageUrl } : {}),
+      pageUrl: typeof window !== 'undefined' ? window.location.pathname : '',
     });
+
+    if (
+      firestoreResult &&
+      typeof (firestoreResult as Promise<unknown>).catch === 'function'
+    ) {
+      void (firestoreResult as Promise<unknown>).catch(() => {
+        // Ignore Firestore failures so local click tracking is unaffected.
+      });
+    }
   } catch {
-    // Silently ignore — localStorage is the primary store
+    // Ignore Firestore failures so local click tracking is unaffected.
   }
 }
 

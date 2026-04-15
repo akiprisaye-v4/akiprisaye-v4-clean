@@ -206,8 +206,10 @@ service cloud.firestore {
 
     function isAllowedClickEventTerritory(territory) {
       return territory is string
-             && ['gp', 'mq', 'gf', 're', 'yt', 'guadeloupe', 'martinique', 'guyane', 'reunion', 'mayotte']
-                  .hasAny([territory.lower()]);
+             && [
+                  'GP', 'MQ', 'GF', 'RE', 'YT',
+                  'guadeloupe', 'martinique', 'guyane', 'reunion', 'mayotte'
+                ].hasAny([territory]);
     }
 
     function isOptionalBoundedString(data, field, maxLen) {
@@ -218,7 +220,15 @@ service cloud.firestore {
     // Click events — écriture anonyme autorisée, lecture interdite (admin seulement)
     match /click_events/{docId} {
       allow create: if request.resource.data.keys().hasAll(['retailer', 'territory', 'price', 'clickedAt'])
-                    && request.resource.data.keys().hasOnly(['retailer', 'territory', 'price', 'clickedAt', 'barcode', 'pageUrl', 'sessionId'])
+                    && request.resource.data.keys().hasOnly([
+                         'retailer',
+                         'territory',
+                         'price',
+                         'clickedAt',
+                         'barcode',
+                         'pageUrl',
+                         'sessionId'
+                       ])
                     && request.resource.data.retailer is string
                     && request.resource.data.retailer.size() > 0
                     && request.resource.data.retailer.size() <= 100
