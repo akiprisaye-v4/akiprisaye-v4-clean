@@ -15,15 +15,13 @@ import { SEOHead } from '../components/ui/SEOHead';
 import { Skeleton } from '../components/ui/Skeleton';
 import { formatEur } from '../utils/currency';
 import {
-  generateProductSlug,
   getTerritoryName,
   SITE_URL,
 } from '../utils/seoHelpers';
-import { getTopViewedProducts } from '../utils/priceClickTracker';
 
-// ── Mock data for top savings (to be replaced with API) ───────────────────────
+// ── Savings product type ─────────────────────────────────────────────────────
 interface SavingsProduct {
-  id: string;
+  ean: string;
   name: string;
   brand?: string;
   category: string;
@@ -34,24 +32,52 @@ interface SavingsProduct {
   storeCount: number;
 }
 
-function getMockSavingsProducts(territory: string): SavingsProduct[] {
-  // In production, this would fetch from API sorted by savings potential
-  const products = [
-    { id: '1', name: 'Riz Uncle Ben\'s 1kg', brand: 'Uncle Ben\'s', category: 'Épicerie', minPrice: 2.45, maxPrice: 4.29, bestRetailer: 'Leader Price' },
-    { id: '2', name: 'Coca-Cola 1.5L', brand: 'Coca-Cola', category: 'Boissons', minPrice: 1.89, maxPrice: 2.99, bestRetailer: 'Carrefour' },
-    { id: '3', name: 'Couches Pampers T4 x60', brand: 'Pampers', category: 'Bébé', minPrice: 14.99, maxPrice: 22.50, bestRetailer: 'Super U' },
-    { id: '4', name: 'Huile Tournesol 1L', category: 'Épicerie', minPrice: 2.15, maxPrice: 3.49, bestRetailer: 'E.Leclerc' },
-    { id: '5', name: 'Yaourt Nature x12', brand: 'Danone', category: 'Produits Laitiers', minPrice: 3.45, maxPrice: 4.99, bestRetailer: 'Carrefour' },
-    { id: '6', name: 'Lessive Skip 40 doses', brand: 'Skip', category: 'Entretien', minPrice: 8.99, maxPrice: 13.50, bestRetailer: 'E.Leclerc' },
-    { id: '7', name: 'Café Carte Noire 250g', brand: 'Carte Noire', category: 'Épicerie', minPrice: 4.25, maxPrice: 6.49, bestRetailer: 'Leader Price' },
-    { id: '8', name: 'Eau Cristaline 6x1.5L', brand: 'Cristaline', category: 'Boissons', minPrice: 2.19, maxPrice: 3.29, bestRetailer: 'Super U' },
-  ].map((p, i) => ({
-    ...p,
-    savings: +(p.maxPrice - p.minPrice).toFixed(2),
-    storeCount: 3 + Math.floor(Math.random() * 5),
-  }));
-  
-  return products.sort((a, b) => b.savings - a.savings);
+/**
+ * Build savings products from real catalogue data.
+ * Groups similar products by category+price range to surface meaningful savings.
+ */
+async function getRealSavingsProducts(_territory: string): Promise<SavingsProduct[]> {
+  const { getCatalogue, nameToSlug } = await import('../services/realDataService');
+  const catalogue = await getCatalogue();
+  if (catalogue.length === 0) return [];
+
+  // Group by category, find min/max per (normalised) base name
+  // Since each product is unique in the catalogue, we use catalogue products
+  // that have the highest price spread relative to their category average.
+  const catTotals: Record<string, { sum: number; count: number; min: number; max: number }> = {};
+  for (const p of catalogue) {
+    const c = p.category;
+    if (!catTotals[c]) catTotals[c] = { sum: 0, count: 0, min: Infinity, max: -Infinity };
+    catTotals[c].sum += p.price;
+    catTotals[c].count += 1;
+    catTotals[c].min = Math.min(catTotals[c].min, p.price);
+    catTotals[c].max = Math.max(catTotals[c].max, p.price);
+  }
+
+  // For each product, compute savings vs the category maximum (worst price)
+  return catalogue
+    .map((p) => {
+      const stats = catTotals[p.category];
+      const catAvg = stats ? stats.sum / stats.count : p.price;
+      const catMax = stats ? stats.max : p.price;
+      const savings = +(catMax - p.price).toFixed(2);
+      const slug = nameToSlug(p.name);
+      return {
+        ean: `/recherche?q=${encodeURIComponent(p.name)}`,
+        name: p.name,
+        category: p.category,
+        minPrice: p.price,
+        maxPrice: catMax,
+        savings,
+        bestRetailer: p.store,
+        storeCount: stats ? stats.count : 1,
+        _rank: savings / catAvg,
+      } satisfies SavingsProduct & { _rank: number };
+    })
+    .filter((p) => p.savings > 0)
+    .sort((a, b) => b._rank - a._rank)
+    .map(({ _rank: _r, ...p }) => p)
+    .slice(0, 12);
 }
 
 // ── Savings card component ────────────────────────────────────────────────────
@@ -66,7 +92,7 @@ function SavingsCard({ product, territory, rank }: SavingsCardProps) {
   
   return (
     <Link
-      to={`/produit/${product.id}?territory=${territory}`}
+      to={product.ean.startsWith('/') ? product.ean : `/produit/${product.ean}?territory=${territory}`}
       className="group relative rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-all hover:border-emerald-400/30 hover:bg-white/[0.05]"
     >
       {/* Rank badge */}
@@ -155,12 +181,15 @@ export default function TopEconomiesPage() {
   const [products, setProducts] = useState<SavingsProduct[]>([]);
   
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    const timer = setTimeout(() => {
-      setProducts(getMockSavingsProducts(territory));
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
+    getRealSavingsProducts(territory).then((data) => {
+      if (!cancelled) {
+        setProducts(data);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
   }, [territory]);
   
   const handleTerritoryChange = (newTerritory: string) => {
@@ -182,7 +211,7 @@ export default function TopEconomiesPage() {
       '@type': 'ListItem',
       position: i + 1,
       name: p.name,
-      url: `${SITE_URL}/produit/${p.id}?territory=${territory}`,
+      url: `${SITE_URL}/produit/${p.ean}?territory=${territory}`,
     })),
   };
   
@@ -244,10 +273,10 @@ export default function TopEconomiesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product, i) => (
               <SavingsCard
-                key={product.id}
+                key={product.name}
                 product={product}
                 territory={territory}
                 rank={i + 1}

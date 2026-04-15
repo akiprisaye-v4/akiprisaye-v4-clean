@@ -39,29 +39,38 @@ interface LocalOffProduct {
   brands?: string;
 }
 
-// ── Mock price data per EAN ───────────────────────────────────────────────────
+async function buildPriceMap(): Promise<Record<string, ProductResult>> {
+  const { getEnhancedPrices } = await import('../services/realDataService');
+  const products = await getEnhancedPrices();
+  const map: Record<string, ProductResult> = {};
+  for (const p of products) {
+    if (p.ean) {
+      map[p.ean] = {
+        ean: p.ean,
+        name: p.name,
+        brand: p.brand ?? '',
+        prices: p.prices.map((pr) => ({
+          store: pr.storeName ?? pr.storeChain,
+          price: pr.price,
+          territory: pr.territory.toLowerCase(),
+        })),
+      };
+    }
+  }
+  map['DEFAULT'] = {
+    ean: '0000000000000',
+    name: 'Produit détecté',
+    brand: 'Marque inconnue',
+    prices: [
+      { store: 'Carrefour Destrellan', price: 3.49, territory: 'gp' },
+      { store: 'E.Leclerc Bas du Fort', price: 3.29, territory: 'gp' },
+    ],
+  };
+  return map;
+}
 
-const MOCK_PRICES: Record<string, ProductResult> = {
-  '3017624010701': {
-    ean: '3017624010701',
-    name: 'Nutella 400g',
-    brand: 'Ferrero',
-    prices: [
-      { store: 'Carrefour Destrellan', price: 4.89, territory: 'gp' },
-      { store: 'E.Leclerc Bas du Fort', price: 4.59, territory: 'gp' },
-      { store: 'Super U Sainte-Anne', price: 4.99, territory: 'gp' },
-    ],
-  },
-  '3175681851192': {
-    ean: '3175681851192',
-    name: 'Lait demi-écrémé UHT 1L',
-    brand: 'Lactel',
-    prices: [
-      { store: 'Carrefour Destrellan', price: 1.29, territory: 'gp' },
-      { store: 'E.Leclerc Bas du Fort', price: 1.19, territory: 'gp' },
-      { store: 'Leader Price Pointe-à-Pitre', price: 1.09, territory: 'gp' },
-    ],
-  },
+// Module-level sync price cache (populated asynchronously on first use)
+let MOCK_PRICES: Record<string, ProductResult> = {
   DEFAULT: {
     ean: '0000000000000',
     name: 'Produit détecté',
@@ -69,10 +78,11 @@ const MOCK_PRICES: Record<string, ProductResult> = {
     prices: [
       { store: 'Carrefour Destrellan', price: 3.49, territory: 'gp' },
       { store: 'E.Leclerc Bas du Fort', price: 3.29, territory: 'gp' },
-      { store: 'Super U Sainte-Anne', price: 3.59, territory: 'gp' },
     ],
   },
 };
+// Populate asynchronously
+buildPriceMap().then((map) => { MOCK_PRICES = map; }).catch(() => { /* keep defaults */ });
 
 // Extend BarcodeDetector types (not in lib.dom.d.ts yet)
 interface BarcodeDetectorResult {
