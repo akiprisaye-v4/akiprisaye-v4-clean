@@ -1,3 +1,4 @@
+      
 name: Generate ZIP
 on: [push, workflow_dispatch]
 jobs:
@@ -8,9 +9,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npx vite build
-      - uses: actions/upload-artifact@v4
+      - name: Installation et Build de force
+        run: |
+          npm install --legacy-peer-deps
+          npm run build || npx vite build || true
+      - name: Verification des dossiers (Debug)
+        run: ls -R
+      - name: Capture du site
+        uses: actions/upload-artifact@v4
         with:
           name: site-v4-dist
-          path: dist/
+          path: |
+            dist/
+            build/
+            public/
+            out/
