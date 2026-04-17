@@ -54,7 +54,9 @@ const SearchPage: React.FC = () => {
             price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
             store: item.store ?? 'Magasin non précisé',
             tags: item.tags ?? [],
-            normalizedSearchContent: normalize(`${item.name ?? ''} ${item.brand ?? ''} ${item.store ?? ''}`),
+            normalizedSearchContent: normalize(
+              `${item.name ?? ''} ${item.brand ?? ''} ${item.store ?? ''}`
+            ),
           }));
 
         setCatalogue(normalizedCatalogue);
@@ -84,7 +86,8 @@ const SearchPage: React.FC = () => {
 
     return catalogue
       .filter((item) => {
-        const searchContent = item.normalizedSearchContent ?? normalize(`${item.name} ${item.brand} ${item.store}`);
+        const searchContent =
+          item.normalizedSearchContent ?? normalize(`${item.name} ${item.brand} ${item.store}`);
         return searchContent.includes(normalizedQuery);
       })
       .sort((a, b) => {
@@ -113,7 +116,9 @@ const SearchPage: React.FC = () => {
       <div className="flex-1 p-4 space-y-3">
         {isLoading ? (
           <div className="text-center py-20">
-            <p className="text-slate-500 dark:text-slate-400 font-medium">Chargement du catalogue…</p>
+            <p className="text-slate-500 dark:text-slate-400 font-medium">
+              Chargement du catalogue…
+            </p>
           </div>
         ) : loadError ? (
           <div className="text-center py-20">
@@ -121,40 +126,50 @@ const SearchPage: React.FC = () => {
           </div>
         ) : (
           <>
-        {results.length > 0 ? (
-          results.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between p-4 rounded-3xl border border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm active:scale-[0.97] transition-all"
-            >
-              <div className="flex flex-col flex-1 pr-4">
-                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.brand}</span>
-                <span className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight truncate">{item.name}</span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center">
-                  <span className="mr-1">📍</span> {item.store}
-                </span>
-              </div>
+            {results.length > 0 ? (
+              results.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-4 rounded-3xl border border-slate-50 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm active:scale-[0.97] transition-all"
+                >
+                  <div className="flex flex-col flex-1 pr-4">
+                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      {item.brand}
+                    </span>
+                    <span className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight truncate">
+                      {item.name}
+                    </span>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center">
+                      <span className="mr-1">📍</span> {item.store}
+                    </span>
+                  </div>
 
-              <div className="text-right flex flex-col items-end">
-                <span className="text-xl font-black text-slate-900 dark:text-slate-100">{item.price.toFixed(2)}€</span>
-                {item.tags?.includes('SOUVERAIN') && (
-                  <span className="text-[8px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 mt-1 uppercase">
-                    Souverain
-                  </span>
-                )}
+                  <div className="text-right flex flex-col items-end">
+                    <span className="text-xl font-black text-slate-900 dark:text-slate-100">
+                      {item.price.toFixed(2)}€
+                    </span>
+                    {item.tags?.includes('SOUVERAIN') && (
+                      <span className="text-[8px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 mt-1 uppercase">
+                        Souverain
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : query.length > 0 ? (
+              <div className="text-center py-20">
+                <p className="text-slate-400 dark:text-slate-500 font-medium">
+                  Aucun prix trouvé pour "{query}"
+                </p>
               </div>
-            </div>
-          ))
-        ) : query.length > 0 ? (
-          <div className="text-center py-20">
-            <p className="text-slate-400 dark:text-slate-500 font-medium">Aucun prix trouvé pour "{query}"</p>
-          </div>
-        ) : (
-          <div className="text-center py-20 space-y-4 opacity-30 dark:opacity-60">
-            <span className="text-6xl block">🛒</span>
-            <p className="font-bold uppercase tracking-widest text-xs text-slate-900 dark:text-slate-100">Catalogue Horizon v4.7</p>
-          </div>
-        )}
+            ) : (
+              <div className="text-center py-20 space-y-4 opacity-30 dark:opacity-60">
+                <span className="text-6xl block">🛒</span>
+                <p className="font-bold uppercase tracking-widest text-xs text-slate-900 dark:text-slate-100">
+                  Catalogue Horizon v4.7
+                </p>
+              </div>
+            )}
           </>
         )}
       </div>

@@ -1,4 +1,3 @@
- 
 import React from 'react';
 import { Lightbulb, Bug, HelpCircle, Database, Sparkles } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -9,7 +8,7 @@ import { PAGE_HERO_IMAGES } from '../config/imageAssets';
 
 /**
  * Page de soumission de suggestions et demandes
- * 
+ *
  * Permet aux utilisateurs de:
  * - Soumettre des suggestions d'amélioration
  * - Signaler des bugs
@@ -84,7 +83,13 @@ export default function Suggestions() {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const requestedType = params.get('type');
-    const allowedTypes: TicketType[] = ['suggestion', 'feature_request', 'bug_report', 'data_quality', 'question'];
+    const allowedTypes: TicketType[] = [
+      'suggestion',
+      'feature_request',
+      'bug_report',
+      'data_quality',
+      'question',
+    ];
     if (requestedType && allowedTypes.includes(requestedType as TicketType)) {
       setSelectedType(requestedType as TicketType);
     }
@@ -103,7 +108,9 @@ export default function Suggestions() {
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>
             💡 Suggestions
           </h1>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)' }}>
+          <p
+            style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)' }}
+          >
             Proposez vos idées pour améliorer la plateforme
           </p>
         </HeroImage>
@@ -120,8 +127,8 @@ export default function Suggestions() {
                   Comment pouvons-nous vous aider ?
                 </h2>
                 <p className="text-sm text-gray-400 mb-4">
-                  Sélectionnez le type de demande qui correspond le mieux à votre besoin.
-                  Toutes les demandes sont suivies et traitées dans les meilleurs délais.
+                  Sélectionnez le type de demande qui correspond le mieux à votre besoin. Toutes les
+                  demandes sont suivies et traitées dans les meilleurs délais.
                 </p>
               </section>
 
@@ -141,12 +148,8 @@ export default function Suggestions() {
                       `}
                     >
                       <Icon className={`w-10 h-10 ${getIconColor(item.color)} mb-4`} />
-                      <h3 className="text-lg font-semibold text-gray-100 mb-2">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-gray-400 text-left">
-                        {item.description}
-                      </p>
+                      <h3 className="text-lg font-semibold text-gray-100 mb-2">{item.title}</h3>
+                      <p className="text-sm text-gray-400 text-left">{item.description}</p>
                     </button>
                   );
                 })}
@@ -189,9 +192,7 @@ export default function Suggestions() {
 
               {/* Ticket form */}
               <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
-                <h2 className="text-lg font-semibold text-gray-100 mb-4">
-                  Nouvelle demande
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-100 mb-4">Nouvelle demande</h2>
                 <TicketForm
                   defaultType={selectedType}
                   onSuccess={(ticketNumber) => {
@@ -208,20 +209,18 @@ export default function Suggestions() {
 
           {/* FAQ / Info section */}
           <section className="bg-slate-900/50 backdrop-blur-md rounded-xl border border-slate-700/50 p-5">
-            <h3 className="text-base font-semibold text-gray-100 mb-3">
-              Questions fréquentes
-            </h3>
+            <h3 className="text-base font-semibold text-gray-100 mb-3">Questions fréquentes</h3>
             <div className="space-y-3 text-sm text-gray-400">
               <details className="group">
                 <summary className="cursor-pointer text-gray-300 hover:text-gray-100 font-medium">
                   Combien de temps pour une réponse ?
                 </summary>
                 <p className="mt-2 pl-4 text-gray-400">
-                  Nous traitons toutes les demandes sous 48-72h ouvrées. Les demandes urgentes
-                  (bugs critiques) sont prioritaires.
+                  Nous traitons toutes les demandes sous 48-72h ouvrées. Les demandes urgentes (bugs
+                  critiques) sont prioritaires.
                 </p>
               </details>
-              
+
               <details className="group">
                 <summary className="cursor-pointer text-gray-300 hover:text-gray-100 font-medium">
                   Puis-je suivre ma demande ?
@@ -231,14 +230,14 @@ export default function Suggestions() {
                   suivre l'avancement.
                 </p>
               </details>
-              
+
               <details className="group">
                 <summary className="cursor-pointer text-gray-300 hover:text-gray-100 font-medium">
                   L'email est-il obligatoire ?
                 </summary>
                 <p className="mt-2 pl-4 text-gray-400">
-                  Non, l'email est optionnel. Il permet uniquement de vous notifier de
-                  l'avancement de votre demande. Nous respectons le RGPD.
+                  Non, l'email est optionnel. Il permet uniquement de vous notifier de l'avancement
+                  de votre demande. Nous respectons le RGPD.
                 </p>
               </details>
 
@@ -247,8 +246,8 @@ export default function Suggestions() {
                   Que faire en cas de bug critique ?
                 </summary>
                 <p className="mt-2 pl-4 text-gray-400">
-                  Utilisez le type "Problème technique" et décrivez précisément le problème,
-                  les étapes pour le reproduire, et votre navigateur/appareil.
+                  Utilisez le type "Problème technique" et décrivez précisément le problème, les
+                  étapes pour le reproduire, et votre navigateur/appareil.
                 </p>
               </details>
             </div>
