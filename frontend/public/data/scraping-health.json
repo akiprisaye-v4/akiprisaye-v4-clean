@@ -1,5 +1,5 @@
 {
-  "lastScrapedAt": "2026-04-18T08:08:13.315Z",
+  "lastScrapedAt": "2026-04-18T13:22:29.091Z",
   "date": "2026-04-18",
   "dryRun": false,
   "deepScan": false,
@@ -9,7 +9,7 @@
       "ok": true
     },
     "food": {
-      "count": 1445,
+      "count": 1556,
       "ok": true
     },
     "fresh": {
@@ -53,7 +53,7 @@
       "ok": true
     }
   },
-  "totalEntries": 2101,
+  "totalEntries": 2212,
   "shocksDetected": 0,
   "status": "ok"
 }
