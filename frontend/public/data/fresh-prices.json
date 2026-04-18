@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-14T18:50:52.141Z",
+    "lastUpdated": "2026-04-18T08:08:13.315Z",
     "source": "DAAF / OPMR / DIETS — data.gouv.fr (Licence Ouverte v2)",
     "autoCollected": true
   },
@@ -12,7 +12,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -23,7 +23,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -34,7 +34,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -45,7 +45,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -56,7 +56,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -67,7 +67,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -78,7 +78,7 @@
       "unit": "pièce",
       "category": "Fruits",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -89,7 +89,7 @@
       "unit": "kg",
       "category": "Viandes",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -100,7 +100,7 @@
       "unit": "kg",
       "category": "Poissons & Fruits de mer",
       "market": "Pointe-à-Pitre",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -111,7 +111,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -122,7 +122,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -133,7 +133,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -144,7 +144,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -155,7 +155,7 @@
       "unit": "pièce",
       "category": "Fruits",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -166,7 +166,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -177,7 +177,7 @@
       "unit": "kg",
       "category": "Viandes",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -188,7 +188,7 @@
       "unit": "kg",
       "category": "Poissons & Fruits de mer",
       "market": "Fort-de-France",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -199,7 +199,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -210,7 +210,7 @@
       "unit": "botte",
       "category": "Légumes",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -221,7 +221,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -232,7 +232,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -243,7 +243,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -254,7 +254,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -265,7 +265,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -276,7 +276,7 @@
       "unit": "kg",
       "category": "Viandes",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -287,7 +287,7 @@
       "unit": "kg",
       "category": "Poissons & Fruits de mer",
       "market": "Saint-Denis",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -298,7 +298,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -309,7 +309,7 @@
       "unit": "kg",
       "category": "Épicerie",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -320,7 +320,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -331,7 +331,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -342,7 +342,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -353,7 +353,7 @@
       "unit": "kg",
       "category": "Viandes",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -364,7 +364,7 @@
       "unit": "kg",
       "category": "Poissons & Fruits de mer",
       "market": "Cayenne",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -375,7 +375,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -386,7 +386,7 @@
       "unit": "kg",
       "category": "Légumes",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -397,7 +397,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -408,7 +408,7 @@
       "unit": "kg",
       "category": "Fruits",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -419,7 +419,7 @@
       "unit": "kg",
       "category": "Viandes",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     },
@@ -430,7 +430,7 @@
       "unit": "kg",
       "category": "Poissons & Fruits de mer",
       "market": "Mamoudzou",
-      "date": "2026-04-14",
+      "date": "2026-04-18",
       "source": "DAAF/OPMR — données de référence 2025",
       "official": true
     }
