@@ -1,390 +1,780 @@
 {
-  "generatedAt": "2026-04-15",
+  "generatedAt": "2026-04-18",
   "territories": [
     {
       "territory": "gp",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
+        {
+          "name": "Leader Price Jarry",
+          "score": 100,
+          "change": "stable",
+          "note": "Score stable"
+        },
         {
           "name": "Ecomax Capesterre",
           "score": 93,
-          "change": "up",
-          "note": "+1.8 pts vs trim."
+          "change": "stable",
+          "note": "Score stable"
         },
         {
           "name": "Super U Baie-Mahault",
-          "score": 90,
-          "change": "stable",
-          "note": "Panier bas stable"
-        },
-        {
-          "name": "Carrefour Destreland",
-          "score": 88,
-          "change": "up",
-          "note": "+0.9 pt"
+          "score": 71,
+          "change": "down",
+          "note": "-19.0 pt"
         }
       ],
       "bestValue": [
         {
-          "name": "Leader Price Jarry",
-          "score": 92,
-          "change": "up",
-          "note": "Qualité locale +++"
-        },
-        {
           "name": "Marché de Bergevin",
           "score": 89,
           "change": "stable",
-          "note": "Produits frais"
+          "note": "Score stable"
         },
         {
           "name": "Ecomax Gosier",
           "score": 87,
-          "change": "up",
-          "note": "+0.5 pt"
+          "change": "stable",
+          "note": "Score stable"
+        },
+        {
+          "name": "Leader Price Jarry",
+          "score": 83.03063673658588,
+          "change": "down",
+          "note": "-9.0 pt"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour Destreland",
-          "score": 95,
+          "name": "Hyper Casino Bas-du-Fort",
+          "score": 89,
           "change": "stable",
-          "note": "4 950 refs"
+          "note": "Score stable"
         },
         {
           "name": "Super U Baie-Mahault",
-          "score": 93,
-          "change": "up",
-          "note": "+200 refs"
+          "score": 67,
+          "change": "down",
+          "note": "-26.0 pt"
         },
         {
-          "name": "Hyper Casino Bas-du-Fort",
-          "score": 89,
+          "name": "Carrefour Destreland",
+          "score": 64,
           "change": "down",
-          "note": "-0.8 pt"
+          "note": "-31.0 pt"
         }
       ]
     },
     {
       "territory": "mq",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
         {
-          "name": "Ecomax Lamentin",
-          "score": 92,
-          "change": "up",
-          "note": "+2.1 pts"
+          "name": "Leader Price Rivière-Salée",
+          "score": 100,
+          "change": "stable",
+          "note": "Score stable"
         },
         {
-          "name": "Super U Ducos",
-          "score": 89,
-          "change": "stable",
-          "note": "Panier bas"
+          "name": "Ecomax Lamentin",
+          "score": 93,
+          "change": "up",
+          "note": "+1.0 pt"
         },
         {
           "name": "Carrefour Génipa",
           "score": 87,
-          "change": "up",
-          "note": "+0.7 pt"
+          "change": "stable",
+          "note": "Score stable"
         }
       ],
       "bestValue": [
         {
+          "name": "Carrefour Génipa",
+          "score": 98.81052965094788,
+          "change": "stable",
+          "note": "Score stable"
+        },
+        {
           "name": "Marché de Fort-de-France",
-          "score": 93,
-          "change": "up",
-          "note": "Frais & locaux"
+          "score": 92,
+          "change": "down",
+          "note": "-1.0 pt"
         },
         {
           "name": "Ecomax Trinité",
-          "score": 90,
-          "change": "stable",
-          "note": "Qualité régulière"
-        },
-        {
-          "name": "Super U Ducos",
-          "score": 88,
-          "change": "up",
-          "note": "+0.4 pt"
+          "score": 89,
+          "change": "down",
+          "note": "-1.0 pt"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour Génipa",
-          "score": 94,
-          "change": "stable",
-          "note": "5 250 refs"
+          "name": "Ecomax Lamentin",
+          "score": 89,
+          "change": "down",
+          "note": "-1.0 pt"
         },
         {
           "name": "Super U Rivière-Salée",
-          "score": 92,
-          "change": "up",
-          "note": "+150 refs"
+          "score": 67,
+          "change": "down",
+          "note": "-25.0 pt"
         },
         {
-          "name": "Ecomax Lamentin",
-          "score": 90,
-          "change": "up",
-          "note": "+80 refs"
+          "name": "Carrefour Génipa",
+          "score": 64,
+          "change": "down",
+          "note": "-30.0 pt"
         }
       ]
     },
     {
       "territory": "gf",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
         {
           "name": "Leader Price Cayenne",
-          "score": 90,
-          "change": "up",
-          "note": "+1.2 pts"
+          "score": 85,
+          "change": "down",
+          "note": "-5.0 pt"
         },
         {
           "name": "Super U Matoury",
-          "score": 87,
-          "change": "stable",
-          "note": "Panier bas stable"
+          "score": 71,
+          "change": "down",
+          "note": "-16.0 pt"
         },
         {
           "name": "Carrefour Rémire",
-          "score": 86,
-          "change": "up",
-          "note": "+0.6 pt"
+          "score": 60,
+          "change": "down",
+          "note": "-26.0 pt"
         }
       ],
       "bestValue": [
         {
-          "name": "Marché de Cayenne",
-          "score": 91,
-          "change": "up",
-          "note": "Filières locales"
-        },
-        {
-          "name": "Super U Matoury",
-          "score": 88,
+          "name": "Score Cayenne",
+          "score": 98.46384538487172,
           "change": "stable",
-          "note": "Qualité régulière"
+          "note": "Score stable"
         },
         {
-          "name": "Leader Price Cayenne",
-          "score": 86,
+          "name": "Carrefour Rémire",
+          "score": 96.19126957680773,
+          "change": "stable",
+          "note": "Score stable"
+        },
+        {
+          "name": "Marché de Cayenne",
+          "score": 92,
           "change": "up",
-          "note": "+0.3 pt"
+          "note": "+1.0 pt"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour Rémire",
-          "score": 93,
-          "change": "stable",
-          "note": "4 300 refs"
+          "name": "Leader Price Cayenne",
+          "score": 78,
+          "change": "down",
+          "note": "-10.0 pt"
         },
         {
           "name": "Super U Matoury",
-          "score": 91,
-          "change": "up",
-          "note": "+110 refs"
+          "score": 67,
+          "change": "down",
+          "note": "-24.0 pt"
         },
         {
-          "name": "Leader Price Cayenne",
-          "score": 88,
-          "change": "stable",
-          "note": "3 900 refs"
+          "name": "Carrefour Rémire",
+          "score": 64,
+          "change": "down",
+          "note": "-29.0 pt"
         }
       ]
     },
     {
       "territory": "re",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
         {
           "name": "Leader Price Saint-Pierre",
-          "score": 93,
-          "change": "up",
-          "note": "+1.5 pts"
+          "score": 85,
+          "change": "down",
+          "note": "-8.0 pt"
         },
         {
           "name": "Super U Saint-Paul",
-          "score": 90,
-          "change": "stable",
-          "note": "Panier bas"
+          "score": 71,
+          "change": "down",
+          "note": "-19.0 pt"
         },
         {
           "name": "Carrefour Sainte-Clotilde",
-          "score": 88,
-          "change": "up",
-          "note": "+0.5 pt"
+          "score": 60,
+          "change": "down",
+          "note": "-28.0 pt"
         }
       ],
       "bestValue": [
         {
           "name": "Marché de Saint-Paul",
-          "score": 94,
-          "change": "up",
-          "note": "Frais locaux"
+          "score": 92,
+          "change": "down",
+          "note": "-2.0 pt"
         },
         {
           "name": "Super U Saint-Joseph",
           "score": 89,
           "change": "stable",
-          "note": "Qualité +++"
+          "note": "Score stable"
         },
         {
           "name": "Leader Price Saint-Pierre",
           "score": 87,
-          "change": "up",
-          "note": "+0.8 pt"
+          "change": "stable",
+          "note": "Score stable"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour Sainte-Clotilde",
-          "score": 96,
-          "change": "stable",
-          "note": "5 550 refs"
-        },
-        {
           "name": "Leclerc Portail",
           "score": 93,
-          "change": "up",
-          "note": "+200 refs"
+          "change": "stable",
+          "note": "Score stable"
         },
         {
           "name": "Super U Saint-Paul",
-          "score": 91,
-          "change": "up",
-          "note": "+80 refs"
+          "score": 67,
+          "change": "down",
+          "note": "-24.0 pt"
+        },
+        {
+          "name": "Carrefour Sainte-Clotilde",
+          "score": 64,
+          "change": "down",
+          "note": "-32.0 pt"
         }
       ]
     },
     {
       "territory": "yt",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
         {
-          "name": "Jumbo Score Kawéni",
-          "score": 88,
+          "name": "Carrefour Mamoudzou",
+          "score": 100,
           "change": "up",
-          "note": "+1.0 pt"
+          "note": "+15.0 pt"
+        },
+        {
+          "name": "Jumbo Score Kawéni",
+          "score": 93,
+          "change": "up",
+          "note": "+5.0 pt"
         },
         {
           "name": "Super U Mamoudzou",
-          "score": 87,
-          "change": "stable",
-          "note": "Panier bas"
-        },
-        {
-          "name": "Carrefour Mamoudzou",
-          "score": 85,
-          "change": "up",
-          "note": "+0.8 pt"
+          "score": 71,
+          "change": "down",
+          "note": "-16.0 pt"
         }
       ],
       "bestValue": [
         {
           "name": "Marché de Mamoudzou",
-          "score": 90,
+          "score": 92,
           "change": "up",
-          "note": "Frais & locaux"
+          "note": "+2.0 pt"
         },
         {
           "name": "Super U Mamoudzou",
-          "score": 87,
-          "change": "stable",
-          "note": "Qualité régulière"
+          "score": 89,
+          "change": "up",
+          "note": "+2.0 pt"
         },
         {
           "name": "Jumbo Score Kawéni",
-          "score": 86,
+          "score": 87,
           "change": "up",
-          "note": "+0.5 pt"
+          "note": "+1.0 pt"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour Mamoudzou",
-          "score": 92,
-          "change": "stable",
-          "note": "3 850 refs"
+          "name": "Jumbo Score Kawéni",
+          "score": 89,
+          "change": "up",
+          "note": "+1.0 pt"
         },
         {
           "name": "Super U Mamoudzou",
-          "score": 90,
-          "change": "up",
-          "note": "+100 refs"
+          "score": 67,
+          "change": "down",
+          "note": "-23.0 pt"
         },
         {
-          "name": "Jumbo Score Kawéni",
-          "score": 88,
-          "change": "stable",
-          "note": "3 400 refs"
+          "name": "Carrefour Mamoudzou",
+          "score": 64,
+          "change": "down",
+          "note": "-28.0 pt"
         }
       ]
     },
     {
       "territory": "fr",
-      "updatedAt": "2026-04-15",
+      "updatedAt": "2026-04-18",
       "lowestPrices": [
         {
-          "name": "E.Leclerc",
-          "score": 95,
-          "change": "up",
-          "note": "+0.6 pt"
-        },
-        {
           "name": "Lidl",
-          "score": 93,
-          "change": "stable",
-          "note": "Panier bas"
+          "score": 90,
+          "change": "down",
+          "note": "-3.0 pt"
         },
         {
           "name": "Intermarché",
-          "score": 91,
-          "change": "up",
-          "note": "+0.4 pt"
+          "score": 88,
+          "change": "down",
+          "note": "-3.0 pt"
+        },
+        {
+          "name": "Aldi",
+          "score": 88,
+          "change": "stable",
+          "note": "Score stable"
         }
       ],
       "bestValue": [
         {
+          "name": "Intermarché",
+          "score": 94.77637058215265,
+          "change": "stable",
+          "note": "Score stable"
+        },
+        {
           "name": "E.Leclerc",
-          "score": 92,
-          "change": "up",
-          "note": "+0.7 pt"
+          "score": 90.05508694050573,
+          "change": "down",
+          "note": "-1.9 pt"
         },
         {
           "name": "U Express",
-          "score": 91,
-          "change": "stable",
-          "note": "Qualité régulière"
-        },
-        {
-          "name": "Carrefour Market",
           "score": 89,
-          "change": "stable",
-          "note": "Stable"
+          "change": "down",
+          "note": "-2.0 pt"
         }
       ],
       "widestSelection": [
         {
-          "name": "Carrefour",
-          "score": 97,
-          "change": "stable",
-          "note": "9 400 refs"
-        },
-        {
           "name": "Auchan",
-          "score": 95,
-          "change": "up",
-          "note": "+250 refs"
+          "score": 93,
+          "change": "down",
+          "note": "-2.0 pt"
         },
         {
           "name": "E.Leclerc",
-          "score": 94,
-          "change": "up",
-          "note": "+180 refs"
+          "score": 89,
+          "change": "down",
+          "note": "-5.0 pt"
+        },
+        {
+          "name": "Carrefour",
+          "score": 64,
+          "change": "down",
+          "note": "-33.0 pt"
         }
       ]
     }
   ],
-  "history": []
+  "history": [
+    {
+      "date": "2026-04-15",
+      "territories": [
+        {
+          "territory": "gp",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "Ecomax Capesterre",
+              "score": 93,
+              "change": "up",
+              "note": "+1.8 pts vs trim."
+            },
+            {
+              "name": "Super U Baie-Mahault",
+              "score": 90,
+              "change": "stable",
+              "note": "Panier bas stable"
+            },
+            {
+              "name": "Carrefour Destreland",
+              "score": 88,
+              "change": "up",
+              "note": "+0.9 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Leader Price Jarry",
+              "score": 92,
+              "change": "up",
+              "note": "Qualité locale +++"
+            },
+            {
+              "name": "Marché de Bergevin",
+              "score": 89,
+              "change": "stable",
+              "note": "Produits frais"
+            },
+            {
+              "name": "Ecomax Gosier",
+              "score": 87,
+              "change": "up",
+              "note": "+0.5 pt"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour Destreland",
+              "score": 95,
+              "change": "stable",
+              "note": "4 950 refs"
+            },
+            {
+              "name": "Super U Baie-Mahault",
+              "score": 93,
+              "change": "up",
+              "note": "+200 refs"
+            },
+            {
+              "name": "Hyper Casino Bas-du-Fort",
+              "score": 89,
+              "change": "down",
+              "note": "-0.8 pt"
+            }
+          ]
+        },
+        {
+          "territory": "mq",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "Ecomax Lamentin",
+              "score": 92,
+              "change": "up",
+              "note": "+2.1 pts"
+            },
+            {
+              "name": "Super U Ducos",
+              "score": 89,
+              "change": "stable",
+              "note": "Panier bas"
+            },
+            {
+              "name": "Carrefour Génipa",
+              "score": 87,
+              "change": "up",
+              "note": "+0.7 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Fort-de-France",
+              "score": 93,
+              "change": "up",
+              "note": "Frais & locaux"
+            },
+            {
+              "name": "Ecomax Trinité",
+              "score": 90,
+              "change": "stable",
+              "note": "Qualité régulière"
+            },
+            {
+              "name": "Super U Ducos",
+              "score": 88,
+              "change": "up",
+              "note": "+0.4 pt"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour Génipa",
+              "score": 94,
+              "change": "stable",
+              "note": "5 250 refs"
+            },
+            {
+              "name": "Super U Rivière-Salée",
+              "score": 92,
+              "change": "up",
+              "note": "+150 refs"
+            },
+            {
+              "name": "Ecomax Lamentin",
+              "score": 90,
+              "change": "up",
+              "note": "+80 refs"
+            }
+          ]
+        },
+        {
+          "territory": "gf",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Cayenne",
+              "score": 90,
+              "change": "up",
+              "note": "+1.2 pts"
+            },
+            {
+              "name": "Super U Matoury",
+              "score": 87,
+              "change": "stable",
+              "note": "Panier bas stable"
+            },
+            {
+              "name": "Carrefour Rémire",
+              "score": 86,
+              "change": "up",
+              "note": "+0.6 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Cayenne",
+              "score": 91,
+              "change": "up",
+              "note": "Filières locales"
+            },
+            {
+              "name": "Super U Matoury",
+              "score": 88,
+              "change": "stable",
+              "note": "Qualité régulière"
+            },
+            {
+              "name": "Leader Price Cayenne",
+              "score": 86,
+              "change": "up",
+              "note": "+0.3 pt"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour Rémire",
+              "score": 93,
+              "change": "stable",
+              "note": "4 300 refs"
+            },
+            {
+              "name": "Super U Matoury",
+              "score": 91,
+              "change": "up",
+              "note": "+110 refs"
+            },
+            {
+              "name": "Leader Price Cayenne",
+              "score": 88,
+              "change": "stable",
+              "note": "3 900 refs"
+            }
+          ]
+        },
+        {
+          "territory": "re",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Saint-Pierre",
+              "score": 93,
+              "change": "up",
+              "note": "+1.5 pts"
+            },
+            {
+              "name": "Super U Saint-Paul",
+              "score": 90,
+              "change": "stable",
+              "note": "Panier bas"
+            },
+            {
+              "name": "Carrefour Sainte-Clotilde",
+              "score": 88,
+              "change": "up",
+              "note": "+0.5 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Saint-Paul",
+              "score": 94,
+              "change": "up",
+              "note": "Frais locaux"
+            },
+            {
+              "name": "Super U Saint-Joseph",
+              "score": 89,
+              "change": "stable",
+              "note": "Qualité +++"
+            },
+            {
+              "name": "Leader Price Saint-Pierre",
+              "score": 87,
+              "change": "up",
+              "note": "+0.8 pt"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour Sainte-Clotilde",
+              "score": 96,
+              "change": "stable",
+              "note": "5 550 refs"
+            },
+            {
+              "name": "Leclerc Portail",
+              "score": 93,
+              "change": "up",
+              "note": "+200 refs"
+            },
+            {
+              "name": "Super U Saint-Paul",
+              "score": 91,
+              "change": "up",
+              "note": "+80 refs"
+            }
+          ]
+        },
+        {
+          "territory": "yt",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 88,
+              "change": "up",
+              "note": "+1.0 pt"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 87,
+              "change": "stable",
+              "note": "Panier bas"
+            },
+            {
+              "name": "Carrefour Mamoudzou",
+              "score": 85,
+              "change": "up",
+              "note": "+0.8 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Mamoudzou",
+              "score": 90,
+              "change": "up",
+              "note": "Frais & locaux"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 87,
+              "change": "stable",
+              "note": "Qualité régulière"
+            },
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 86,
+              "change": "up",
+              "note": "+0.5 pt"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour Mamoudzou",
+              "score": 92,
+              "change": "stable",
+              "note": "3 850 refs"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 90,
+              "change": "up",
+              "note": "+100 refs"
+            },
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 88,
+              "change": "stable",
+              "note": "3 400 refs"
+            }
+          ]
+        },
+        {
+          "territory": "fr",
+          "updatedAt": "2026-04-15",
+          "lowestPrices": [
+            {
+              "name": "E.Leclerc",
+              "score": 95,
+              "change": "up",
+              "note": "+0.6 pt"
+            },
+            {
+              "name": "Lidl",
+              "score": 93,
+              "change": "stable",
+              "note": "Panier bas"
+            },
+            {
+              "name": "Intermarché",
+              "score": 91,
+              "change": "up",
+              "note": "+0.4 pt"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "E.Leclerc",
+              "score": 92,
+              "change": "up",
+              "note": "+0.7 pt"
+            },
+            {
+              "name": "U Express",
+              "score": 91,
+              "change": "stable",
+              "note": "Qualité régulière"
+            },
+            {
+              "name": "Carrefour Market",
+              "score": 89,
+              "change": "stable",
+              "note": "Stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Carrefour",
+              "score": 97,
+              "change": "stable",
+              "note": "9 400 refs"
+            },
+            {
+              "name": "Auchan",
+              "score": 95,
+              "change": "up",
+              "note": "+250 refs"
+            },
+            {
+              "name": "E.Leclerc",
+              "score": 94,
+              "change": "up",
+              "note": "+180 refs"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
