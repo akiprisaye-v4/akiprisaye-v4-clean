@@ -10,7 +10,7 @@ const BUILD_ENV: string = import.meta.env.VITE_BUILD_ENV ?? 'development';
 
 const APP_VERSIONS = [
   {
-    version: 'v4.7.1',
+    version: 'v4.7.2',
     date: 'avril 2026',
     label: 'latest',
     title: 'Corrections TypeScript — StoreMap & FlipStatCard',
