@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-04-20",
+  "generatedAt": "2026-04-21",
   "territories": [
     {
       "territory": "gp",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Leader Price Jarry",
@@ -67,7 +67,7 @@
     },
     {
       "territory": "mq",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Leader Price Rivière-Salée",
@@ -131,7 +131,7 @@
     },
     {
       "territory": "gf",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Leader Price Cayenne",
@@ -195,7 +195,7 @@
     },
     {
       "territory": "re",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Leader Price Saint-Pierre",
@@ -259,7 +259,7 @@
     },
     {
       "territory": "yt",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Carrefour Mamoudzou",
@@ -323,7 +323,7 @@
     },
     {
       "territory": "fr",
-      "updatedAt": "2026-04-20",
+      "updatedAt": "2026-04-21",
       "lowestPrices": [
         {
           "name": "Lidl",
@@ -1160,6 +1160,395 @@
               "score": 64,
               "change": "down",
               "note": "-33.0 pt"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-04-20",
+      "territories": [
+        {
+          "territory": "gp",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Jarry",
+              "score": 100,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Ecomax Capesterre",
+              "score": 93,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Baie-Mahault",
+              "score": 71,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Bergevin",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Ecomax Gosier",
+              "score": 87,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Leader Price Jarry",
+              "score": 83.03063673658588,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Hyper Casino Bas-du-Fort",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Baie-Mahault",
+              "score": 67,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Destreland",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ]
+        },
+        {
+          "territory": "mq",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Rivière-Salée",
+              "score": 100,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Ecomax Lamentin",
+              "score": 93,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Génipa",
+              "score": 87,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Carrefour Génipa",
+              "score": 98.81052965094788,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Marché de Fort-de-France",
+              "score": 92,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Ecomax Trinité",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Ecomax Lamentin",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Rivière-Salée",
+              "score": 67,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Génipa",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ]
+        },
+        {
+          "territory": "gf",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Cayenne",
+              "score": 85,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Matoury",
+              "score": 71,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Rémire",
+              "score": 60,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Score Cayenne",
+              "score": 98.46384538487172,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Rémire",
+              "score": 96.19126957680773,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Marché de Cayenne",
+              "score": 92,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Leader Price Cayenne",
+              "score": 78,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Matoury",
+              "score": 67,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Rémire",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ]
+        },
+        {
+          "territory": "re",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Leader Price Saint-Pierre",
+              "score": 85,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Saint-Paul",
+              "score": 71,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Sainte-Clotilde",
+              "score": 60,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Saint-Paul",
+              "score": 92,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Saint-Joseph",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Leader Price Saint-Pierre",
+              "score": 87,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Leclerc Portail",
+              "score": 93,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Saint-Paul",
+              "score": 67,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Sainte-Clotilde",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ]
+        },
+        {
+          "territory": "yt",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Carrefour Mamoudzou",
+              "score": 100,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 93,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 71,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Marché de Mamoudzou",
+              "score": 92,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 87,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Jumbo Score Kawéni",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Super U Mamoudzou",
+              "score": 67,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour Mamoudzou",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ]
+        },
+        {
+          "territory": "fr",
+          "updatedAt": "2026-04-20",
+          "lowestPrices": [
+            {
+              "name": "Lidl",
+              "score": 90,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Intermarché",
+              "score": 88,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Aldi",
+              "score": 88,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "bestValue": [
+            {
+              "name": "Intermarché",
+              "score": 94.77637058215265,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "E.Leclerc",
+              "score": 90.05508694050573,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "U Express",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            }
+          ],
+          "widestSelection": [
+            {
+              "name": "Auchan",
+              "score": 93,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "E.Leclerc",
+              "score": 89,
+              "change": "stable",
+              "note": "Score stable"
+            },
+            {
+              "name": "Carrefour",
+              "score": 64,
+              "change": "stable",
+              "note": "Score stable"
             }
           ]
         }
