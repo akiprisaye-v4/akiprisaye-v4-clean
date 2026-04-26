@@ -1,7 +1,7 @@
 {
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2026-04-25T08:38:01.363Z",
+    "lastUpdated": "2026-04-26T09:16:01.089Z",
     "description": "Comparateur de prix des carburants — tous les territoires d'outre-mer",
     "disclaimer": "A KI PRI SA YÉ observe les prix, ne vend pas. Transparence sur les écarts de prix.",
     "methodology": "v1.0.0",
@@ -14,7 +14,7 @@
       "Export CSV/TXT"
     ],
     "autoUpdated": true,
-    "scrapedAt": "2026-04-25T08:38:01.363Z"
+    "scrapedAt": "2026-04-26T09:16:01.089Z"
   },
   "stations": [
     {
@@ -246,7 +246,7 @@
   ],
   "fuelPrices": [
     {
-      "id": "price-gp-auto-sp95-2026-04-25",
+      "id": "price-gp-auto-sp95-2026-04-26",
       "station": {
         "territory": "GP",
         "id": "auto-gp",
@@ -260,12 +260,12 @@
       "priceMax": 1.672,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gp-auto-sp98-2026-04-25",
+      "id": "price-gp-auto-sp98-2026-04-26",
       "station": {
         "territory": "GP",
         "id": "auto-gp",
@@ -279,12 +279,12 @@
       "priceMax": 1.748,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gp-auto-gazole-2026-04-25",
+      "id": "price-gp-auto-gazole-2026-04-26",
       "station": {
         "territory": "GP",
         "id": "auto-gp",
@@ -298,12 +298,12 @@
       "priceMax": 1.523,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gp-auto-e10-2026-04-25",
+      "id": "price-gp-auto-e10-2026-04-26",
       "station": {
         "territory": "GP",
         "id": "auto-gp",
@@ -317,12 +317,12 @@
       "priceMax": 1.637,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gp-auto-gplc-2026-04-25",
+      "id": "price-gp-auto-gplc-2026-04-26",
       "station": {
         "territory": "GP",
         "id": "auto-gp",
@@ -336,12 +336,12 @@
       "priceMax": 0.892,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-mq-auto-sp95-2026-04-25",
+      "id": "price-mq-auto-sp95-2026-04-26",
       "station": {
         "territory": "MQ",
         "id": "auto-mq",
@@ -355,12 +355,12 @@
       "priceMax": 1.685,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-mq-auto-sp98-2026-04-25",
+      "id": "price-mq-auto-sp98-2026-04-26",
       "station": {
         "territory": "MQ",
         "id": "auto-mq",
@@ -374,12 +374,12 @@
       "priceMax": 1.761,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-mq-auto-gazole-2026-04-25",
+      "id": "price-mq-auto-gazole-2026-04-26",
       "station": {
         "territory": "MQ",
         "id": "auto-mq",
@@ -393,12 +393,12 @@
       "priceMax": 1.538,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-mq-auto-e10-2026-04-25",
+      "id": "price-mq-auto-e10-2026-04-26",
       "station": {
         "territory": "MQ",
         "id": "auto-mq",
@@ -412,12 +412,12 @@
       "priceMax": 1.648,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-mq-auto-gplc-2026-04-25",
+      "id": "price-mq-auto-gplc-2026-04-26",
       "station": {
         "territory": "MQ",
         "id": "auto-mq",
@@ -431,12 +431,12 @@
       "priceMax": 0.905,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gf-auto-sp95-2026-04-25",
+      "id": "price-gf-auto-sp95-2026-04-26",
       "station": {
         "territory": "GF",
         "id": "auto-gf",
@@ -450,12 +450,12 @@
       "priceMax": 1.698,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gf-auto-sp98-2026-04-25",
+      "id": "price-gf-auto-sp98-2026-04-26",
       "station": {
         "territory": "GF",
         "id": "auto-gf",
@@ -469,12 +469,12 @@
       "priceMax": 1.782,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gf-auto-gazole-2026-04-25",
+      "id": "price-gf-auto-gazole-2026-04-26",
       "station": {
         "territory": "GF",
         "id": "auto-gf",
@@ -488,12 +488,12 @@
       "priceMax": 1.556,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-gf-auto-e10-2026-04-25",
+      "id": "price-gf-auto-e10-2026-04-26",
       "station": {
         "territory": "GF",
         "id": "auto-gf",
@@ -507,12 +507,12 @@
       "priceMax": 1.661,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SARA — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-re-auto-sp95-2026-04-25",
+      "id": "price-re-auto-sp95-2026-04-26",
       "station": {
         "territory": "RE",
         "id": "auto-re",
@@ -526,12 +526,12 @@
       "priceMax": 1.659,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SRPP — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-re-auto-sp98-2026-04-25",
+      "id": "price-re-auto-sp98-2026-04-26",
       "station": {
         "territory": "RE",
         "id": "auto-re",
@@ -545,12 +545,12 @@
       "priceMax": 1.733,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SRPP — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-re-auto-gazole-2026-04-25",
+      "id": "price-re-auto-gazole-2026-04-26",
       "station": {
         "territory": "RE",
         "id": "auto-re",
@@ -564,12 +564,12 @@
       "priceMax": 1.504,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SRPP — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-re-auto-e85-2026-04-25",
+      "id": "price-re-auto-e85-2026-04-26",
       "station": {
         "territory": "RE",
         "id": "auto-re",
@@ -583,12 +583,12 @@
       "priceMax": 0.849,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "SRPP — Arrêté préfectoral 2025",
       "autoCollected": true
     },
     {
-      "id": "price-yt-auto-sp95-2026-04-25",
+      "id": "price-yt-auto-sp95-2026-04-26",
       "station": {
         "territory": "YT",
         "id": "auto-yt",
@@ -602,12 +602,12 @@
       "priceMax": 1.628,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "Arrêté préfectoral Mayotte 2025",
       "autoCollected": true
     },
     {
-      "id": "price-yt-auto-gazole-2026-04-25",
+      "id": "price-yt-auto-gazole-2026-04-26",
       "station": {
         "territory": "YT",
         "id": "auto-yt",
@@ -621,10 +621,10 @@
       "priceMax": 1.481,
       "stationCount": 1,
       "currency": "EUR",
-      "observationDate": "2026-04-25T08:38:01.363Z",
+      "observationDate": "2026-04-26T09:16:01.089Z",
       "source": "Arrêté préfectoral Mayotte 2025",
       "autoCollected": true
     }
   ],
-  "lastAutoUpdate": "2026-04-25T08:38:01.363Z"
+  "lastAutoUpdate": "2026-04-26T09:16:01.089Z"
 }
