@@ -2,6 +2,7 @@ import { OfflineBanner } from './components/OfflineBanner';
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { lazyPage } from './router/lazy';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 
 // Import Layout synchronously to prevent loading block
 import Layout from './components/Layout';
@@ -18,6 +19,7 @@ import RequireAdmin from './components/auth/RequireAdmin';
 import { logDebug } from './utils/logger';
 import { registerServiceWorker, captureInstallPrompt } from './services/pwaService';
 import { PWAInstallBanner } from './components/ui/PWAInstallBanner';
+import { auth } from './lib/firebase';
 
 const _langProviderImport = import('./context/LanguageProvider');
 
@@ -120,6 +122,7 @@ const GamificationProfilePage = lazy(() => import('./pages/GamificationProfilePa
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
 const BadgesPage = lazy(() => import('./pages/BadgesPage'));
 const Login = lazy(() => import('./pages/Login'));
+const AkiLogin = lazy(() => import('./views/auth/AkiLogin'));
 const Inscription = lazy(() => import('./pages/Inscription'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const MonCompte = lazy(() => import('./pages/MonCompte'));
@@ -392,6 +395,23 @@ function LoadingFallback() {
 
 export default function App() {
   const [providerError, setProviderError] = useState<Error | null>(null);
+  const [sessionUser, setSessionUser] = useState<User | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+
+  useEffect(() => {
+    if (!auth) {
+      setSessionReady(true);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setSessionUser(user);
+      setSessionReady(true);
+    });
+
+    return unsubscribe;
+  }, []);
+
   useEffect(() => {
     const fallback = document.getElementById('loading-fallback');
     if (fallback) fallback.style.display = 'none';
@@ -413,6 +433,10 @@ export default function App() {
         </button>
       </div>
     );
+  }
+
+  if (!sessionReady) {
+    return <LoadingFallback />;
   }
 
   return (
@@ -576,8 +600,20 @@ export default function App() {
                                     element={<LeaderboardPage />}
                                   />
                                   <Route path="gamification/badges" element={<BadgesPage />} />
-                                  <Route path="login" element={<Login />} />
-                                  <Route path="connexion" element={<Login />} />
+                                  <Route
+                                    path="login"
+                                    element={sessionUser ? <Navigate to="/" replace /> : <Login />}
+                                  />
+                                  <Route
+                                    path="connexion"
+                                    element={sessionUser ? <Navigate to="/" replace /> : <Login />}
+                                  />
+                                  <Route
+                                    path="aki-login"
+                                    element={
+                                      sessionUser ? <Navigate to="/" replace /> : <AkiLogin />
+                                    }
+                                  />
                                   <Route path="inscription" element={<Inscription />} />
                                   <Route path="reset-password" element={<ResetPassword />} />
                                   <Route path="auth" element={<AuthHub />} />
