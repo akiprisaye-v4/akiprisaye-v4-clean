@@ -14,14 +14,16 @@ import { getInstallations } from 'firebase/installations';
 // working without a .env file.  In production the secrets MUST be set so
 // the correct apiKey is embedded; the fallback is only a last resort.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDf_m8BzMVHFWoFhVLyThuKwWTMhB7u5ZY',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'a-ki-pri-sa-ye.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'a-ki-pri-sa-ye',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDby4HIcb0K_-pZssF6OmKoSjNi7TcvqlQ',
+  authDomain:
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'akiprisaye-officielle.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'akiprisaye-officielle',
   storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'a-ki-pri-sa-ye.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '187272078809',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:187272078809:web:501d916973a75edb06e5c8',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-W0R1B4HHE1',
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'akiprisaye-officielle.appspot.com',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '147409182593',
+  appId:
+    import.meta.env.VITE_FIREBASE_APP_ID || '1:147409182593:web:75e81d77320548922b91c8',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Detect missing VITE_FIREBASE_* secrets so diagnostic pages (Login, StatutPage)
