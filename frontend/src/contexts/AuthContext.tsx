@@ -13,6 +13,8 @@ import {
   signInFacebookRedirect,
   signInApplePopup,
   signInAppleRedirect,
+  signInGithubPopup,
+  signInGithubRedirect,
   signOutUser,
   signUpEmailPassword,
   subscribeToAuthState,
@@ -368,6 +370,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInAppleRedirect: async () => {
         setError(null);
         await signInAppleRedirect();
+      },
+      signInGithubPopup: async () => {
+        setError(null);
+        authLog('AUTH_CLICK_GITHUB', { mode: 'popup' });
+        transition('starting');
+        await signInGithubPopup();
+      },
+      signInGithubRedirect: async () => {
+        setError(null);
+        authLog('AUTH_REDIRECT_START', { provider: 'github', mode: 'redirect' });
+        transition('redirecting');
+        await signInGithubRedirect();
       },
       signOutUser: async () => {
         setError(null);

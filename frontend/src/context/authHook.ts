@@ -61,6 +61,8 @@ export type AuthContextValue = {
   signInFacebookRedirect: () => Promise<void>;
   signInApplePopup: () => Promise<void>;
   signInAppleRedirect: () => Promise<void>;
+  signInGithubPopup: () => Promise<void>;
+  signInGithubRedirect: () => Promise<void>;
   signOutUser: () => Promise<void>;
 };
 

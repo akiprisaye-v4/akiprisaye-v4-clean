@@ -120,6 +120,7 @@ const GamificationProfilePage = lazy(() => import('./pages/GamificationProfilePa
 const LeaderboardPage = lazy(() => import('./pages/LeaderboardPage'));
 const BadgesPage = lazy(() => import('./pages/BadgesPage'));
 const Login = lazy(() => import('./pages/Login'));
+const AkiLogin = lazy(() => import('./views/auth/AkiLogin'));
 const Inscription = lazy(() => import('./pages/Inscription'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const MonCompte = lazy(() => import('./pages/MonCompte'));
@@ -391,29 +392,12 @@ function LoadingFallback() {
 }
 
 export default function App() {
-  const [providerError, setProviderError] = useState<Error | null>(null);
   useEffect(() => {
     const fallback = document.getElementById('loading-fallback');
     if (fallback) fallback.style.display = 'none';
     captureInstallPrompt();
     registerServiceWorker();
   }, []);
-
-  if (providerError) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white p-4">
-        <h1 className="text-xl font-bold mb-2">Erreur d'initialisation</h1>
-        <p className="text-red-400 mb-4">{providerError.message}</p>
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
-          Recharger
-        </button>
-      </div>
-    );
-  }
 
   return (
     <ErrorBoundary>
@@ -576,8 +560,15 @@ export default function App() {
                                     element={<LeaderboardPage />}
                                   />
                                   <Route path="gamification/badges" element={<BadgesPage />} />
-                                  <Route path="login" element={<Login />} />
-                                  <Route path="connexion" element={<Login />} />
+                                  <Route
+                                    path="login"
+                                    element={<Login />}
+                                  />
+                                  <Route
+                                    path="connexion"
+                                    element={<Login />}
+                                  />
+                                  <Route path="aki-login" element={<AkiLogin />} />
                                   <Route path="inscription" element={<Inscription />} />
                                   <Route path="reset-password" element={<ResetPassword />} />
                                   <Route path="auth" element={<AuthHub />} />

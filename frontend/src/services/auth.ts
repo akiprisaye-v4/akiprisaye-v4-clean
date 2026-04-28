@@ -1,5 +1,6 @@
 import {
   FacebookAuthProvider,
+  GithubAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
   browserLocalPersistence,
@@ -21,6 +22,7 @@ import { auth } from '@/lib/firebase';
 
 const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
+const githubProvider = new GithubAuthProvider();
 const appleProvider = new OAuthProvider('apple.com');
 
 // Request extra scopes for better profile info
@@ -28,6 +30,9 @@ googleProvider.addScope('profile');
 googleProvider.addScope('email');
 facebookProvider.addScope('email');
 facebookProvider.addScope('public_profile');
+githubProvider.addScope('read:user');
+githubProvider.addScope('user:email');
+githubProvider.setCustomParameters({ allow_signup: 'true' });
 appleProvider.addScope('email');
 appleProvider.addScope('name');
 
@@ -98,6 +103,12 @@ export async function signInApplePopup(): Promise<UserCredential> {
   return signInWithPopup(authInstance, appleProvider);
 }
 
+export async function signInGithubPopup(): Promise<UserCredential> {
+  const authInstance = ensureAuth();
+  await ensureSessionPersistence();
+  return signInWithPopup(authInstance, githubProvider);
+}
+
 export async function signOutUser(): Promise<void> {
   const authInstance = ensureAuth();
   await signOut(authInstance);
@@ -130,6 +141,12 @@ export async function signInAppleRedirect(): Promise<void> {
   const authInstance = ensureAuth();
   await ensureSessionPersistence();
   await signInWithRedirect(authInstance, appleProvider);
+}
+
+export async function signInGithubRedirect(): Promise<void> {
+  const authInstance = ensureAuth();
+  await ensureSessionPersistence();
+  await signInWithRedirect(authInstance, githubProvider);
 }
 
 /**
