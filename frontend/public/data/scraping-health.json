@@ -1,6 +1,6 @@
 {
-  "lastScrapedAt": "2026-04-26T09:16:01.089Z",
-  "date": "2026-04-26",
+  "lastScrapedAt": "2026-04-29T11:20:51.363Z",
+  "date": "2026-04-29",
   "dryRun": false,
   "deepScan": false,
   "sources": {
@@ -54,6 +54,6 @@
     }
   },
   "totalEntries": 2125,
-  "shocksDetected": 0,
+  "shocksDetected": 1,
   "status": "ok"
 }
