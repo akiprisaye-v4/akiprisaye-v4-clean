@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db, firebaseError } from '@/lib/firebase';
+import { auth, db,  } from '@/lib/firebase';
 import { PasswordInput } from '@/components/PasswordInput';
 import { FIREBASE_UNAVAILABLE_MESSAGE, getAuthErrorMessage } from '@/lib/authMessages';
 import { HeroImage } from '@/components/ui/HeroImage';
@@ -47,7 +47,7 @@ export default function Inscription() {
     e.preventDefault();
     setError(null);
 
-    if (firebaseError) {
+    if () {
       setError(FIREBASE_UNAVAILABLE_MESSAGE);
       return;
     }

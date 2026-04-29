@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: Create D1 Database
 
 on:

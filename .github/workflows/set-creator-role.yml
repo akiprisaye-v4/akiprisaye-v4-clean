@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: "✨ Attribuer un rôle utilisateur"
 
 # Déclenchement manuel depuis l'onglet Actions de GitHub (fonctionne sur mobile).

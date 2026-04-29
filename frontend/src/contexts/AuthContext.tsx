@@ -4,9 +4,9 @@ import type { User } from 'firebase/auth';
 
 import { roleFromClaims } from '@/auth/rbac';
 
-import { db, firebaseError } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import {
-  signInEmailPassword,
+  signInWithEmailAndPassword,
   signInGooglePopup,
   signInGoogleRedirect,
   signInFacebookPopup,
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>('guest');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(
-    firebaseError ? FIREBASE_UNAVAILABLE_MESSAGE : null
+     ? FIREBASE_UNAVAILABLE_MESSAGE : null
   );
   const [authResolved, setAuthResolved] = useState(false);
   const [authFlowState, setAuthFlowState] = useState<AuthFlowState>('resolving');
@@ -139,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
 
-    if (firebaseError) {
+    if () {
       setLoading(false);
       setAuthResolved(true);
       setAuthFlowState('failed');
@@ -337,9 +337,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null);
         await signUpEmailPassword(em, pw);
       },
-      signInEmailPassword: async (em, pw) => {
+      signInWithEmailAndPassword: async (em, pw) => {
         setError(null);
-        await signInEmailPassword(em, pw);
+        await signInWithEmailAndPassword(em, pw);
       },
       signInGooglePopup: async () => {
         setError(null);

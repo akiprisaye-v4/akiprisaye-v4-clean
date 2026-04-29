@@ -60,7 +60,7 @@ export async function signUpEmailPassword(
   return credential;
 }
 
-export async function signInEmailPassword(
+export async function signInWithEmailAndPassword(
   email: string,
   password: string
 ): Promise<UserCredential> {

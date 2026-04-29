@@ -33,7 +33,7 @@ vi.mock('react-hot-toast', () => ({
 
 /* ── Firebase / lib mocks ──────────────────────────────────────────────── */
 vi.mock('../lib/firebase', () => ({
-  firebaseError: null,
+  : null,
   missingCriticalEnvKeys: [],
   wrongApiKeyDetected: false,
 }));
@@ -64,7 +64,7 @@ function makeAuthMock(overrides: Record<string, unknown> = {}) {
     isCreator: false,
     clearError: vi.fn(),
     signUpEmailPassword: vi.fn(),
-    signInEmailPassword: vi.fn(),
+    signInWithEmailAndPassword: vi.fn(),
     signInGooglePopup: vi.fn(),
     signInGoogleRedirect: vi.fn(),
     signInFacebookPopup: vi.fn(),

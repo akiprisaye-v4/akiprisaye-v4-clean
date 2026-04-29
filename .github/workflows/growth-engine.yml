@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 🚀 Growth Engine V2 — Auto Selection + Content Generation
 # ─────────────────────────────────────────────────────────────────────────────

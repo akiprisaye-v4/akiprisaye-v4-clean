@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ────────────────────────────────────────────────────────────────────────────
 # 🌿 Auto SEO Prepare PR (Manual, Review-Only Branch)
 # ────────────────────────────────────────────────────────────────────────────

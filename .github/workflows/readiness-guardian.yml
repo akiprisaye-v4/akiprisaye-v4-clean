@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: Readiness Guardian 24/24
 run-name: Readiness Guardian 24/24
 

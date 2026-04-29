@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: Deploy price-api (D1 + Worker)
 
 on:

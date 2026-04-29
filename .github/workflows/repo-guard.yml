@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: Repo Guard — Anti fichiers inutiles
 
 on:

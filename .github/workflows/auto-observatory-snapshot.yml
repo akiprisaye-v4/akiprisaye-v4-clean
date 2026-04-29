@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 📊 Snapshot Hebdomadaire de l'Observatoire des Prix
 # ──────────────────────────────────────────────────────────────────────────────

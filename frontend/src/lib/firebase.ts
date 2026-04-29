@@ -1,144 +1,18 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
-import type { Analytics } from 'firebase/analytics';
-import { browserLocalPersistence, getAuth, setPersistence, type Auth } from 'firebase/auth';
-import { initializeFirestore, type Firestore } from 'firebase/firestore';
-import { getInstallations } from 'firebase/installations';
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Firebase web API keys are public by design — security is enforced via
-// Firebase Security Rules, not by keeping these values secret.
-// See: https://firebase.google.com/docs/projects/api-keys
-//
-// Values are read from VITE_FIREBASE_* environment variables (injected at
-// build time by GitHub Actions / Cloudflare Pages via repository secrets).
-// The hardcoded fallbacks match frontend/.env.example and keep local dev
-// working without a .env file.  In production the secrets MUST be set so
-// the correct apiKey is embedded; the fallback is only a last resort.
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDby4HIcb0K_-pZssF6OmKoSjNi7TcvqlQ',
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'akiprisaye-officielle.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'akiprisaye-officielle',
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'akiprisaye-officielle.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '147409182593',
-  appId:
-    import.meta.env.VITE_FIREBASE_APP_ID || '1:147409182593:web:75e81d77320548922b91c8',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyDby4HIcb8K_-pZssF60mKoSjNi7TcvqlQ",
+  authDomain: "akiprisaye-officielle.firebaseapp.com",
+  projectId: "akiprisaye-officielle",
+  storageBucket: "akiprisaye-officielle.firebasestorage.app",
+  messagingSenderId: "147409182593",
+  appId: "1:147409182593:web:22cdfec5c8f281f7645280"
 };
 
-// Detect missing VITE_FIREBASE_* secrets so diagnostic pages (Login, StatutPage)
-// can warn operators.  Vite replaces `import.meta.env.*` at build time: an empty
-// string means the secret was not set in GitHub Actions / Cloudflare Pages.
-const missingCriticalEnvKeys: string[] = (
-  [
-    'VITE_FIREBASE_API_KEY',
-    'VITE_FIREBASE_AUTH_DOMAIN',
-    'VITE_FIREBASE_PROJECT_ID',
-    'VITE_FIREBASE_APP_ID',
-  ] as const
-).filter((k) => !import.meta.env[k as keyof ImportMetaEnv]);
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Detect the historically wrong API key (transposed characters at indices 10–11
-// vs the GCP-registered key: wrong key has 'B8', correct key has '8B').
-// This guard is belt-and-suspenders: CI already refuses to build with this key,
-// but if somehow it reaches the browser it surfaces a clear, actionable message
-// instead of a cryptic "API_KEY_INVALID" Firebase error.
-// Individual charAt() checks are used deliberately — static string concatenation
-// of the wrong key would be constant-folded by the bundler (esbuild/Vite) into
-// a single literal in the output bundle, which would trigger false positives in
-// bundle validation scripts that search for the wrong key string.
-const wrongApiKeyDetected: boolean =
-  typeof firebaseConfig.apiKey === 'string' &&
-  firebaseConfig.apiKey.length === 39 &&
-  firebaseConfig.apiKey.charAt(10) === 'B' && // wrong key: 'B' here; correct key: '8'
-  firebaseConfig.apiKey.charAt(11) === '8'; // wrong key: '8' here; correct key: 'B'
-
-let firebaseError: string | null = null;
-let app: FirebaseApp | null = null;
-let auth: Auth | null = null;
-let db: Firestore | null = null;
-let analytics: Analytics | null = null;
-
-function safeInitInstallations(appInstance: FirebaseApp): void {
-  const init = () => {
-    try {
-      getInstallations(appInstance);
-    } catch (error) {
-      console.warn('Firebase Installations unavailable (non-blocking):', error);
-    }
-  };
-
-  if (typeof window === 'undefined') return;
-  const win = window as Window & {
-    requestIdleCallback?: (callback: IdleRequestCallback, opts?: IdleRequestOptions) => number;
-  };
-  if (typeof win.requestIdleCallback === 'function') {
-    win.requestIdleCallback(init, { timeout: 5_000 });
-    return;
-  }
-  setTimeout(init, 2_000);
-}
-
-try {
-  app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  void setPersistence(auth, browserLocalPersistence).catch((error) => {
-    console.warn('Firebase Auth persistence fallback (local) unavailable:', error);
-  });
-  db = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
-  });
-  safeInitInstallations(app);
-  // Analytics requires a real browser environment and a valid measurementId.
-  // Load the analytics module lazily after the page has fully loaded so it
-  // never blocks the critical rendering path (~60 KB deferred).
-  if (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined' &&
-    firebaseConfig.measurementId
-  ) {
-    const initAnalytics = () => {
-      void import('firebase/analytics')
-        .then(async ({ getAnalytics, isSupported }) => {
-          if (!app) return;
-          const supported = await isSupported().catch(() => false);
-          if (!supported) return;
-          analytics = getAnalytics(app);
-        })
-        .catch((error) => {
-          console.warn('Firebase analytics unavailable:', error);
-        });
-    };
-
-    const scheduleIdle = (cb: () => void) => {
-      const win = window as Window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
-      };
-      if (typeof win.requestIdleCallback === 'function') {
-        win.requestIdleCallback(cb, { timeout: 5_000 });
-      } else {
-        setTimeout(cb, 2_000);
-      }
-    };
-
-    if (document.readyState === 'complete') {
-      scheduleIdle(initAnalytics);
-    } else {
-      window.addEventListener('load', () => scheduleIdle(initAnalytics), { once: true });
-    }
-  }
-} catch (error) {
-  firebaseError = error instanceof Error ? error.message : 'Unknown Firebase initialization error';
-  console.error('Firebase initialization failed:', firebaseError);
-}
-
-export {
-  app,
-  auth,
-  db,
-  analytics,
-  firebaseError,
-  firebaseConfig,
-  missingCriticalEnvKeys,
-  wrongApiKeyDetected,
-};
+export { auth, db, app };

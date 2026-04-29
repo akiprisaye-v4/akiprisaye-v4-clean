@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: 🧹 Nettoyage issues monitoring automatiques
 on:
   schedule:

@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 name: Lighthouse Guardian 24/24
 run-name: Lighthouse Guardian 24/24
 

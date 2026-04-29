@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # CI Pipeline — akiprisaye-web / frontend
 #
 # Jobs séparés pour une meilleure lisibilité et un échec précis :

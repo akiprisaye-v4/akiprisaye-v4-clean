@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 🤖 Scraping Automatique Multi-Sources — Prix DOM-TOM
 # ──────────────────────────────────────────────────────────────────────────────

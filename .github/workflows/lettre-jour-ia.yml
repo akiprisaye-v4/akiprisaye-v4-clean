@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # ☀️ Briefing Journalier IA — Actualité quotidienne des territoires ultramarins
 # ──────────────────────────────────────────────────────────────────────────────

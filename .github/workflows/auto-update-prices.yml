@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # ⛽ Mise à Jour Automatique des Prix Carburants DOM-TOM
 # ──────────────────────────────────────────────────────────────────────────────

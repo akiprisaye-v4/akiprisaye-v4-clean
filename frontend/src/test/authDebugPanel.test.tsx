@@ -32,7 +32,7 @@ function makeAuthMock(overrides: Record<string, unknown> = {}) {
     isCreator: false,
     clearError: vi.fn(),
     signUpEmailPassword: vi.fn(),
-    signInEmailPassword: vi.fn(),
+    signInWithEmailAndPassword: vi.fn(),
     signInGooglePopup: vi.fn(),
     signInGoogleRedirect: vi.fn(),
     signInFacebookPopup: vi.fn(),

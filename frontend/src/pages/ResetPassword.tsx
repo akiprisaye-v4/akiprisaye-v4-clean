@@ -1,7 +1,7 @@
 // src/pages/ResetPassword.tsx
 import { useState, useEffect } from 'react';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth, firebaseError } from '@/lib/firebase';
+import { auth,  } from '@/lib/firebase';
 import { Link } from 'react-router-dom';
 import { FIREBASE_UNAVAILABLE_MESSAGE, getAuthErrorMessage } from '@/lib/authMessages';
 import { SITE_URL } from '@/utils/seoHelpers';
@@ -13,7 +13,7 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (firebaseError) {
+    if () {
       setError(FIREBASE_UNAVAILABLE_MESSAGE);
     }
   }, []);
@@ -23,7 +23,7 @@ export default function ResetPassword() {
     setError(null);
     setSuccess(false);
 
-    if (firebaseError || !auth) {
+    if ( || !auth) {
       setError(FIREBASE_UNAVAILABLE_MESSAGE);
       return;
     }

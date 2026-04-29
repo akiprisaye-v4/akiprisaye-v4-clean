@@ -22,7 +22,7 @@ import '@testing-library/jest-dom/vitest';
 
 /* ── Firebase / lib mocks ──────────────────────────────────────────────── */
 vi.mock('../lib/firebase', () => ({
-  firebaseError: null,
+  : null,
   db: null,
   missingCriticalEnvKeys: [],
   wrongApiKeyDetected: false,
@@ -55,7 +55,7 @@ function makeAuthMock(overrides: Record<string, unknown> = {}) {
     clearAuthIncident: vi.fn(),
     refreshClaims: vi.fn(),
     signUpEmailPassword: vi.fn(),
-    signInEmailPassword: vi.fn(),
+    signInWithEmailAndPassword: vi.fn(),
     signInGooglePopup: vi.fn(),
     signInGoogleRedirect: vi.fn(),
     signInFacebookPopup: vi.fn(),

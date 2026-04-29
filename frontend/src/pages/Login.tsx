@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { firebaseError, missingCriticalEnvKeys, wrongApiKeyDetected } from '@/lib/firebase';
+import { , missingCriticalEnvKeys, wrongApiKeyDetected } from '@/lib/firebase';
 import { FIREBASE_UNAVAILABLE_MESSAGE, getAuthErrorMessage } from '@/lib/authMessages';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,7 @@ export default function Login() {
   const [verificationSent, setVerificationSent] = useState(false);
 
   const {
-    signInEmailPassword,
+    signInWithEmailAndPassword,
     signUpEmailPassword,
     user,
     loading: authLoading,
@@ -33,10 +33,10 @@ export default function Login() {
   const [searchParams] = useSearchParams();
 
   const firebaseHealthy =
-    !firebaseError && missingCriticalEnvKeys.length === 0 && !wrongApiKeyDetected;
+    ! && missingCriticalEnvKeys.length === 0 && !wrongApiKeyDetected;
   const showFirebaseStatus =
     import.meta.env.DEV ||
-    Boolean(firebaseError) ||
+    Boolean() ||
     missingCriticalEnvKeys.length > 0 ||
     wrongApiKeyDetected;
 
@@ -64,16 +64,16 @@ export default function Login() {
   }, [getSafeNext, navigate, user]);
 
   useEffect(() => {
-    if (firebaseError) {
+    if () {
       setError(FIREBASE_UNAVAILABLE_MESSAGE);
     }
-  }, [firebaseError]);
+  }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (firebaseError) {
+    if () {
       setError(FIREBASE_UNAVAILABLE_MESSAGE);
       return;
     }
@@ -91,7 +91,7 @@ export default function Login() {
         setVerificationSent(true);
         return;
       } else {
-        await signInEmailPassword(email, password);
+        await signInWithEmailAndPassword(email, password);
       }
 
       navigate(getSafeNext());

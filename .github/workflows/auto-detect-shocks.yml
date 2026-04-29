@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 🔍 Détection Automatique des Chocs de Prix
 # ──────────────────────────────────────────────────────────────────────────────

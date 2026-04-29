@@ -1,3 +1,9 @@
+permissions:
+  contents: read
+
+permissions:
+  contents: read
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 🤖 Lettre Hebdomadaire IA — Actualité des territoires ultramarins
 # ──────────────────────────────────────────────────────────────────────────────

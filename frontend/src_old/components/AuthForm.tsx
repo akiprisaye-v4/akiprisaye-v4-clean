@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth, db, firebaseError } from "@/lib/firebase";
+import { auth, db,  } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 
@@ -19,16 +19,16 @@ export default function AuthForm() {
 
   // Check if Firebase is available
   React.useEffect(() => {
-    if (firebaseError) {
-      setError(firebaseError);
+    if () {
+      setError();
     }
   }, []);
 
   // --- Email Sign In / Sign Up ---
   const handleEmailAuth = async () => {
-    if (firebaseError || !auth) {
+    if ( || !auth) {
       setError("Service d'authentification non disponible. Veuillez contacter l'administrateur.");
-      console.error('Firebase Auth Error:', firebaseError);
+      console.error('Firebase Auth Error:', );
       return;
     }
     
@@ -72,9 +72,9 @@ export default function AuthForm() {
 
   // --- Password Reset ---
   const handlePasswordReset = async () => {
-    if (firebaseError || !auth) {
+    if ( || !auth) {
       setError("Service d'authentification non disponible. Veuillez contacter l'administrateur.");
-      console.error('Firebase Auth Error:', firebaseError);
+      console.error('Firebase Auth Error:', );
       return;
     }
     

@@ -95,3 +95,8 @@ export default defineConfig(() => {
     preview: { port: 4173 },
   };
 });
+import { visualizer } from 'rollup-plugin-visualizer'
+
+
+import { visualizer } from 'rollup-plugin-visualizer'
+
