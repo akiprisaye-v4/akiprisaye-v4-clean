@@ -1,7 +1,6 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Corrigée pour Déploiement Render
- * Sécurité anti-crash sur le chargement des routes
+ * Version Phoenix 2.1 - Correctif Export Prisma
  */
 
 import express, { Express, Request, Response, NextFunction } from 'express';
@@ -15,34 +14,23 @@ import legalEntityRoutes from './api/routes/legalEntity.routes.js';
 import auditRoutes from './audit/audit.routes.js';
 import adminRoutes from './admin/admin.routes.js';
 import opendataRoutes from './api/routes/opendata.routes.js';
-// API Gateway routes
 import apiKeyRoutes from './api/routes/apiKey.routes.js';
 import v1Routes from './api/v1/index.js';
 import publicApiRoutes from './api/routes/publicApi.js';
-// Infrastructure routes
 import geocodingRoutes from './routes/geocoding.js';
 import storesRoutes from './routes/stores.js';
 import productsRoutes from './routes/products.js';
-// Basket comparison routes
 import basketRoutes from './routes/basket.js';
-// Subscription & Payment routes
 import subscriptionRoutes from './api/routes/subscription.routes.js';
-// Promo code routes
 import promoRoutes from './api/routes/promo.routes.js';
-// Affiliate routes
 import affiliateRoutes from './api/routes/affiliate.routes.js';
-// Analytics routes
 import analyticsRoutes from './api/routes/analytics.routes.js';
-// Verified Pricing routes
 import pricesRoutes from './api/routes/prices.routes.js';
-// Receipt OCR Import routes
 import receiptsRoutes from './routes/receipts.js';
-// Price comparison routes
 import compareRoutes from './routes/compare.js';
 import territoriesRoutes from './routes/territories.js';
 import historyRoutes from './routes/history.js';
 import signalRoutes from './routes/signal.js';
-// Monetization engine routes
 import marketplaceRoutes from './api/routes/marketplace.routes.js';
 import affiliatesRoutes from './api/routes/affiliates.routes.js';
 import reportsRoutes from './api/routes/reports.routes.js';
@@ -59,15 +47,14 @@ import {
 import { setupSwagger } from './api/docs/swagger.js';
 import { syncScheduler } from './services/scheduler/syncScheduler.js';
 
-// Charger les variables d'environnement
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 10000;
 const nodeEnv = process.env.NODE_ENV || 'production';
 
-// Re-export shared Prisma client
-export { default as prismaShared } from './database/prisma.js';
+// CRITIQUE : Exportation nommée "prisma" pour la compatibilité avec les middlewares
+export { default as prisma } from './database/prisma.js';
 
 // ========================================
 // Middlewares globaux
@@ -83,55 +70,43 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Headers de sécurité
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Permissions-Policy', 'interest-cohort=()');
   next();
 });
 
 // ========================================
-// Routes de base
+// Routes
 // ========================================
 
 app.get('/health', async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.status(200).json({ status: 'healthy', database: 'connected' });
+    res.status(200).json({ status: 'healthy' });
   } catch (error) {
-    res.status(503).json({ status: 'unhealthy', database: 'disconnected' });
+    res.status(503).json({ status: 'unhealthy' });
   }
 });
 
 app.get('/', (_req, res) => {
-  res.json({ 
-    name: 'A KI PRI SA YÉ API', 
-    version: '4.0.0', 
-    status: 'Running on Render',
-    message: 'Backend Phoenix opérationnel' 
-  });
+  res.json({ name: 'A KI PRI SA YÉ API', status: 'Phoenix Live' });
 });
 
-// ========================================
-// Sécurité : Montage des routes
-// ========================================
-
-// Fonction pour éviter le crash si une route est "undefined"
+// Fonction de sécurité anti-crash (undefined router)
 const safeUse = (path: string, router: any) => {
   if (router) {
     app.use(path, router);
   } else {
-    console.error(`⚠️ ALERTE : La route pour ${path} est indéfinie et a été ignorée pour éviter le crash.`);
+    console.error(`⚠️ Route ignorée (undefined) : ${path}`);
   }
 };
 
 if (process.env.ENABLE_SWAGGER !== 'false') setupSwagger(app);
-
 app.use('/api', apiLimiter);
 
-// Montage sécurisé de toutes tes routes
+// Montage des routes
 safeUse('/api/auth', authRoutes);
 safeUse('/api/v1', v1Routes);
 safeUse('/api/v1', publicApiRoutes);
@@ -159,46 +134,28 @@ safeUse('/api/affiliates', affiliatesRoutes);
 safeUse('/api/reports', reportsRoutes);
 safeUse('/api/sponsorship', sponsorshipRoutes);
 
-// ========================================
-// Gestion des erreurs
-// ========================================
-
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 // ========================================
-// Démarrage du serveur
+// Démarrage
 // ========================================
 
 async function startServer() {
   try {
     await prisma.$connect();
-    console.info('✅ Connexion à la base de données établie');
-
+    console.info('✅ Connexion DB OK');
     if (nodeEnv === 'production' || process.env.ENABLE_SCHEDULER === 'true') {
       syncScheduler.start();
     }
-
     app.listen(port, () => {
-      console.info('========================================');
-      console.info(`🚀 Serveur Phoenix démarré sur le port ${port}`);
-      console.info('========================================');
+      console.info(`🚀 Serveur prêt sur le port ${port}`);
     });
   } catch (error) {
-    console.error('❌ Erreur fatale au démarrage:', error);
+    console.error('❌ Erreur:', error);
     process.exit(1);
   }
 }
 
-// Arrêt gracieux
-const shutdown = async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-};
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-
-// Lancement automatique
 startServer();
-
 export default app;
