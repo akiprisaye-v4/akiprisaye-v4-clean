@@ -1,12 +1,12 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Phoenix 2.1 - Correctif Export Prisma
+ * Version Phoenix 3.0 - Correctif Final Export Prisma & Routes
  */
 
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import prisma from './database/prisma.js';
+import prismaInstance from './database/prisma.js';
 
 // Import routes
 import authRoutes from './api/routes/auth.routes.js';
@@ -51,56 +51,33 @@ dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 10000;
-const nodeEnv = process.env.NODE_ENV || 'production';
 
-// CRITIQUE : Exportation nommée "prisma" pour la compatibilité avec les middlewares
-export { default as prisma } from './database/prisma.js';
+// CRITIQUE : Exportation nommée "prisma" INDISPENSABLE pour tes middlewares
+export const prisma = prismaInstance;
 
-// ========================================
 // Middlewares globaux
-// ========================================
-
-const corsOptions = {
-  origin: process.env.CORS_ORIGINS?.split(',') || ['*'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-};
-app.use(cors(corsOptions));
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use((_req, res, next) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
-
-// ========================================
-// Routes
-// ========================================
-
+// Routes de base
 app.get('/health', async (_req, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await prismaInstance.$queryRaw`SELECT 1`;
     res.status(200).json({ status: 'healthy' });
-  } catch (error) {
+  } catch (e) {
     res.status(503).json({ status: 'unhealthy' });
   }
 });
 
 app.get('/', (_req, res) => {
-  res.json({ name: 'A KI PRI SA YÉ API', status: 'Phoenix Live' });
+  res.json({ name: 'A KI PRI SA YÉ API', status: 'Phoenix Operational' });
 });
 
-// Fonction de sécurité anti-crash (undefined router)
+// Sécurité anti-crash pour les routes indéfinies
 const safeUse = (path: string, router: any) => {
-  if (router) {
-    app.use(path, router);
-  } else {
-    console.error(`⚠️ Route ignorée (undefined) : ${path}`);
-  }
+  if (router) app.use(path, router);
+  else console.warn(`⚠️ Route ignorée : ${path}`);
 };
 
 if (process.env.ENABLE_SWAGGER !== 'false') setupSwagger(app);
@@ -137,22 +114,15 @@ safeUse('/api/sponsorship', sponsorshipRoutes);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-// ========================================
 // Démarrage
-// ========================================
-
 async function startServer() {
   try {
-    await prisma.$connect();
-    console.info('✅ Connexion DB OK');
-    if (nodeEnv === 'production' || process.env.ENABLE_SCHEDULER === 'true') {
-      syncScheduler.start();
-    }
-    app.listen(port, () => {
-      console.info(`🚀 Serveur prêt sur le port ${port}`);
-    });
-  } catch (error) {
-    console.error('❌ Erreur:', error);
+    await prismaInstance.$connect();
+    console.info('✅ DB Connectée');
+    if (process.env.ENABLE_SCHEDULER === 'true') syncScheduler.start();
+    app.listen(port, () => console.info(`🚀 Phoenix sur le port ${port}`));
+  } catch (err) {
+    console.error('❌ Erreur:', err);
     process.exit(1);
   }
 }
