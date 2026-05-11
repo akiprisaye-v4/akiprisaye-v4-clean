@@ -1,6 +1,6 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Phoenix 3.1 - Correctif Final (Conflit de Port & Prisma)
+ * Version Phoenix 3.2 - Stable (Correction EADDRINUSE & Prisma)
  */
 
 import express, { Express } from 'express';
@@ -52,7 +52,6 @@ const app: Express = express();
 
 /**
  * CRITIQUE : Exportation nommée "prisma" indispensable pour tes middlewares.
- * Ne pas supprimer cette ligne.
  */
 export const prisma = prismaInstance;
 
@@ -61,10 +60,9 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Route de santé (Healthcheck) - Très important pour Render
+// Route de santé (Healthcheck) - Indispensable pour Render
 app.get('/health', async (_req, res) => {
   try {
-    // Teste la connexion à la base de données
     await prismaInstance.$queryRaw`SELECT 1`;
     res.status(200).json({ status: 'healthy', database: 'connected' });
   } catch (e) {
@@ -76,14 +74,14 @@ app.get('/', (_req, res) => {
   res.json({ 
     name: 'A KI PRI SA YÉ API', 
     status: 'Phoenix Operational',
-    version: '3.1' 
+    version: '3.2' 
   });
 });
 
 // Sécurité anti-crash pour les routes indéfinies
 const safeUse = (path: string, router: any) => {
   if (router) app.use(path, router);
-  else console.warn(`⚠️ Route ignorée car non importée : ${path}`);
+  else console.warn(`⚠️ Route ignorée : ${path}`);
 };
 
 if (process.env.ENABLE_SWAGGER !== 'false') setupSwagger(app);
@@ -117,13 +115,12 @@ safeUse('/api/affiliates', affiliatesRoutes);
 safeUse('/api/reports', reportsRoutes);
 safeUse('/api/sponsorship', sponsorshipRoutes);
 
-// Middlewares de gestion d'erreurs (toujours en dernier)
+// Gestion d'erreurs
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 /**
- * NOTE : On ne lance pas "app.listen" ici. 
- * C'est le fichier server.ts qui s'en occupe pour éviter les conflits de ports.
+ * ATTENTION : Pas de app.listen() ici ! 
+ * C'est src/server.ts qui s'occupe de lancer le serveur.
  */
-
 export default app;
