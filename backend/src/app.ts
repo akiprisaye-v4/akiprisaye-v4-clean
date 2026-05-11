@@ -1,9 +1,9 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Phoenix 3.0 - Correctif Final Export Prisma & Routes
+ * Version Phoenix 3.1 - Correctif Final (Conflit de Port & Prisma)
  */
 
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import prismaInstance from './database/prisma.js';
@@ -43,16 +43,17 @@ import {
   notFoundMiddleware,
 } from './api/middlewares/error.middleware.js';
 
-// Import Swagger & Scheduler
+// Import Swagger
 import { setupSwagger } from './api/docs/swagger.js';
-import { syncScheduler } from './services/scheduler/syncScheduler.js';
 
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 10000;
 
-// CRITIQUE : Exportation nommée "prisma" INDISPENSABLE pour tes middlewares
+/**
+ * CRITIQUE : Exportation nommée "prisma" indispensable pour tes middlewares.
+ * Ne pas supprimer cette ligne.
+ */
 export const prisma = prismaInstance;
 
 // Middlewares globaux
@@ -60,24 +61,29 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Routes de base
+// Route de santé (Healthcheck) - Très important pour Render
 app.get('/health', async (_req, res) => {
   try {
+    // Teste la connexion à la base de données
     await prismaInstance.$queryRaw`SELECT 1`;
-    res.status(200).json({ status: 'healthy' });
+    res.status(200).json({ status: 'healthy', database: 'connected' });
   } catch (e) {
-    res.status(503).json({ status: 'unhealthy' });
+    res.status(503).json({ status: 'unhealthy', database: 'disconnected' });
   }
 });
 
 app.get('/', (_req, res) => {
-  res.json({ name: 'A KI PRI SA YÉ API', status: 'Phoenix Operational' });
+  res.json({ 
+    name: 'A KI PRI SA YÉ API', 
+    status: 'Phoenix Operational',
+    version: '3.1' 
+  });
 });
 
 // Sécurité anti-crash pour les routes indéfinies
 const safeUse = (path: string, router: any) => {
   if (router) app.use(path, router);
-  else console.warn(`⚠️ Route ignorée : ${path}`);
+  else console.warn(`⚠️ Route ignorée car non importée : ${path}`);
 };
 
 if (process.env.ENABLE_SWAGGER !== 'false') setupSwagger(app);
@@ -111,21 +117,13 @@ safeUse('/api/affiliates', affiliatesRoutes);
 safeUse('/api/reports', reportsRoutes);
 safeUse('/api/sponsorship', sponsorshipRoutes);
 
+// Middlewares de gestion d'erreurs (toujours en dernier)
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
-// Démarrage
-async function startServer() {
-  try {
-    await prismaInstance.$connect();
-    console.info('✅ DB Connectée');
-    if (process.env.ENABLE_SCHEDULER === 'true') syncScheduler.start();
-    app.listen(port, () => console.info(`🚀 Phoenix sur le port ${port}`));
-  } catch (err) {
-    console.error('❌ Erreur:', err);
-    process.exit(1);
-  }
-}
+/**
+ * NOTE : On ne lance pas "app.listen" ici. 
+ * C'est le fichier server.ts qui s'en occupe pour éviter les conflits de ports.
+ */
 
-startServer();
 export default app;
