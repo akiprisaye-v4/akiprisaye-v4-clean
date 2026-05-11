@@ -1,6 +1,6 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Phoenix 3.2 - Stable (Correction EADDRINUSE & Prisma)
+ * Version Phoenix 3.2 - Stable (Correction Port & Prisma)
  */
 
 import express, { Express } from 'express';
@@ -60,7 +60,7 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Route de santé (Healthcheck) - Indispensable pour Render
+// Route de santé (Healthcheck) - Indispensable pour que Render sache que tout va bien
 app.get('/health', async (_req, res) => {
   try {
     await prismaInstance.$queryRaw`SELECT 1`;
@@ -120,7 +120,7 @@ app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 /**
- * ATTENTION : Pas de app.listen() ici ! 
- * C'est src/server.ts qui s'occupe de lancer le serveur.
+ * NOTE : On ne met plus "app.listen" ici. 
+ * C'est le fichier server.ts qui gère le démarrage propre du Phoenix.
  */
 export default app;
