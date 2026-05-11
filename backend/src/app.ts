@@ -1,6 +1,6 @@
 /**
  * Application Express - Backend A KI PRI SA YÉ
- * Version Phoenix 3.2 - Stable (Correction Port & Prisma)
+ * Version Phoenix 3.3 - Stable (Migration Render OK)
  */
 
 import express, { Express } from 'express';
@@ -51,7 +51,7 @@ dotenv.config();
 const app: Express = express();
 
 /**
- * CRITIQUE : Exportation nommée "prisma" indispensable pour tes middlewares.
+ * CRITIQUE : Exportation nommée "prisma" INDISPENSABLE pour tes middlewares
  */
 export const prisma = prismaInstance;
 
@@ -60,9 +60,10 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Route de santé (Healthcheck) - Indispensable pour que Render sache que tout va bien
+// Route de santé (Healthcheck) - Utilisée par Render pour surveiller le Phoenix
 app.get('/health', async (_req, res) => {
   try {
+    // Vérifie si la base de données répond
     await prismaInstance.$queryRaw`SELECT 1`;
     res.status(200).json({ status: 'healthy', database: 'connected' });
   } catch (e) {
@@ -71,17 +72,13 @@ app.get('/health', async (_req, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.json({ 
-    name: 'A KI PRI SA YÉ API', 
-    status: 'Phoenix Operational',
-    version: '3.2' 
-  });
+  res.json({ name: 'A KI PRI SA YÉ API', status: 'Phoenix Operational' });
 });
 
 // Sécurité anti-crash pour les routes indéfinies
 const safeUse = (path: string, router: any) => {
   if (router) app.use(path, router);
-  else console.warn(`⚠️ Route ignorée : ${path}`);
+  else console.warn(`⚠️ Route ignorée car manquante : ${path}`);
 };
 
 if (process.env.ENABLE_SWAGGER !== 'false') setupSwagger(app);
@@ -115,12 +112,12 @@ safeUse('/api/affiliates', affiliatesRoutes);
 safeUse('/api/reports', reportsRoutes);
 safeUse('/api/sponsorship', sponsorshipRoutes);
 
-// Gestion d'erreurs
+// Middlewares d'erreurs (doivent être en dernier)
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
 /**
- * NOTE : On ne met plus "app.listen" ici. 
- * C'est le fichier server.ts qui gère le démarrage propre du Phoenix.
+ * NOTE : Pas de "app.listen" ici. 
+ * C'est le fichier server.ts qui gère le démarrage pour éviter les conflits.
  */
 export default app;
