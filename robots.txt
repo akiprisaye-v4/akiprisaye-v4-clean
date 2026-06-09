@@ -1,24 +1,15 @@
-# A KI PRI SA YÉ — Comparateur de prix Outre-mer
-# https://teetee971.github.io/akiprisaye-web
-
 User-agent: *
 Allow: /
 
-# Sitemaps
-Sitemap: https://teetee971.github.io/akiprisaye-web/sitemap.xml
+Sitemap: https://www.akiprisaye.fr/sitemap.xml
 
-# Crawl-delay for respectful crawling
-Crawl-delay: 1
-
-# Block admin pages
-Disallow: /admin/
-Disallow: /mon-compte
-Disallow: /stats-dashboard
-Disallow: /seo-monitoring
-Disallow: /outreach
-Disallow: /cro-dashboard
-Disallow: /seo-loop-dashboard
-Disallow: /revenue-dashboard
-Disallow: /expansion-dashboard
-Disallow: /authority-dashboard
-Disallow: /global-dashboard
+# Pages privées (nécessitent connexion)
+Disallow: /dashboard
+Disallow: /scanner
+Disallow: /barcode
+Disallow: /archives
+Disallow: /flux
+Disallow: /panier
+Disallow: /alertes
+Disallow: /reglages
+Disallow: /admin

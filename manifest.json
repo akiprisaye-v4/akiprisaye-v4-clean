@@ -1,0 +1,60 @@
+{
+  "name": "A ki pri sa yé — Transparence des Prix",
+  "short_name": "A ki pri sa yé",
+  "description": "Observatoire des prix en Guadeloupe et DOM-TOM. Scannez, comparez, économisez.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050608",
+  "theme_color": "#050608",
+  "orientation": "portrait",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/opengraph.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "label": "A ki pri sa yé — Comparateur de prix DOM-TOM"
+    }
+  ],
+  "categories": ["finance", "shopping", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Scanner un ticket",
+      "url": "/scanner",
+      "description": "Scanner et analyser un ticket de caisse",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mon panier",
+      "url": "/panier",
+      "description": "Voir mon panier et comparer les prix",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Observatoire",
+      "url": "/observatoire",
+      "description": "Prix en temps réel Guadeloupe",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
